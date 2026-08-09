@@ -1,0 +1,30 @@
+@startuml sprint4_usecase
+left to right direction
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "Manager" as MGR
+
+rectangle "IA & Machine Learning Service" {
+    usecase "S'authentifier" as UC_Auth
+    usecase "Consulter les prévisions de production" as UC41
+    usecase "Consulter les prévisions de stock" as UC42
+    usecase "Visualiser le comparatif multi-modèles" as UC43
+    usecase "Consulter la classification K-Means" as UC44
+    usecase "Consulter les anomalies Isolation Forest" as UC45
+}
+
+MGR --> UC41
+MGR --> UC42
+MGR --> UC43
+MGR --> UC44
+MGR --> UC45
+
+UC41 ..> UC_Auth : <<include>>
+UC42 ..> UC_Auth : <<include>>
+UC43 ..> UC_Auth : <<include>>
+UC44 ..> UC_Auth : <<include>>
+UC45 ..> UC_Auth : <<include>>
+@enduml

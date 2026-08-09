@@ -1,0 +1,35 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam fontName "Arial"
+skinparam fontSize 12
+
+class ActivityLog {
+    + Long id
+    + String timestamp
+    + String module
+    + String action
+    + String user
+    + String details
+    + String level
+}
+
+class SystemHealth {
+    + String backendStatus
+    + String databaseStatus
+    + String mlServiceStatus
+    + Integer activeConnections
+}
+
+class Notification {
+    + Long id
+    + String titre
+    + String message
+    + String module
+    + Boolean lu
+    + LocalDateTime createdAt
+}
+
+ActivityLog "1" -- "0..*" Notification : alerte
+@enduml

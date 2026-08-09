@@ -1,0 +1,29 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam fontName "Arial"
+skinparam fontSize 12
+
+class ProphetService {
+    + predictProduction(historicalData)
+    + predictStock(historicalData)
+}
+
+class KMeansSegmentation {
+    + classifyABC(stockItems)
+}
+
+class IsolationForestAnomaly {
+    + detectAnomalies(telemetryData)
+}
+
+class PredictionResult {
+    + String date
+    + Double predictedValue
+    + Double lowerBound
+    + Double upperBound
+}
+
+ProphetService "1" -- "0..*" PredictionResult : génère
+@enduml

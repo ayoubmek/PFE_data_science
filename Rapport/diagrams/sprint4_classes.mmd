@@ -1,0 +1,88 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '12px'}}}%%
+classDiagram
+    direction TB
+
+    class RoleEnum {
+        <<enumeration>>
+        ADMIN
+        SERVICE_VENDEUR
+        VENDEUR
+        SERVICE_LOGISTIQUE
+        SERVICE_CLIENT
+        SERVICE_FINANCE
+    }
+
+    class Utilisateur {
+        +id: bigint
+        +nom: string
+        +email: string
+        +mot_de_passe: string
+    }
+
+    class Commande {
+        +id: bigint
+        +numero_commande: int
+        +statut: string
+        +montant_total: decimal
+    }
+
+    class LigneCommande {
+        +id: bigint
+        +quantite: int
+        +prix_unitaire: decimal
+        +sku: string
+    }
+
+    class Produit {
+        +id: bigint
+        +sku: string
+        +nom: string
+        +prix: decimal
+    }
+    class KPIDashboard {
+        +gmv_received: decimal
+        +nmv_delivered: decimal
+        +avg_order_value: decimal
+        +total_orders: int
+        +total_delivered_orders: int
+        +total_vendors: int
+        +total_products: int
+        +delivery_success_rate: float
+        +delivery_failure_rate: float
+        +avg_delivery_time: float
+        +pickup_rate: float
+        +on_time_delivery_rate: float
+        +avg_delivery_cost: decimal
+    }
+
+    class StatsJournalieres {
+        +id: bigint
+        +date: date
+        +commandes_total: int
+        +livrees: int
+        +annulees: int
+    }
+
+    class StatsMensuelles {
+        +id: bigint
+        +annee: int
+        +mois: int
+        +commandes_total: int
+        +ca_total: decimal
+    }
+
+    %% Relations
+    Utilisateur -- RoleEnum : role
+    Utilisateur "1" -- "*" StatsJournalieres : analysé dans
+    Utilisateur "1" -- "*" StatsMensuelles : analysé dans
+    Utilisateur "1" -- "*" Commande : gère
+    Utilisateur "1" -- "*" KPIDashboard : consulte
+    
+    Commande "1" *-- "*" LigneCommande : contient
+    Commande "1" -- "*" Produit : concerne
+    
+    %% Data Flow to Analytics
+    Commande ..> StatsJournalieres : alimente
+    
+    StatsJournalieres ..> KPIDashboard : alimente
+    StatsMensuelles ..> KPIDashboard : alimente

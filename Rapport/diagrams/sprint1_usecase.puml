@@ -1,0 +1,58 @@
+@startuml sprint1_usecase
+left to right direction
+
+skinparam nodesep 40
+skinparam ranksep 60
+
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+    FontSize 12
+    FontName Arial
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+    FontColor Black
+    FontSize 12
+    FontName Arial
+    FontStyle bold
+}
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor Black
+    FontSize 14
+    FontName Arial
+    FontStyle bold
+    FontColor Black
+}
+skinparam arrow {
+    Color Black
+    FontSize 10
+    FontColor Black
+}
+
+actor "Administrateur" as ADM
+
+rectangle "Gestion des Accès et de la Sécurité" {
+    usecase "S'authentifier" as UC0
+    usecase "Gérer les comptes\nutilisateurs" as UC3
+    usecase "Configurer les permissions\npar rôle" as UC5
+    usecase "Gérer les sessions\nactives" as UC6
+    usecase "Surveiller la plateforme" as UC8
+}
+
+' Associations pour Administrateur
+ADM --> UC0
+ADM --> UC3
+ADM --> UC5
+ADM --> UC6
+ADM --> UC8
+
+' Relations include : authentification obligatoire
+UC3 ..> UC0 : <<include>>
+UC5 ..> UC0 : <<include>>
+UC6 ..> UC0 : <<include>>
+UC8 ..> UC0 : <<include>>
+
+@enduml

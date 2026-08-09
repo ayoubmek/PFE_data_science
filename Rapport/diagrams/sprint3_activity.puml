@@ -1,0 +1,21 @@
+@startuml sprint3_activity
+start
+:Saisie de l'article et de la quantité;
+if (Type de mouvement?) then (Sortie)
+    if (Quantité <= Stock Actuel?) then (oui)
+        :Mettre à jour le stock en déduction;
+    else (non)
+        :Afficher "Stock insuffisant" et bloquer;
+        stop
+    endif
+else (Entrée)
+    :Mettre à jour le stock en addition;
+endif
+:Enregistrer le mouvement en base;
+if (Stock < Seuil d'alerte?) then (oui)
+    :Générer une notification d'alerte de rupture;
+    :Envoyer alerte au Manager;
+else (non)
+endif
+stop
+@enduml

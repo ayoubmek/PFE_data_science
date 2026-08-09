@@ -1,0 +1,149 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '10px'}}}%%
+erDiagram
+    users {
+        bigint id PK
+        string nom
+        string email
+        string mot_de_passe
+        string role
+        timestamp created_at
+    }
+    sessions {
+        string id PK
+        bigint user_id FK
+        string ip_address
+        text payload
+        timestamp last_activity
+    }
+    password_reset_tokens {
+        string email PK
+        string token
+        timestamp created_at
+    }
+    role_permissions {
+        bigint id PK
+        string role
+        string module
+        string permission
+    }
+    orders {
+        bigint id PK
+        int numero_commande
+        string statut
+        decimal montant_total
+        bigint vendeur_id FK
+        timestamp created_at
+    }
+    order_lines {
+        bigint id PK
+        bigint order_id FK
+        string sku
+        int quantite
+        decimal prix_unitaire
+    }
+    shipments {
+        bigint id PK
+        bigint order_id FK
+        string tracking_number
+        string statut
+        string transporteur
+        timestamp date_expedition
+    }
+    tracking_histories {
+        bigint id PK
+        bigint shipment_id FK
+        string statut
+        string localisation
+        timestamp date_evenement
+    }
+    bordereaux {
+        bigint id PK
+        int numero_bordereau
+        string statut
+        decimal frais_livraison
+        timestamp created_at
+    }
+    vendeurs {
+        bigint id PK
+        string nom
+        string email
+        string telephone
+        boolean disponible
+    }
+    products {
+        bigint id PK
+        string sku
+        string nom
+        decimal prix
+        int stock
+        boolean disponible
+    }
+    seller_sku_mappings {
+        bigint id PK
+        bigint vendeur_id FK
+        string sku
+        bigint product_id FK
+    }
+    notifications {
+        string id PK
+        string type
+        string notifiable_type
+        bigint notifiable_id
+        string donnees
+        timestamp lu_le
+    }
+    clients {
+        bigint id PK
+        string nom
+        string email
+        string telephone
+        string adresse
+    }
+    leads {
+        bigint id PK
+        bigint client_id FK
+        string source
+        string etape
+        decimal valeur_estimee
+        float score_conversion
+    }
+    interactions_crm {
+        bigint id PK
+        bigint client_id FK
+        string type_interaction
+        string commentaire
+        timestamp date_interaction
+    }
+    factures {
+        bigint id PK
+        string numero_facture
+        bigint client_id FK
+        decimal montant_total
+        timestamp created_at
+    }
+    paiements {
+        bigint id PK
+        bigint facture_id FK
+        decimal montant
+        string methode
+        string statut
+        timestamp date_paiement
+    }
+    comptes_comptables {
+        bigint id PK
+        string code
+        string libelle
+    }
+
+    users ||--o{ sessions : "maintient"
+    users ||--o{ role_permissions : "droits RBAC"
+    orders ||--o{ order_lines : "contient"
+    orders ||--o{ shipments : "génère"
+    shipments ||--o{ tracking_histories : "tracé par"
+    vendeurs ||--o{ orders : "passe"
+    vendeurs ||--o{ seller_sku_mappings : "configure"
+    products ||--o{ seller_sku_mappings : "référencé dans"
+    clients ||--o{ leads : "a"
+    clients ||--o{ interactions_crm : "génère"
+    clients ||--o{ factures : "reçoit"
+    factures ||--o{ paiements : "réglée par"

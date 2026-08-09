@@ -1,0 +1,64 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '12px'}}}%%
+classDiagram
+    direction TB
+
+    class RoleEnum {
+        <<enumeration>>
+        ADMIN
+        SERVICE_VENDEUR
+        VENDEUR
+        SERVICE_CLIENT
+        SERVICE_LOGISTIQUE
+        SERVICE_FINANCE
+    }
+
+    class Utilisateur {
+        +bigint id
+        +string nom
+        +string email
+        +string mot_de_passe
+        +RoleEnum role
+    }
+
+    class Client {
+        +bigint id
+        +string nom
+        +string email
+        +string telephone
+        +string adresse
+    }
+
+    class PipelineCommercial {
+        +bigint id
+        +string titre
+        +string besoin
+        +string solution_proposee
+        +string statut
+        +string priorite
+        +timestamp date_creation
+    }
+
+    class Commande {
+        +bigint id
+        +int numero_commande
+        +string statut
+        +decimal montant_total
+    }
+
+    class Reclamation {
+        +bigint id
+        +string sujet
+        +string description
+        +string statut
+        +string solution
+        +timestamp date_creation
+    }
+
+    %% Relations
+    Utilisateur -- RoleEnum : role
+    Utilisateur "1" -- "*" PipelineCommercial : crée
+    Utilisateur "1" -- "*" Reclamation : traite
+    Utilisateur "1" -- "*" Commande : gère
+    Client "1" -- "0..*" PipelineCommercial : possède
+    Client "1" -- "*" Reclamation : soumet
+    PipelineCommercial "1" -- "0..*" Commande : génère

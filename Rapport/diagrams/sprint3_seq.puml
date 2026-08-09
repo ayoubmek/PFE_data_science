@@ -1,0 +1,25 @@
+@startuml sprint3_seq
+actor "Opérateur" as OPE
+participant "React App" as React
+participant "Spring Boot API" as Spring
+database "SQL Server DB" as DB
+
+OPE -> React : Saisir mouvement de sortie
+React -> Spring : POST /api/stock/movements (JSON)
+activate Spring
+Spring -> DB : Véfication quantité disponible
+activate DB
+DB --> Spring : Stock suffisant
+deactivate DB
+Spring -> DB : UPDATE article stock & INSERT movement
+activate DB
+DB --> Spring : Success
+deactivate DB
+Spring -> Spring : Comparer stock restant au seuil minimal
+alt Stock < Seuil Minimal
+    Spring -> DB : Créer Notification d'Alerte
+end
+Spring --> React : HTTP 200 OK (Updated stock level)
+deactivate Spring
+React --> OPE : Afficher le stock mis à jour
+@enduml

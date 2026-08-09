@@ -1,0 +1,60 @@
+@startuml sprint6_seq
+hide footbox
+skinparam backgroundColor White
+skinparam sequence {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
+  ActorBorderColor #333333
+  ActorBackgroundColor White
+  ParticipantBorderColor #333333
+  ParticipantBackgroundColor #F5F5F5
+  ParticipantFontName Arial
+  ParticipantFontSize 12
+  ArrowFontName Arial
+  ArrowFontSize 11
+  LifeLineBorderColor #999999
+  ActivationBorderColor #333333
+  ActivationBackgroundColor #E8E8E8
+}
+skinparam noteFontName Arial
+skinparam noteFontSize 11
+skinparam noteBorderColor #333333
+skinparam noteBackgroundColor #FFFFF0
+
+actor "Service Finance" as FIN
+participant "BillingView" as WEB
+participant "InvoiceController" as SRV
+participant "InvoicePDFService" as PDF
+database "Base de Données" as DB
+
+FIN -> WEB : Sélectionner les bordereaux et lancer la facturation
+activate WEB
+
+WEB -> SRV : Demander la facturation
+activate SRV
+
+SRV -> DB : Charger les livraisons sélectionnées
+activate DB
+DB --> SRV : Détails des expéditions et articles
+deactivate DB
+
+SRV -> SRV : Calculer le montant global et les taxes
+
+SRV -> PDF : Générer la facture PDF
+activate PDF
+PDF --> SRV : Fichier PDF généré
+deactivate PDF
+
+SRV -> DB : Enregistrer la facture
+activate DB
+DB --> SRV : Enregistrement validé
+deactivate DB
+
+SRV --> WEB : Facture générée et fichier PDF disponible
+deactivate SRV
+
+WEB --> FIN : Afficher le PDF de la facture générée
+deactivate WEB
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml sprint2_activity
+start
+:Manager planifie un Ordre de Production;
+:Statut = EN_ATTENTE;
+:Opérateur démarre la fabrication sur machine;
+:Statut = EN_COURS;
+if (Panne ou arrêt machine?) then (oui)
+    :Opérateur déclare l'arrêt machine;
+    :Machine statut = ARRÊT;
+    :Comptabiliser le temps d'arrêt;
+else (non)
+    :Production continue;
+endif
+:Opérateur termine l'ordre de production;
+:Statut = TERMINE;
+:Saisir quantité produite et pièces rebutées;
+:Recalculer le TRG de la machine;
+:Mettre à jour le tableau de bord TRG;
+stop
+@enduml

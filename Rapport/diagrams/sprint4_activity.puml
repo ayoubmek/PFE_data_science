@@ -1,0 +1,17 @@
+@startuml sprint4_activity
+start
+:Chargement des données de production de la base;
+:Prétraitement et nettoyage des données;
+fork
+    :Exécuter le modèle Prophet;
+fork again
+    :Exécuter le modèle ARIMA;
+fork again
+    :Exécuter la Régression Linéaire;
+end fork
+:Calculer les métriques d'erreur (MAE, RMSE, MAPE);
+:Identifier le modèle le plus performant (lowest MAPE);
+:Générer les recommandations d'IA correspondantes;
+:Rendu des graphiques de prévision sur React;
+stop
+@enduml

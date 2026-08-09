@@ -1,0 +1,49 @@
+graph LR
+    SV["👤 Service Vendeur"]
+    SC["👤 Service Client"]
+    SL["👤 Service Logistique"]
+    MAG["🛒 Magento"]
+    CARR["🚚 Transporteurs\nAramex · Intigo · Phoenix"]
+
+    subgraph SYS["Sprint 2 — Gestion des Commandes et Intégration Transporteurs"]
+        direction TB
+
+        subgraph FLUX["Flux de traitement"]
+            UC1(["1️⃣ Importer les commandes"])
+            UC2(["2️⃣ Vérifier la disponibilité\ndes produits"])
+            UC3(["3️⃣ Valider la commande\nauprès du client"])
+            UC4(["4️⃣ Dispatcher la commande\net choisir le transporteur"])
+        end
+
+        subgraph EXP["Expédition"]
+            UC5(["Créer le colis\nchez le transporteur"])
+            UC6(["Générer le bordereau\nd'expédition PDF"])
+        end
+
+        subgraph TRACK["Suivi et Reporting"]
+            UC7(["Suivre les expéditions\nen temps réel"])
+            UC8(["Recevoir les mises\nà jour de statut"])
+            UC9(["Consulter les commandes\nannulées"])
+            UC10(["Visualiser le rapport"])
+        end
+
+        subgraph DOCS["Documents et Export"]
+            UC11(["Consulter et imprimer\nles bordereaux"])
+            UC12(["Exporter les données\ncommandes CSV / Excel"])
+        end
+    end
+
+    MAG -->|import automatique| UC1
+    SV --> UC2
+    SC --> UC3
+    SL --> UC4
+    SL --> UC7
+    SL --> UC9
+    SL --> UC10
+    SL --> UC11
+    SL --> UC12
+    CARR -->|webhook · cron job| UC8
+
+    UC4 -.->|"«include»"| UC5
+    UC5 -.->|"«include»"| UC6
+    UC7 -.->|"«include»"| UC8

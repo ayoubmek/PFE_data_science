@@ -1,0 +1,18 @@
+@startuml sprint7_seq
+actor "Administrateur" as ADM
+participant "React App" as React
+participant "Spring Boot API" as Spring
+database "SQL Server DB" as DB
+
+ADM -> React : Accéder aux journaux d'activité
+React -> Spring : GET /api/admin/audit-logs
+activate Spring
+Spring -> Spring : Valider l'autorisation d'administration (JWT Claims)
+Spring -> DB : SELECT * FROM kpi_logs
+activate DB
+DB --> Spring : Liste des logs d'audit
+deactivate DB
+Spring --> React : HTTP 200 OK (JSON Logs)
+deactivate Spring
+React --> ADM : Affichage de la table de monitoring technique
+@enduml

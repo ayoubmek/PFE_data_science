@@ -1,0 +1,24 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam fontName "Arial"
+skinparam fontSize 12
+
+class Utilisateur {
+    + Long id
+    + String nom
+    + String email
+    + String motDePasse
+    + RoleEnum role
+}
+
+enum RoleEnum {
+    <<enumeration>>
+    ADMIN
+    MANAGER
+    OPERATEUR
+}
+
+Utilisateur "1" -- "1" RoleEnum : role
+@enduml

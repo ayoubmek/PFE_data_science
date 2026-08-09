@@ -1,0 +1,63 @@
+@startuml sprint6_usecase
+left to right direction
+
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+    FontSize 12
+    FontName Arial
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+    FontColor Black
+    FontSize 12
+    FontName Arial
+    FontStyle bold
+}
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor Black
+    FontSize 14
+    FontName Arial
+    FontStyle bold
+    FontColor Black
+}
+skinparam arrow {
+    Color Black
+    FontSize 10
+    FontColor Black
+}
+
+actor "Service Finance" as SF
+actor "Vendeur" as VEN <<Destinataire>>
+
+rectangle "Facturation et Comptabilité" {
+
+    usecase "S'authentifier" as UC0
+    usecase "Consulter les bordereaux" as UC1
+    usecase "Facturer les bordereaux" as UC2
+    usecase "Générer une facture" as UC3
+    usecase "Calculer la TVA" as UC4
+    usecase "Envoyer la facture\nau vendeur" as UC5
+    usecase "Enregistrer un paiement" as UC6
+
+}
+
+SF  --> UC1
+SF  --> UC2
+SF  --> UC3
+SF  --> UC5
+SF  --> UC6
+VEN --> UC5
+
+UC1 ..> UC0 : <<include>>
+UC2 ..> UC0 : <<include>>
+UC2 ..> UC1 : <<extend>>
+UC3 ..> UC0 : <<include>>
+UC3 ..> UC2 : <<extend>>
+UC4 ..> UC3 : <<include>>
+UC5 ..> UC3 : <<extend>>
+UC6 ..> UC0 : <<include>>
+
+@enduml

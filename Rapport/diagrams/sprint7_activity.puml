@@ -1,0 +1,12 @@
+@startuml sprint7_activity
+start
+:L'utilisateur effectue une action critique;
+:Intercepter l'action via AOP (Spring Aspect);
+:Extraire l'identité de l'utilisateur, l'action, l'adresse IP et l'horodatage;
+:Enregistrer la trace dans la table kpi_logs de manière asynchrone;
+if (L'action déclenche-t-elle une alerte de sécurité?) then (oui)
+    :Créer une notification système pour l'administrateur;
+else (non)
+endif
+stop
+@enduml

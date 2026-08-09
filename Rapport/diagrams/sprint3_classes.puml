@@ -1,0 +1,40 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam fontName "Arial"
+skinparam fontSize 12
+
+class StockItem {
+    + String reference
+    + String designation
+    + BigDecimal quantite
+    + BigDecimal valeurUnitaire
+    + BigDecimal valeurTotale
+    + String emplacement
+    + String dateStock
+    + String categorie
+    + Boolean enAlerte
+}
+
+class StockMovement {
+    + Long id
+    + String stockItemReference
+    + String stockItemDesignation
+    + TypeMouvement type
+    + BigDecimal quantite
+    + String operateur
+    + String motif
+    + String reference
+    + LocalDateTime date
+}
+
+enum TypeMouvement {
+    <<enumeration>>
+    ENTREE
+    SORTIE
+}
+
+StockItem "1" -- "0..*" StockMovement : contient
+StockMovement "1" -- "1" TypeMouvement : type
+@enduml

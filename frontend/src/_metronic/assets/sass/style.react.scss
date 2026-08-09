@@ -1,0 +1,29 @@
+// React vendors
+@import '~socicon/css/socicon.css';
+@import '~@fortawesome/fontawesome-free/css/all.min.css';
+@import '~line-awesome/dist/line-awesome/css/line-awesome.css';
+@import '~prism-themes/themes/prism-shades-of-purple.css';
+@import '~bootstrap-icons/font/bootstrap-icons.css';
+@import '~animate.css/animate.css';
+@import '~nouislider/dist/nouislider.css';
+
+#root {
+  display: contents;
+}
+
+// Fix sidebar menu arrow pseudo-element conflict
+.menu-item .menu-link .menu-arrow {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  &::after {
+    display: none !important;
+    content: "" !important;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}

@@ -1,0 +1,43 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '12px'}}}%%
+classDiagram
+    direction TB
+
+    class RoleEnum {
+        <<enumeration>>
+        ADMIN
+        SERVICE_VENDEUR
+        VENDEUR
+        SERVICE_CLIENT
+        SERVICE_LOGISTIQUE
+        SERVICE_FINANCE
+    }
+
+    class Utilisateur {
+        +bigint id
+        +string nom
+        +string email
+        +string mot_de_passe
+        +RoleEnum role
+    }
+
+    class ActivityLog {
+        +bigint id
+        +bigint user_id
+        +string action
+        +string entite
+        +json details
+        +timestamp created_at
+    }
+
+    class Notification {
+        +bigint id
+        +string type
+        +json data
+        +timestamp created_at
+        +timestamp read_at
+    }
+
+    %% Relations
+    Utilisateur -- RoleEnum : role
+    Utilisateur "1" -- "*" ActivityLog : effectue
+    Utilisateur "1" -- "*" Notification : reçoit

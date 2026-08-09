@@ -1,0 +1,23 @@
+{
+  "name": "rapport",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build_rapport.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "adm-zip": "^0.5.18",
+    "docx": "^9.7.1"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.15.0",
+    "jimp": "^1.6.1",
+    "node-fetch": "^2.7.0",
+    "plantuml-encoder": "^1.4.0"
+  }
+}

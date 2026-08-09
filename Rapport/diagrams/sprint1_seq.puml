@@ -1,0 +1,69 @@
+@startuml sprint1_seq
+hide footbox
+skinparam backgroundColor White
+skinparam sequence {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
+  ActorBorderColor #333333
+  ActorBackgroundColor White
+  ParticipantBorderColor #333333
+  ParticipantBackgroundColor #F5F5F5
+  ParticipantFontName Arial
+  ParticipantFontSize 12
+  ArrowFontName Arial
+  ArrowFontSize 11
+  LifeLineBorderColor #999999
+  ActivationBorderColor #333333
+  ActivationBackgroundColor #E8E8E8
+}
+skinparam noteFontName Arial
+skinparam noteFontSize 11
+skinparam noteBorderColor #333333
+skinparam noteBackgroundColor #FFFFF0
+
+
+
+actor "Utilisateur" as U
+participant "LoginView" as WEB
+participant "AuthController" as SRV
+participant "JWTService" as AUTH
+database "Base de Données" as DB
+
+== Authentification ==
+
+U -> WEB : Saisir les identifiants de connexion
+activate WEB
+
+WEB -> SRV : Soumettre les identifiants
+activate SRV
+
+SRV -> DB : Vérifier l'existence du compte
+activate DB
+DB --> SRV : Informations du compte
+deactivate DB
+
+SRV -> SRV : Vérifier le mot de passe
+
+SRV -> AUTH : Générer le jeton d'accès
+activate AUTH
+AUTH --> SRV : Jeton d'accès généré
+deactivate AUTH
+
+SRV -> DB : Enregistrer la session active
+activate DB
+DB --> SRV : Session enregistrée
+deactivate DB
+
+SRV --> WEB : Authentification réussie
+deactivate SRV
+
+WEB --> U : Redirection vers le tableau de bord
+deactivate WEB
+
+note over U, DB
+  Le rôle détermine les modules accessibles :
+  Administrateur | Manager | Opérateur
+end note
+
+@enduml

@@ -1,0 +1,34 @@
+@startuml sprint7_classes
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    HeaderBackgroundColor #DDDDDD
+    HeaderFontStyle bold
+}
+
+class User {
+    +id : int
+    +username : string
+    +role_id : int
+}
+class Role {
+    +id : int
+    +name : string
+}
+class KpiLog {
+    +id : int
+    +user_id : int
+    +action : string
+    +ip_address : string
+    +logged_at : datetime
+}
+class Notification {
+    +id : int
+    +message : string
+    +read : boolean
+    +created_at : datetime
+}
+
+User "0..*" -- "1" Role
+KpiLog "0..*" -- "1" User
+@enduml

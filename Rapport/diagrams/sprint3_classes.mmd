@@ -1,0 +1,50 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '12px'}}}%%
+classDiagram
+    direction TB
+
+    class Vendeur {
+        +bigint id
+        +string nom
+        +string email
+        +string telephone
+        +boolean disponible
+    }
+
+    class Produit {
+        +bigint id
+        +string sku
+        +string nom
+        +decimal prix
+        +boolean disponible
+    }
+
+    class Commande {
+        +bigint id
+        +int numero_commande
+        +string statut
+        +decimal montant_total
+    }
+
+    class Notification {
+        +string id
+        +string type
+        +string donnees
+        +timestamp lu_le
+    }
+
+    class DemandeApprobation {
+        +bigint id
+        +string type_demande
+        +string statut
+        +string donnees
+        +string commentaire_admin
+        +timestamp date_creation
+    }
+
+    %% Relations
+    Vendeur "1" -- "*" Produit : gère
+    Vendeur "1" -- "*" DemandeApprobation : envoie
+    Vendeur "1" -- "*" Notification : reçoit
+    Vendeur "1" -- "*" Commande : consulte
+    DemandeApprobation "*" -- "1" Commande : concerne
+    DemandeApprobation "*" -- "1" Produit : concerne

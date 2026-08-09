@@ -1,0 +1,45 @@
+@startuml sprint6_activity
+skinparam backgroundColor White
+skinparam activity {
+  BackgroundColor #F5F5F5
+  BorderColor #333333
+  FontName Arial
+  FontSize 11
+  ArrowColor #333333
+  StartColor #333333
+  EndColor #333333
+}
+skinparam swimlane {
+  BorderColor #333333
+  TitleFontName Arial
+  TitleFontSize 12
+}
+
+|Service Finance|
+start
+:Sélectionner un vendeur;
+:Consulter les bordereaux non facturés;
+:Sélectionner les bordereaux à facturer;
+
+|Système|
+:Calculer total HT, TVA (19%), TTC;
+:Générer la facture;
+:Enregistrer la facture (statut = impayée);
+:Générer PDF facture;
+
+|Service Finance|
+:Envoyer facture au vendeur;
+:Attendre paiement;
+
+if (Paiement reçu ?) then (oui)
+  |Système|
+  :Enregistrer le règlement;
+  :Mettre à jour facture → "payée";
+  |Service Finance|
+  :Clôturer la vente;
+else (non / en retard)
+  :Envoyer relance de paiement;
+  :Planifier rappel;
+endif
+stop
+@enduml

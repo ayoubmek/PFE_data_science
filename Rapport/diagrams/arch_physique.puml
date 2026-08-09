@@ -1,0 +1,41 @@
+@startuml arch_physique
+skinparam componentStyle uml2
+skinparam node {
+    BackgroundColor White
+    BorderColor Black
+    FontSize 12
+    FontName Arial
+    FontStyle bold
+}
+skinparam database {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam component {
+    BackgroundColor White
+    BorderColor Black
+}
+
+node "Navigateur Client Web" as WebNode {
+    component "React.js Web App" as ReactApp
+}
+
+node "Serveur de Base de Données" as DBNode {
+    database "Microsoft SQL Server" as SQLServerDB
+}
+
+node "Serveur Applicatif Spring Boot" as AppServer {
+    component "Spring Boot 3 API" as SpringApp
+}
+
+node "Serveur IA et Machine Learning" as MLServer {
+    component "FastAPI Web Service" as FastAPIApp
+    component "Modèles Prophet et ARIMA" as IAEngine
+}
+
+ReactApp -down-> SpringApp : HTTPS JSON
+SpringApp -down-> SQLServerDB : SQL Port 1433
+SpringApp -right-> FastAPIApp : HTTP REST JSON
+FastAPIApp -down-> IAEngine : Appel Python
+FastAPIApp -down-> SQLServerDB : SQL Port 1433
+@enduml

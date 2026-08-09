@@ -1,0 +1,24 @@
+@startuml sprint5_usecase
+left to right direction
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "Administrateur" as ADM
+
+rectangle "Supervision & Monitoring" {
+    usecase "S'authentifier" as UC_Auth
+    usecase "Consulter les journaux d'activité" as UC51
+    usecase "Filtrer les logs d'audit" as UC52
+    usecase "Consulter les notifications système" as UC53
+}
+
+ADM --> UC51
+ADM --> UC52
+ADM --> UC53
+
+UC51 ..> UC_Auth : <<include>>
+UC52 ..> UC_Auth : <<include>>
+UC53 ..> UC_Auth : <<include>>
+@enduml

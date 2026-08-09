@@ -1,0 +1,59 @@
+@startuml sprint1_activity
+skinparam backgroundColor White
+skinparam activity {
+  BackgroundColor #F5F5F5
+  BorderColor #333333
+  FontName Arial
+  FontSize 11
+  ArrowColor #333333
+  StartColor #333333
+  EndColor #333333
+}
+skinparam swimlane {
+  BorderColor #333333
+  TitleFontName Arial
+  TitleFontSize 12
+}
+
+
+|Utilisateur|
+start
+:Saisir les identifiants de connexion;
+:Soumettre le formulaire;
+
+|Système|
+:Vérifier l'existence du compte;
+if (Compte existant ?) then (non)
+  :Refuser l'accès;
+  |Utilisateur|
+  :Afficher le message d'erreur;
+  stop
+else (oui)
+  :Vérifier le mot de passe;
+  if (Mot de passe correct ?) then (non)
+    :Refuser l'accès;
+    |Utilisateur|
+    :Afficher le message d'erreur;
+    stop
+  else (oui)
+    :Générer le jeton d'accès;
+    :Enregistrer la session;
+    :Retourner les droits et le rôle;
+  endif
+endif
+
+|Utilisateur|
+:Mémoriser les informations de session;
+:Charger les permissions selon le rôle;
+
+if (Rôle ?) then (Administrateur)
+  :Accès complet à tous les modules et administration;
+else if (Manager)
+  :Accès gestion production, machines, stocks et IA;
+else (Opérateur)
+  :Accès exécution d'atelier et saisie des mouvements;
+endif
+
+:Rediriger vers le tableau de bord du rôle;
+stop
+@enduml

@@ -1,0 +1,5 @@
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <!-- White background for the logo in dark mode -->
+  <rect x="0" y="0" width="200" height="60" fill="white" rx="4"/>
+  <image href="logo-full.png" x="0" y="0" width="200" height="60" preserveAspectRatio="xMinYMid meet"/>
+</svg>

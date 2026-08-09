@@ -1,0 +1,28 @@
+@startuml sprint4_seq
+actor "Manager" as MGR
+participant "React App" as React
+participant "Spring Boot API" as Spring
+participant "FastAPI Service" as FastAPI
+database "SQL Server DB" as DB
+
+MGR -> React : Accéder à la page Data Science
+React -> Spring : GET /api/data-science/predictions
+activate Spring
+
+Spring -> DB : Récupérer l'historique de production
+activate DB
+DB --> Spring : Données de production
+deactivate DB
+
+Spring -> FastAPI : GET /predict/production
+activate FastAPI
+
+FastAPI -> FastAPI : Calcul des prévisions avec Prophet
+FastAPI --> Spring : Prévisions et métriques
+deactivate FastAPI
+
+Spring --> React : Données de prévision
+deactivate Spring
+
+React --> MGR : Afficher courbes comparatives
+@enduml

@@ -1,0 +1,21 @@
+@startuml sprint5_seq
+actor "Administrateur" as ADM
+participant "React App" as React
+participant "Spring Boot API" as Spring
+database "SQL Server DB" as DB
+
+ADM -> React : Accéder aux journaux d'activité
+React -> Spring : GET /api/admin/audit-logs
+activate Spring
+
+Spring -> Spring : Valider l'autorisation d'administration
+Spring -> DB : SELECT * FROM activity_logs ORDER BY timestamp DESC
+activate DB
+DB --> Spring : Liste des journaux d'activité
+deactivate DB
+
+Spring --> React : Données des journaux d'activité
+deactivate Spring
+
+React --> ADM : Affichage de la table de monitoring technique
+@enduml

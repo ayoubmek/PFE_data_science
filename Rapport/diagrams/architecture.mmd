@@ -1,0 +1,77 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Times New Roman', 'fontSize': '12px'}}}%%
+flowchart TB
+    %% Core System Box
+    subgraph CORE["Plateforme Arkan Shipping (Système Core)"]
+        direction TB
+
+        %% 1. Frontend Layer
+        subgraph FRONTEND["1. Couche Présentation (Applications Clients)"]
+            direction LR
+            WEB["Application Web (React)\n- Gestion des Commandes\n- Gestion Financière\n- Gestion CRM\n- Gestion des Vendeurs et Produits\n- Tableaux de Bord et Reporting"]
+            MOBILE["Application Mobile (Flutter)\n- Consultation Commandes\n- Gestion des Produits\n- Dashboard Vendeur"]
+        end
+
+        %% 2. Backend Layer
+        subgraph BACKEND["2. Couche Back-end (Laravel REST API)"]
+            direction TB
+            AUTH["Module d'Authentification (JWT)"]
+            CTRL["Contrôleurs REST API et Endpoints Webhooks"]
+            SVC["Services Métiers (Business Logic)"]
+        end
+
+        %% 3. Async et Real-time Layer
+        subgraph ASYNC["3. Couche Traitements Asynchrones et Temps Réel"]
+            direction LR
+            QUEUE["Laravel Queues (File d'attente)\n- Traitement Commandes\n- Envois APIs vers 3PL"]
+            WEBSOCKETS["WebSockets\n- Synchronisation en Temps Réel\n- Live Statuts et Tracking"]
+        end
+
+        %% 4. Data Layer
+        subgraph DATA_LAYER["4. Couche Données (Data)"]
+            MYSQL[("Base de Données MySQL")]
+        end
+    end
+
+    %% External Systems Box
+    subgraph EXTERNES["Systèmes Externes (Hors Système)"]
+        direction TB
+        MAGENTO["Plateforme E-commerce\n(Magento - Arkan.tn)"]
+        
+        subgraph PROVIDERS_3PL["Prestataires Logistiques Tiers (3PL)"]
+            direction LR
+            ARAMEX["Aramex API\n(3PL Shipping Provider)"]
+            INTIGO["Intigo API\n(3PL Delivery Provider)"]
+            PHOENIX["Phoenix API\n(3PL Logistics Provider)"]
+        end
+        
+        PBI["Power BI\n(Analytics et Reporting)"]
+    end
+
+    %% System Flows / Minimal meaningful arrows
+    %% Flows between Magento and Backend
+    MAGENTO ==>|"Importation des commandes (API / Webhooks)"| CTRL
+    
+    %% Flows between Frontend and Backend (HTTPS + JWT)
+    WEB <-->|"HTTPS (Authentification JWT)"| AUTH
+    MOBILE <-->|"HTTPS (Authentification JWT)"| AUTH
+    
+    %% Backend internal routing
+    AUTH --> CTRL
+    CTRL --> SVC
+    
+    %% Backend to Async layer
+    SVC -->|"Déclenchement des Jobs"| QUEUE
+    SVC -->|"Événements temps réel"| WEBSOCKETS
+    
+    %% Real-time push updates to apps
+    WEBSOCKETS -.->|"Push Temps Réel"| WEB
+    WEBSOCKETS -.->|"Push Temps Réel"| MOBILE
+    
+    %% Data Layer Flow
+    SVC <-->|"Persistance et Synchronisation"| MYSQL
+    QUEUE -->|"Traitement en arrière-plan"| MYSQL
+    
+    %% Integration with 3PL Providers and Power BI
+    QUEUE ==>|"Création colis (API)"| PROVIDERS_3PL
+    PROVIDERS_3PL ==>|"Mises à jour statuts (Webhooks)"| CTRL
+    SVC ==>|"Export Données (KPIs)"| PBI

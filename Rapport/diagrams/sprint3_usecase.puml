@@ -1,0 +1,38 @@
+@startuml sprint3_usecase
+left to right direction
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "Opérateur" as OPE
+actor "Manager" as MGR
+
+rectangle "Gestion des Stocks, Mouvements DWH & Export" {
+    usecase "S'authentifier" as UC_Auth
+    usecase "Consulter les mouvements DWH" as UC31
+    usecase "Enregistrer un mouvement d'atelier" as UC32
+    usecase "Appliquer les filtres multi-critères" as UC33
+    usecase "Exporter les données filtrées au format Excel" as UC34
+    usecase "Configurer les seuils d'alerte" as UC35
+}
+
+OPE --> UC31
+OPE --> UC32
+OPE --> UC33
+
+MGR --> UC31
+MGR --> UC33
+MGR --> UC34
+MGR --> UC35
+
+UC31 ..> UC_Auth : <<include>>
+UC32 ..> UC_Auth : <<include>>
+UC33 ..> UC_Auth : <<include>>
+UC34 ..> UC_Auth : <<include>>
+UC35 ..> UC_Auth : <<include>>
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam fontName "Arial"
+skinparam fontSize 12
+
+class Machine {
+    + Long id
+    + String code
+    + String nom
+    + String statut
+    + Double tauxRendement
+    + Integer totalOutput
+}
+
+class ProductionOrder {
+    + Long id
+    + String reference
+    + String article
+    + Integer quantitePrevue
+    + Integer quantiteRealisee
+    + String statut
+    + String dateDebut
+}
+
+class MachineStop {
+    + Long id
+    + String startAt
+    + String endAt
+    + String reason
+}
+
+Machine "1" -- "0..*" ProductionOrder : exécute
+Machine "1" -- "0..*" MachineStop : subit
+@enduml

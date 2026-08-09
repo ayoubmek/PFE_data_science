@@ -1,0 +1,45 @@
+@startuml sprint2_usecase
+left to right direction
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "Manager" as MGR
+actor "Opérateur" as OPE
+
+rectangle "Gestion de Production & Rendement" {
+    usecase "S'authentifier" as UC_Auth
+    usecase "Gérer les machines d'atelier" as UC21
+    usecase "Planifier un ordre de production" as UC22
+    usecase "Affecter une machine à un ordre" as UC23
+    usecase "Mettre à jour le statut d'un ordre" as UC24
+    usecase "Suivre le TRG en direct" as UC25
+    usecase "Enregistrer un temps d'arrêt" as UC26
+}
+
+MGR --> UC21
+MGR --> UC22
+MGR --> UC23
+MGR --> UC25
+MGR --> UC26
+
+OPE --> UC24
+OPE --> UC26
+OPE --> UC25
+
+UC21 ..> UC_Auth : <<include>>
+UC22 ..> UC_Auth : <<include>>
+UC23 ..> UC_Auth : <<include>>
+UC24 ..> UC_Auth : <<include>>
+UC25 ..> UC_Auth : <<include>>
+UC26 ..> UC_Auth : <<include>>
+@enduml

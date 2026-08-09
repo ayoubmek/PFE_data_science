@@ -1,0 +1,68 @@
+@startuml global_usecase
+left to right direction
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+    FontSize 12
+    FontName Arial
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+    FontColor Black
+    FontSize 12
+    FontName Arial
+    FontStyle bold
+}
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor Black
+    FontSize 16
+    FontName Arial
+    FontStyle bold
+    FontColor Black
+}
+
+actor "Opérateur" as OPE
+actor "Manager" as MGR
+actor "Administrateur" as ADM
+
+rectangle "Plateforme Nexora" {
+    usecase "S'authentifier" as UC0
+    usecase "Mettre à jour l'état de production" as UC1
+    usecase "Saisir un mouvement de stock" as UC2
+    usecase "Gérer les machines d'atelier" as UC3
+    usecase "Planifier les ordres de production" as UC4
+    usecase "Suivre le rendement (TRG)" as UC5
+    usecase "Consulter les prévisions d'IA" as UC6
+    usecase "Gérer les comptes utilisateurs" as UC7
+    usecase "Gérer les permissions (RBAC)" as UC8
+    usecase "Consulter les journaux d'activité" as UC9
+}
+
+OPE --> UC0
+OPE --> UC1
+OPE --> UC2
+OPE --> UC5
+
+MGR --> UC0
+MGR --> UC3
+MGR --> UC4
+MGR --> UC5
+MGR --> UC6
+
+ADM --> UC0
+ADM --> UC7
+ADM --> UC8
+ADM --> UC9
+
+UC1 ..> UC0 : <<include>>
+UC2 ..> UC0 : <<include>>
+UC3 ..> UC0 : <<include>>
+UC4 ..> UC0 : <<include>>
+UC5 ..> UC0 : <<include>>
+UC6 ..> UC0 : <<include>>
+UC7 ..> UC0 : <<include>>
+UC8 ..> UC0 : <<include>>
+UC9 ..> UC0 : <<include>>
+@enduml

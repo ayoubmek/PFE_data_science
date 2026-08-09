@@ -1,0 +1,104 @@
+@startuml global_classes
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    FontColor Black
+    FontName Arial
+    FontSize 10
+    HeaderBackgroundColor #DDDDDD
+    HeaderFontStyle bold
+}
+skinparam package {
+    BackgroundColor White
+    BorderColor Black
+    FontStyle bold
+}
+
+package "Sécurité & Accès" {
+    class User {
+        +id : int
+        +username : string
+        +email : string
+        +password : string
+        +role_id : int
+        +active : boolean
+    }
+    class Role {
+        +id : int
+        +name : string
+    }
+    class Permission {
+        +id : int
+        +name : string
+        +module : string
+    }
+}
+
+package "Production & Atelier" {
+    class Machine {
+        +id : int
+        +code : string
+        +name : string
+        +status : string
+        +trg : double
+    }
+    class MachineStop {
+        +id : int
+        +machine_id : int
+        +start_time : datetime
+        +end_time : datetime
+        +reason : string
+    }
+    class ProductionOrder {
+        +id : int
+        +code : string
+        +article_id : int
+        +machine_id : int
+        +planned_qty : int
+        +produced_qty : int
+        +rebuttals : int
+        +status : string
+    }
+}
+
+package "Inventaire & Stock" {
+    class Article {
+        +id : int
+        +code : string
+        +name : string
+        +stock : int
+        +min_threshold : int
+    }
+    class StockMovement {
+        +id : int
+        +article_id : int
+        +type : string
+        +quantity : int
+        +movement_at : datetime
+    }
+}
+
+package "Supervision & Audit" {
+    class KpiLog {
+        +id : int
+        +user_id : int
+        +action : string
+        +ip_address : string
+        +logged_at : datetime
+    }
+    class Notification {
+        +id : int
+        +message : string
+        +read : boolean
+        +created_at : datetime
+    }
+}
+
+User "0..*" -- "1" Role
+Role "1" -- "0..*" Permission
+ProductionOrder "0..*" -- "1" Machine
+ProductionOrder "0..*" -- "1" Article
+MachineStop "0..*" -- "1" Machine
+StockMovement "0..*" -- "1" Article
+KpiLog "0..*" -- "1" User
+@enduml

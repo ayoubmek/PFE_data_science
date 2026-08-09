@@ -1,0 +1,68 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '12px'}}}%%
+classDiagram
+    direction TB
+
+    class RoleEnum {
+        <<enumeration>>
+        ADMIN
+        SERVICE_VENDEUR
+        VENDEUR
+        SERVICE_LOGISTIQUE
+        SERVICE_CLIENT
+        SERVICE_FINANCE
+    }
+
+    class Utilisateur {
+        +bigint id
+        +string nom
+        +string email
+        +string mot_de_passe
+        +RoleEnum role
+    }
+
+    class Client {
+        +bigint id
+        +string nom
+        +string email
+        +string telephone
+        +string adresse
+    }
+
+    class Produit {
+        +bigint id
+        +string sku
+        +string nom
+        +decimal prix
+    }
+
+    class Commande {
+        +bigint id
+        +int numero_commande
+        +string statut
+        +decimal montant_total
+    }
+
+    class LigneCommande {
+        +bigint id
+        +int quantite
+        +decimal prix_unitaire
+        +string sku
+    }
+
+    class Bordereau {
+        +bigint id
+        +int numero_bordereau
+        +string statut
+        +decimal frais_livraison
+    }
+
+    %% Relations
+    Utilisateur -- RoleEnum : role
+    Utilisateur "1" -- "*" Commande : logistique traite
+    Utilisateur "1" -- "*" Produit : vendeur gère
+
+    Client "1" -- "*" Commande : passe
+
+    Commande "1" *-- "*" LigneCommande : contient
+    Produit "*" <-- "1" Commande : concerne
+    LigneCommande "*" -- "1..*" Bordereau : groupée dans

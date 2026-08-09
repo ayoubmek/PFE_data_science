@@ -1,0 +1,85 @@
+@startuml arch_logique
+skinparam packageStyle rect
+skinparam package {
+    BackgroundColor White
+    BorderColor Black
+    FontSize 12
+    FontName Arial
+    FontStyle bold
+}
+skinparam component {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam database {
+    BackgroundColor White
+    BorderColor Black
+}
+
+package "Couche Présentation React" as PresLayer {
+    component "React.js Web App" as ReactApp
+}
+
+package "Couche Sécurité Spring Security" as SecLayer {
+    component "JWT Filter" as JWTAuth
+    component "RBAC Guard" as RBACGuard
+}
+
+package "Couche Contrôleur REST" as ControllerLayer {
+    component "AuthController" as AuthCtrl
+    component "MachineController" as MachineCtrl
+    component "ProductionController" as ProdCtrl
+    component "StockController" as StockCtrl
+    component "DataScienceController" as DSCtrl
+}
+
+package "Couche Service Métier" as ServiceLayer {
+    component "AuthService" as AuthServ
+    component "MachineService" as MachineServ
+    component "ProductionService" as ProdServ
+    component "StockService" as StockServ
+    component "DataScienceService" as DSServ
+    component "AuditLogService" as AuditServ
+}
+
+package "Microservice IA FastAPI Python" as MLService {
+    component "Uvicorn FastAPI" as FastAPIApp
+    component "ForecastingService" as ForecastServ
+    component "ClusteringService" as ClusterServ
+    component "AnomalyService" as AnomalyServ
+}
+
+package "Couche Persistance Spring Data JPA" as RepoLayer {
+    component "JPA Repositories" as JPARepo
+}
+
+database "SGBD Microsoft SQL Server" as DB
+
+ReactApp -down-> JWTAuth : HTTP Request JSON et JWT
+JWTAuth -down-> RBACGuard
+RBACGuard -down-> AuthCtrl
+RBACGuard -down-> MachineCtrl
+RBACGuard -down-> ProdCtrl
+RBACGuard -down-> StockCtrl
+RBACGuard -down-> DSCtrl
+
+AuthCtrl -down-> AuthServ
+MachineCtrl -down-> MachineServ
+ProdCtrl -down-> ProdServ
+StockCtrl -down-> StockServ
+DSCtrl -down-> DSServ
+
+DSServ -right-> FastAPIApp : HTTP Client REST
+FastAPIApp -down-> ForecastServ
+FastAPIApp -down-> ClusterServ
+FastAPIApp -down-> AnomalyServ
+
+AuthServ -down-> JPARepo
+MachineServ -down-> JPARepo
+ProdServ -down-> JPARepo
+StockServ -down-> JPARepo
+AuditServ -down-> JPARepo
+
+JPARepo -down-> DB : SQL JDBC
+ForecastServ -down-> DB : SQL ODBC
+@enduml
