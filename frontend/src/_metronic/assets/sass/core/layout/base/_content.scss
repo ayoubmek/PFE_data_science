@@ -1,8 +1,8 @@
-//
-// Content
-//
 
-// Desktop mode
+
+
+
+
 @include media-breakpoint-up(lg) {
   .app-content {
     padding-top: $app-content-padding-y;
@@ -12,7 +12,7 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
   .app-content {
     max-width: none;

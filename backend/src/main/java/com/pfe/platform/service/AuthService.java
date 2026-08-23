@@ -37,7 +37,6 @@ public class AuthService implements UserDetailsService {
     }
 
     public AuthDTO.AuthResponse login(AuthDTO.LoginRequest request) {
-        // Support login by email or username
         String identifier = request.getUsername();
         User user = identifier.contains("@")
             ? userRepository.findByEmail(identifier)

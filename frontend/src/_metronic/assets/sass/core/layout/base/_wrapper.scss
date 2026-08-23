@@ -1,19 +1,17 @@
-//
-// Wrapper
-//
 
-// General mode
+
+
+
+
 .app-wrapper {
   display: flex;
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
-  // Integration
   .app-wrapper {
     transition: $app-wrapper-transition;
 
-    // Header
     [data-kt-app-header-sticky='on'] & {
       margin-top: var(--#{$prefix}app-header-height-actual);
     }
@@ -22,7 +20,6 @@
       margin-top: var(--#{$prefix}app-header-height);
     }
 
-    // Toolbar
     [data-kt-app-toolbar-sticky='on'] & {
       margin-top: var(--#{$prefix}app-toolbar-height);
     }
@@ -37,7 +34,6 @@
       margin-top: calc(var(--#{$prefix}app-header-height) + var(--#{$prefix}app-toolbar-height));
     }
 
-    // Sidebar
     [data-kt-app-sidebar-fixed='true'] & {
       margin-left: calc(
         var(--#{$prefix}app-sidebar-width) + var(--#{$prefix}app-sidebar-gap-start, 0px) +
@@ -45,7 +41,6 @@
       );
     }
 
-    // Sidebar Panel
     [data-kt-app-sidebar-panel-fixed='true'] & {
       margin-left: calc(
         var(--#{$prefix}app-sidebar-width) + var(--#{$prefix}app-sidebar-gap-start, 0px) +
@@ -55,7 +50,6 @@
       );
     }
 
-    // Aside
     [data-kt-app-aside-fixed='true'] & {
       margin-right: calc(
         var(--#{$prefix}app-aside-width) + var(--#{$prefix}app-aside-gap-start, 0px) +
@@ -63,20 +57,17 @@
       );
     }
 
-    // Footer
     [data-kt-app-footer-fixed='true'] & {
       margin-bottom: var(--#{$prefix}app-footer-height);
     }
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
-  // Integration
   .app-wrapper {
     transition: $app-wrapper-transition;
 
-    // Header
     [data-kt-app-header-sticky='on'] & {
       margin-top: var(--#{$prefix}app-header-height-actual);
     }
@@ -85,14 +76,12 @@
       margin-top: var(--#{$prefix}app-header-height);
     }
 
-    // Toolbar
     [data-kt-app-header-fixed-mobile='true'][data-kt-app-toolbar-sticky='on'] & {
       margin-top: calc(
         var(--#{$prefix}app-header-height-actual) + var(--#{$prefix}app-toolbar-height-actual)
       );
     }
 
-    // Footer
     [data-kt-app-footer-fixed-mobile='true'] & {
       margin-bottom: var(--#{$prefix}app-footer-height);
     }

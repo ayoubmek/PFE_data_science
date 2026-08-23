@@ -1,11 +1,10 @@
-//
-// Header
-//
 
-// General mode
+
+
+
+
 .app-header-menu {
   .menu {
-    // General
     .menu-item {
       @include menu-link-default-state(
         $title-color: var(--#{$prefix}gray-700),
@@ -48,7 +47,6 @@
       );
     }
 
-    // Root
     > .menu-item {
       > .menu-link {
         > .menu-title {
@@ -78,11 +76,10 @@
   }
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
   .app-header-menu {
     .menu {
-      // Menu root item
       > .menu-item {
         margin-right: 0.5rem;
 
@@ -106,7 +103,6 @@
   [data-kt-app-layout='dark-sidebar'] {
     .app-header-menu {
       .menu {
-        // Menu root item
         > .menu-item {
           &.active,
           &.here {
@@ -127,14 +123,12 @@
   }
 }
 
-// Dark mode
+
 @include color-mode(dark) {
-  // Desktop mode
   @include media-breakpoint-up(lg) {
     [data-kt-app-layout='dark-sidebar'] {
       .app-header-menu {
         .menu {
-          // Menu root item
           > .menu-item {
             &.active,
             &.here {
@@ -150,7 +144,7 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
   .app-header {
     background-color: var(--#{$prefix}app-header-minimize-bg-color);

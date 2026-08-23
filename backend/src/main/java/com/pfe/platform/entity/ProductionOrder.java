@@ -54,7 +54,6 @@ public class ProductionOrder {
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
-        // Auto-detect delay
         if (this.statut == Statut.EN_COURS && this.dateFin != null
                 && LocalDate.now().isAfter(this.dateFin)) {
             this.statut = Statut.EN_RETARD;

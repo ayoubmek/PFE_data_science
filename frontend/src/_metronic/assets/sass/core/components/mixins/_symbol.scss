@@ -1,6 +1,6 @@
-//
-// Symbol
-//
+
+
+
 
 @mixin symbol-size($size) {
   > img {
@@ -26,7 +26,6 @@
     }
   }
 
-  // Ratios
   &.symbol-2by3 {
     .symbol-label {
       height: $size;

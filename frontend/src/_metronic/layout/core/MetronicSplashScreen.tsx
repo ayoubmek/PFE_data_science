@@ -18,7 +18,6 @@ const MetronicSplashScreenProvider: FC<WithChildren> = ({children}) => {
   let visible = count > 0
 
   useEffect(() => {
-    // Show SplashScreen
     if (visible) {
       document.body.classList.remove('page-loading')
 
@@ -27,7 +26,6 @@ const MetronicSplashScreenProvider: FC<WithChildren> = ({children}) => {
       }
     }
 
-    // Hide SplashScreen
     let timeout: number
     if (!visible) {
       timeout = window.setTimeout(() => {
@@ -48,7 +46,6 @@ const MetronicSplashScreenProvider: FC<WithChildren> = ({children}) => {
 }
 
 const LayoutSplashScreen: FC<{visible?: boolean}> = ({visible = true}) => {
-  // Everything are ready - remove splashscreen
   const setCount = useContext(MetronicSplashScreenContext)
 
   useEffect(() => {

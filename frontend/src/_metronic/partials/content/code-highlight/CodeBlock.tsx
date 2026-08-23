@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+
 import React, {useState, useEffect, useRef} from 'react'
 import {CopyToClipboard} from 'react-copy-to-clipboard'
 import {Highlight} from 'prism-react-renderer'

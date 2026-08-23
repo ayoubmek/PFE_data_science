@@ -115,7 +115,6 @@ class GlobalExportManager {
 
         if (this.progressText) this.progressText.innerText = '100%';
 
-        // Hide after 3 seconds
         setTimeout(() => {
             this.hide();
         }, 3000);
@@ -138,7 +137,6 @@ class GlobalExportManager {
             spinner.outerHTML = '<i class="bi bi-x-circle-fill text-danger fs-4"></i>';
         }
 
-        // Hide after 4 seconds
         setTimeout(() => {
             this.hide();
         }, 4000);
@@ -151,7 +149,6 @@ class GlobalExportManager {
         }
         this.isVisible = false;
 
-        // Clean up DOM after animation
         setTimeout(() => {
             if (this.container && this.container.parentNode) {
                 this.container.parentNode.removeChild(this.container);

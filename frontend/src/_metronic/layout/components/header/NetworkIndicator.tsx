@@ -14,7 +14,6 @@ const NetworkIndicator: React.FC = () => {
         const start = performance.now();
         const response = await fetch(`${apiUrl}/ping`, { cache: 'no-store' });
         const end = performance.now();
-        
         if (response.ok && isMounted) {
           const ms = Math.round(end - start);
           setLatency(ms);
@@ -34,7 +33,7 @@ const NetworkIndicator: React.FC = () => {
     };
 
     measureLatency();
-    const intervalId = setInterval(measureLatency, 5000); // Ping every 5 seconds
+    const intervalId = setInterval(measureLatency, 5000); 
 
     return () => {
       isMounted = false;

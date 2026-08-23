@@ -1,6 +1,6 @@
-//
-// Border
-//
+
+
+
 
 .border-active:not(.active):not(:active):not(:hover):not(:focus) {
   border-color: transparent !important;
@@ -11,15 +11,14 @@
   border-color: transparent !important;
 }
 
-// Gray border colors
+
 @each $name, $value in $grays {
-  // Initial
   .border-gray-#{$name} {
     border-color: var(--#{$prefix}gray-#{$name}) !important;
   }
 }
 
-// Hover border colors
+
 @each $name, $value in $theme-colors {
   .border-hover-#{$name}:hover {
     border-color: var(--#{$prefix}#{$name}) !important;
@@ -30,12 +29,12 @@
   }
 }
 
-// Hover transparent
+
 .border-hover-transparent:hover {
   border-color: transparent !important;
 }
 
-// Dashed style
+
 .border-dashed {
   border-style: dashed !important;
   border-color: var(--#{$prefix}border-dashed-color);
@@ -57,7 +56,7 @@
   border-right-style: dashed !important;
 }
 
-// Dotted style
+
 .border-dotted {
   border-style: dotted !important;
 }
@@ -78,17 +77,17 @@
   border-right-style: dotted !important;
 }
 
-// Border transparent
+
 .border-transparent {
   border-color: transparent !important;
 }
 
-// Border body
+
 .border-body {
   border-color: var(--#{$prefix}body-bg) !important;
 }
 
-// Border radiuses
+
 .rounded-top-0 {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;

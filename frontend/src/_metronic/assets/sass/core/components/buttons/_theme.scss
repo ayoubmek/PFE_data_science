@@ -1,8 +1,8 @@
-//
-// Buttons Theme
-//
 
-// Outline dashed basic style
+
+
+
+
 .btn.btn-outline.btn-outline-dashed {
   border-width: 1px;
   border-style: dashed;
@@ -29,9 +29,8 @@
   );
 }
 
-// Theme colors
+
 @each $name, $value in $theme-colors {
-  // Base
   .btn.btn-#{$name} {
     $color: var(--#{$prefix}#{$name}-inverse);
     $icon-color: var(--#{$prefix}#{$name}-inverse);
@@ -55,7 +54,6 @@
     );
   }
 
-  // Light
   @if (theme-light-color($name)) {
     .btn.btn-light-#{$name} {
       $color: var(--#{$prefix}#{$name});
@@ -81,7 +79,6 @@
     }
   }
 
-  // Background
   .btn.btn-bg-#{$name} {
     $color: null;
     $icon-color: null;
@@ -105,7 +102,6 @@
     );
   }
 
-  // Active
   .btn.btn-active-#{$name} {
     $color: null;
     $icon-color: null;
@@ -129,7 +125,6 @@
     );
   }
 
-  // Light
   @if (theme-light-color($name)) {
     .btn.btn-active-light-#{$name} {
       $color: null;
@@ -155,7 +150,6 @@
     }
   }
 
-  // Outline
   .btn.btn-outline.btn-outline-#{$name} {
     $color: var(--#{$prefix}#{$name});
     $icon-color: var(--#{$prefix}#{$name});
@@ -180,9 +174,8 @@
   }
 }
 
-// Theme text colors
+
 @each $name, $value in $theme-text-colors {
-  // Text and icon colors
   .btn.btn-color-#{$name} {
     $color: var(--#{$prefix}text-#{$name});
     $icon-color: var(--#{$prefix}text-#{$name});
@@ -206,7 +199,6 @@
     );
   }
 
-  // Text and icon colors active state
   .btn.btn-active-color-#{$name} {
     $color: null;
     $icon-color: null;
@@ -230,7 +222,6 @@
     );
   }
 
-  // Icon colors
   .btn.btn-icon-#{$name} {
     $color: null;
     $icon-color: var(--#{$prefix}text-#{$name});
@@ -254,7 +245,6 @@
     );
   }
 
-  // Icon colors active state
   .btn.btn-active-icon-#{$name} {
     $color: null;
     $icon-color: null;
@@ -278,7 +268,6 @@
     );
   }
 
-  // Text colors
   .btn.btn-text-#{$name} {
     $color: var(--#{$prefix}text-#{$name});
     $icon-color: null;
@@ -302,7 +291,6 @@
     );
   }
 
-  // Text colors active state
   .btn.btn-active-text-#{$name} {
     $color: null;
     $icon-color: null;
@@ -327,9 +315,8 @@
   }
 }
 
-// Social colors
+
 @each $name, $value in $social-colors {
-  // Base
   .btn.btn-#{$name} {
     $color: get($value, inverse);
     $icon-color: get($value, inverse);
@@ -353,7 +340,6 @@
     );
   }
 
-  // Light
   .btn.btn-light-#{$name} {
     $color: get($value, base);
     $icon-color: get($value, base);

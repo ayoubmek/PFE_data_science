@@ -16,7 +16,6 @@ export default function AnalyticsPage() {
     try {
       const { data } = await axios.get(`${apiUrl}/production/machines`)
       setMachines(data || [])
-      
       if (data && data.length > 0) {
         const total = data.reduce((acc: number, m: any) => acc + (m.totalOutput || 0), 0)
         const avg = data.reduce((acc: number, m: any) => acc + (m.tauxRendement || 0), 0) / data.length
@@ -47,7 +46,6 @@ export default function AnalyticsPage() {
     fetchAnalytics()
   }, [])
 
-  // Options for TRG chart
   const machineNames = machines.map((m) => m.nom || m.code)
   const yieldRates = machines.map((m) => m.tauxRendement || 0)
   const colors = yieldRates.map((r) => r >= 80 ? '#50CD89' : r >= 50 ? '#F1BC00' : '#F1416C')
@@ -101,7 +99,6 @@ export default function AnalyticsPage() {
     }
   }
 
-  // Options for Production volume chart
   const outputValues = machines.map((m) => Math.round(m.totalOutput || 0))
   const prodChartOptions: any = {
     series: [{
@@ -175,8 +172,7 @@ export default function AnalyticsPage() {
           box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04) !important;
         }
       `}</style>
-      
-      {/* KPI row */}
+      {}
       <div className='row g-5 mb-3'>
         <div className='col-md-6'>
           <div className='card glass-card h-100 py-5 border-top border-4 border-success shadow-sm' style={{ borderTop: '4px solid #50CD89 !important' }}>
@@ -198,7 +194,7 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Production Chart */}
+      {}
       <div className='card glass-card shadow-sm border-0'>
         <div className='card-header pt-6 bg-transparent border-0'>
           <h3 className='card-title align-items-start flex-column'>
@@ -218,7 +214,7 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Yield/TRG Chart */}
+      {}
       <div className='card glass-card shadow-sm border-0'>
         <div className='card-header pt-6 bg-transparent border-0'>
           <h3 className='card-title align-items-start flex-column'>

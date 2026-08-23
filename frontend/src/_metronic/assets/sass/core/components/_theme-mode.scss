@@ -1,13 +1,13 @@
-//
-// Theme Modes
-//
 
-// Used for theme mode switching via JS
+
+
+
+
 [data-kt-theme-mode-switching='true'] * {
   transition: none !important;
 }
 
-// Light mode
+
 @include color-mode(light) {
   .theme-dark-show {
     display: none !important;
@@ -22,7 +22,7 @@
   }
 }
 
-// Dark mode
+
 @include color-mode(dark) {
   .theme-light-show {
     display: none !important;

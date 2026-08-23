@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+
 import { FC, useEffect } from 'react'
 import { useAuth } from '../../../../app/modules/auth'
 import { Languages } from './Languages'
@@ -7,7 +7,6 @@ import { KTIcon, toAbsoluteUrl } from '../../../helpers'
 const HeaderUserMenu: FC = () => {
   const { currentUser, logout } = useAuth()
 
-  // Debug: Vérification des données dans la console
   useEffect(() => {
     if (currentUser) {
       console.log('User Profile Data:', {
@@ -18,7 +17,6 @@ const HeaderUserMenu: FC = () => {
     }
   }, [currentUser]);
 
-  // Nom d'affichage
   const displayName =
     (currentUser as any)?.name ||
     [currentUser?.first_name, currentUser?.last_name].filter(Boolean).join(' ') ||
@@ -26,10 +24,7 @@ const HeaderUserMenu: FC = () => {
     currentUser?.email ||
     'User'
 
-  // Rôle principal
   const rawRole = currentUser?.roles?.[0] || 'user'
-  
-  // Logique de Badge et Libellé
   let badgeColor = 'badge-light-primary'
   let displayRoleLabel = rawRole.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 
@@ -46,7 +41,7 @@ const HeaderUserMenu: FC = () => {
       className='menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg menu-state-primary fw-bold py-4 fs-6 w-275px'
       data-kt-menu='true'
     >
-      {/* ── En-tête Utilisateur ── */}
+      {}
       <div className='menu-item px-3'>
         <div className='menu-content d-flex align-items-center px-3'>
           <div className='symbol symbol-50px me-5'>

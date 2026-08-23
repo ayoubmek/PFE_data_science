@@ -22,7 +22,7 @@ function getConfig(): Props {
   return initialState
 }
 
-// Side effect
+
 export function setLanguage(lang: string) {
   localStorage.setItem(I18N_CONFIG_KEY, JSON.stringify({selectedLang: lang}))
   window.location.reload()

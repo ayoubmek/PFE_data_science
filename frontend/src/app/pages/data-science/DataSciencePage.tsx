@@ -19,11 +19,9 @@ const fetchPredictionData = async () => {
       const dateStr = nextDate.toISOString().split('T')[0]
       const wd = nextDate.getDay()
       const isWeekend = wd === 0 || wd === 6
-      
       const arimaQty = isWeekend ? 0 : Math.round(120 * (1.0 + Math.sin(i / 2.5) * 0.12 + Math.random() * 0.1 - 0.05))
       const prophetQty = isWeekend ? 0 : Math.round(120 * (1.0 + Math.sin(i / 2.8) * 0.15 + Math.random() * 0.04 - 0.02))
       const lrQty = isWeekend ? 0 : Math.round(120 * (1.05 + i * 0.003 + Math.random() * 0.18 - 0.09))
-      
       mockPredictions.push({
         date: dateStr,
         arima_quantity: arimaQty,
@@ -32,7 +30,6 @@ const fetchPredictionData = async () => {
         working_day: !isWeekend
       })
     }
-    
     return {
       predictions: mockPredictions,
       metrics: {
@@ -48,12 +45,11 @@ const fetchPredictionData = async () => {
 export default function DataSciencePage() {
   const [selectedModel, setSelectedModel] = useState<string>('all')
 
-  // Using React Query for automatic caching & refetching optimization
   const { data: result, isLoading: loading, refetch: runPrediction } = useQuery(
     ['productionPredictions'],
     fetchPredictionData,
     {
-      staleTime: 1000 * 60 * 10, // 10 minutes cache
+      staleTime: 1000 * 60 * 10, 
     }
   )
 
@@ -67,7 +63,6 @@ export default function DataSciencePage() {
   const prophetValues = result?.predictions?.map((x: any) => Math.round(x.prophet_quantity)) || []
   const lrValues = result?.predictions?.map((x: any) => Math.round(x.lr_quantity)) || []
 
-  // Dynamic series setup
   const series: any[] = []
   if (selectedModel === 'all' || selectedModel === 'prophet') {
     series.push({
@@ -88,11 +83,10 @@ export default function DataSciencePage() {
     })
   }
 
-  // Dynamic colors
   const colorsMap: Record<string, string> = {
-    prophet: '#50CD89', // Green
-    arima: '#009EF7',    // Blue
-    linear_regression: '#7239EA' // Purple
+    prophet: '#50CD89', 
+    arima: '#009EF7',    
+    linear_regression: '#7239EA' 
   }
 
   const activeColors = selectedModel === 'all'
@@ -108,13 +102,10 @@ export default function DataSciencePage() {
   const getModelInsightsForCard = (modelKey: string, valuesArray: number[]) => {
     const total = valuesArray.reduce((a: number, b: number) => a + b, 0)
     const avg = valuesArray.length > 0 ? Math.round(total / valuesArray.length) : 0
-    
-    // Find min and max for this model specifically
     let maxVal = 0
     let maxDt = '-'
     let minVal = 999999
     let minDt = '-'
-    
     if (result?.predictions && result.predictions.length > 0) {
       result.predictions.forEach((x: any) => {
         const qty = Math.round(modelKey === 'arima' ? x.arima_quantity : modelKey === 'linear_regression' ? x.lr_quantity : x.prophet_quantity)
@@ -164,7 +155,6 @@ export default function DataSciencePage() {
         </>
       ]
     } else {
-      // prophet
       return [
         <>
           Volume total de <strong>{total.toLocaleString()} pièces</strong> avec une moyenne quotidienne de <strong>{avg.toLocaleString()} pcs</strong>.
@@ -272,8 +262,7 @@ export default function DataSciencePage() {
         </h3>
       </div>
       <div className='card-body pt-2'>
-        
-        {/* Model Selector Bar */}
+        {}
         <div className='d-flex align-items-center justify-content-between flex-wrap gap-2 mb-6 border-bottom pb-4'>
           <span className='text-gray-700 fw-bold fs-7'>Choisissez le modèle à analyser :</span>
           <div className='d-flex flex-wrap gap-2'>
@@ -328,8 +317,7 @@ export default function DataSciencePage() {
                 height={320}
               />
             </div>
-            
-            {/* Model Comparison Table */}
+            {}
             <div className='table-responsive mt-8 mb-8'>
               <h4 className='text-gray-900 fw-bold mb-4 fs-6'>Tableau de Performance et de Précision des Modèles</h4>
               <table className='table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4'>
@@ -385,7 +373,7 @@ export default function DataSciencePage() {
               </table>
             </div>
 
-            {/* AI Insights Section for all models */}
+            {}
             <div className='mt-8'>
               <h4 className='text-gray-900 fw-bold mb-6 fs-5 d-flex align-items-center'>
                 <span className='btn btn-icon btn-light-primary btn-sm rounded-circle me-3'>
@@ -394,7 +382,7 @@ export default function DataSciencePage() {
                 Analyses Prédictives & Recommandations de l'IA pour chaque modèle
               </h4>
               <div className='row g-6'>
-                {/* Prophet Card */}
+                {}
                 <div className='col-xl-4 col-md-12'>
                   <div className='card h-100 bg-light-success border border-success border-dashed p-6 rounded-3'>
                     <div className='d-flex align-items-center mb-4 border-bottom border-success border-opacity-10 pb-3'>
@@ -412,7 +400,7 @@ export default function DataSciencePage() {
                   </div>
                 </div>
 
-                {/* ARIMA Card */}
+                {}
                 <div className='col-xl-4 col-md-12'>
                   <div className='card h-100 bg-light-primary border border-primary border-dashed p-6 rounded-3'>
                     <div className='d-flex align-items-center mb-4 border-bottom border-primary border-opacity-10 pb-3'>
@@ -430,7 +418,7 @@ export default function DataSciencePage() {
                   </div>
                 </div>
 
-                {/* Linear Regression Card */}
+                {}
                 <div className='col-xl-4 col-md-12'>
                   <div className='card h-100 bg-light-warning border border-warning border-dashed p-6 rounded-3'>
                     <div className='d-flex align-items-center mb-4 border-bottom border-warning border-opacity-10 pb-3'>

@@ -1,6 +1,6 @@
-//
-// Dark Header(used by Dark Header layout only)
-//
+
+
+
 
 [data-kt-app-layout='dark-header'] {
   .app-header {
@@ -21,10 +21,8 @@
     }
   }
 
-  // General mode
   .app-header-menu {
     .menu {
-      // Menu root links
       > .menu-item {
         @include menu-link-default-state(
           $title-color: #858585,

@@ -21,20 +21,16 @@ export default function AdminMonitoringPage() {
     setLoading(true)
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
     try {
-      // 1. Fetch Machines
       const mRes = await axios.get(`${apiUrl}/production/machines`)
       setMachines(mRes.data || [])
 
-      // 2. Fetch Production Orders
       const oRes = await axios.get(`${apiUrl}/production/orders`)
       setOrders(oRes.data || [])
 
-      // 3. Check Actuator Health if available
       try {
         const hRes = await axios.get(`http://localhost:8081/actuator/health`)
         setSystemHealth((prev: any) => ({ ...prev, backend: hRes.data.status || 'UP' }))
       } catch (e) {
-        // Fallback status
       }
     } catch (err) {
       console.warn('Backend unavailable, rendering mock monitoring telemetry:', err)
@@ -52,7 +48,6 @@ export default function AdminMonitoringPage() {
         { id: 103, reference: 'OP-2026-003', article: 'Support Moteur S8', quantitePrevue: 750, quantiteRealisee: 200, statut: 'EN_RETARD' },
       ])
     } finally {
-      // Generate initial telemetry logs
       setLogs([
         { id: 1, timestamp: new Date().toLocaleTimeString(), module: 'PRODUCTION', action: 'START_ORDER', user: 'Imen (Dev)', details: 'Lancement de l\'ordre OP-2026-001 sur M-01', level: 'INFO' },
         { id: 2, timestamp: new Date().toLocaleTimeString(), module: 'SECURITY', action: 'JWT_AUTH', user: 'Admin', details: 'Connexion administrateur réussie via IP 192.168.1.45', level: 'SUCCESS' },
@@ -68,7 +63,6 @@ export default function AdminMonitoringPage() {
     fetchData()
   }, [])
 
-  // Calculated Metrics
   const totalProduction = machines.reduce((acc, m) => acc + (m.totalOutput || 0), 0)
   const avgTRG = machines.length > 0
     ? Math.round(machines.reduce((acc, m) => acc + (m.tauxRendement || 0), 0) / machines.length * 10) / 10
@@ -79,7 +73,6 @@ export default function AdminMonitoringPage() {
   const maintCount = machines.filter(m => m.statut === 'EN_MAINTENANCE').length
   const panneCount = machines.filter(m => m.statut === 'EN_PANNE').length
 
-  // Chart setup
   const machineCodes = machines.map(m => m.code || 'M')
   const trgValues = machines.map(m => m.tauxRendement || 0)
 
@@ -107,7 +100,7 @@ export default function AdminMonitoringPage() {
 
   return (
     <div className='d-flex flex-column gap-7'>
-      {/* HEADER BAR */}
+      {}
       <div className='card glass-card border-0 shadow-sm p-6 rounded-4'>
         <div className='d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4'>
           <div>
@@ -134,9 +127,9 @@ export default function AdminMonitoringPage() {
         </div>
       </div>
 
-      {/* ── SECTION 1: SYSTEM HEALTH & ACTUATOR METRICS ── */}
+      {}
       <div className='row g-5'>
-        {/* Backend API */}
+        {}
         <div className='col-12 col-sm-6 col-xl-3'>
           <div className='card bg-light-primary border-0 p-5 rounded-4 h-100'>
             <div className='d-flex justify-content-between align-items-center mb-3'>
@@ -148,7 +141,7 @@ export default function AdminMonitoringPage() {
           </div>
         </div>
 
-        {/* Database SQL Server */}
+        {}
         <div className='col-12 col-sm-6 col-xl-3'>
           <div className='card bg-light-success border-0 p-5 rounded-4 h-100'>
             <div className='d-flex justify-content-between align-items-center mb-3'>
@@ -160,7 +153,7 @@ export default function AdminMonitoringPage() {
           </div>
         </div>
 
-        {/* FastAPI ML Service */}
+        {}
         <div className='col-12 col-sm-6 col-xl-3'>
           <div className='card bg-light-info border-0 p-5 rounded-4 h-100'>
             <div className='d-flex justify-content-between align-items-center mb-3'>
@@ -172,7 +165,7 @@ export default function AdminMonitoringPage() {
           </div>
         </div>
 
-        {/* Real-time SSE Stream */}
+        {}
         <div className='col-12 col-sm-6 col-xl-3'>
           <div className='card bg-light-warning border-0 p-5 rounded-4 h-100'>
             <div className='d-flex justify-content-between align-items-center mb-3'>
@@ -185,9 +178,9 @@ export default function AdminMonitoringPage() {
         </div>
       </div>
 
-      {/* ── SECTION 2: PRODUCTION TELEMETRY SUMMARY & TRG CHART ── */}
+      {}
       <div className='row g-5'>
-        {/* Machine Fleet Summary */}
+        {}
         <div className='col-12 col-xl-5'>
           <div className='card border-0 shadow-sm p-6 rounded-4 h-100'>
             <h4 className='fw-bolder text-gray-900 mb-4 d-flex align-items-center gap-2'>
@@ -243,7 +236,7 @@ export default function AdminMonitoringPage() {
           </div>
         </div>
 
-        {/* TRG Yield Chart per Machine */}
+        {}
         <div className='col-12 col-xl-7'>
           <div className='card border-0 shadow-sm p-6 rounded-4 h-100'>
             <div className='d-flex justify-content-between align-items-center mb-4'>
@@ -262,7 +255,7 @@ export default function AdminMonitoringPage() {
         </div>
       </div>
 
-      {/* ── SECTION 3: AUDIT LOGS & EVENT FEED ── */}
+      {}
       <div className='card border-0 shadow-sm p-6 rounded-4'>
         <div className='d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4 mb-6'>
           <div>
@@ -273,7 +266,7 @@ export default function AdminMonitoringPage() {
             <div className='text-gray-500 fs-7'>Traçabilité complète des actions utilisateur, événements machines et alertes</div>
           </div>
 
-          {/* Module Filter Pills */}
+          {}
           <div className='d-flex gap-2 flex-wrap'>
             {['ALL', 'PRODUCTION', 'SECURITY', 'MACHINE', 'STOCK', 'ML_SERVICE'].map(mod => (
               <button

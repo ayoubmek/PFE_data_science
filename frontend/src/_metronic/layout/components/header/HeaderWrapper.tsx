@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import { KTIcon, toAbsoluteUrl } from '../../../helpers'

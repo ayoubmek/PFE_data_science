@@ -1,8 +1,8 @@
-//
-// Scroll
-//
 
-// Customize native scrollbars only for desktop mode
+
+
+
+
 @include media-breakpoint-up(lg) {
   main,
   span,
@@ -10,10 +10,8 @@
   ul,
   pre,
   div {
-    // Firefox
     scrollbar-width: thin;
 
-    // Webkit
     &::-webkit-scrollbar {
       width: var(--#{$prefix}scrollbar-size);
       height: var(--#{$prefix}scrollbar-size);
@@ -27,7 +25,6 @@
       @include border-radius(var(--#{$prefix}scrollbar-size));
     }
 
-    // Default color
     @include scrollbar-color(
       var(--#{$prefix}scrollbar-color),
       var(--#{$prefix}scrollbar-hover-color)
@@ -35,14 +32,13 @@
   }
 }
 
-// Scroll
+
 .scroll,
 .hover-scroll,
 .hover-scroll-overlay {
   overflow: scroll;
   position: relative;
 
-  // Tablet & mobile modes
   @include media-breakpoint-down(lg) {
     overflow: auto;
   }
@@ -54,7 +50,6 @@
   overflow-x: scroll;
   position: relative;
 
-  // Tablet & mobile modes
   @include media-breakpoint-down(lg) {
     overflow-x: auto;
   }
@@ -66,7 +61,6 @@
   overflow-y: scroll;
   position: relative;
 
-  // Tablet & mobile modes
   @include media-breakpoint-down(lg) {
     overflow-y: auto;
   }
@@ -81,7 +75,7 @@
   @include scrollbar-color(transparent, var(--#{$prefix}scrollbar-color));
 }
 
-// Utilities
+
 .scroll-ps {
   padding-left: var(--#{$prefix}scrollbar-size) !important;
 }

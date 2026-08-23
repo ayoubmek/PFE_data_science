@@ -3,11 +3,10 @@ const fs = require('fs');
 const targetFile = 'c:\\Users\\ayoub\\OneDrive\\Documents\\PFEImen\\Rapport\\build_rapport.js';
 let content = fs.readFileSync(targetFile, 'utf8');
 
-// Normalize newlines to LF for consistency in multiline search
+
 content = content.replaceAll('\r\n', '\n');
 
 const replacements = [
-  // 1. Introduction Générale body paragraphs
   {
     target: `        body("Dans le paysage économique actuel, l'essor fulgurant du commerce électronique et la transition numérique des flux d'information imposent aux acteurs de la distribution commerciale une révision profonde de leurs méthodes de gestion interne. Ce processus de transformation est devenu un prérequis incontournable pour pérenniser leur compétitivité, accroître l'efficacité de leurs processus de livraison et répondre aux attentes d'immédiateté des consommateurs. Au cœur de cette dynamique, la logistique s'impose à la fois comme un défi opérationnel majeur et comme un levier d'optimisation central."),
         pb(),
@@ -20,7 +19,6 @@ const replacements = [
         pb(),
         body("Pour y parvenir, nous avons développé la plateforme intelligente Nexora. Celle-ci intègre un back-end d'API REST robuste avec Spring Boot 3 (Java 17) connecté à une base SQL Server centralisée, couplé à une application web monopage (SPA) réactive sous React.js pour les gestionnaires et opérateurs d'atelier. De plus, elle intègre un service de Machine Learning et Data Science sous FastAPI (Python 3.10) pour les analyses prédictives (ARIMA, Prophet), le clustering K-Means et la détection d'anomalies (Isolation Forest)."),`
   },
-  // 2. Introduction Générale bullet list of chapters
   {
     target: `        bullet("**Chapitre 1 : Cadre Général du Projet** – Ce chapitre présente le contexte du projet, l'organisme d'accueil (la société Arkan), le diagnostic de l'existant avec une étude comparative des solutions du marché à l'échelle nationale et internationale, puis détaille le cadre méthodologique Scrum [1] [3] et le langage UML [15] retenu."),
         bullet("**Chapitre 2 : Analyse et Spécification des Besoins** – Il formalise les acteurs et leurs rôles (matrice de contrôle d'accès RBAC), détaille les exigences fonctionnelles (les fonctionnalités et User Stories) et non fonctionnelles, puis décrit l'architecture globale ainsi que les environnements de développement et de déploiement sécurisés."),
@@ -37,7 +35,6 @@ const replacements = [
         bullet("**Chapitre 6 : Sprint 4 – Intelligence Artificielle et Data Science** – Il décrit le service FastAPI (Python) hébergeant les modèles prédictifs de production et de stock (ARIMA, Prophet), la segmentation ABC des articles via K-Means et la détection d'anomalies de fonctionnement via Isolation Forest."),
         bullet("**Chapitre 7 : Sprint 5 – Administration, Supervision et Monitoring** – Ce chapitre présente la console technique de monitoring d'activité (ActivityLog) et le centre d'historisation des notifications d'alertes système."),`
   },
-  // 3. Chapter 1 Intro and Cadre
   {
     target: `        title2("1.1 Introduction"),
         body("Ce premier chapitre pose le contexte général de ce projet de fin d'études en décrivant l'organisme d'accueil, la société Arkan, ainsi que le cadre opérationnel de notre travail. Nous établissons un diagnostic de l'existant afin d'identifier les problématiques métiers et de justifier la réalisation d'une solution logicielle personnalisée. Enfin, nous présentons la démarche de gestion de projet retenue ainsi que les standards de modélisation choisis pour mener à bien la conception."),
@@ -76,7 +73,6 @@ const replacements = [
         bullet("La gestion de l'inventaire, comprenant la traçabilité des entrées, sorties et ajustements de stock."),
         bullet("L'analyse prédictive et l'aide à la décision concernant l'évolution des volumes de production et de stock future."),`
   },
-  // 4. Chapter 1 Table 1.1 Fiche d'identité
   {
     target: `        makeTable(
           ["Caractéristique", "Détail de l'entreprise"],
@@ -105,7 +101,6 @@ const replacements = [
           [3500, 6000]
         ),`
   },
-  // 5. Chapter 1 Organigramme and Study of existing system
   {
     target: `        title3("1.2.4 Organigramme d'Arkan"),
         body("La structure organisationnelle d'Arkan s'articule autour de départements clés garantissant la fluidité opérationnelle du service :"),
@@ -140,7 +135,6 @@ const replacements = [
         bullet("**Absence de calcul de rendement (TRG)** : le TRG des postes de travail n'est pas quantifié automatiquement, rendant difficile l'évaluation de l'efficacité globale de l'atelier."),
         bullet("**Pas de vision prédictive** : la planification des réapprovisionnements est réactive, ce qui provoque régulièrement des ruptures de stock critiques ou du surstockage coûteux."),`
   },
-  // 6. Chapter 1 Market study and critique
   {
     target: `        title3("1.3.2 Étude des Solutions Existantes sur le Marché"),
         body("Afin de justifier le développement d'une solution personnalisée, il convient de dresser un bilan comparatif des solutions logistiques (TMS et middlewares e-commerce) existantes sur le marché, tant au niveau international qu'au niveau national (Tunisie) :"),
@@ -185,7 +179,6 @@ const replacements = [
         bullet("**Silo de données d'inventaire** : les stocks ne sont pas reliés dynamiquement à la consommation réelle d'atelier, ce qui entraîne de fréquentes ruptures de matières premières."),
         bullet("**Absence d'anticipation** : le manque de modèles prédictifs empêche de planifier efficacement la production future et l'approvisionnement."),`
   },
-  // 7. Chapter 1 Table 1.3 comparative study
   {
     target: `        makeTable(
           ["Solution", "Intégration 3PL locale", "Automatisation & CMS", "Calcul Taxes & TVA", "Coût"],
@@ -206,7 +199,6 @@ const replacements = [
           [2000, 1800, 1800, 2000, 1860]
         ),`
   },
-  // 8. Chapter 1 Proposed Solution
   {
     target: `        title3("1.3.4 Solution Proposée"),
         body("Face aux limites identifiées lors de la critique de l'existant, nous proposons la mise en place d'une plateforme d'information sur mesure, centralisant l'intégralité des flux logistiques et commerciaux d'Arkan."),
@@ -233,7 +225,6 @@ const replacements = [
         bullet("Garantir la traçabilité des modifications critiques en consignant l'intégralité des actions au sein d'une console technique (ActivityLog)."),
         bullet("Sécuriser les transactions de la plateforme par jetons JWT et contrôle d'accès basé sur les rôles (RBAC)."),`
   },
-  // 9. Chapter 2 Introduction & Actors
   {
     target: `        title1("Chapitre 2 : Analyse et Spécification des Besoins"),
         title2("2.1 Introduction"),
@@ -275,7 +266,6 @@ const replacements = [
           [2800, 6560]
         ),`
   },
-  // 10. Non functional requirements
   {
     target: `        title3("2.2.3 Les besoins non fonctionnels"),
         bullet("Performance : maintien d'un temps de réponse des API inférieur à 500 ms et optimisation des requêtes MySQL par indexation."),
@@ -292,14 +282,12 @@ const replacements = [
         bullet("Ergonomie et utilisabilité : interface React dynamique et adaptative (Bootstrap/CSS personnalisé), avec tableaux de bord réactifs, visualisations d'IA interactives (ApexCharts) et notifications visuelles clairs."),
         bullet("Maintenabilité : code structuré selon les standards Spring Boot (couches controller, service, repository) et typage rigoureux du code React en TypeScript."),`
   },
-  // 11. Diagram descriptions
   {
     target: `        title2("2.3 Diagramme de Cas d'Utilisation Global"),
         body("Le diagramme de cas d'utilisation global modélise l'ensemble des interactions entre les six profils d'utilisateurs (Administrateur, Service Vendeur, Vendeur, Service Logistique, Service Client et Service Finance) et les cas d'utilisation majeurs de la plateforme. Il fournit une vue d'ensemble de la couverture fonctionnelle du système."),`,
     replace: `        title2("2.3 Diagramme de Cas d'Utilisation Global"),
         body("Le diagramme de cas d'utilisation global modélise l'ensemble des interactions entre les trois profils d'utilisateurs (Administrateur, Manager et Opérateur) et les cas d'utilisation majeurs de la plateforme Nexora. Il fournit une vue d'ensemble de la couverture fonctionnelle du système."),`
   },
-  // 12. Sprint Planning Table
   {
     target: `        makeTable(
           ["Sprint", "Thématique principale", "Nb US", "Estimation (SP)", "Durée", "Type"],
@@ -324,7 +312,6 @@ const replacements = [
           [1000, 3000, 700, 1000, 1400, 1200]
         ),`
   },
-  // 13. Product Backlog indicator summary
   {
     target: `        makeTable(
           ["Indicateur", "Valeur"],
@@ -353,7 +340,6 @@ const replacements = [
           [4480, 4880]
         ),`
   },
-  // 14. Physical Architecture descriptions
   {
     target: `        title2("2.6 Architecture Proposée"),
         title3("2.6.1 Architecture Physique"),
@@ -370,7 +356,6 @@ const replacements = [
         bullet("**Serveur de Machine Learning (FastAPI)** : Exécute le service Python sous Uvicorn. Il interroge la base SQL Server pour collecter les historiques et expose des endpoints REST permettant de fournir à l'API Spring Boot et au client React les prévisions d'IA (ARIMA/Prophet), les segmentations K-Means et les anomalies Isolation Forest."),
         bullet("**Interface Front-end (React.js SPA)** : Exécutée au sein du navigateur de l'utilisateur (manager ou opérateur), elle communique via HTTPS avec l'API Spring Boot (pour les actions métiers de gestion et de traçabilité) et FastAPI (pour le rendu dynamique des graphiques analytiques d'IA)."),`
   },
-  // 15. Logical Architecture descriptions
   {
     target: `        title3("2.6.2 Architecture Logique"),
         body("La structuration interne de notre système repose sur une organisation en couches logiques indépendantes. Cette répartition facilite la maintenance du code source et garantit une séparation claire des responsabilités :"),
@@ -388,7 +373,6 @@ const replacements = [
         bullet("**Couche Logique & Services (Spring Services / Python Modules)** : Implémente le cœur fonctionnel du système (calcul en direct du TRG, affectations de production, alertes d'inventaire et exécutions d'algorithmes de machine learning)."),
         bullet("**Couche d'Accès aux Données (Spring Data JPA / SQL Server Repositories)** : Abstrait la persistance des entités Java via le framework Hibernate et gère la connexion transactionnelle sécurisée vers la base Microsoft SQL Server."),`
   },
-  // 16. Technical Stack Table (original Laravel table)
   {
     target: `        title3("2.6.3 Schéma architectural"),
         body("L'architecture globale de la plateforme Nexora décrit la répartition des composants applicatifs et les flux d'échange d'informations entre l'API Spring Boot, l'interface web React, le service FastAPI d'Intelligence Artificielle et la base de données SQL Server."),
@@ -428,7 +412,6 @@ const replacements = [
           [2200, 2600, 4560]
         ),`
   },
-  // 17. Outils Table 2.8
   {
     target: `        makeTable(
           ["Outil", "Usage"],
@@ -454,17 +437,14 @@ const replacements = [
           [2400, 6960]
         ),`
   },
-  // 18. Global Classes text
   {
     target: `        body("Ce schéma conceptuel présente l'organisation logique des informations au sein d'Nexora en structurant les entités métiers avec leurs propriétés, opérations et relations d'association. Les éléments clés de ce modèle reposent sur les classes suivantes : Commande, LigneCommande, Bordereau, Facture, Produit, Client, Utilisateur, DemandeApprobation et Historique."),`,
     replace: `        body("Ce schéma conceptuel présente l'organisation logique des informations au sein de la plateforme Nexora en structurant les entités métiers avec leurs relations d'association. Les éléments clés de ce modèle reposent sur les classes de production et de stock : Utilisateur, Role, Machine, MachineStop, ProductionOrder, Article, StockMovement et KpiLog."),`
   },
-  // 19. Architecture logicielle
   {
     target: `        body("La plateforme Nexora adopte une architecture client-serveur découplée reposant sur une séparation stricte entre le back-end (Laravel exposant une API REST) et le front-end (React.js SPA et application mobile Flutter). Les communications entre les composants s'effectuent via des requêtes HTTP véhiculant des messages JSON et sécurisées par des jetons JWT. Des tâches planifiées orchestrent les synchronisations automatiques avec le site e-commerce Magento et les transporteurs partenaires."),`,
     replace: `        body("La plateforme Nexora adopte une architecture microservices découplée reposant sur une séparation stricte entre le back-end (Spring Boot 3 exposant l'API REST), le front-end (React.js SPA) et le microservice d'IA (FastAPI sous Python). Les communications s'effectuent via des requêtes HTTP véhiculant des messages JSON et sécurisées par des jetons d'authentification JWT."),`
   },
-  // 20. Tech cards removal (Laravel / Flutter / Magento cards)
   {
     target: `        ...techCard(1, "Laravel 12.0",
           "logos/laravel.png",
@@ -502,7 +482,7 @@ const replacements = [
           "Elle permet de stocker le catalogue de produits, d'enregistrer les commandes clients et de les transmettre à notre application Nexora via des API REST."
         ),`,
     replace: `        ...techCard(1, "Spring Boot 3 (Java 17)",
-          "logos/react.png", // fallback placeholder
+          "logos/react.png", 
           "Spring Boot 3 est le framework d'API d'entreprise robuste choisi pour la logique métier et la sécurité.",
           "Dans notre architecture, il sert de passerelle REST principale connectée à la base SQL Server et expose les endpoints pour le front-end React."
         ),
@@ -512,12 +492,12 @@ const replacements = [
           "Il permet aux managers et opérateurs de piloter la production, de consulter les stocks et de visualiser les graphiques interactifs des prévisions IA."
         ),
         ...techCard(3, "FastAPI (Python 3.10)",
-          "logos/react.png", // fallback placeholder
+          "logos/react.png", 
           "FastAPI est un framework Python haute performance dédié aux services de Machine Learning.",
           "Dans notre application, il héberge les algorithmes de prévision (Prophet, ARIMA, Régression Linéaire), de clustering (K-Means) et de détection d'anomalies (Isolation Forest)."
         ),
         ...techCard(4, "MS SQL Server",
-          "logos/powerbi.png", // fallback placeholder
+          "logos/powerbi.png", 
           "Microsoft SQL Server est la base de données relationnelle centralisée (dbDWH) hébergeant les données transactionnelles.",
           "Il garantit la persistance des utilisateurs, des machines, des ordres de production, des stocks et de la traçabilité des actions."
         ),
@@ -527,12 +507,11 @@ const replacements = [
           "Ils permettent un travail collaboratif rigoureux et garantissent la traçabilité des modifications apportées aux trois microservices."
         ),
         ...techCard(6, "Uvicorn ASGI",
-          "logos/react.png", // fallback placeholder
+          "logos/react.png", 
           "Uvicorn fait office de serveur ASGI léger pour exécuter le service de Machine Learning FastAPI sous Python.",
           "Il assure une communication ultra-rapide en JSON pour transmettre les analyses prédictives et les indicateurs dynamiques au client React."
         ),`
   },
-  // 21. Deployment steps (MySQL to SQL Server/Uvicorn)
   {
     target: `        title2("2.8 Déploiement de l'Application"),
         body("La mise en production de la solution applicative sur notre serveur d'hébergement distant s'appuie sur le protocole chiffré SSH (Secure Shell). Ce canal d'administration sécurisé permet d'exécuter à distance les commandes systèmes requises pour le déploiement."),
@@ -556,14 +535,12 @@ const replacements = [
         bullet("Configuration des variables d'environnement de connexion SQL Server et endpoints d'IA FastAPI."),
         bullet("Exécution et validation des tests d'intégration unitaires finaux."),`
   },
-  // 22. Chapter 2 Conclusion
   {
     target: `        title2("2.9 Conclusion"),
         conclusionBox("En conclusion, la phase d'analyse des besoins et de conception globale a permis de définir une architecture robuste pour la plateforme Nexora. L'articulation autour du socle Laravel, React, MySQL et JWT garantit la performance, la sécurité et l'évolutivité du système. Les choix technologiques adoptés couvrent de manière cohérente l'ensemble des besoins de l'application (back-end, front-end, mobile, analytique et gestion de code), tandis que le déploiement sécurisé via SSH assure une exploitation sereine. Le chapitre suivant détaille l'implémentation pratique de cette architecture sprint par sprint."),`,
     replace: `        title2("2.9 Conclusion"),
         conclusionBox("En conclusion, la phase d'analyse des exigences et de conception globale a permis de définir une architecture robuste pour la plateforme Nexora. L'articulation de l'API Spring Boot 3, de l'interface web React, du service FastAPI (Python) et de la base SQL Server garantit des temps de réponse faibles, une sécurité JWT rigoureuse et une évolutivité fonctionnelle. Le chapitre suivant détaille l'implémentation de cette architecture itération par itération."),`
   },
-  // 23. Chapter 3 (Sprint 1) Descriptions (Laravel to Spring Boot, 6 profiles to 3 roles)
   {
     target: `          "Ce diagramme de séquence modélise le cas d'utilisation « S'authentifier » : il illustre les échanges entre l'utilisateur, le front-end React et l'API Laravel pour la validation des identifiants, la génération du jeton JWT et la redirection vers le tableau de bord.",
           "Ce diagramme représente le déroulement général du processus de connexion et de vérification d'accès. Il permet de visualiser les étapes de validation des informations d'identification et la redirection automatique selon le profil.",
@@ -582,11 +559,8 @@ const replacements = [
             ["Tests d'intégration", "Contrôle d'accès et restrictions des routes API selon les rôles", "Spring Security", "✓ Accès bloqué aux non-autorisés"],
           ],`
   },
-  // 24. Chapter 4 (Sprint 2 - Commandes et Transporteurs rewrite)
   {
-    target: `        // ══════════════════════════════════════════════════
-        // CHAPITRE 4 — SPRINT 2 : Commandes et Transporteurs
-        // ══════════════════════════════════════════════════
+    target: `        
         title1("Chapitre 4 : Sprint 2 – Gestion des Commandes et Intégration des Transporteurs"),
         ...sprintSection(
           2, 4, "Gestion des Commandes et Intégration des Transporteurs",
@@ -625,9 +599,7 @@ const replacements = [
             ["3.15", "En tant que service logistique, je veux consulter les journaux de synchronisation avec les transporteurs", "Développement d'une interface de suivi des journaux de requêtes et d'analyse des erreurs de synchronisation", "3", "Terminé"],
             ["3.16", "En tant que service logistique, je veux consulter les rapports logistiques afin d'analyser les performances de livraison", "Développement de l'interface de consultation des rapports logistiques des performances de livraison par transporteur", "5", "Terminé"],
           ],`,
-    replace: `        // ══════════════════════════════════════════════════
-        // CHAPITRE 4 — SPRINT 2 : Gestion de Production et Suivi des Machines
-        // ══════════════════════════════════════════════════
+    replace: `        
         title1("Chapitre 4 : Sprint 2 – Gestion de Production et Suivi des Machines"),
         ...sprintSection(
           2, 4, "Gestion de Production et Suivi des Machines",
@@ -640,7 +612,6 @@ const replacements = [
             ["2.6", "En tant que manager, je veux enregistrer et suivre les temps d'arrêt des machines afin d'analyser les pannes", "Développement de l'historique et de la comptabilisation des durées de pannes", "3", "Terminé"],
           ],`
   },
-  // 25. Chapter 8 General Conclusion paragraphs
   {
     target: `        body("Ce travail de stage effectué chez Arkan s'est concrétisé par la réalisation de la plateforme Nexora, un écosystème logiciel regroupant un portail d'administration web et une application mobile pour les vendeurs partenaires. Ce dispositif centralisé répond à un impératif stratégique fort : unifier, fluidifier et automatiser le suivi des flux logistiques et des transactions financières, substituant ainsi des outils isolés par une chaîne d'information cohérente et automatisée."),
         pb(),
@@ -657,7 +628,6 @@ const replacements = [
         pb(),
         body("Sur le plan personnel, ce projet a constitué une excellente opportunité de consolider mes compétences en génie logiciel, en développement full-stack d'entreprise (Spring/React) et en intégration de modèles d'Intelligence Artificielle. Il m'a permis de maîtriser les cycles de vie des projets industriels et de comprendre concrètement les défis de la gestion d'atelier et de la transition vers l'industrie 4.0."),`
   },
-  // 26. Table 8.2 tests sprints list
   {
     target: `            ["Sprint 1 – Sécurité & Accès", "15", "12", "5", "31", "1", "32", "96,9 %"],
             ["Sprint 2 – Commandes & Transporteurs", "32", "18", "6", "52", "4", "56", "92,9 %"],

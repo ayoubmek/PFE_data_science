@@ -129,7 +129,6 @@ export interface IToolbar extends ILayoutComponent {
     attributes?: {[attrName: string]: string}
   }
 
-  // Custom settings
   filterButton?: boolean
   daterangepickerButton?: boolean
   primaryButton?: boolean
@@ -139,8 +138,8 @@ export interface IToolbar extends ILayoutComponent {
 }
 
 export interface IMain extends ILayoutComponent {
-  type?: 'blank' | 'default' | 'none' // Set layout type: default|blank|none
-  pageBgWhite?: boolean // Set true if page background color is white
+  type?: 'blank' | 'default' | 'none' 
+  pageBgWhite?: boolean 
   iconType: 'duotone' | 'solid' | 'outline'
 }
 
@@ -155,8 +154,8 @@ export interface IGeneral extends ILayoutComponent {
   layoutType?: 'default' | 'blank'
   mode?: 'light' | 'dark' | 'system'
   rtl?: boolean
-  primaryColor?: string // Used in email templates
-  pageBgWhite?: boolean // Set true if page background color is white
+  primaryColor?: string 
+  pageBgWhite?: boolean 
   pageWidth?: 'default' | 'fluid' | 'fixed'
 }
 

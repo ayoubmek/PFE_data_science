@@ -24,7 +24,7 @@ const PageTitle = () => {
         }
       )}
     >
-      {/* begin::Title */}
+      {}
       {config.app?.pageTitle?.display && pageTitle && (
         <h1
           className={clsx('page-heading d-flex text-dark fw-bold fs-3 my-0', {
@@ -47,7 +47,7 @@ const PageTitle = () => {
           )}
         </h1>
       )}
-      {/* end::Title */}
+      {}
 
       {pageBreadcrumbs &&
         pageBreadcrumbs.length > 0 &&

@@ -1,6 +1,6 @@
-//
-// Root
-//
+
+
+
 
 html {
   font-family: sans-serif;
@@ -18,12 +18,10 @@ body {
   font-weight: $font-weight-base;
   font-family: $font-family-sans-serif;
 
-  // Tablet mode
   @include media-breakpoint-down(lg) {
     font-size: $root-font-size-lg !important;
   }
 
-  // Mobile mode
   @include media-breakpoint-down(md) {
     font-size: $root-font-size-md !important;
   }
@@ -44,7 +42,7 @@ canvas {
   user-select: none;
 }
 
-// Angular integration
+
 router-outlet {
   display: none;
 }

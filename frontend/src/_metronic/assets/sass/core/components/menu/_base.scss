@@ -1,13 +1,13 @@
-//
-// Menu Base
-//
 
-// Menu group
+
+
+
+
 .menu-group {
   display: flex;
 }
 
-// Menu & wrapper
+
 .menu,
 .menu-wrapper {
   display: flex;
@@ -16,14 +16,14 @@
   list-style: none;
 }
 
-// Sub inner
+
 .menu-inner {
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-// Sub menu
+
 .menu-sub {
   display: none;
   padding: 0;
@@ -32,12 +32,11 @@
   flex-direction: column;
 }
 
-// Menu item
+
 .menu-item {
   display: block;
   padding: $menu-item-padding-y $menu-item-padding-x;
 
-  // Menu Link
   .menu-link {
     cursor: pointer;
     display: flex;
@@ -101,20 +100,17 @@
         will-change: transform;
         background-size: 100% 100%;
         @include svg-bg-icon(arrow-start, var(--#{$prefix}text-muted));
-        /*rtl:begin:remove*/
         @include svg-bg-icon(arrow-end, var(--#{$prefix}text-muted));
-        /*rtl:end:remove*/
       }
     }
   }
 
-  // Menu Content
   .menu-content {
     padding: $menu-link-padding-y $menu-link-padding-x;
   }
 }
 
-// Accordion arrows
+
 .menu-item {
   &.show {
     .menu-link {
@@ -126,17 +122,17 @@
   }
 }
 
-// Center alignment
+
 .menu-center {
   justify-content: center;
 }
 
-// Heading
+
 .menu-heading {
   color: var(--#{$prefix}menu-heading-color);
 }
 
-// Responsive
+
 @each $direction in (up, down) {
   @each $breakpoint in map-keys($grid-breakpoints) {
     $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
@@ -146,7 +142,6 @@
     }
 
     @include media-breakpoint-direction($direction, $breakpoint) {
-      // Accordion arrow
       .menu-item.menu#{$infix}-accordion {
         .menu-arrow:after {
           @include menu-link-arrow-rotate(90deg, -90deg);
@@ -162,7 +157,6 @@
         }
       }
 
-      // Sub dropdown
       .menu-sub#{$infix}-dropdown {
         display: none;
         border-radius: $menu-dropdown-border-radius;
@@ -170,23 +164,19 @@
         box-shadow: var(--#{$prefix}menu-dropdown-box-shadow);
         z-index: $menu-dropdown-z-index;
 
-        // Dropdown show
         .show.menu-dropdown > &,
         &.menu.show,
         &.show[data-popper-placement] {
           display: flex;
           will-change: transform;
 
-          // Animation
           @if ($menu-dropdown-animation == true) {
-            // Move up
             animation: menu-sub-dropdown-animation-fade-in #{$menu-dropdown-animation-speed} ease 1,
               menu-sub-dropdown-animation-move-up #{$menu-dropdown-animation-speed} ease 1;
           }
         }
       }
 
-      // Sub accordion
       .menu-sub#{$infix}-accordion {
         display: none;
 
@@ -196,22 +186,18 @@
         }
       }
 
-      // Sub indention
       .menu-sub#{$infix}-indention {
         @include menu-sub-indention($menu-accordion-indention);
 
-        // Active link
         .menu-item .menu-item .menu-link.active {
           margin-right: $menu-link-padding-x;
         }
       }
 
-      // Inline
       .menu#{$infix}-inline {
         display: flex;
       }
 
-      // Reset link left & right paddings of level 1 menu links
       .menu#{$infix}-fit {
         > .menu-item {
           > .menu-content,
@@ -242,21 +228,18 @@
         }
       }
 
-      // Border radiuses
       .menu#{$infix}-rounded {
         .menu-link {
           @include border-radius($menu-link-border-radius);
         }
       }
 
-      // Border radiuses
       .menu#{$infix}-pill {
         .menu-link {
           border-radius: 50px;
         }
       }
 
-      // Reset border radiuses
       .menu#{$infix}-rounded-0 {
         .menu-link {
           border-radius: 0 !important;
@@ -266,7 +249,7 @@
   }
 }
 
-// Link indention
+
 .menu-link-indention {
   .menu-item {
     padding-top: 0;
@@ -276,7 +259,7 @@
   @include menu-link-indention($menu-accordion-indention, $menu-link-padding-x);
 }
 
-// Menu animations
+
 @keyframes menu-sub-dropdown-animation-fade-in {
   from {
     opacity: 0;

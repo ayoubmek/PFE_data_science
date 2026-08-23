@@ -16,7 +16,6 @@ public class SseService {
     private final CopyOnWriteArrayList<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
     public SseEmitter subscribe() {
-        // 30 minutes timeout
         SseEmitter emitter = new SseEmitter(30 * 60 * 1000L);
         this.emitters.add(emitter);
 

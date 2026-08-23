@@ -42,55 +42,44 @@ class ThemeMode {
   }
 
   public setMode = (mode: Mode, menuMode: Mode | ''): void => {
-    // Check input values
     if (mode !== 'light' && mode !== 'dark') {
       return
     }
 
-    // Get param names
     const modeParam: string = this.getParamName('value')
     const menuModeParam: string = this.getParamName('menu')
 
-    // Reset mode if system mode was changed
     if (menuMode === 'system') {
       if (this.getSystemMode() !== mode) {
         mode = this.getSystemMode()
       }
     }
 
-    // Check menu mode
     if (!menuMode) {
       menuMode = mode
     }
 
-    // Read active menu mode value
     const activeMenuItem: HTMLElement | null =
       this.menu?.querySelector('[data-kt-element="mode"][data-kt-value="' + menuMode + '"]') || null
 
-    // Enable switching state
     this.element?.setAttribute('data-kt-theme-mode-switching', 'true')
 
-    // Set mode to the target element
     this.element?.setAttribute('data-bs-theme', mode)
 
-    // Disable switching state
     const self = this
     setTimeout(function () {
       self.element?.removeAttribute('data-kt-theme-mode-switching')
     }, 300)
 
-    // Store mode value in storage
     if (localStorage) {
       localStorage.setItem(modeParam, mode)
     }
 
-    // Set active menu item
     if (activeMenuItem && localStorage) {
       localStorage.setItem(menuModeParam, menuMode)
       this.setActiveMenuItem(activeMenuItem)
     }
 
-    // Flip images
     this.flipImages()
   }
 
@@ -207,5 +196,5 @@ class ThemeMode {
 }
 
 const ThemeModeComponent = new ThemeMode()
-// Initialize app on document ready => ThemeModeComponent.init()
+
 export {ThemeModeComponent}

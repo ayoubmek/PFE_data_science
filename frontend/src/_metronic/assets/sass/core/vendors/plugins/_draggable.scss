@@ -1,6 +1,6 @@
-//
-// Draggable plugin customization: https://shopify.github.io/draggable
-//
+
+
+
 
 .draggable {
   transition: opacity 0.3s ease;
@@ -21,7 +21,6 @@
     opacity: 0 !important;
   }
 
-  // Handle
   .draggable-handle {
     cursor: move;
   }

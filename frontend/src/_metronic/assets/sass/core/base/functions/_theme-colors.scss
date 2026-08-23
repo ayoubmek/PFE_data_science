@@ -1,6 +1,6 @@
-//
-// Bootstrap extended functions
-//
+
+
+
 
 @function theme-inverse-color($key: 'primary') {
   @return get($theme-inverse-colors, $key);

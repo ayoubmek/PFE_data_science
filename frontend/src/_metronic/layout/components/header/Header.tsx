@@ -62,7 +62,6 @@ const updateDOM = (config: ILayout) => {
 
   setTimeout(() => {
     const headerElement = document.getElementById('kt_app_header')
-    // header
     if (headerElement) {
       const headerAttributes = headerElement
         .getAttributeNames()

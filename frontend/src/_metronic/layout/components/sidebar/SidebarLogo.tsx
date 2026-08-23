@@ -33,14 +33,10 @@ const SidebarLogo = (props: PropsType) => {
         return
       }
 
-      // Add a class to prevent sidebar hover effect after toggle click
       toggleObj.on('kt.toggle.change', function () {
-        // Set animation state
         props.sidebarRef.current!.classList.add('animating')
 
-        // Wait till animation finishes
         setTimeout(function () {
-          // Remove animation state
           props.sidebarRef.current!.classList.remove('animating')
         }, 300)
       })

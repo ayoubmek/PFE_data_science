@@ -1,8 +1,8 @@
-//
-// sidebar Primary
-//
 
-// General mode
+
+
+
+
 .app-sidebar-primary {
   transition: $app-sidebar-primary-base-transition;
   position: relative;
@@ -13,7 +13,7 @@
   border-right: var(--#{$prefix}app-sidebar-primary-base-border-end);
 }
 
-// Utilities
+
 .app-sidebar-primary-collapse-d-flex,
 .app-sidebar-primary-minimize-d-flex,
 .app-sidebar-primary-collapse-mobile-d-flex,
@@ -21,9 +21,8 @@
   display: none;
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
-  // Base
   .app-sidebar-primary {
     @include property(z-index, $app-sidebar-primary-base-z-index);
     @include property(margin-left, $app-sidebar-primary-base-gap-start);
@@ -32,7 +31,6 @@
     @include property(margin-bottom, $app-sidebar-primary-base-gap-bottom);
   }
 
-  // Vars
   :root {
     --#{$prefix}app-sidebar-primary-width-actual: #{$app-sidebar-primary-base-width};
   }
@@ -59,7 +57,6 @@
     --#{$prefix}app-sidebar-primary-width: 0px;
   }
 
-  // States
   .app-sidebar-primary {
     width: var(--#{$prefix}app-sidebar-primary-width);
 
@@ -72,10 +69,6 @@
     [data-kt-app-sidebar-primary-minimize='on'] & {
       transition: $app-sidebar-primary-base-transition;
 
-      //background-color: var(--#{$prefix}app-sidebar-primary-minimize-bg-color);
-      //box-shadow: var(--#{$prefix}app-sidebar-primary-minimize-box-shadow);
-      //border-left: var(--#{$prefix}app-sidebar-primary-minimize-border-start);
-      //border-right: var(--#{$prefix}app-sidebar-primary-minimize-border-end);
 
       @include property(margin-left, $app-sidebar-primary-minimize-gap-start);
       @include property(margin-right, $app-sidebar-primary-minimize-gap-end);
@@ -89,7 +82,6 @@
       }
     }
 
-    // Hover minimized
     [data-kt-app-sidebar-primary-hoverable='true'][data-kt-app-sidebar-primary-minimize='on']
       &:hover:not(.animating) {
       transition: $app-sidebar-primary-base-transition;
@@ -98,22 +90,18 @@
     }
   }
 
-  // Integration
   .app-sidebar-primary {
-    // Header
     [data-kt-app-sidebar-fixed='true'][data-kt-app-header-fixed='true'][data-kt-app-sidebar-primary-below-header='true']
       & {
       top: var(--#{$prefix}app-header-height);
     }
 
-    // Toolbar
     [data-kt-app-sidebar-fixed='true'][data-kt-app-header-fixed='true'][data-kt-app-toolbar-fixed='true'][data-kt-app-sidebar-primary-below-toolbar='true']
       & {
       top: calc(var(--#{$prefix}app-header-height) + var(--#{$prefix}app-toolbar-height, 0));
     }
   }
 
-  // Utilities
   [data-kt-app-sidebar-primary-minimize='on'] {
     .app-sidebar-primary-minimize-d-none {
       display: none !important;
@@ -135,9 +123,8 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
-  // Base
   .app-sidebar-primary {
     @include property(z-index, $app-sidebar-primary-base-z-index-mobile);
     @include property(margin-left, $app-sidebar-primary-base-gap-start-mobile);
@@ -146,7 +133,6 @@
     @include property(margin-bottom, $app-sidebar-primary-base-gap-bottom-mobile);
   }
 
-  // Vars
   :root {
     --#{$prefix}app-sidebar-primary-width-actual: #{$app-sidebar-primary-base-width-mobile};
   }
@@ -173,7 +159,6 @@
     --#{$prefix}app-sidebar-primary-width: 0px;
   }
 
-  // States
   .app-sidebar-primary {
     width: var(--#{$prefix}app-sidebar-primary-width);
 
@@ -186,10 +171,6 @@
     [data-kt-app-sidebar-primary-minimize-mobile='on'] & {
       transition: $app-sidebar-primary-base-transition;
 
-      //background-color: var(--#{$prefix}app-sidebar-primary-minimize-bg-color-mobile);
-      //box-shadow: var(--#{$prefix}app-sidebar-primary-base-box-shadow-mobile);
-      //border-left: var(--#{$prefix}app-sidebar-primary-minimize-border-start-mobile);
-      //border-left: var(--#{$prefix}app-sidebar-primary-minimize-border-end-mobile);
 
       @include property(margin-left, $app-sidebar-primary-minimize-gap-start-mobile);
       @include property(margin-right, $app-sidebar-primary-minimize-gap-end-mobile);
@@ -211,7 +192,6 @@
     }
   }
 
-  // Utilities
   [data-kt-app-sidebar-primary-minimize-mobile='on'] {
     .app-sidebar-primary-minimize-mobile-d-none {
       display: none !important;

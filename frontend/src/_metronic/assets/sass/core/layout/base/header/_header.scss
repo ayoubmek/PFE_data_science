@@ -1,8 +1,8 @@
-//
-// sidebar
-//
 
-// General mode
+
+
+
+
 .app-header {
   transition: $app-header-base-transition;
   display: flex;
@@ -12,14 +12,12 @@
   border-bottom: var(--#{$prefix}app-header-base-border-bottom);
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
-  // Base
   .app-header {
     @include property(z-index, $app-header-base-z-index);
   }
 
-  // Vars
   :root {
     --#{$prefix}app-header-height: #{$app-header-base-height};
     --#{$prefix}app-header-height-actual: #{$app-header-base-height};
@@ -45,7 +43,6 @@
     --#{$prefix}app-header-height: #{$app-header-minimize-height};
   }
 
-  // States
   .app-header {
     height: var(--#{$prefix}app-header-height);
 
@@ -98,9 +95,7 @@
     }
   }
 
-  // Integration
   .app-header {
-    // Sidebar
     [data-kt-app-header-fixed='true'][data-kt-app-sidebar-fixed='true'][data-kt-app-sidebar-push-header='true']
       &,
     [data-kt-app-header-fixed='true'][data-kt-app-sidebar-sticky='on'][data-kt-app-sidebar-push-header='true']
@@ -121,7 +116,6 @@
       );
     }
 
-    // Sidebar Panel
     [data-kt-app-header-fixed='true'][data-kt-app-sidebar-panel-fixed='true'][data-kt-app-sidebar-panel-push-header='true']
       &,
     [data-kt-app-header-fixed='true'][data-kt-app-sidebar-panel-sticky='on'][data-kt-app-sidebar-panel-push-header='true']
@@ -146,21 +140,18 @@
       );
     }
 
-    // Toolbar
     [data-kt-app-header-fixed='true'][data-kt-app-toolbar-fixed='true'] & {
       box-shadow: none;
     }
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
-  // Base
   .app-header {
     @include property(z-index, $app-header-base-z-index-mobile);
   }
 
-  // Vars
   :root {
     --#{$prefix}app-header-height: #{$app-header-base-height-mobile};
   }
@@ -175,7 +166,6 @@
     --#{$prefix}app-header-height-actual: #{$app-header-minimize-height-mobile};
   }
 
-  // States
   .app-header {
     height: var(--#{$prefix}app-header-height);
     align-items: stretch;
@@ -226,9 +216,7 @@
     }
   }
 
-  // Integration
   .app-header {
-    // Toolbar
     [data-kt-app-header-fixed-mobile='true'][data-kt-app-toolbar-fixed-mobile='true'] & {
       box-shadow: none;
     }

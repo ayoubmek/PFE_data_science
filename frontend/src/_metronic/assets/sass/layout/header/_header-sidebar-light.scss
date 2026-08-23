@@ -1,13 +1,11 @@
-//
-// Custom Header(used by Light Sidebar layout only)
-//
+
+
+
 
 [data-kt-app-layout='light-sidebar'] {
-  // Desktop mode
   @include media-breakpoint-up(lg) {
     .app-header-menu {
       .menu {
-        // Menu root item
         > .menu-item {
           @include menu-link-here-state(
             $title-color: var(--#{$prefix}primary),
@@ -32,7 +30,7 @@
   }
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
   [data-kt-app-layout='light-sidebar']:not([data-kt-app-header-fixed='true']) {
     .app-header {
@@ -43,7 +41,7 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
   [data-kt-app-layout='light-sidebar']:not([data-kt-app-header-fixed-mobile='true']) {
     .app-header {

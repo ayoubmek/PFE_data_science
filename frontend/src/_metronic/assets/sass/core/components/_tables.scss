@@ -1,10 +1,9 @@
-//
-// Table
-//
 
-// Table
+
+
+
+
 .table:not(.table-bordered) {
-  // Fix for BS 5.1.2 update
   & > :not(:first-child) {
     border-color: transparent;
     border-width: 0;
@@ -56,14 +55,12 @@
     }
   }
 
-  // Rounded
   &.table-rounded {
     border-radius: $border-radius;
     border-spacing: 0;
     border-collapse: separate;
   }
 
-  // Flush
   &.table-flush {
     tr,
     th,
@@ -72,7 +69,6 @@
     }
   }
 
-  // Row bordered
   &.table-row-bordered {
     tr {
       border-bottom-width: 1px;
@@ -88,7 +84,6 @@
     }
   }
 
-  // Row dashed
   &.table-row-dashed {
     tr {
       border-bottom-width: 1px;
@@ -104,7 +99,6 @@
     }
   }
 
-  // Row border colors
   @each $name, $value in $grays {
     &.table-row-gray-#{$name} {
       tr {
@@ -114,12 +108,12 @@
   }
 }
 
-// Layout fixed
+
 .table-layout-fixed {
   table-layout: fixed;
 }
 
-// Sorting
+
 .table-sort {
   &:after {
     opacity: 0;
@@ -158,7 +152,7 @@
   }
 }
 
-// Loading
+
 .table-loading-message {
   display: none;
   position: absolute;
@@ -183,7 +177,7 @@
   }
 }
 
-// Cell gutters
+
 @each $breakpoint in map-keys($grid-breakpoints) {
   @include media-breakpoint-up($breakpoint) {
     $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
@@ -194,7 +188,6 @@
         td {
           padding: $value;
 
-          // Datatables responsive mode fix
           &.dtr-control {
             padding-left: $value !important;
           }
@@ -215,7 +208,6 @@
           padding-left: $value;
           padding-right: $value;
 
-          // Datatables responsive mode fix
           &.dtr-control {
             padding-left: $value !important;
           }
@@ -233,7 +225,6 @@
             padding-right: $value;
           }
 
-          // Datatables responsive mode fix
           &.dtr-control:first-child {
             padding-left: $value !important;
           }

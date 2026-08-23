@@ -21,7 +21,6 @@ public class StockController {
 
 
 
-    // ── ITEMS ──────────────────────────────────────────────────────────────
 
     @GetMapping("/items")
     public ResponseEntity<List<StockDTO.ItemResponse>> getAllItems() {
@@ -54,7 +53,6 @@ public class StockController {
         return ResponseEntity.noContent().build();
     }
 
-    // ── MOVEMENTS ──────────────────────────────────────────────────────────
 
     @PostMapping("/movements")
     public ResponseEntity<StockDTO.MovementResponse> createMovement(
@@ -73,7 +71,6 @@ public class StockController {
         return ResponseEntity.ok(stockService.getRecentMovements(months));
     }
 
-    // ── ALERTS ──────────────────────────────────────────────────────────────
 
     @GetMapping("/alerts")
     public ResponseEntity<List<StockDTO.ItemResponse>> getAlertes() {
@@ -90,7 +87,6 @@ public class StockController {
         return ResponseEntity.ok(stockService.getRuptures());
     }
 
-    // ── KPI ──────────────────────────────────────────────────────────────
 
     @GetMapping("/kpi")
     public ResponseEntity<StockDTO.KpiResponse> getKpi() {

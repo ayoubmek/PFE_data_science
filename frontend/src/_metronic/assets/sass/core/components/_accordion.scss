@@ -1,17 +1,14 @@
-//
-// Accordion
-//
 
-// Base
+
+
+
+
 .accordion {
-  // According heading
   .accordion-header {
     cursor: pointer;
   }
 
-  // Icon toggle mode
   &.accordion-icon-toggle {
-    // Accordion icon expaned mode
     .accordion-icon {
       display: flex;
       flex-shrink: 0;
@@ -26,7 +23,6 @@
       }
     }
 
-    // Accordion icon collapsed mode
     .collapsed {
       .accordion-icon {
         transition: $transition-base;
@@ -40,9 +36,7 @@
     }
   }
 
-  // Icon collapse mode
   &.accordion-icon-collapse {
-    // Accordion icon expaned mode
     .accordion-icon {
       display: flex;
       flex-shrink: 0;
@@ -64,7 +58,6 @@
       }
     }
 
-    // Accordion icon collapsed mode
     .collapsed {
       .accordion-icon {
         transition: $transition-base;
@@ -85,17 +78,13 @@
     }
   }
 
-  // Reset accordion item border
   &.accordion-borderless {
-    // According item
     .accordion-item {
       border: 0;
     }
   }
 
-  // Reset accordion item border, border radiues and background color
   &.accordion-flush {
-    // According item
     .accordion-item {
       background-color: transparent;
       border: 0;

@@ -71,7 +71,6 @@ class SwapperComponent {
     this.options = Object.assign(defaultSwapperOptions, _options)
     this.queries = _queries
 
-    // Initial update
     this.update()
 
     SwapperStore.set(this.element.id, this)
@@ -98,9 +97,6 @@ class SwapperComponent {
     }
   }
 
-  ///////////////////////
-  // ** Public API  ** //
-  ///////////////////////
   public update = () => {
     const parentSelector = this.getOption('parent')?.toString()
     const mode = this.getOption('mode')
@@ -117,7 +113,6 @@ class SwapperComponent {
     }
   }
 
-  // Event API
   public on = (name: string, handler: Function) => {
     return EventHandlerUtil.on(this.element, name, handler)
   }
@@ -134,7 +129,6 @@ class SwapperComponent {
     return EventHandlerUtil.trigger(this.element, name, event)
   }
 
-  // Static methods
   public static getInstance = (
     el: HTMLElement,
     componentName: string = defaultSwapperQueires.componentName
@@ -188,13 +182,12 @@ class SwapperComponent {
   }
 }
 
-// Window resize handler
+
 window.addEventListener('resize', function () {
   let timer
   throttle(
     timer,
     () => {
-      // Locate and update Offcanvas instances on window resize
       const elements = document.querySelectorAll(defaultSwapperQueires.instanseQuery)
       elements.forEach((el) => {
         const place = SwapperComponent.getInstance(el as HTMLElement)

@@ -32,8 +32,7 @@ class FeedbackComponent {
     this.instanceUid = getUniqueIdWithPrefix('feedback')
     this.shown = false
 
-    // Event handlers
-    this._handlers() // will add in the show popup
+    this._handlers() 
     DataUtil.set(this.element, 'feedback', this)
   }
 
@@ -74,9 +73,6 @@ class FeedbackComponent {
     this.element.remove()
   }
 
-  ///////////////////////
-  // ** Public API  ** //
-  ///////////////////////
   public show = () => {
     if (EventHandlerUtil.trigger(this.element, 'kt.feedback.show') === false) {
       return
@@ -113,7 +109,6 @@ class FeedbackComponent {
     return this.element
   }
 
-  // Event API
   public on = (name: string, handler: Function) => {
     return EventHandlerUtil.on(this.element, name, handler)
   }
@@ -130,12 +125,10 @@ class FeedbackComponent {
     return EventHandlerUtil.trigger(this.element, name, event)
   }
 
-  // Create Instances
   public static createInstances(selector: string) {
     throw new Error('not implemented')
   }
 
-  // Static methods
   public static hasInstace(element: HTMLElement) {
     throw new Error('not implemented')
   }

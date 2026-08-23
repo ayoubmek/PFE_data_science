@@ -1,12 +1,11 @@
-//
-// Ribbon
-//
 
-// Base
+
+
+
+
 .ribbon {
   position: relative;
 
-  // Ribbon target
   .ribbon-label {
     display: flex;
     justify-content: center;
@@ -36,7 +35,6 @@
     }
   }
 
-  // Vertical aligment
   &-vertical {
     .ribbon-label {
       padding: 5px 10px;
@@ -81,7 +79,7 @@
   }
 }
 
-// Clip style
+
 .ribbon.ribbon-clip {
   &.ribbon-start {
     .ribbon-label {
@@ -136,7 +134,7 @@
   }
 }
 
-// Triangle style
+
 .ribbon.ribbon-triangle {
   position: absolute;
   z-index: 1;
@@ -144,7 +142,6 @@
   align-items: flex-start;
   justify-content: flex-start;
 
-  // Top start position
   &.ribbon-top-start {
     top: 0;
     left: 0;
@@ -156,7 +153,6 @@
     border-top: solid 2rem transparent;
   }
 
-  // Top end position
   &.ribbon-top-end {
     top: 0;
     right: 0;
@@ -168,7 +164,6 @@
     border-top: solid 2rem transparent;
   }
 
-  // Botton start position
   &.ribbon-bottom-start {
     bottom: 0;
     left: 0;
@@ -180,7 +175,6 @@
     border-top: solid 2rem transparent !important;
   }
 
-  // Botton end position
   &.ribbon-bottom-end {
     bottom: 0;
     right: 0;

@@ -1,8 +1,8 @@
-//
-// Card
-//
 
-// Base
+
+
+
+
 .card {
   @if ($card-border-enabled) {
     border: $card-border-width $card-border-style var(--#{$prefix}card-border-color);
@@ -10,7 +10,6 @@
     border: 0;
   }
 
-  // Header
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -22,7 +21,6 @@
     background-color: var(--#{$prefix}card-cap-bg);
     border-bottom: $card-border-width $card-border-style var(--#{$prefix}card-border-color);
 
-    // Title
     .card-title {
       display: flex;
       align-items: center;
@@ -67,13 +65,11 @@
         flex-wrap: wrap;
       }
 
-      // Description
       small {
         color: var(--#{$prefix}text-muted);
         font-size: 1rem;
       }
 
-      // Headings
       h1,
       h2,
       h3,
@@ -84,7 +80,6 @@
       }
     }
 
-    // Toolbar
     .card-toolbar {
       display: flex;
       align-items: center;
@@ -93,13 +88,11 @@
     }
   }
 
-  // Body
   .card-body {
     padding: $card-py $card-px;
     color: var(--#{$prefix}card-color);
   }
 
-  // Footer
   .card-footer {
     padding: $card-py $card-px;
     color: var(--#{$prefix}card-cap-color);
@@ -107,13 +100,11 @@
     border-top: $card-border-width $card-border-style var(--#{$prefix}card-border-color);
   }
 
-  // Scroll
   .card-scroll {
     position: relative;
     overflow: auto;
   }
 
-  // Reset padding x
   &.card-px-0 {
     .card-header,
     .card-body,
@@ -140,7 +131,6 @@
     }
   }
 
-  // Dashed style
   &.card-dashed {
     box-shadow: none;
     border: $card-border-width dashed $card-border-dashed-color;
@@ -154,13 +144,11 @@
     }
   }
 
-  // Bordered style
   &.card-bordered {
     box-shadow: none;
     border: $card-border-width $card-border-style $card-border-color;
   }
 
-  // Flush header and footer borders
   &.card-flush {
     > .card-header {
       border-bottom: 0 !important;
@@ -171,13 +159,11 @@
     }
   }
 
-  // Enable shadow
   &.card-shadow {
     box-shadow: var(--#{$prefix}card-box-shadow);
     border: 0;
   }
 
-  // Reset styles
   &.card-reset {
     border: 0 !important;
     box-shadow: none !important;
@@ -192,7 +178,6 @@
     }
   }
 
-  // Reset borders
   &.card-borderless {
     border: 0 !important;
 
@@ -205,44 +190,37 @@
     }
   }
 
-  // Reset borders
   &.card-border-0 {
     border: 0 !important;
   }
 }
 
-// Responsive stretch heights
+
 .card {
   @each $breakpoint in map-keys($grid-breakpoints) {
     @include media-breakpoint-up($breakpoint) {
       $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
 
-      // Stretch
       &.card#{$infix}-stretch {
         height: calc(100% - var(--#{$prefix}gutter-y));
       }
 
-      // Stretch 75
       &.card#{$infix}-stretch-75 {
         height: calc(75% - var(--#{$prefix}gutter-y));
       }
 
-      // Stretch 50
       &.card#{$infix}-stretch-50 {
         height: calc(50% - var(--#{$prefix}gutter-y));
       }
 
-      // Stretch 33
       &.card#{$infix}-stretch-33 {
         height: calc(33.333% - var(--#{$prefix}gutter-y));
       }
 
-      // Stretch 25
       &.card#{$infix}-stretch-25 {
         height: calc(25% - var(--#{$prefix}gutter-y));
       }
 
-      // Header stretch
       .card-header#{$infix}-stretch {
         padding-top: 0 !important;
         padding-bottom: 0 !important;
@@ -257,7 +235,7 @@
   }
 }
 
-// Utilities
+
 .card-p {
   padding: $card-py $card-px !important;
 }
@@ -300,7 +278,7 @@
   border-bottom-right-radius: $card-border-radius;
 }
 
-// Mobile mode
+
 @include media-breakpoint-down(md) {
   .card {
     > .card-header:not(.flex-nowrap) {

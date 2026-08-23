@@ -68,7 +68,6 @@ public class ProductionService {
                         res.setTauxRendement(yield);
                         list.add(res);
                     } catch (Exception rowErr) {
-                        // Skip malformed row safely
                     }
                 }
                 if (!list.isEmpty()) {
@@ -76,7 +75,6 @@ public class ProductionService {
                 }
             }
         } catch (Exception e) {
-            // Fallback to local table if FACT_CLE query fails
         }
         return orderRepo.findAll().stream().map(this::toResponse).collect(Collectors.toList());
     }

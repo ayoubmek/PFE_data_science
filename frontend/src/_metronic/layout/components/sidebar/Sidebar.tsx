@@ -110,7 +110,6 @@ const updateDOM = (config: ILayout) => {
 
     setTimeout(() => {
       const sidebarElement = document.getElementById('kt_app_sidebar')
-      // sidebar
       if (sidebarElement) {
         const sidebarAttributes = sidebarElement
           .getAttributeNames()

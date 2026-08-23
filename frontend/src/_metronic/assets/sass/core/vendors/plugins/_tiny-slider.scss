@@ -1,8 +1,8 @@
-//
-// Slider
-//
 
-// Base
+
+
+
+
 .tns {
   position: relative;
   overflow: hidden;
@@ -70,11 +70,9 @@
     }
   }
 
-  // Default
   &.tns-default {
     position: relative;
 
-    // Navs
     [data-controls='prev'],
     [data-controls='next'] {
       position: absolute;
@@ -93,7 +91,6 @@
     .tns-outer {
       margin: 0 4rem;
 
-      // Tablet mode
       @include media-breakpoint-down(md) {
         margin: 0 2rem;
       }
@@ -132,7 +129,7 @@
   }
 }
 
-// Utils
+
 .tns-hide-disabled-nav {
   [disabled] {
     display: none !important;

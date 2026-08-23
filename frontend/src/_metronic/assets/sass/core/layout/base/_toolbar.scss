@@ -1,8 +1,8 @@
-//
-// Toolbar
-//
 
-// General mode
+
+
+
+
 .app-toolbar {
   display: flex;
   align-items: stretch;
@@ -16,9 +16,8 @@
   }
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
-  // Vars
   :root {
     --#{$prefix}app-toolbar-height: #{$app-toolbar-base-height};
     --#{$prefix}app-toolbar-height-actual: #{$app-toolbar-base-height};
@@ -32,7 +31,6 @@
     --#{$prefix}app-toolbar-height: #{$app-toolbar-minimize-height};
   }
 
-  // States
   .app-toolbar {
     height: var(--#{$prefix}app-toolbar-height);
 
@@ -72,14 +70,11 @@
     }
   }
 
-  // Integration
   .app-toolbar {
-    // Header
     [data-kt-app-toolbar-fixed='true'][data-kt-app-header-fixed='true'] & {
       top: var(--#{$prefix}app-header-height);
     }
 
-    // Sidebar
     [data-kt-app-toolbar-sticky='on'][data-kt-app-sidebar-fixed='true'][data-kt-app-sidebar-push-toolbar='true']
       &,
     [data-kt-app-toolbar-fixed='true'][data-kt-app-sidebar-fixed='true'][data-kt-app-sidebar-push-toolbar='true']
@@ -90,7 +85,6 @@
       );
     }
 
-    // Sidebar panel
     [data-kt-app-toolbar-sticky='on'][data-kt-app-sidebar-panel-fixed='true'][data-kt-app-sidebar-panel-push-toolbar='true']
       &,
     [data-kt-app-toolbar-fixed='true'][data-kt-app-sidebar-panel-fixed='true'][data-kt-app-sidebar-panel-push-toolbar='true']
@@ -103,7 +97,6 @@
       );
     }
 
-    // Aside
     [data-kt-app-toolbar-sticky='on'][data-kt-app-aside-fixed='true'][data-kt-app-aside-push-toolbar='true']
       &,
     [data-kt-app-toolbar-fixed='true'][data-kt-app-aside-fixed='true'][data-kt-app-aside-push-toolbar='true']
@@ -116,9 +109,8 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
-  // Vars
   :root {
     --#{$prefix}app-toolbar-height: #{$app-toolbar-base-height-mobile};
   }
@@ -131,7 +123,6 @@
     --#{$prefix}app-toolbar-height: #{$app-toolbar-minimize-height-mobile};
   }
 
-  // States
   .app-toolbar {
     height: var(--#{$prefix}app-toolbar-height);
 

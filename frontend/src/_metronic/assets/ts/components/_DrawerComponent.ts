@@ -78,11 +78,8 @@ class DrawerComponent {
     this.name = this.element.getAttribute('data-kt-drawer-name') || ''
     this.shown = false
     this.toggleElement = null
-    // Event Handlers
     this._handlers()
-    // Update Instance
     this._update()
-    // Bind Instance
     DrawerStore.set(this.element.id, this)
   }
 
@@ -112,7 +109,6 @@ class DrawerComponent {
     const width = String(this._getOption('width'))
     const direction = String(this._getOption('direction'))
 
-    // Reset state
     const hasBaseClass = this.element.classList.contains(`${this.options.baseClass}-on`)
     const bodyCanvasAttr = String(document.body.getAttribute(`data-kt-drawer-${this.name}-`))
 
@@ -122,7 +118,6 @@ class DrawerComponent {
       this.shown = false
     }
 
-    // Activate/deactivate
     if (this._getOption('activate') === true) {
       this.element.classList.add(this.options.baseClass)
       this.element.classList.add(`${this.options.baseClass}-${direction}`)
@@ -215,7 +210,7 @@ class DrawerComponent {
       const elementZIndex = getCSS(this.element, 'z-index')
       if (elementZIndex) {
         const overlayZindex = parseInt(elementZIndex) - 1
-        ElementStyleUtil.set(this.overlayElement, 'z-index', overlayZindex) // update
+        ElementStyleUtil.set(this.overlayElement, 'z-index', overlayZindex) 
       }
       document.body.append(this.overlayElement)
       const overlayClassOption = this._getOption('overlay-class')
@@ -248,9 +243,6 @@ class DrawerComponent {
     return width
   }
 
-  ///////////////////////
-  // ** Public API  ** //
-  ///////////////////////
   public toggle = () => {
     this._toggle()
   }
@@ -275,7 +267,6 @@ class DrawerComponent {
     return this.element
   }
 
-  // Event API
   public on = (name: string, handler: Function) => {
     return EventHandlerUtil.on(this.element, name, handler)
   }
@@ -292,7 +283,6 @@ class DrawerComponent {
     return EventHandlerUtil.trigger(this.element, name, event)
   }
 
-  // Static methods
   public static hasInstace = (elementId: string): boolean => {
     return DrawerStore.has(elementId)
   }
@@ -315,7 +305,6 @@ class DrawerComponent {
     })
   }
 
-  // Create Instances
   public static createInstances(selector: string): void {
     const elements = document.body.querySelectorAll(selector)
     elements.forEach((element) => {
@@ -329,11 +318,8 @@ class DrawerComponent {
     })
   }
 
-  // Dismiss instances
   public static handleDismiss = () => {
-    // External drawer toggle handler
     DOMEventHandlerUtil.on(document.body, '[data-kt-drawer-dismiss="true"]', 'click', () => {
-      /* @ts-ignore */
       const element = this.closest('[data-kt-drawer="true"]')
       if (element) {
         const drawer = DrawerComponent.getInstance(element)
@@ -344,15 +330,12 @@ class DrawerComponent {
     })
   }
 
-  // Global Initialization
   public static initGlobalHandlers(): void {
-    // Window Resize Handling
     window.addEventListener('resize', function () {
       let timer: number | undefined
       throttle(
         timer,
         () => {
-          // Locate and update Drawer instances on window resize
           const elements = document.body.querySelectorAll('[data-kt-drawer="true"]')
           elements.forEach((el) => {
             const item = el as HTMLElement

@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-no-target-blank */
+
 import React from 'react'
 import { SidebarMenuItemWithSub } from './SidebarMenuItemWithSub'
 import { SidebarMenuItem } from './SidebarMenuItem'
@@ -6,7 +6,7 @@ import { SidebarMenuItem } from './SidebarMenuItem'
 const SidebarMenuMain = () => {
   return (
     <>
-      {/* Dashboard */}
+      {}
       <SidebarMenuItem
         to='/dashboard'
         icon='element-11'
@@ -15,7 +15,7 @@ const SidebarMenuMain = () => {
         iconColor='#3B82F6'
       />
 
-      {/* Section Production */}
+      {}
       <div className='menu-item'>
         <div className='menu-content pt-8 pb-2'>
           <span className='menu-section text-muted text-uppercase fs-8 ls-1'>
@@ -45,7 +45,7 @@ const SidebarMenuMain = () => {
         />
       </SidebarMenuItemWithSub>
 
-      {/* Section Stock */}
+      {}
       <div className='menu-item'>
         <div className='menu-content pt-8 pb-2'>
           <span className='menu-section text-muted text-uppercase fs-8 ls-1'>
@@ -75,7 +75,7 @@ const SidebarMenuMain = () => {
         />
       </SidebarMenuItemWithSub>
 
-      {/* Section Analytique */}
+      {}
       <div className='menu-item'>
         <div className='menu-content pt-8 pb-2'>
           <span className='menu-section text-muted text-uppercase fs-8 ls-1'>
@@ -92,7 +92,7 @@ const SidebarMenuMain = () => {
         iconColor='#7C3AED'
       />
 
-      {/* Section Intelligence Artificielle */}
+      {}
       <div className='menu-item'>
         <div className='menu-content pt-8 pb-2'>
           <span className='menu-section text-muted text-uppercase fs-8 ls-1'>
@@ -109,7 +109,7 @@ const SidebarMenuMain = () => {
         iconColor='#009EF7'
       />
 
-      {/* Section Administration */}
+      {}
       <div className='menu-item'>
         <div className='menu-content pt-8 pb-2'>
           <span className='menu-section text-muted text-uppercase fs-8 ls-1'>

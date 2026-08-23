@@ -1,10 +1,9 @@
-//
-// Form Check
-//
 
-// Customization
+
+
+
+
 .form-check {
-  // Input
   &:not(.form-switch) {
     .form-check-input {
       &[type='checkbox'] {
@@ -13,7 +12,6 @@
     }
   }
 
-  // Sizing
   &.form-check-sm {
     .form-check-input {
       height: $form-check-input-width-sm;
@@ -28,13 +26,11 @@
     }
   }
 
-  // Inline
   &.form-check-inline {
     display: inline-block;
     margin-right: $form-check-inline-margin-end;
   }
 
-  // Solid
   &.form-check-solid {
     .form-check-input {
       border: 0;
@@ -49,8 +45,6 @@
     }
   }
 
-  // States
-  // Success state
   &.form-check-success {
     .form-check-input {
       &:checked {
@@ -59,7 +53,6 @@
     }
   }
 
-  // Danger state
   &.form-check-danger {
     .form-check-input {
       &:checked {
@@ -68,7 +61,6 @@
     }
   }
 
-  // Warning state
   &.form-check-warning {
     .form-check-input {
       &:checked {
@@ -78,27 +70,25 @@
   }
 }
 
-// Custom checkbox and radio
+
 .form-check-custom {
   display: flex;
   align-items: center;
   padding-left: 0;
   margin: 0;
 
-  // Input
   .form-check-input {
     margin: 0;
     float: none;
     flex-shrink: 0;
   }
 
-  // Label
   .form-check-label {
     margin-left: 0.55rem;
   }
 }
 
-// Switch
+
 .form-switch {
   &.form-check-custom {
     .form-check-input {
@@ -120,7 +110,6 @@
     }
   }
 
-  // Solid
   &.form-check-solid {
     .form-check-input {
       --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image-solid)};
@@ -142,7 +131,7 @@
   }
 }
 
-// Image
+
 .form-check-image {
   position: relative;
   overflow: hidden;

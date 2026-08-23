@@ -1,20 +1,20 @@
-//
-// Custom background helpers
-//
 
-// Background white color
+
+
+
+
 .bg-white {
   --#{$prefix}bg-rgb-color: var(--#{$prefix}white-bg-rgb);
   background-color: $white !important;
 }
 
-// Background black color
+
 .bg-black {
   --#{$prefix}bg-rgb-color: var(--#{$prefix}black-bg-rgb);
   background-color: $black !important;
 }
 
-// Background body color
+
 .bg-body {
   --#{$prefix}bg-rgb-color: var(--#{$prefix}body-bg-rgb);
   background-color: var(--#{$prefix}body-bg) !important;
@@ -69,7 +69,7 @@
   }
 }
 
-// Background theme light colors
+
 @each $name, $value in $theme-colors {
   @if (theme-light-color($name)) {
     .bg-light-#{$name} {
@@ -130,7 +130,7 @@
   }
 }
 
-// Background gray colors
+
 @each $name, $value in $grays {
   .bg-gray-#{$name} {
     --#{$prefix}bg-rgb-color: var(--#{$prefix}gray-#{$name}-rgb);
@@ -143,7 +143,7 @@
   }
 }
 
-// Opacity
+
 @each $name, $value in $opacity-values {
   .bg-opacity-#{$name} {
     background-color: rgba(var(--#{$prefix}bg-rgb-color), #{$value}) !important;
@@ -165,13 +165,13 @@
   }
 }
 
-// Background image helpers
-// Background repeat
+
+
 .bgi-no-repeat {
   background-repeat: no-repeat;
 }
 
-// Background positions
+
 .bgi-position-y-top {
   background-position-y: top;
 }
@@ -208,12 +208,11 @@
   background-position: center;
 }
 
-// Responsive helpers
+
 @each $breakpoint in map-keys($grid-breakpoints) {
   @include media-breakpoint-up($breakpoint) {
     $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
 
-    // Background sizes
     .bgi-size#{$infix}-auto {
       background-size: auto;
     }
@@ -226,7 +225,6 @@
       background-size: contain;
     }
 
-    // Background attachment
     .bgi-attachment#{$infix}-fixed {
       background-attachment: fixed;
     }

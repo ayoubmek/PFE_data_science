@@ -10,7 +10,7 @@ function isNotEmpty(obj: unknown) {
   return obj !== undefined && obj !== null && obj !== ''
 }
 
-// Example: page=1&items_per_page=10&sort=id&order=desc&search=a&filter_name=a&filter_online=false
+
 function stringifyRequestQuery(state: QueryState): string {
   const pagination = qs.stringify(state, {filter: ['page', 'items_per_page'], skipNulls: true})
   const sort = qs.stringify(state, {filter: ['sort', 'order'], skipNulls: true})
@@ -89,24 +89,19 @@ function groupingOnSelectAll<T>(
   setSelected(data.filter((item) => item.id).map((item) => item.id))
 }
 
-// Hook
+
 function useDebounce(value: string | undefined, delay: number) {
-  // State and setters for debounced value
   const [debouncedValue, setDebouncedValue] = useState(value)
   useEffect(
     () => {
-      // Update debounced value after delay
       const handler = setTimeout(() => {
         setDebouncedValue(value)
       }, delay)
-      // Cancel the timeout if value changes (also on delay change or unmount)
-      // This is how we prevent debounced value from updating if value is changed ...
-      // .. within the delay period. Timeout gets cleared and restarted.
       return () => {
         clearTimeout(handler)
       }
     },
-    [value, delay] // Only re-call effect if value or delay changes
+    [value, delay] 
   )
   return debouncedValue
 }

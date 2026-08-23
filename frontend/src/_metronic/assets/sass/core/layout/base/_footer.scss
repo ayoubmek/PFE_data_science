@@ -1,8 +1,8 @@
-//
-// Footer
-//
 
-// General mode
+
+
+
+
 .app-footer {
   transition: $app-footer-transition;
   display: flex;
@@ -11,19 +11,16 @@
   border-top: var(--#{$prefix}app-footer-border-top);
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
-  // Base
   .app-footer {
     @include property(z-index, $app-footer-z-index);
   }
 
-  // Vars
   :root {
     --#{$prefix}app-footer-height: #{$app-footer-height};
   }
 
-  // States
   .app-footer {
     height: var(--#{$prefix}app-footer-height);
 
@@ -37,9 +34,7 @@
     }
   }
 
-  // Integration
   .app-footer {
-    // Sidebar
     [data-kt-app-sidebar-fixed='true'][data-kt-app-sidebar-push-footer='true'] & {
       left: calc(
         var(--#{$prefix}app-sidebar-width) + var(--#{$prefix}app-sidebar-gap-start, 0px) +
@@ -47,7 +42,6 @@
       );
     }
 
-    // Sidebar Panel
     [data-kt-app-sidebar-panel-fixed='true'][data-kt-app-sidebar-panel-push-footer='true'] & {
       left: calc(
         var(--#{$prefix}app-sidebar-width) + var(--#{$prefix}app-sidebar-gap-start, 0px) +
@@ -57,7 +51,6 @@
       );
     }
 
-    // Aside
     [data-kt-app-aside-fixed='true'][data-kt-app-aside-push-footer='true'] & {
       right: calc(
         var(--#{$prefix}app-aside-width) + var(--#{$prefix}app-aside-gap-start, 0px) +
@@ -67,19 +60,16 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
-  // Base
   .app-footer {
     @include property(z-index, $app-footer-z-index-mobile);
   }
 
-  // Vars
   body {
     --#{$prefix}app-footer-height: #{$app-footer-height-mobile};
   }
 
-  // States
   .app-footer {
     height: var(--#{$prefix}app-footer-height);
 

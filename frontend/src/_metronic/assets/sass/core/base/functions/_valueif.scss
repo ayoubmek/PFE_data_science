@@ -1,6 +1,6 @@
-//
-// valueif
-//
+
+
+
 
 @function valueif($check, $trueValue, $falseValue: null) {
   @if $check {

@@ -5,11 +5,7 @@ function getObjectPropertyValueByKey(obj: any, key: string): any | undefined {
   }
 }
 
-/**
- * Generates unique ID for give prefix.
- * @param {string} prefix Prefix for generated ID
- * @returns {boolean}
- */
+
 function getUniqueIdWithPrefix(prefix: string | undefined): string {
   const result = Math.floor(Math.random() * new Date().getTime()).toString()
   if (!prefix) {
@@ -19,7 +15,7 @@ function getUniqueIdWithPrefix(prefix: string | undefined): string {
   return `${prefix}${result}`
 }
 
-/* eslint-disable no-useless-escape */
+
 function stringSnakeToCamel(str: string): string {
   return str.replace(/(\-\w)/g, function (m) {
     return m[1].toUpperCase()
@@ -35,7 +31,6 @@ function toJSON(value: string | JSON): JSON | undefined {
     return undefined
   }
 
-  // ("'" => "\"");
   const result = value
     .toString()
     .split('')

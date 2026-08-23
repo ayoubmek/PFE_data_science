@@ -10,8 +10,6 @@ export function login(username: string, password: string) {
 }
 
 export function getUserByToken(token: string) {
-  // Spring Boot backend does not implement /api/auth/me.
-  // We resolve a mock user session preserving the actual JWT token to authorize subsequent API requests.
   return Promise.resolve({
     data: {
       id: 1,

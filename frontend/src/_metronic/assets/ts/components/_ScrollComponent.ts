@@ -29,7 +29,6 @@ class ScrollComponent {
     this.options = Object.assign(defaultScrollOptions, options)
     this.id = this.element.getAttribute('id') || ''
     this.update()
-    // this.element.setAttribute('data-kt-scrolltop', 'true')
     DataUtil.set(this.element, 'scroll', this)
   }
 
@@ -73,7 +72,6 @@ class ScrollComponent {
     const wrappers = this.getOption('wrappers')
     const offset = this.getOption('offset')
 
-    // Height dependencies
     if (dependencies !== null) {
       const elements = document.querySelectorAll(dependencies as string)
       if (elements && elements.length > 0) {
@@ -100,7 +98,6 @@ class ScrollComponent {
       }
     }
 
-    // Wrappers
     if (wrappers !== null) {
       var elements = document.querySelectorAll(wrappers as string)
       if (elements && elements.length > 0) {
@@ -129,7 +126,6 @@ class ScrollComponent {
       }
     }
 
-    // Custom offset
     if (offset !== null) {
       height = height - parseInt(offset as string)
     }
@@ -156,7 +152,6 @@ class ScrollComponent {
     let height = this.getHeight()
     let heightType = this.getHeightType() as string
 
-    // Set height
     if (height !== null && height.length > 0) {
       ElementStyleUtil.set(this.element, heightType, height)
     } else {
@@ -201,11 +196,7 @@ class ScrollComponent {
     }
   }
 
-  ///////////////////////
-  // ** Public API  ** //
-  ///////////////////////
   public update = () => {
-    // Activate/deactivate
     if (
       this.getOption('activate') === true ||
       !this.element.hasAttribute('data-kt-scroll-activate')
@@ -235,7 +226,6 @@ class ScrollComponent {
     return this.element
   }
 
-  // Static methods
   public static hasInstace(element: HTMLElement) {
     return DataUtil.has(element, 'scroll')
   }
@@ -249,7 +239,6 @@ class ScrollComponent {
     }
   }
 
-  // Create Instances
   public static createInstances(selector: string) {
     const elements = document.body.querySelectorAll(selector)
     elements.forEach((element: Element) => {
@@ -294,13 +283,11 @@ class ScrollComponent {
   }
 
   public static resize() {
-    // Window Resize Handling
     window.addEventListener('resize', function () {
       let timer
       throttle(
         timer,
         () => {
-          // Locate and update Drawer instances on window resize
           ScrollComponent.updateAll()
         },
         200

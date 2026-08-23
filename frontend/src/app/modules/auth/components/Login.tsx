@@ -92,7 +92,7 @@ export function Login() {
         </div>
       )}
 
-      {/* begin::Form group */}
+      {}
       <div className='fv-row mb-8'>
         <label className='form-label fs-6 fw-bolder text-dark'>Username</label>
         <input
@@ -115,9 +115,9 @@ export function Login() {
           </div>
         )}
       </div>
-      {/* end::Form group */}
+      {}
 
-      {/* begin::Form group */}
+      {}
       <div className='fv-row mb-3'>
         <label className='form-label fw-bolder text-dark fs-6 mb-0'>Password</label>
         <input
@@ -142,21 +142,21 @@ export function Login() {
           </div>
         )}
       </div>
-      {/* end::Form group */}
+      {}
 
-      {/* begin::Wrapper */}
+      {}
       <div className='d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-8'>
         <div />
 
-        {/* begin::Link */}
+        {}
         <Link to='/auth/forgot-password' className='link-primary'>
           Forgot Password ?
         </Link>
-        {/* end::Link */}
+        {}
       </div>
-      {/* end::Wrapper */}
+      {}
 
-      {/* begin::Action */}
+      {}
       <div className='d-grid mb-10'>
         <button
           type='submit'
@@ -173,7 +173,7 @@ export function Login() {
           )}
         </button>
       </div>
-      {/* end::Action */}
+      {}
 
       <div className='text-gray-500 text-center fw-semibold fs-6'>
         Not a Member yet?{' '}

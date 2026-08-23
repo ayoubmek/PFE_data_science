@@ -35,7 +35,6 @@ export default function MachinesPage() {
   useEffect(() => {
     fetchMachines()
 
-    // ── Server-Sent Events (SSE) Listener for Real-Time Machine Updates ──
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
     let eventSource: EventSource | null = null
     try {
@@ -111,7 +110,6 @@ export default function MachinesPage() {
         .border-l-primary { border-left: 4px solid #3E97FF !important; }
         .border-l-warning { border-left: 4px solid #F1BC00 !important; }
         .border-l-danger { border-left: 4px solid #F1416C !important; }
-        
         .pulse-dot-small {
           width: 6px;
           height: 6px;
@@ -120,7 +118,6 @@ export default function MachinesPage() {
         .pulse-green { background-color: #50CD89; animation: pG 1.5s infinite; }
         .pulse-blue { background-color: #3E97FF; animation: pB 1.5s infinite; }
         .pulse-red { background-color: #F1416C; animation: pR 1.5s infinite; }
-        
         @keyframes pG {
           0% { box-shadow: 0 0 0 0 rgba(80,205,137,0.7); }
           100% { box-shadow: 0 0 0 6px rgba(80,205,137,0); }
@@ -133,7 +130,6 @@ export default function MachinesPage() {
           0% { box-shadow: 0 0 0 0 rgba(241,65,108,0.7); }
           100% { box-shadow: 0 0 0 6px rgba(241,65,108,0); }
         }
-        
         .mimic-node {
           border-radius: 12px;
           padding: 16px;
@@ -147,7 +143,7 @@ export default function MachinesPage() {
         }
       `}</style>
 
-      {/* Header */}
+      {}
       <div className='card-header align-items-center py-5 gap-2 gap-md-5 border-0 bg-transparent'>
         <div className='card-title'>
           <h3 className='card-label fw-bold fs-4 d-flex align-items-center gap-2'>
@@ -156,7 +152,7 @@ export default function MachinesPage() {
           </h3>
         </div>
         <div className='card-toolbar d-flex gap-3'>
-          {/* Refresh Button */}
+          {}
           <button className='btn btn-light-primary btn-sm px-5 py-2' onClick={fetchMachines} disabled={loading}>
             {loading ? <span className='spinner-border spinner-border-sm me-2'></span> : null}
             <KTIcon iconName='arrows-loop' className='fs-2 me-1' />
@@ -166,7 +162,7 @@ export default function MachinesPage() {
       </div>
 
       <div className='card-body pt-0'>
-        {/* ── 1. SHOP FLOOR MIMIC PANEL (Grille Visuelle 2D des Machines) ── */}
+        {}
         <div className='mb-8 p-6 rounded-4' style={{ background: isDarkMode ? '#151521' : '#f8f9fa', border: '1px solid rgba(0,0,0,0.05)' }}>
           <div className='d-flex justify-content-between align-items-center mb-4'>
             <h5 className='fw-bolder mb-0 d-flex align-items-center gap-2'>
@@ -216,7 +212,7 @@ export default function MachinesPage() {
           </div>
         </div>
 
-        {/* ── 2. TABLEAU CLASSIQUE ── */}
+        {}
         <div className='table-responsive'>
           <table className='table align-middle table-row-dashed fs-6 gy-5'>
             <thead>
@@ -274,7 +270,7 @@ export default function MachinesPage() {
         </div>
       </div>
 
-      {/* Modal Detailed View */}
+      {}
       {selectedMachine && (() => {
         const conf = getStatusConfig(selectedMachine.statut)
         return (

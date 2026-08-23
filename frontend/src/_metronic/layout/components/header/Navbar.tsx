@@ -47,25 +47,22 @@ const Navbar = () => {
 
   useEffect(() => {
     fetchNotifications()
-    // Poll for notifications every 20 seconds
     const interval = setInterval(fetchNotifications, 20000)
     return () => clearInterval(interval)
   }, [])
 
-  // Map backend notifications to Metronic menu structure
   const mappedNotifications = notifications.map((n: any) => {
     let icon = 'notification-on'
-    let color = '#3E97FF' // primary blue
-    
+    let color = '#3E97FF' 
     if (n.type === 'ALERTE_STOCK' || n.priorite === 'CRITIQUE') {
       icon = 'security-user'
-      color = '#F1416C' // danger red
+      color = '#F1416C' 
     } else if (n.type === 'SUCCES') {
       icon = 'check-circle'
-      color = '#50CD89' // success green
+      color = '#50CD89' 
     } else if (n.type === 'ALERTE_PRODUCTION') {
       icon = 'setting-2'
-      color = '#F1BC00' // warning yellow
+      color = '#F1BC00' 
     }
 
     let timeStr = 'Récemment'
@@ -95,10 +92,10 @@ const Navbar = () => {
 
   return (
     <div className='app-navbar flex-shrink-0 d-flex align-items-center'>
-      {/* Search Bar */}
+      {}
       <Search />
 
-      {/* Notifications Menu */}
+      {}
       <div className={clsx('app-navbar-item', itemClass)}>
         <div
           className={clsx(
@@ -123,12 +120,12 @@ const Navbar = () => {
         />
       </div>
 
-      {/* Theme Mode Switcher */}
+      {}
       <div className={clsx('app-navbar-item', itemClass)}>
         <ThemeModeSwitcher toggleBtnClass={clsx('btn-active-light-primary btn-custom')} />
       </div>
 
-      {/* User Menu */}
+      {}
       <div className={clsx('app-navbar-item', itemClass)}>
         <div
           className={clsx('cursor-pointer symbol', userAvatarClass)}
@@ -141,7 +138,7 @@ const Navbar = () => {
         <HeaderUserMenu />
       </div>
 
-      {/* Mobile Toggle Menu */}
+      {}
       {config.app?.header?.default?.menu?.display && (
         <div className='app-navbar-item d-lg-none ms-2 me-n3' title='Show header menu'>
           <div

@@ -1,10 +1,9 @@
-//
-// Form controls
-//
 
-// Customization
+
+
+
+
 .form-control {
-  // Transparent style
   &.form-control-transparent {
     background-color: transparent;
     border-color: transparent;
@@ -19,13 +18,12 @@
     }
   }
 
-  // Flush
   &.form-control-flush {
     @include input-reset();
   }
 }
 
-// Solid style
+
 .form-control.form-control-solid {
   background-color: $input-solid-bg;
   border-color: $input-solid-bg;
@@ -45,17 +43,17 @@
   }
 }
 
-// Form control solid bg
+
 .form-control-solid-bg {
   background-color: $input-solid-bg;
 }
 
-// Readonly controls as plain text
+
 .form-control-plaintext {
   color: $input-plaintext-color;
 }
 
-// Placeholder colors
+
 .placeholder-gray-500 {
   @include placeholder(var(--#{$prefix}gray-500));
 }
@@ -64,7 +62,7 @@
   @include placeholder($white);
 }
 
-// Textarea reset resize
+
 .resize-none {
   resize: none;
 }

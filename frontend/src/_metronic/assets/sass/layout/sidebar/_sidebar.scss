@@ -1,8 +1,8 @@
-//
-// Sidebar
-//
 
-// Desktop mode
+
+
+
+
 @include media-breakpoint-up(lg) {
   .app-sidebar-toggle {
     box-shadow: var(--#{$prefix}app-sidebar-base-toggle-btn-box-shadow) !important;
@@ -37,7 +37,6 @@
 
   .app-sidebar-menu {
     .menu {
-      // Root
       > .menu-item {
         margin-left: 0.115rem;
 
@@ -52,7 +51,7 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
   .app-sidebar-logo {
     display: none;

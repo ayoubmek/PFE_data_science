@@ -86,9 +86,7 @@ class LayoutSetup {
 
   private static initLayoutSettings(config: ILayout): ILayout {
     const updatedConfig = {...config}
-    // clear body classes
     document.body.className = ''
-    // clear body attributes
     const bodyAttributes = document.body.getAttributeNames().filter((t) => t.indexOf('data-') > -1)
     bodyAttributes.forEach((attr) => document.body.removeAttribute(attr))
     document.body.setAttribute('style', '')
@@ -197,7 +195,7 @@ class LayoutSetup {
     LayoutSetup.initHTMLAttributes()
     LayoutSetup.isLoaded = false
     LayoutSetup.config = LayoutSetup.initConfig(Object.assign({}, updatedConfig))
-    LayoutSetup.isLoaded = true // remove loading there
+    LayoutSetup.isLoaded = true 
     return updatedConfig
   }
 

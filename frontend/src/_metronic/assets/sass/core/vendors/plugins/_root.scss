@@ -1,12 +1,10 @@
-//
-// CSS Variables
-//
+
+
+
 
 :root,
 [data-bs-theme='light'] {
-  // Select2
 
-  // Prismjs
   --#{$prefix}prismjs-bg: #{$prismjs-bg};
 
   --#{$prefix}prismjs-border: #{$prismjs-border};
@@ -21,7 +19,6 @@
 }
 
 [data-bs-theme='dark'] {
-  // Prismjs
   --#{$prefix}prismjs-bg: #{$prismjs-bg-dark};
 
   --#{$prefix}prismjs-border: #{$prismjs-border-dark};

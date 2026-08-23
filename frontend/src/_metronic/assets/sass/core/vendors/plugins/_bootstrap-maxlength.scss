@@ -1,11 +1,10 @@
-//
-// Bootstrap Maxlength
-//
+
+
+
 
 .bootstrap-maxlength {
   z-index: $bootstrap-maxlength-z-index !important;
 
-  // In modal
   .modal-open & {
     z-index: #{$zindex-modal + 5} !important;
   }

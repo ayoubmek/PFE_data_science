@@ -1,8 +1,8 @@
-//
-// Popover
-//
 
-// Base
+
+
+
+
 .popover {
   --#{$prefix}popover-header-border-color: #{$popover-header-border-color};
 
@@ -18,7 +18,7 @@
     right: $popover-dissmis-btn-end;
     height: $popover-dissmis-btn-size;
     width: $popover-dissmis-btn-size;
-    @include svg-bg-icon(close, var(--#{$prefix}gray-500)); // todo: revise
+    @include svg-bg-icon(close, var(--#{$prefix}gray-500)); 
     mask-size: 50%;
     -webkit-mask-size: 50%;
 
@@ -32,7 +32,7 @@
   }
 }
 
-// Inverse
+
 .popover-inverse {
   --#{$prefix}popover-bg: var(--#{$prefix}gray-900);
   --#{$prefix}popover-border-color: var(--#{$prefix}gray-900);

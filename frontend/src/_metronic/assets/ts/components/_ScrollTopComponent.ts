@@ -29,10 +29,8 @@ class ScrollTopComponent {
     this.options = Object.assign(defaultScrollTopOptions, options)
     this.instanceUid = getUniqueIdWithPrefix('scrolltop')
 
-    // Event Handlers
     this._handlers()
 
-    // Bind Instance
     DataUtil.set(this.element, 'scrolltop', this)
   }
 
@@ -52,7 +50,7 @@ class ScrollTopComponent {
 
   private _scroll = () => {
     const offset = parseInt(this._getOption('offset') as string)
-    const pos = getScrollTop() // current vertical position
+    const pos = getScrollTop() 
     if (pos > offset) {
       if (!document.body.hasAttribute('data-kt-scrolltop')) {
         document.body.setAttribute('data-kt-scrolltop', 'on')
@@ -85,11 +83,7 @@ class ScrollTopComponent {
     return null
   }
 
-  ///////////////////////
-  // ** Public API  ** //
-  ///////////////////////
 
-  // Plugin API
   public go = () => {
     return this._go()
   }
@@ -98,7 +92,6 @@ class ScrollTopComponent {
     return this.element
   }
 
-  // Static methods
   public static getInstance = (el: HTMLElement): ScrollTopComponent | undefined => {
     const scrollTop = DataUtil.get(el, 'scrolltop')
     if (scrollTop) {

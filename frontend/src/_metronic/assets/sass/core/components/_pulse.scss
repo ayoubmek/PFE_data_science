@@ -1,12 +1,11 @@
-//
-// Pulse
-//
 
-// Base
+
+
+
+
 .pulse {
   position: relative;
 
-  // Theme Colors
   @each $name, $color in $theme-colors {
     &.pulse-#{$name} {
       .pulse-ring {

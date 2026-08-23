@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+
 import React, {useRef, useState} from 'react'
 import {Modal} from 'react-bootstrap'
 import {KTIcon} from '../../helpers'
@@ -27,13 +27,13 @@ const InboxCompose: React.FC<Props> = ({show, handleClose}) => {
       animation={false}
     >
       <div className='modal-content'>
-        {/* begin::Form */}
+        {}
         <form ref={formRef} id='kt_inbox_compose_form' onSubmit={() => console.log('submit')}>
-          {/*begin::Header*/}
+          {}
           <div className='d-flex align-items-center justify-content-between py-5 ps-8 pe-5 border-bottom'>
             <h5 className='fw-bold m-0'>Compose</h5>
             <div className='d-flex ms-2'>
-              {/*begin::Close*/}
+              {}
               <div
                 className='btn btn-icon btn-sm btn-light-primary ms-2'
                 data-bs-dismiss='modal'
@@ -41,14 +41,14 @@ const InboxCompose: React.FC<Props> = ({show, handleClose}) => {
               >
                 <KTIcon className='fs-1' iconName='cross' />
               </div>
-              {/*end::Close*/}
+              {}
             </div>
           </div>
-          {/*end::Header*/}
+          {}
 
-          {/*begin::Body*/}
+          {}
           <div className='d-block'>
-            {/*begin::To*/}
+            {}
             <div className='d-flex align-items-center border-bottom inbox-to px-8 min-h-45px'>
               <div className='text-gray-600 w-75px'>To:</div>
               <div className='d-flex align-items-center flex-grow-1'>
@@ -74,9 +74,9 @@ const InboxCompose: React.FC<Props> = ({show, handleClose}) => {
                 </span>
               </div>
             </div>
-            {/*end::To*/}
+            {}
 
-            {/*begin::CC*/}
+            {}
             <div className='d-none align-items-center border-bottom inbox-to-cc ps-8 pe-5 min-h-45px'>
               <div className='text-gray-600 w-75px'>Cc:</div>
               <div className='flex-grow-1'>
@@ -92,9 +92,9 @@ const InboxCompose: React.FC<Props> = ({show, handleClose}) => {
                 <i className='la la-close '></i>
               </span>
             </div>
-            {/*end::CC*/}
+            {}
 
-            {/*begin::BCC*/}
+            {}
             <div className='d-none align-items-center border-bottom inbox-to-bcc ps-8 pe-5 min-h-45px'>
               <div className='text-gray-600 w-75px'>Bcc:</div>
               <div className='flex-grow-1'>
@@ -110,9 +110,9 @@ const InboxCompose: React.FC<Props> = ({show, handleClose}) => {
                 <i className='la la-close '></i>
               </span>
             </div>
-            {/*end::BCC*/}
+            {}
 
-            {/*begin::Subject*/}
+            {}
             <div className='border-bottom'>
               <input
                 className='form-control border-0 px-8 min-h-45px'
@@ -122,13 +122,13 @@ const InboxCompose: React.FC<Props> = ({show, handleClose}) => {
                 onChange={(e) => setSubject(e.target.value)}
               />
             </div>
-            {/*end::Subject*/}
+            {}
 
-            {/*begin::Message*/}
+            {}
             <div id='kt_inbox_compose_editor' className='border-0 h-125px h-lg-250px'></div>
-            {/*end::Message*/}
+            {}
 
-            {/*begin::Attachments*/}
+            {}
             <div className='dropzone dropzone-multi px-8 py-4' id='kt_inbox_compose_attachments'>
               <div className='dropzone-items'>
                 <div className='dropzone-item' style={{display: 'none'}}>
@@ -155,32 +155,32 @@ const InboxCompose: React.FC<Props> = ({show, handleClose}) => {
                   </div>
                   <div className='dropzone-toolbar'>
                     <span className='dropzone-delete' data-dz-remove>
-                      {/*begin::Close*/}
+                      {}
                       <span
                         className='btn btn-icon btn-sm btn-active-light-primary ms-2'
                         data-bs-dismiss='modal'
                       >
                         <KTIcon className='fs-1' iconName='cross' />
                       </span>
-                      {/*end::Close*/}
+                      {}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
-            {/*end::Attachments*/}
+            {}
           </div>
-          {/*end::Body*/}
+          {}
 
-          {/*begin::Footer*/}
+          {}
           <div className='d-flex align-items-center justify-content-between py-5 ps-8 pe-5 border-top'>
-            {/*begin::Actions*/}
+            {}
             <div className='d-flex align-items-center me-3'>
-              {/*begin::Send*/}
+              {}
               <button className='btn btn-primary me-4 px-6'>Send</button>
-              {/*end::Send*/}
+              {}
 
-              {/*begin::Other*/}
+              {}
               <a
                 href='#'
                 className='btn btn-icon btn-active-light-primary me-2'
@@ -191,11 +191,11 @@ const InboxCompose: React.FC<Props> = ({show, handleClose}) => {
               <a href='#' className='btn btn-icon btn-active-light-primary'>
                 <KTIcon className='fs-1' iconName='geolocation' />
               </a>
-              {/*end::Other*/}
+              {}
             </div>
-            {/*end::Actions*/}
+            {}
 
-            {/*begin::Toolbar*/}
+            {}
             <div className='d-flex align-items-center'>
               <button
                 className='btn btn-icon btn-active-light-primary me-2'
@@ -205,11 +205,11 @@ const InboxCompose: React.FC<Props> = ({show, handleClose}) => {
                 <KTIcon className='fs-1' iconName='setting-2' />
               </button>
             </div>
-            {/*end::Toolbar*/}
+            {}
           </div>
-          {/*end::Footer*/}
+          {}
         </form>
-        {/*end::Form*/}
+        {}
       </div>
     </Modal>
   )

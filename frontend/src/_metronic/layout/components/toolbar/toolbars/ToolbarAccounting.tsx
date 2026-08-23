@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+
 import {FC, useEffect, useState} from 'react'
 import {KTIcon} from '../../../../helpers'
 
@@ -13,15 +13,15 @@ const ToolbarAccounting: FC = () => {
   return (
     <>
       <div className='d-flex align-items-center me-5'>
-        {/* begin::Input group */}
+        {}
         <div className='d-flex align-items-center flex-shrink-0'>
-          {/* begin::Label */}
+          {}
           <span className='fs-7 text-gray-700 fw-bold pe-3 d-none d-md-block'>Actions:</span>
-          {/* end::Label */}
+          {}
 
-          {/* begin::Actions */}
+          {}
           <div className='d-flex flex-shrink-0'>
-            {/* begin::Button */}
+            {}
             <div
               data-bs-toggle='tooltip'
               data-bs-placement='top'
@@ -32,9 +32,9 @@ const ToolbarAccounting: FC = () => {
                 <KTIcon iconName='plus-square' className='fs-2x' />
               </a>
             </div>
-            {/* end::Button */}
+            {}
 
-            {/* begin::Button */}
+            {}
             <div
               data-bs-toggle='tooltip'
               data-bs-placement='top'
@@ -45,9 +45,9 @@ const ToolbarAccounting: FC = () => {
                 <KTIcon iconName='minus-square' className='fs-2x' />
               </a>
             </div>
-            {/* end::Button */}
+            {}
 
-            {/* begin::Button */}
+            {}
             <div
               data-bs-toggle='tooltip'
               data-bs-placement='top'
@@ -58,21 +58,21 @@ const ToolbarAccounting: FC = () => {
                 <KTIcon iconName='dots-square' className='fs-2x' />
               </a>
             </div>
-            {/* end::Button */}
+            {}
           </div>
-          {/* end::Actions */}
+          {}
         </div>
-        {/* end::Input group */}
+        {}
 
-        {/* begin::Input group */}
+        {}
         <div className='d-flex align-items-center flex-shrink-0'>
-          {/* begin::Desktop separartor */}
+          {}
           <div className='bullet bg-secondary h-35px w-1px mx-5'></div>
-          {/* end::Desktop separartor */}
+          {}
 
-          {/* begin::Label */}
+          {}
           <span className='fs-7 text-gray-700 fw-bold pe-4 ps-1 d-none d-md-block'>Progress:</span>
-          {/* end::Label */}
+          {}
 
           <div className='progress w-100px w-xl-150px w-xxl-300px h-25px bg-light-success'>
             <div
@@ -87,14 +87,14 @@ const ToolbarAccounting: FC = () => {
             </div>
           </div>
         </div>
-        {/* end::Input group */}
-        {/* end::Toolbar start */}
+        {}
+        {}
       </div>
-      {/* begin::Toolbar end */}
+      {}
       <div className='d-flex align-items-center'>
-        {/* begin::Input group */}
+        {}
         <div className='me-3'>
-          {/* begin::Select */}
+          {}
           <select
             className='form-select form-select-sm form-select-solid'
             data-control='select2'
@@ -108,13 +108,13 @@ const ToolbarAccounting: FC = () => {
             <option value='2'>In Progress</option>
             <option value='3'>Done</option>
           </select>
-          {/* end::Select */}
+          {}
         </div>
-        {/* end::Input group- */}
+        {}
 
-        {/* begin::Input group- */}
+        {}
         <div className='m-0'>
-          {/* begin::Select */}
+          {}
           <select
             className='form-select form-select-sm form-select-solid w-md-125px'
             data-control='select2'
@@ -128,9 +128,9 @@ const ToolbarAccounting: FC = () => {
             <option value='2'>In Progress</option>
             <option value='3'>Done</option>
           </select>
-          {/* end::Content */}
+          {}
         </div>
-        {/* end::Input group- */}
+        {}
       </div>
     </>
   )

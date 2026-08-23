@@ -1,6 +1,6 @@
-//
-// Alert
-//
+
+
+
 
 @each $name, $value in $theme-colors {
   .alert-#{$name} {

@@ -13,7 +13,7 @@ const ToolbarClassic = () => {
     <div className='d-flex align-items-center gap-2 gap-lg-3'>
       {config.app?.toolbar?.filterButton && (
         <div className='m-0'>
-          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+          {}
           <a
             href='#'
             className={clsx('btn btn-sm btn-flex fw-bold', daterangepickerButtonClass)}
@@ -43,7 +43,7 @@ const ToolbarClassic = () => {
 
       {config.app?.toolbar?.secondaryButton && (
         <>
-          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+          {}
           <a href='#' className='btn btn-sm btn-flex btn-light fw-bold'>
             Filter
           </a>
@@ -52,7 +52,7 @@ const ToolbarClassic = () => {
 
       {config.app?.toolbar?.primaryButton && (
         <>
-          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+          {}
           <a
             href='#'
             className='btn btn-sm fw-bold btn-primary'

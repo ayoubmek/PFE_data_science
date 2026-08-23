@@ -1,17 +1,16 @@
-//
-// Header tertiary
-//
 
-// General mode
+
+
+
+
 .app-header-tertiary {
   transition: $app-header-tertiary-base-transition;
   display: flex;
   align-items: stretch;
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
-  // Base
   .app-header-tertiary {
     @include property(z-index, $app-header-tertiary-base-z-index);
 
@@ -21,7 +20,6 @@
     border-bottom: var(--#{$prefix}app-header-tertiary-base-border-bottom);
   }
 
-  // Vars
   [data-kt-app-header-tertiary-enabled='true'] {
     --#{$prefix}app-header-tertiary-height: #{$app-header-tertiary-base-height};
   }
@@ -38,7 +36,6 @@
     --#{$prefix}app-header-tertiary-height: 0;
   }
 
-  // States
   .app-header-tertiary {
     height: var(--#{$prefix}app-header-tertiary-height);
 
@@ -83,9 +80,7 @@
     }
   }
 
-  // Integration
   .app-header-tertiary {
-    // Sidebar
     [data-kt-app-header-tertiary-enabled='true'][data-kt-app-sidebar-fixed='true'][data-kt-app-sidebar-push-header='true']
       & {
       left: calc(
@@ -94,7 +89,6 @@
       );
     }
 
-    // Sidebar Panel
     [data-kt-app-header-tertiary-enabled='true'][data-kt-app-sidebar-panel-fixed='true'][data-kt-app-sidebar-panel-push-header='true']
       & {
       left: calc(
@@ -107,9 +101,8 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
-  // Base
   .app-header .app-header-tertiary {
     flex-grow: 1;
     height: var(--#{$prefix}app-header-tertiary-height);
@@ -122,7 +115,6 @@
     background-color: var(--#{$prefix}app-header-tertiary-base-bg-color);
   }
 
-  // Vars
   [data-kt-app-header-tertiary-enabled='true'] {
     --#{$prefix}app-header-tertiary-height: #{$app-header-tertiary-base-height-mobile};
   }

@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-no-target-blank */
+
 import { useEffect } from 'react'
 import { ILayout, useLayout } from '../../core'
 

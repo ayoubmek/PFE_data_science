@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+
 import {useEffect, useState} from 'react'
 import {KTIcon} from '../../../../helpers'
 
@@ -11,13 +11,13 @@ const ToolbarReports = () => {
 
   return (
     <div className='d-flex align-items-center overflow-auto'>
-      {/* begin::Wrapper */}
+      {}
       <div className='d-flex align-items-center flex-shrink-0'>
-        {/* begin::Label */}
+        {}
         <span className='fs-7 fw-bold text-gray-700 flex-shrink-0 pe-4 d-none d-md-block'>
           Filter By:
         </span>
-        {/* end::Label */}
+        {}
 
         <div className='flex-shrink-0 '>
           <ul className='nav'>
@@ -53,21 +53,21 @@ const ToolbarReports = () => {
           </ul>
         </div>
       </div>
-      {/* end::Wrapper */}
+      {}
 
-      {/* begin::Separartor */}
+      {}
       <div className='bullet bg-secondary h-35px w-1px mx-5'></div>
-      {/* end::Separartor */}
+      {}
 
-      {/* begin::Wrapper */}
+      {}
       <div className='d-flex align-items-center'>
-        {/* begin::Label */}
+        {}
         <span className='fs-7 fw-bold text-gray-700 flex-shrink-0 pe-4 d-none d-md-block'>
           Sort By:
         </span>
-        {/* end::Label */}
+        {}
 
-        {/* begin::Select */}
+        {}
         <select
           className='form-select form-select-sm w-md-125px form-select-solid'
           data-control='select2'
@@ -81,9 +81,9 @@ const ToolbarReports = () => {
           <option value='2'>In Progress</option>
           <option value='3'>Done</option>
         </select>
-        {/* end::Select */}
+        {}
 
-        {/* begin::Actions */}
+        {}
         <div className='d-flex align-items-center ms-3'>
           <button
             type='button'
@@ -105,9 +105,9 @@ const ToolbarReports = () => {
             <KTIcon iconName='abstract-14' className=' fs-2 text-gray-400' />
           </button>
         </div>
-        {/* end::Actions */}
+        {}
       </div>
-      {/* end::Wrapper */}
+      {}
     </div>
   )
 }

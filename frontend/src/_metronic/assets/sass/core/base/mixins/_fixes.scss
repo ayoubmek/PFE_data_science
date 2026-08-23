@@ -1,9 +1,8 @@
-//
-// Fixes
-//
+
+
+
 
 @mixin fix-fixed-position-lags() {
-  // webkit hack for smooth font view on fixed positioned elements
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }

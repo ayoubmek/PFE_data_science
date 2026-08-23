@@ -27,7 +27,6 @@ public class StockService {
     private final FactCleRepository factCleRepo;
     private final NotificationService notificationService;
 
-    // ── ITEMS ──────────────────────────────────────────────────────────────
 
     public List<StockDTO.ItemResponse> getAllItems() {
         return itemRepo.findAllLatestSnapshot().stream()
@@ -56,7 +55,6 @@ public class StockService {
         itemRepo.delete(item);
     }
 
-    // ── MOVEMENTS ──────────────────────────────────────────────────────────
 
     public StockDTO.MovementResponse createMovement(StockDTO.MovementRequest req) {
         StockItem item = findItemOrThrow(req.getStockItemReference());
@@ -71,7 +69,6 @@ public class StockService {
             .reference(req.getReference())
             .build();
 
-        // Update stock quantity
         switch (req.getType()) {
             case ENTREE, RETOUR -> item.setQuantite(item.getQuantite().add(req.getQuantite()));
             case SORTIE -> {
@@ -86,7 +83,6 @@ public class StockService {
         itemRepo.save(item);
         StockMovement saved = movementRepo.save(movement);
 
-        // Trigger alerts
         checkAndNotifyStockLevel(item);
 
         return toMovementResponses(List.of(saved)).get(0);
@@ -97,7 +93,6 @@ public class StockService {
     }
 
     public List<StockDTO.MovementResponse> getRecentMovements(int months) {
-        // Use FACT_ILE — the real Item Ledger Entry table (1.5M rows)
         try {
             List<Object[]> rows = factCleRepo.findStockMovementsFromDWH();
 
@@ -105,9 +100,6 @@ public class StockService {
                 List<StockDTO.MovementResponse> result = new java.util.ArrayList<>();
                 for (Object[] r : rows) {
                     try {
-                        // Column order: id, itemReference, designation, postingDate,
-                        //               entryType, documentNo, quantite, locationCode,
-                        //               siteCode, sourceNo, coutActuel, database_
                         long    id          = r[0] != null ? ((Number) r[0]).longValue() : 0L;
                         String  reference   = r[1] != null ? r[1].toString().trim() : "";
                         String  designation = r[2] != null ? r[2].toString().trim() : "";
@@ -120,7 +112,6 @@ public class StockService {
                         String  sourceNo    = r[9] != null ? r[9].toString().trim() : "";
                         String  database_   = r[11] != null ? r[11].toString().trim() : "";
 
-                        // Map Entry Type to French label
                         String entryLabel = switch (entryTypeStr) {
                             case "0" -> "Achat";
                             case "1" -> "Vente";
@@ -132,12 +123,10 @@ public class StockService {
                             default  -> "Autre (" + entryTypeStr + ")";
                         };
 
-                        // ENTREE if quantity > 0, SORTIE otherwise
                         StockMovement.TypeMouvement type = quantite.compareTo(java.math.BigDecimal.ZERO) > 0
                             ? StockMovement.TypeMouvement.ENTREE
                             : StockMovement.TypeMouvement.SORTIE;
 
-                        // Parse posting date
                         java.time.LocalDateTime dateTime;
                         try {
                             Object rawDate = r[3];
@@ -168,11 +157,9 @@ public class StockService {
             }
         } catch (Exception ignored) {}
 
-        // Fallback to local movements table
         return toMovementResponses(movementRepo.findAllByOrderByDateDesc());
     }
 
-    // ── ALERTS ─────────────────────────────────────────────────────────────
 
     public List<StockDTO.ItemResponse> getAlertes() {
         return itemRepo.findAllByOrderByDateStockDesc().stream()
@@ -192,20 +179,15 @@ public class StockService {
             .map(this::toItemResponse).collect(Collectors.toList());
     }
 
-    // ── KPI ────────────────────────────────────────────────────────────────
 
     public StockDTO.KpiResponse getKpi() {
         LocalDateTime today = LocalDateTime.now().toLocalDate().atStartOfDay();
         StockDTO.KpiResponse kpi = new StockDTO.KpiResponse();
-        
         kpi.setTotalArticles(itemRepo.count());
-        // For performance on large legacy DB, we approximate these based on top 2000 or just return 0 for now
         kpi.setEnRupture(0); 
         kpi.setEnAlerte(0);
         kpi.setEnNiveauCritique(0);
-        
-        kpi.setValeurTotaleStock(0.0); // Approximated
-        
+        kpi.setValeurTotaleStock(0.0); 
         java.math.BigDecimal entrees = movementRepo.totalEntrees(today);
         java.math.BigDecimal sorties = movementRepo.totalSorties(today);
         kpi.setTotalEntreesJour(entrees != null ? entrees : java.math.BigDecimal.ZERO);
@@ -214,7 +196,6 @@ public class StockService {
     }
 
 
-    // ── HISTORY (ASTOCKDATE) ───────────────────────────────────────────────
 
     public List<StockDTO.HistoryResponse> getHistory(int limit) {
         return itemRepo.findAllByOrderByDateStockDesc().stream()
@@ -236,7 +217,6 @@ public class StockService {
             }).collect(Collectors.toList());
     }
 
-    // ── PRIVATE ────────────────────────────────────────────────────────────
 
     private void checkAndNotifyStockLevel(StockItem item) {
         if (item.isEnRupture()) {
@@ -294,7 +274,6 @@ public class StockService {
     private List<StockDTO.MovementResponse> toMovementResponses(List<StockMovement> movements) {
         if (movements.isEmpty()) return java.util.Collections.emptyList();
 
-        // Batch-fetch designations in one query instead of N+1
         Set<String> refs = movements.stream()
             .map(StockMovement::getStockItemReference)
             .collect(Collectors.toSet());

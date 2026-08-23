@@ -13,7 +13,6 @@ const Search: FC = () => {
   const suggestionsElement = useRef<HTMLDivElement | null>(null)
   const emptyElement = useRef<HTMLDivElement | null>(null)
   const [results, setResults] = useState<{ orders: any[], vendors: any[] }>({ orders: [], vendors: [] })
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searching, setSearching] = useState(false)
 
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
@@ -21,7 +20,6 @@ const Search: FC = () => {
     return saved ? JSON.parse(saved) : []
   })
 
-  // Domain-specific fallbacks if history is empty
   const defaultRecentItems = [
     { title: 'Order #102345', desc: 'Arkan Shipper', icon: 'package' },
     { title: 'Tracking ID: ARK-2940', desc: 'DHL Express', icon: 'truck' },
@@ -48,8 +46,6 @@ const Search: FC = () => {
           params: { query: queryTerm }
         })
         setResults(response.data)
-        
-        // Hide recently viewed
         suggestionsElement.current!.classList.add('d-none')
 
         if (response.data.orders.length === 0 && response.data.vendors.length === 0) {
@@ -73,22 +69,16 @@ const Search: FC = () => {
   }, [])
 
   const clear = useCallback((search: SearchComponent) => {
-    // Show recently viewed
     suggestionsElement.current!.classList.remove('d-none')
-    // Hide results
     resultsElement.current!.classList.add('d-none')
-    // Hide empty message
     emptyElement.current!.classList.add('d-none')
   }, [])
 
   useEffect(() => {
-    // Initialize search handler
     const searchObject = SearchComponent.createInsance('#kt_header_search')
 
-    // Search handler
     searchObject!.on('kt.search.process', processs)
 
-    // Clear handler
     searchObject!.on('kt.search.clear', clear)
   }, [processs, clear])
 

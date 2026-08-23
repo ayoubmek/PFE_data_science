@@ -1,6 +1,6 @@
-//
-// Dark Sidebar(used by Dark Sidebar layout only)
-//
+
+
+
 
 [data-kt-app-layout='dark-sidebar'] {
   .app-sidebar {
@@ -101,7 +101,7 @@
   }
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
   [data-kt-app-layout='dark-sidebar'] {
     .app-sidebar {
@@ -112,7 +112,7 @@
   }
 }
 
-// Dark mode
+
 @include color-mode(dark) {
   [data-kt-app-layout='dark-sidebar'] {
     .app-sidebar {

@@ -1,15 +1,14 @@
-//
-// Prismjs
-//
 
-// Highlight
+
+
+
+
 .highlight {
   position: relative;
   background: var(--#{$prefix}prismjs-bg);
   border-radius: $border-radius;
   padding: 1.75rem 1.5rem 1.75rem 1.5rem;
 
-  // Tabs
   .nav {
     border-bottom: 1px solid var(--#{$prefix}prismjs-border);
     padding-bottom: 1rem;
@@ -64,7 +63,6 @@
     }
   }
 
-  // Code
   .highlight-code {
     pre {
       background-color: transparent;

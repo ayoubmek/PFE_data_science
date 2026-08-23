@@ -38,12 +38,10 @@ class ImageInputComponent {
   value: string = ''
 
   constructor(_element: HTMLElement, _options: IImageInputOptions, _queries: IImageInputQueries) {
-    // Variables
     this.options = Object.assign(defaultImageInputOptions, _options)
     this.queries = _queries
     this.uid = getUniqueIdWithPrefix(this.queries.componentName)
 
-    // Elements
     this.element = _element
     this.inputElement = this.element.querySelector(this.queries.inputQuery)
     this.wrapperElement = this.element.querySelector(this.queries.wrapperQuery)
@@ -54,7 +52,6 @@ class ImageInputComponent {
       this.src = getCSS(this.wrapperElement, 'backgroundImage')
     }
 
-    // Event Handlers
     this.handlers()
 
     DataUtil.set(this.element, this.queries.componentName, this)
@@ -71,12 +68,10 @@ class ImageInputComponent {
     }
   }
 
-  // Event Handlers
   private _change = (e: Event) => {
     e.preventDefault()
 
     if (this.inputElement !== null && this.inputElement.files && this.inputElement.files[0]) {
-      // Fire change event
       if (EventHandlerUtil.trigger(this.element, 'kt.imageinput.change', e) === false) {
         return
       }
@@ -93,7 +88,6 @@ class ImageInputComponent {
       this.element.classList.add('image-input-changed')
       this.element.classList.remove('image-input-empty')
 
-      // Fire removed event
       EventHandlerUtil.trigger(this.element, 'kt.imageinput.changed', e)
     }
   }
@@ -101,7 +95,6 @@ class ImageInputComponent {
   private _cancel = (e: Event) => {
     e.preventDefault()
 
-    // Fire cancel event
     if (EventHandlerUtil.trigger(this.element, 'kt.imageinput.cancel', e) === false) {
       return
     }
@@ -117,14 +110,12 @@ class ImageInputComponent {
       this.hiddenElement.value = '0'
     }
 
-    // Fire canceled event
     EventHandlerUtil.trigger(this.element, 'kt.imageinput.canceled', e)
   }
 
   private _remove = (e: Event) => {
     e.preventDefault()
 
-    // Fire remove event
     if (EventHandlerUtil.trigger(this.element, 'kt.imageinput.remove', e) === false) {
       return
     }
@@ -143,13 +134,9 @@ class ImageInputComponent {
       this.hiddenElement.value = '1'
     }
 
-    // Fire removed event
     EventHandlerUtil.trigger(this.element, 'kt.imageinput.removed', e)
   }
 
-  ///////////////////////
-  // ** Public API  ** //
-  ///////////////////////
   public getInputElement(): HTMLInputElement | null {
     return this.inputElement
   }
@@ -158,7 +145,6 @@ class ImageInputComponent {
     return this.element
   }
 
-  // Event API
   public on = (name: string, handler: Function) => {
     return EventHandlerUtil.on(this.element, name, handler)
   }
@@ -175,7 +161,6 @@ class ImageInputComponent {
     return EventHandlerUtil.trigger(this.element, name, event)
   }
 
-  // Static methods
   public static getInstance = (
     el: HTMLElement,
     componentName: string = defaultImageInputQueires.componentName

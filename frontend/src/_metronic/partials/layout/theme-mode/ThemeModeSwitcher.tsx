@@ -3,7 +3,7 @@ import {KTIcon} from '../../../helpers'
 import {ThemeModeComponent} from '../../../assets/ts/layout'
 import {ThemeModeType, useThemeMode} from './ThemeModeProvider'
 
-/* eslint-disable jsx-a11y/anchor-is-valid */
+
 type Props = {
   toggleBtnClass?: string
   toggleBtnIconClass?: string
@@ -28,7 +28,7 @@ const ThemeModeSwitcher = ({
 
   return (
     <>
-      {/* begin::Menu toggle */}
+      {}
       <a
         href='#'
         className={clsx('btn btn-icon ', toggleBtnClass)}
@@ -44,14 +44,14 @@ const ThemeModeSwitcher = ({
           <KTIcon iconName='night-day' className={clsx('theme-dark-hide', toggleBtnIconClass)} />
         )}
       </a>
-      {/* begin::Menu toggle */}
+      {}
 
-      {/* begin::Menu */}
+      {}
       <div
         className='menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-title-gray-700 menu-icon-muted menu-active-bg menu-state-primary fw-semibold py-4 fs-base w-175px'
         data-kt-menu='true'
       >
-        {/* begin::Menu item */}
+        {}
         <div className='menu-item px-3 my-0'>
           <a
             href='#'
@@ -64,9 +64,9 @@ const ThemeModeSwitcher = ({
             <span className='menu-title'>Light</span>
           </a>
         </div>
-        {/* end::Menu item */}
+        {}
 
-        {/* begin::Menu item */}
+        {}
         <div className='menu-item px-3 my-0'>
           <a
             href='#'
@@ -79,9 +79,9 @@ const ThemeModeSwitcher = ({
             <span className='menu-title'>Dark</span>
           </a>
         </div>
-        {/* end::Menu item */}
+        {}
 
-        {/* begin::Menu item */}
+        {}
         <div className='menu-item px-3 my-0'>
           <a
             href='#'
@@ -94,9 +94,9 @@ const ThemeModeSwitcher = ({
             <span className='menu-title'>System</span>
           </a>
         </div>
-        {/* end::Menu item */}
+        {}
       </div>
-      {/* end::Menu */}
+      {}
     </>
   )
 }

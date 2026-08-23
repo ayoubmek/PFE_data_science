@@ -1,11 +1,10 @@
-//
-// SVG Bg Icons
-//
+
+
+
 
 @mixin svg-bg-icon($type, $color: none, $update: false) {
   $bg-image: '';
 
-  // Icon type;
   @if ($type == close) {
     $bg-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='#{$color}'><path d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/></svg>");
   }
@@ -50,7 +49,6 @@
     $bg-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'><rect opacity='0.3' x='2' y='2' width='20' height='20' rx='5' fill='#{$color}'/><rect x='6.0104' y='10.9247' width='12' height='2' rx='1' fill='#{$color}'/></svg>");
   }
 
-  // Icon style
   @if $update == false {
     mask-repeat: no-repeat;
     mask-position: center;

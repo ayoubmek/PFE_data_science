@@ -33,10 +33,10 @@ public class StockDTO {
     @Data
     public static class ItemResponse {
         private String id;
-        private String reference; // No_
-        private String designation; // Description
-        private String categorie; // GroupeItem
-        private String emplacement; // Site
+        private String reference; 
+        private String designation; 
+        private String categorie; 
+        private String emplacement; 
         private java.time.LocalDate dateStock;
         private Integer encours;
         private String genProdPostingGroup;
@@ -46,9 +46,9 @@ public class StockDTO {
         private BigDecimal quantite;
         private BigDecimal seuilCritique;
         private BigDecimal seuilAlerte;
-        private BigDecimal valeurUnitaire; // Cout
+        private BigDecimal valeurUnitaire; 
         private BigDecimal valeurTotale;
-        private String niveauAlerte;  // "NORMAL", "ALERTE", "CRITIQUE", "RUPTURE"
+        private String niveauAlerte;  
     }
 
     @Data

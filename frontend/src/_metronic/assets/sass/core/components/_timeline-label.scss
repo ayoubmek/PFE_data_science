@@ -1,6 +1,6 @@
-//
-// Timeline Label
-//
+
+
+
 
 .timeline-label {
   position: relative;
@@ -17,7 +17,6 @@
     background-color: var(--#{$prefix}gray-200);
   }
 
-  //
   .timeline-item {
     display: flex;
     align-items: flex-start;

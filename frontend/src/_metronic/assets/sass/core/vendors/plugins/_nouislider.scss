@@ -1,8 +1,8 @@
-//
-// NoUiSlider
-//
 
-// Base
+
+
+
+
 .noUi-target {
   border: 0;
   background: var(--#{$prefix}gray-100);
@@ -54,25 +54,22 @@
   }
 
   .noUi-handle {
-    background-color: $white; //var(--#{$prefix}body-bg);
+    background-color: $white; 
     border: 1px solid var(--#{$prefix}gray-200);
     box-shadow: var(--#{$prefix}box-shadow-sm);
   }
 
-  // Small size
   &.noUi-sm {
     @include nouislider-size(6px, 20px, 20px, 7px);
   }
 
-  // Large size
   &.noUi-lg {
     @include nouislider-size(18px, 30px, 30px, 6px);
   }
 }
 
-// Theme colors
+
 @each $name, $value in $theme-colors {
-  // NoUiSlider success color option
   .noUi-target.noUi-target-#{$name} {
     .noUi-connects {
       background-color: var(--#{$prefix}#{$name}-light);
@@ -90,7 +87,7 @@
   }
 }
 
-// Tooltip
+
 .noUi-tooltip {
   box-shadow: var(--#{$prefix}tooltip-box-shadow);
   background: var(--#{$prefix}tooltip-bg);

@@ -84,7 +84,6 @@ export const DefaultConfig: ILayout = {
         desktop: false,
         mobile: false,
       },
-      // custom settings,
       filterButton: false,
       daterangepickerButton: false,
       primaryButton: false,

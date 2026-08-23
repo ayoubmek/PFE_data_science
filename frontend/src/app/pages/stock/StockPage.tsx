@@ -114,7 +114,7 @@ export default function StockPage() {
   return (
     <div className='card card-flush'>
 
-      {/* ── KPI STATS ROW ── */}
+      {}
       <div className='card-header border-0 pt-6 pb-0'>
         <div className='d-flex gap-4 flex-wrap'>
           {[
@@ -136,7 +136,7 @@ export default function StockPage() {
         </div>
       </div>
 
-      {/* ── TOOLBAR ── */}
+      {}
       <div className='card-header border-0 pt-4 pb-2'>
         <div className='card-title'>
           <div className='d-flex align-items-center position-relative my-1'>
@@ -199,7 +199,7 @@ export default function StockPage() {
         </div>
       </div>
 
-      {/* ── FILTER PANEL ── */}
+      {}
       {showFilters && (
         <div className='card-header border-0 pt-0 pb-3'>
           <div className='d-flex flex-wrap gap-4 align-items-end bg-light rounded p-4 w-100'>
@@ -230,7 +230,7 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* ── TABLE ── */}
+      {}
       <div className='card-body pt-0'>
         <div className='table-responsive'>
           <table className='table align-middle table-row-dashed table-hover fs-8 gy-2'>
@@ -294,7 +294,7 @@ export default function StockPage() {
           </table>
         </div>
 
-        {/* ── PAGINATION ── */}
+        {}
         <div className='d-flex justify-content-between align-items-center flex-wrap gap-3 pt-4 border-top'>
           <div className='text-muted fs-7'>
             Affichage de <strong className='text-gray-800'>{filteredItems.length === 0 ? 0 : start + 1}</strong> à{' '}
@@ -327,7 +327,7 @@ export default function StockPage() {
         </div>
       </div>
 
-      {/* ── DETAIL MODAL ── */}
+      {}
       <Modal show={showModal} onHide={() => setShowModal(false)} size='lg' centered>
         <Modal.Header closeButton>
           <Modal.Title className='fw-bold fs-5'>

@@ -40,7 +40,7 @@ const LanguageSwitcher: FC = () => {
               setLanguage(l.lang)
             }}
           >
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+            {}
             <a
               href='#'
               className={clsx('menu-link d-flex px-5', {active: l.lang === currentLanguage.lang})}

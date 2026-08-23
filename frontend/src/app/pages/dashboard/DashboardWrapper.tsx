@@ -101,7 +101,6 @@ const DashboardPage: FC = () => {
       ])
       const summary = summaryRes.data
       const stats = statsRes.data || []
-      
       const mappedOfs = (ofsRes.data || []).map((o: any) => ({
         id: o.id,
         code: o.reference || o.code,
@@ -234,7 +233,6 @@ const DashboardPage: FC = () => {
     return <DashboardSkeleton />
   }
 
-  // Chart configuration
   const dates = data.chart_data.map((item) => item.date)
   const outputSeries = data.chart_data.map((item) => item.revenue)
   const scrapSeries = data.chart_data.map((item) => item.orders)
@@ -300,7 +298,7 @@ const DashboardPage: FC = () => {
 
   return (
     <>
-      {/* Statistics Row */}
+      {}
       <div className='row g-5 g-xl-10 mb-xl-10'>
         <div className='col-md-6 col-lg-6 col-xl-3 col-xxl-3'>
           <StatisticsWidget
@@ -349,7 +347,7 @@ const DashboardPage: FC = () => {
         </div>
       </div>
 
-      {/* Production Chart */}
+      {}
       <div className='row g-5 mb-7'>
         <div className='col-12'>
           <div className='card card-flush shadow-sm border-0 h-100'>
@@ -373,9 +371,9 @@ const DashboardPage: FC = () => {
         </div>
       </div>
 
-      {/* Bottom tables */}
+      {}
       <div className='row g-5 mb-7'>
-        {/* Recent OFs */}
+        {}
         <div className='col-lg-6'>
           <div className='card card-flush shadow-sm border-0 h-100'>
             <div className='card-header pt-6'>
@@ -428,7 +426,7 @@ const DashboardPage: FC = () => {
           </div>
         </div>
 
-        {/* Stock distribution */}
+        {}
         <div className='col-lg-6'>
           <div className='card card-flush shadow-sm border-0 h-100'>
             <div className='card-header pt-6'>
@@ -576,7 +574,7 @@ const DashboardPage: FC = () => {
           </Modal.Header>
           <Modal.Body className='px-8 py-8'>
             <div className='row g-6'>
-              {/* Summary Card */}
+              {}
               <div className='col-12'>
                 <div className='card bg-light border-0 p-5 rounded-3'>
                   <span className='text-muted fs-8 fw-semibold text-uppercase ls-1'>Catégorie d'Inventaire</span>
@@ -584,7 +582,7 @@ const DashboardPage: FC = () => {
                 </div>
               </div>
 
-              {/* Grid details */}
+              {}
               <div className='col-md-6'>
                 <div className='card bg-body border border-dashed border-gray-300 p-5 rounded-3 h-100'>
                   <div className='d-flex flex-column gap-4'>

@@ -1,17 +1,16 @@
-//
-// Header secondary
-//
 
-// General mode
+
+
+
+
 .app-header-secondary {
   transition: $app-header-secondary-base-transition;
   display: flex;
   align-items: stretch;
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
-  // Base
   .app-header-secondary {
     @include property(z-index, $app-header-secondary-base-z-index);
 
@@ -21,7 +20,6 @@
     border-bottom: var(--#{$prefix}app-header-secondary-base-border-bottom);
   }
 
-  // Vars
   [data-kt-app-header-secondary-enabled='true'] {
     --#{$prefix}app-header-secondary-height: #{$app-header-secondary-base-height};
   }
@@ -38,7 +36,6 @@
     --#{$prefix}app-header-secondary-height: 0;
   }
 
-  // States
   .app-header-secondary {
     height: var(--#{$prefix}app-header-secondary-height);
 
@@ -83,9 +80,7 @@
     }
   }
 
-  // Integration
   .app-header-secondary {
-    // Sidebar
     [data-kt-app-header-secondary-enabled='true'][data-kt-app-sidebar-fixed='true'][data-kt-app-sidebar-push-header='true']
       & {
       left: calc(
@@ -94,7 +89,6 @@
       );
     }
 
-    // Sidebar Panel
     [data-kt-app-header-secondary-enabled='true'][data-kt-app-sidebar-panel-fixed='true'][data-kt-app-sidebar-panel-push-header='true']
       & {
       left: calc(
@@ -107,9 +101,8 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
-  // Base
   .app-header .app-header-secondary {
     flex-grow: 1;
     height: var(--#{$prefix}app-header-secondary-height);
@@ -123,7 +116,6 @@
     background-color: var(--#{$prefix}app-header-secondary-base-bg-color);
   }
 
-  // Vars
   [data-kt-app-header-secondary-enabled='true'] {
     --#{$prefix}app-header-secondary-height: #{$app-header-secondary-base-height-mobile};
   }

@@ -1,6 +1,5 @@
 import zipfile
 import re
-
 with zipfile.ZipFile('scratch/test_out.docx', 'r') as zip_ref:
     document_xml = zip_ref.read('word/document.xml').decode('utf-8')
     print("Found w:pgNumType tags:")

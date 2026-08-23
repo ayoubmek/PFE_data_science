@@ -1,9 +1,8 @@
-//
-// Carousel
-//
+
+
+
 
 .carousel-custom {
-  // Indicators
   .carousel-indicators {
     align-items: center;
     position: static;
@@ -22,7 +21,6 @@
       }
     }
 
-    // Dots style
     &.carousel-indicators-dots {
       li {
         border-radius: 0;
@@ -57,7 +55,6 @@
       }
     }
 
-    // Bullet style
     &.carousel-indicators-bullet {
       li {
         transition: all $carousel-custom-indicator-transition-speed ease;
@@ -97,7 +94,6 @@
     }
   }
 
-  // Theme colors
   @each $name, $value in $theme-colors {
     .carousel-indicators-active-#{$name} {
       li.active:after {
@@ -106,7 +102,6 @@
     }
   }
 
-  // Stretch mode
   &.carousel-stretch {
     height: 100%;
     display: flex;

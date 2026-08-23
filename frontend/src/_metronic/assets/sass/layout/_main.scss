@@ -1,8 +1,8 @@
-//
-// Main
-//
 
-// Desktop mode
+
+
+
+
 @include media-breakpoint-up(lg) {
   .app-main {
     :not([data-kt-app-footer-fixed='true']) & {

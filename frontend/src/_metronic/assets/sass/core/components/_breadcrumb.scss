@@ -1,8 +1,8 @@
-//
-// Breadcrumb
-//
 
-// Breadcrumb
+
+
+
+
 .breadcrumb {
   display: flex;
   align-items: center;
@@ -10,7 +10,6 @@
   padding: 0;
   margin: 0;
 
-  // Item breadcrumb
   .breadcrumb-item {
     display: flex;
     align-items: center;
@@ -41,7 +40,7 @@
   }
 }
 
-// Breadcrumb line style
+
 .breadcrumb-line {
   .breadcrumb-item {
     &:after {
@@ -50,7 +49,7 @@
   }
 }
 
-// Breadcrumb dot style
+
 .breadcrumb-dot {
   .breadcrumb-item {
     &:after {
@@ -59,7 +58,7 @@
   }
 }
 
-// Breadcrumb separatorless style
+
 .breadcrumb-separatorless {
   .breadcrumb-item {
     &:after {

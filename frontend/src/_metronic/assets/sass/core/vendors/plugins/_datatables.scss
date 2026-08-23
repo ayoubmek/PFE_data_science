@@ -1,10 +1,10 @@
-//
-// DataTables
-//
+
+
+
 
 $toolbar-spacing: 1rem 0;
 
-// Base
+
 table.dataTable {
   width: 100% !important;
   margin: 0 !important;
@@ -14,7 +14,7 @@ table.dataTable {
   }
 }
 
-// Toolbar
+
 div.dataTables_wrapper div.dataTables_length {
   padding: $toolbar-spacing;
 }
@@ -42,7 +42,7 @@ div.dataTables_length + div.dataTables_info {
   margin-left: 1rem;
 }
 
-// Pagination
+
 div.dataTables_wrapper div.dataTables_paginate {
   padding: $toolbar-spacing;
   margin-left: 0.5rem;
@@ -52,7 +52,7 @@ div.dataTables_wrapper div.dataTables_paginate {
   }
 }
 
-// Head
+
 table.dataTable > thead > tr > {
   td,
   th {
@@ -62,7 +62,7 @@ table.dataTable > thead > tr > {
   }
 }
 
-// Sorting
+
 table.dataTable > thead {
   .sorting {
     &:after,
@@ -83,7 +83,6 @@ table.dataTable > thead {
       width: 0.75rem;
       height: 0.75rem;
       content: ' ' !important;
-      //top: 50%;
       bottom: auto;
       right: auto !important;
       left: auto;
@@ -106,7 +105,7 @@ table.dataTable > thead .sorting_desc:after {
   @include svg-bg-icon(arrow-bottom, var(--#{$prefix}text-muted));
 }
 
-// Processing
+
 div.dataTables_wrapper {
   .table-responsive {
     position: relative;
@@ -129,7 +128,7 @@ div.dataTables_wrapper {
   }
 }
 
-// Responsive
+
 table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control,
 table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control,
 table.dataTable.dtr-column.collapsed > tbody > tr > td.dtr-control,
@@ -189,7 +188,7 @@ table.dataTable > tbody > tr.child span.dtr-data {
   font-weight: $font-weight-normal;
 }
 
-// Striped
+
 table.dataTable.table-striped > tbody > tr.odd > * {
   box-shadow: inset 0 0 0 9999px var(--#{$prefix}table-striped-bg);
 }
@@ -210,7 +209,7 @@ table.dataTable > tbody > tr.selected > * {
   }
 }
 
-// Scroll
+
 div.dataTables_scrollBody {
   border-left: 0 !important;
 
@@ -238,7 +237,7 @@ div.dtfc-left-top-blocker {
   background-color: var(--#{$prefix}body-bg);
 }
 
-// Fixed column
+
 table.dataTable thead tr > .dtfc-fixed-left,
 table.dataTable thead tr > .dtfc-fixed-right {
   background-color: var(--#{$prefix}body-bg);
@@ -249,7 +248,7 @@ table.dataTable tbody tr > .dtfc-fixed-right {
   background-color: var(--#{$prefix}body-bg);
 }
 
-// Fixed header
+
 .dtfh-floatingparent {
   box-shadow: var(--#{$prefix}box-shadow-sm);
 
@@ -265,7 +264,7 @@ table.dataTable tbody tr > .dtfc-fixed-right {
   }
 }
 
-// Child details
+
 .dtr-details {
   li {
     display: flex;

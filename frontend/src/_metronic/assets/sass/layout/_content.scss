@@ -1,8 +1,8 @@
-//
-// Content
-//
 
-// Desktop mode
+
+
+
+
 @include media-breakpoint-up(lg) {
   .app-content {
     [data-kt-app-toolbar-enabled='true']:not([data-kt-app-toolbar-fixed='true']) & {
@@ -11,7 +11,7 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
   .app-content {
     [data-kt-app-toolbar-enabled='true']:not([data-kt-app-toolbar-fixed-mobile='true']) & {

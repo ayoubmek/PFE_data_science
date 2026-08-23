@@ -1,15 +1,13 @@
-//
-// Text
-//
 
-// Text colors
+
+
+
+
 @each $name, $color in $theme-text-colors {
-  // Base color
   .text-#{$name} {
     color: var(--#{$prefix}text-#{$name}) !important;
   }
 
-  // Inverse color
   @if (theme-inverse-color($name)) {
     .text-inverse-#{$name} {
       color: var(--#{$prefix}#{$name}-inverse) !important;
@@ -17,13 +15,11 @@
   }
 
   @if (theme-light-color($name)) {
-    // Light colors
     .text-light-#{$name} {
       color: var(--#{$prefix}#{$name}-light) !important;
     }
   }
 
-  // Hover
   .text-hover-#{$name} {
     transition: $transition-link;
 
@@ -46,7 +42,6 @@
     }
   }
 
-  // Active
   .text-active-#{$name} {
     transition: $transition-link;
 
@@ -70,7 +65,7 @@
   }
 }
 
-// Parent hover
+
 .parent-hover {
   @each $name, $color in $theme-text-colors {
     .parent-hover-#{$name} {
@@ -86,7 +81,7 @@
   }
 }
 
-// Parent active
+
 .parent-active {
   @each $name, $color in $theme-text-colors {
     .parent-active-#{$name} {
@@ -102,26 +97,26 @@
   }
 }
 
-// Text transparent
+
 .text-transparent {
   color: transparent;
 }
 
-// Cursor pointer
+
 .cursor-pointer {
   cursor: pointer;
 }
 
-// Cursor default
+
 .cursor-default {
   cursor: default;
 }
-// Cursor move
+
 .cursor-move {
   cursor: move;
 }
 
-// Icons
+
 i {
   &.bi,
   &[class^='fonticon-'],
@@ -136,7 +131,7 @@ i {
   }
 }
 
-// Link transition
+
 a {
   transition: $transition-link;
 

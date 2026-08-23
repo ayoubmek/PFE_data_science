@@ -63,9 +63,6 @@ export type ListViewContextProps = {
   onSelect: (selectedId: ID) => void
   onSelectAll: () => void
   clearSelected: () => void
-  // NULL => (CREATION MODE) | MODAL IS OPENED
-  // NUMBER => (EDIT MODE) | MODAL IS OPENED
-  // UNDEFINED => MODAL IS CLOSED
   itemIdForUpdate?: ID
   setItemIdForUpdate: Dispatch<SetStateAction<ID>>
   isAllSelected: boolean

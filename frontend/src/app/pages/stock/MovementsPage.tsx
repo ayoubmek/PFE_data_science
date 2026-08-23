@@ -131,7 +131,7 @@ export default function MovementsPage() {
   return (
     <div className='card card-flush'>
 
-      {/* ── KPI STATS ROW ── */}
+      {}
       <div className='card-header border-0 pt-6 pb-0'>
         <div className='d-flex gap-4 flex-wrap'>
           {[
@@ -154,10 +154,10 @@ export default function MovementsPage() {
         </div>
       </div>
 
-      {/* ── TOOLBAR ── */}
+      {}
       <div className='card-header border-0 pt-4 pb-2'>
         <div className='card-title flex-wrap gap-2'>
-          {/* Search */}
+          {}
           <div className='d-flex align-items-center position-relative my-1'>
             <KTIcon iconName='magnifier' className='fs-1 position-absolute ms-4 text-gray-400' />
             <input
@@ -168,7 +168,7 @@ export default function MovementsPage() {
               onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
-          {/* Type quick pills */}
+          {}
           <div className='d-flex gap-2'>
             {[
               { val: 'ALL', label: 'Tous', color: 'primary' },
@@ -187,7 +187,7 @@ export default function MovementsPage() {
           </div>
         </div>
         <div className='card-toolbar gap-2 flex-wrap'>
-          {/* Period selector */}
+          {}
           <div className='d-flex align-items-center gap-1 me-2'>
             <span className='text-muted fs-8 fw-semibold me-1'>Période :</span>
             {[1, 3, 6, 12].map(m => (
@@ -248,7 +248,7 @@ export default function MovementsPage() {
         </div>
       </div>
 
-      {/* ── DATE FILTER PANEL ── */}
+      {}
       {showFilters && (
         <div className='card-header border-0 pt-0 pb-3'>
           <div className='d-flex flex-wrap gap-4 align-items-end bg-light rounded p-4 w-100'>
@@ -267,7 +267,7 @@ export default function MovementsPage() {
         </div>
       )}
 
-      {/* ── TABLE ── */}
+      {}
       <div className='card-body pt-0'>
         <div className='table-responsive'>
           <table className='table align-middle table-row-dashed table-hover fs-7 gy-2'>
@@ -329,7 +329,7 @@ export default function MovementsPage() {
           </table>
         </div>
 
-        {/* ── PAGINATION ── */}
+        {}
         <div className='d-flex justify-content-between align-items-center flex-wrap gap-3 pt-4 border-top'>
           <div className='text-muted fs-7'>
             Affichage de <strong className='text-gray-800'>{filteredMovements.length === 0 ? 0 : start + 1}</strong> à{' '}
@@ -362,7 +362,7 @@ export default function MovementsPage() {
         </div>
       </div>
 
-      {/* ── DETAIL MODAL ── */}
+      {}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title className='fw-bold fs-5'>

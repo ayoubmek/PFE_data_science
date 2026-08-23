@@ -1,6 +1,6 @@
-//
-// Select2 plugin customization: https://select2.org
-//
+
+
+
 
 $select2-dropdown-padding: 1rem 0;
 $select2-dropdown-option-padding: 0.75rem 1.25rem;
@@ -17,9 +17,9 @@ $select2-clear-size: 0.7rem;
 $select2-clear-color: var(--#{$prefix}gray-700);
 $select2-clear-color-dark: var(--#{$prefix}gray-700);
 $select2-clear-color-hover: var(--#{$prefix}primary);
-$select2-clear-right: $form-select-indicator-padding; //$form-select-padding-x +
+$select2-clear-right: $form-select-indicator-padding; 
 
-// Bootstrap .form-control sizing integration
+
 $select2-tag-clear-size: 0.6rem;
 
 $select2-tag-padding-y-sm: 0.1rem;
@@ -34,16 +34,14 @@ $select2-tag-padding-y-lg: 0.15rem;
 $select2-tag-padding-x-lg: 0.65rem;
 $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2;
 
-// Bootstrapa 5 Theme
+
 .select2-container--bootstrap5 {
-  // Selection
   .select2-selection {
     box-shadow: none;
     height: auto;
     outline: none !important;
   }
 
-  // Selection focus & open states
   &.select2-container--focus:not(.select2-container--disabled),
   &.select2-container--open:not(.select2-container--disabled) {
     .form-select-solid {
@@ -72,7 +70,6 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
     }
   }
 
-  // Search
   .select2-search.select2-search--inline {
     flex-grow: 1;
 
@@ -99,12 +96,10 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
     }
   }
 
-  //  Single mode
   .select2-selection--single {
     display: flex;
     align-items: center;
 
-    // Selected
     .select2-selection__rendered {
       display: block;
       padding-left: 0;
@@ -115,57 +110,45 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
       color: var(--#{$prefix}input-color);
     }
 
-    // Placeholder
     .select2-selection__placeholder {
       color: $input-solid-placeholder-color;
     }
 
-    // Form select solid
     &.form-select-solid {
-      // Selected
       .select2-selection__rendered {
         color: $input-solid-color;
       }
 
-      // Placeholder
       .select2-selection__placeholder {
         color: $input-solid-placeholder-color;
       }
     }
 
-    // Form select transparent
     &.form-select-transparent {
-      // Selected
       .select2-selection__rendered {
         color: var(--#{$prefix}gray-800);
       }
 
-      // Placeholder
       .select2-selection__placeholder {
         color: var(--#{$prefix}gray-800);
       }
     }
 
-    // Form select dark color
     &.form-select-dark {
-      // Selected
       .select2-selection__rendered {
         color: var(--#{$prefix}gray-900);
       }
     }
   }
 
-  //  Multiple mode
   .select2-selection--multiple {
     display: flex;
     align-items: center;
 
-    // Search
     .select2-search.select2-search--inline {
       display: inline-flex;
     }
 
-    // Selected
     .select2-selection__rendered {
       display: inline;
       margin: 0;
@@ -204,7 +187,6 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
       }
     }
 
-    // Choice
     .select2-selection__choice {
       .select2-selection__choice__remove {
         height: $select2-tag-clear-size;
@@ -212,7 +194,6 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
       }
     }
 
-    // Sizes
     &.form-select-sm {
       min-height: $input-height-sm;
       padding-top: $select2-input-padding-y-sm;
@@ -283,7 +264,6 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
     }
   }
 
-  // Dropdown
   .select2-dropdown {
     border: 0;
     box-shadow: var(--#{$prefix}dropdown-box-shadow);
@@ -291,12 +271,10 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
     padding: $select2-dropdown-padding;
     background-color: var(--#{$prefix}dropdown-bg);
 
-    // In modal
     .modal-open & {
       z-index: $zindex-modal + 1;
     }
 
-    // Search
     .select2-search {
       padding: $select2-search-padding;
       margin: $select2-search-margin;
@@ -317,13 +295,11 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
       }
     }
 
-    // Options
     .select2-results > .select2-results__options {
       max-height: 250px;
       overflow-y: auto;
     }
 
-    // Option
     .select2-results__option {
       color: var(--#{$prefix}gray-700);
       transition: $transition-link;
@@ -386,7 +362,6 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
     }
   }
 
-  // Clear
   .select2-selection__clear {
     display: block;
     height: $select2-clear-size;
@@ -409,7 +384,7 @@ $select2-input-padding-y-lg: $input-padding-y-lg - $select2-tag-padding-y-lg * 2
   }
 }
 
-// Floating label integration
+
 .form-floating {
   .form-select {
     padding-top: $form-floating-input-padding-t !important;

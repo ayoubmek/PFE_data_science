@@ -1,6 +1,6 @@
-//
-// CSS Property
-//
+
+
+
 
 @mixin property($attr, $value, $important: '') {
   @if $value != null and $value != false {

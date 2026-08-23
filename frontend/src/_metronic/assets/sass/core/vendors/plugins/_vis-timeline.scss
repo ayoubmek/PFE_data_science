@@ -1,12 +1,12 @@
-//
-// Vis Timeline
-//
 
-// Variables
+
+
+
+
 $vis-border-color: var(--#{$prefix}border-color);
 $vis-border-dashed-color: var(--#{$prefix}border-dashed-color);
 
-// General
+
 .vis-timeline {
   border: 1px solid $vis-border-color !important;
 
@@ -99,7 +99,7 @@ $vis-border-dashed-color: var(--#{$prefix}border-dashed-color);
   }
 }
 
-// Custom style
+
 .vis-timeline-custom {
   .vis-timeline {
     border: 0 !important;

@@ -1,8 +1,8 @@
-//
-// sidebar
-//
 
-// General mode
+
+
+
+
 .app-sidebar {
   transition: $app-sidebar-base-transition;
   background-color: var(--#{$prefix}app-sidebar-base-bg-color);
@@ -11,7 +11,7 @@
   border-right: var(--#{$prefix}app-sidebar-base-border-end);
 }
 
-// Utilities
+
 .app-sidebar-minimize-d-flex,
 .app-sidebar-sticky-d-flex,
 .app-sidebar-collapse-d-flex,
@@ -20,9 +20,8 @@
   display: none;
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
-  // Base
   .app-sidebar {
     display: flex;
     flex-shrink: 0;
@@ -35,7 +34,6 @@
     @include property(margin-bottom, $app-sidebar-base-gap-bottom);
   }
 
-  // Vars
   :root {
     --#{$prefix}app-sidebar-width: #{$app-sidebar-base-width};
     --#{$prefix}app-sidebar-width-actual: #{$app-sidebar-base-width};
@@ -74,7 +72,6 @@
     --#{$prefix}app-sidebar-width: 0px;
   }
 
-  // States
   .app-sidebar {
     [data-kt-app-sidebar-static='true'] & {
       position: relative;
@@ -143,7 +140,6 @@
     }
   }
 
-  // Utilities
   [data-kt-app-sidebar-minimize='on'] {
     .app-sidebar-minimize-d-none {
       display: none !important;
@@ -174,15 +170,12 @@
     }
   }
 
-  // Integration
   .app-sidebar {
-    // Header
     [data-kt-app-sidebar-fixed='true'][data-kt-app-header-fixed='true']:not([data-kt-app-sidebar-push-header='true'])
       & {
       top: var(--#{$prefix}app-header-height);
     }
 
-    // Toolbar
     [data-kt-app-sidebar-fixed='true'][data-kt-app-header-fixed='true'][data-kt-app-toolbar-fixed='true']:not([data-kt-app-sidebar-push-toolbar='true'])
       & {
       top: calc(var(--#{$prefix}app-header-height) + var(--#{$prefix}app-toolbar-height, 0px));
@@ -190,9 +183,8 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
-  // Base
   .app-sidebar {
     display: none;
     width: var(--#{$prefix}app-sidebar-width);
@@ -204,7 +196,6 @@
     @include property(margin-bottom, $app-sidebar-base-gap-bottom-mobile);
   }
 
-  // Vars
   :root {
     --#{$prefix}app-sidebar-width: #{$app-sidebar-base-width-mobile};
     --#{$prefix}app-sidebar-width-actual: #{$app-sidebar-base-width-mobile};
@@ -234,7 +225,6 @@
     --#{$prefix}app-sidebar-width: 0px;
   }
 
-  // States
   .app-sidebar {
     [data-kt-app-sidebar-stacked='true'] & {
       align-items: stretch;
@@ -269,7 +259,6 @@
     }
   }
 
-  // Utilities
   [data-kt-app-sidebar-minimize-mobile='on'] {
     .app-sidebar-minimize-mobile-d-none {
       display: none !important;

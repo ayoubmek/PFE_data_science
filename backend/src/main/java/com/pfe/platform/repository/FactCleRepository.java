@@ -104,4 +104,3 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
         """, nativeQuery = true)
     List<Object[]> findStockMovementsFromDWH();
 }
-

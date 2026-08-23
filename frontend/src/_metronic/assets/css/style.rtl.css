@@ -1,12 +1,6 @@
-/*!***********************************************************************************************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[0].use[2]!./src/_metronic/assets/sass/style.scss ***!
-  \***********************************************************************************************************************************************************/
+
 @charset "UTF-8";
-/*!
- * Bootstrap  v5.3.0 (https://getbootstrap.com/)
- * Copyright 2011-2023 The Bootstrap Authors
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
- */
+
 :root,
 [data-bs-theme=light] {
   --bs-blue: #0d6efd;
@@ -29162,7 +29156,6 @@ h6,
   width: 0.875rem;transform: rotateZ(-180deg);
 }
 .page-item .page-link {
-  /*rtl:end:ignore*/
 }
 .page-item .page-link .previous {
   mask-repeat: no-repeat;
@@ -29299,7 +29292,6 @@ h6,
   mask-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 6 6%27 fill=%27var%28--bs-pagination-disabled-color%29%27%3e%3cpath d=%27M3.27989 3.23571L1.53642 4.97917C1.36382 5.15176 1.36383 5.43158 1.53642 5.60417C1.70901 5.77676 1.98882 5.77676 2.16139 5.60417L4.47096 3.29463C4.63371 3.13192 4.63371 2.86809 4.47096 2.70538L2.16139 0.395812C1.98883 0.22325 1.70901 0.22325 1.53642 0.395812C1.36383 0.568437 1.36383 0.84825 1.53642 1.02081L3.27989 2.76429C3.41006 2.89446 3.41006 3.10554 3.27989 3.23571Z%27/%3e%3c/svg%3e");
 }
 .page-item {
-  /*rtl:end:ignore*/
 }
 
 @media (max-width: 991.98px) {
@@ -42101,8 +42093,8 @@ code:not([class*=language-]) {
   right: 0;
   bottom: 0;
   border: 2px solid var(--bs-symbol-border-color);
-  -webkit-background-clip: padding-box; /* for Safari */
-  background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
+  -webkit-background-clip: padding-box; 
+  background-clip: padding-box; 
 }
 .symbol-group.symbol-hover .symbol {
   cursor: pointer;

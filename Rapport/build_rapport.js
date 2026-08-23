@@ -7,18 +7,18 @@ const {
 } = require('docx');
 const fs = require('fs');
 
-// ─── COLORS & FONTS ────────────────────────────────────────────────────────
-const NAVY = "000000";   // Noir — sans couleur (standard universitaire)
-const BLUE = "000000";   // Noir — sans couleur
+
+const NAVY = "000000";   
+const BLUE = "000000";   
 const LIGHT = "F0F0F0";
 const WHITE = "FFFFFF";
 const BLACK = "000000";
 const GRAY = "595959";
-const DARK = "333333";   // Gris foncé pour fonds de tableaux
+const DARK = "333333";   
 const FONT = "Times New Roman";
 const FONT2 = "Arial";
 
-// ─── HELPERS ───────────────────────────────────────────────────────────────
+
 const pb = () => new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 40, after: 40 } });
 const pageBreak = () => new Paragraph({ children: [new PageBreak()], spacing: { before: 0, after: 0 } });
 
@@ -159,12 +159,12 @@ const fitImage = (filePath, maxW = 550, maxH = 650) => {
   return { width, height };
 };
 
-// ─── TABLE HELPER ──────────────────────────────────────────────────────────
+
 const border = { style: BorderStyle.SINGLE, size: 1, color: "AAAAAA" };
 const borders = { top: border, bottom: border, left: border, right: border };
 
 const makeTable = (headers, rows, colWidths) => {
-  const targetTotalW = 8666; // Exact width of the body text area (A4 width 11906 - 1800 left - 1440 right)
+  const targetTotalW = 8666; 
   const originalTotalW = colWidths.reduce((a, b) => a + b, 0);
   const scaledColWidths = colWidths.map(w => Math.round((w / originalTotalW) * targetTotalW));
   const totalW = scaledColWidths.reduce((a, b) => a + b, 0);
@@ -206,8 +206,8 @@ const makeTable = (headers, rows, colWidths) => {
   });
 };
 
-// ─── TABLE OF CONTENTS HELPER ─────────────────────────────────────────────
-// level: 0 = chapitre/front-matter, 1 = section, 2 = sous-section, 3 = sous-sous-section
+
+
 const tocLine = (text, level, page) => {
   const sz = level === 0 ? 24 : level === 1 ? 23 : 22;
   const bold = level === 0;
@@ -227,13 +227,12 @@ const tocLine = (text, level, page) => {
   });
 };
 
-// ─── SP TO DAYS CONVERTER HELPER ──────────────────────────────────────────
+
 const getEstDays = (spStr, sprintNum) => {
   const sp = parseFloat(spStr);
   if (isNaN(sp)) return spStr;
 
   if (sprintNum === 2) {
-    // Sprint 2 is extremely packed (139 SP), so the conversion factor is lower
     if (sp === 8) return "1.5";
     if (sp === 5) return "1";
     if (sp === 3) return "0.5";
@@ -241,7 +240,6 @@ const getEstDays = (spStr, sprintNum) => {
     return (sp * 0.15).toFixed(1);
   }
 
-  // Sprints 1, 3, 4, 5 have a more standard conversion (1 SP ≈ 0.25 - 0.3 days)
   if (sp === 8) return "2";
   if (sp === 5) return "1.5";
   if (sp === 3) return "1";
@@ -269,7 +267,6 @@ const getEstSP = (spStr, sprintNum) => {
     return (sp * 0.3).toFixed(1);
   }
 
-  // Sprints 1, 4, 5
   if (sp === 8) return "3";
   if (sp === 5) return "2";
   if (sp === 3) return "1.5";
@@ -277,7 +274,7 @@ const getEstSP = (spStr, sprintNum) => {
   return (sp * 0.4).toFixed(1);
 };
 
-// ─── TEST METRICS INTRO HELPER ──────────────────────────────────────────────
+
 const getSprintTestIntro = (num) => {
   const introBase = "Cette section présente les tests réalisés dans le cadre de ce sprint afin de valider la conformité fonctionnelle et technique des développements livrés. Les tests ont été exécutés de manière itérative. Les anomalies détectées ont été corrigées au fil des sprints, ce qui a permis d’améliorer progressivement la stabilité du système jusqu’à atteindre un taux de réussite final de 100%.";
   switch (num) {
@@ -296,7 +293,7 @@ const getSprintTestIntro = (num) => {
   }
 };
 
-// ─── TECH CARD HELPER ──────────────────────────────────────────────────────
+
 const techCard = (num, name, logoPath, desc, adv) => [
   title3(`2.7.${num} ${name}`),
   new Paragraph({
@@ -314,14 +311,14 @@ const techCard = (num, name, logoPath, desc, adv) => [
   pb(),
 ];
 
-// ─── UC DESCRIPTION HELPER ─────────────────────────────────────────────────
+
 const ucBorder = { style: BorderStyle.SINGLE, size: 1, color: "AAAAAA" };
 const ucBorders = { top: ucBorder, bottom: ucBorder, left: ucBorder, right: ucBorder };
 
 const ucDesc = (uc) => {
-  const targetTotalW = 8666; // A4 width 11906 - 1800 left - 1440 right
-  const col1W = Math.round((2200 / 9360) * targetTotalW); // 2035 DXA
-  const col2W = targetTotalW - col1W; // 6631 DXA
+  const targetTotalW = 8666; 
+  const col1W = Math.round((2200 / 9360) * targetTotalW); 
+  const col2W = targetTotalW - col1W; 
 
   const labelCell = (text) => new TableCell({
     borders: ucBorders,
@@ -368,41 +365,34 @@ const ucDesc = (uc) => {
   });
 };
 
-// ─── UC DATA PER SPRINT ────────────────────────────────────────────────────
+
 const UC_DATA = {
   1: [
-    { name: "S'authentifier", actors: "Tout utilisateur de la plateforme (Administrateur, Service Logistique, Service Vendeur, Service Client, Service Finance)", precond: "L'utilisateur dispose d'un compte actif et de ses identifiants de connexion.", scenario: ["L'utilisateur accède à l'interface de connexion.", "Il saisit son adresse e-mail ainsi que son mot de passe.", "Le système contrôle l'existence du compte et la validité du mot de passe.", "Le système génère le jeton d'accès (JWT) et enregistre la session active.", "L'utilisateur est redirigé vers son tableau de bord personnalisé en fonction de son rôle."], postcond: "L'utilisateur est authentifié : sa session est active et son tableau de bord affiché.", exceptions: "Identifiants invalides : message d'erreur affiché, accès refusé. Compte désactivé : l'utilisateur est invité à contacter l'administrateur." },
-    { name: "Gérer les comptes utilisateurs", actors: "Administrateur", precond: "L'administrateur est authentifié avec les droits de gestion des utilisateurs.", scenario: ["L'administrateur accède au module de gestion des utilisateurs.", "Il sélectionne l'action souhaitée : créer, modifier ou désactiver un compte.", "Pour une création : il saisit les informations (nom, e-mail, rôle) et confirme.", "Le système enregistre le compte et envoie les identifiants par e-mail à l'utilisateur.", "Pour une modification de rôle : les permissions sont mises à jour immédiatement."], postcond: "Le compte est créé, modifié ou désactivé : les droits d'accès sont appliqués.", exceptions: "Adresse e-mail déjà utilisée : message d'erreur. Suppression d'un compte actif : confirmation obligatoire requise." },
+    { name: "S'authentifier et gérer la session JWT", actors: "Tout utilisateur (Administrateur, Responsable Production, Gestionnaire Stock, Opérateur Atelier)", precond: "L'utilisateur dispose d'un compte actif et d'identifiants valides.", scenario: ["L'utilisateur accède à la mire de connexion Metronic UI.", "Il saisit son adresse e-mail et son mot de passe.", "Le backend Spring Boot valide les identifiants et génère un jeton JWT.", "Le jeton est décodé par le frontend pour déterminer le rôle et les autorisations.", "L'utilisateur est redirigé vers son tableau de bord spécifique."], postcond: "La session est active et le menu dynamique est adapté aux droits de l'utilisateur.", exceptions: "Identifiants invalides : message d'alerte. Compte désactivé : accès refusé." },
+    { name: "Gérer les rôles et droits d'accès RBAC", actors: "Administrateur", precond: "L'Administrateur est authentifié.", scenario: ["L'administrateur accède au module de gestion des utilisateurs.", "Il sélectionne un utilisateur et modifie son rôle (ADMIN, MANAGER, OPERATEUR).", "Le système enregistre les modifications dans SQL Server.", "Les autorisations d'accès aux API et aux vues du frontend sont mises à jour."], postcond: "Les droits d'accès de l'utilisateur sont immédiatement appliqués.", exceptions: "Tentative d'auto-révocation du dernier compte administrateur : action bloquée." }
   ],
   2: [
-    { name: "Traiter une commande confirmée", actors: "Service Logistique", precond: "La commande est confirmée par le Service Client et disponible dans la liste de traitement.", scenario: ["Le Service Logistique accède à la liste des commandes confirmées.", "Il sélectionne la commande à traiter et consulte ses détails.", "Il choisit le transporteur approprié parmi les partenaires disponibles.", "Le système crée le colis auprès du transporteur et génère le bordereau d'expédition.", "Le statut de la commande est mis à jour vers \"En cours d'expédition\".", "Le numéro de suivi est enregistré et affiché."], postcond: "La commande est expédiée, le bordereau est disponible, le statut est synchronisé vers Magento.", exceptions: "Transporteur indisponible : le système propose une alternative. Commande annulée entre-temps : avertissement affiché." },
-    { name: "Suivre les expéditions en temps réel", actors: "Service Logistique", precond: "Des commandes expédiées existent avec des numéros de suivi valides.", scenario: ["Le Service Logistique accède à la page de suivi des expéditions.", "Il consulte la liste paginée des expéditions avec leurs statuts actuels.", "Il sélectionne une expédition et visualise l'historique chronologique des statuts.", "Le système reçoit les mises à jour de statut depuis les webhooks des transporteurs.", "Le statut mis à jour est synchronisé vers la base de données et vers Magento."], postcond: "Les statuts sont synchronisés : les anomalies sont signalées au Service Logistique.", exceptions: "Transporteur inaccessible : rejeu automatique planifié (3 tentatives avec délai exponentiel)." },
+    { name: "Suivre les machines d'atelier et calculer le TRG", actors: "Responsable Production, Opérateur Atelier", precond: "Les machines d'atelier et les postes de travail sont configurés.", scenario: ["L'utilisateur consulte la vue de suivi des machines en temps réel.", "Le système extrait les statuts (En Marche, En Panne, En Réglage) et les heures de fonctionnement.", "Le backend calcule dynamiquement le Taux de Rendement Global (TRG).", "Les indicateurs KPI et graphiques de performance sont mis à jour."], postcond: "Le taux TRG et les alertes d'arrêt machine sont affichés en direct.", exceptions: "Donnée machine manquante : affichage du dernier état connu avec avertissement." },
+    { name: "Planifier et suivre les Ordres de Fabrication (OF)", actors: "Responsable Production", precond: "Des requêtes SQL optimisées extraient les ordres de fabrication depuis la table FACT_CLE du DWH.", scenario: ["Le responsable accède à la liste des Ordres de Fabrication.", "Il filtre les OF par statut (Planifié, En cours, Terminé, En retard) et par période.", "Il consulte les détails d'un OF (quantités prévues/réalisées, coût unitaire).", "Il met à jour le statut ou réassigne l'OF à une machine."], postcond: "Le statut de l'ordre de fabrication est actualisé dans la base du Data Warehouse.", exceptions: "Conflit de capacité machine : alerte de surréservation affichée." }
   ],
   3: [
-    { name: "S'authentifier sur l'application mobile", actors: "Vendeur", precond: "Le vendeur dispose d'un compte actif créé par l'Administrateur.", scenario: ["Le vendeur lance l'application mobile Flutter.", "Il saisit son adresse e-mail et son mot de passe.", "Le système vérifie les identifiants via l'API d'authentification.", "Un jeton d'accès est généré et stocké localement sur l'appareil.", "Le vendeur accède à son tableau de bord avec ses commandes et son statut de disponibilité."], postcond: "Le vendeur est authentifié, sa session mobile est active.", exceptions: "Identifiants invalides : message d'erreur affiché. Mot de passe oublié : procédure de réinitialisation par e-mail déclenchée." },
-    { name: "Soumettre une demande de prise en charge de commande", actors: "Vendeur (initiateur), Service Vendeur (validateur)", precond: "Le vendeur est authentifié et activé comme disponible. Des commandes lui sont proposées.", scenario: ["Le vendeur reçoit une notification push pour une nouvelle commande disponible.", "Il consulte les détails de la commande dans l'application.", "Il soumet une demande de prise en charge.", "Le Service Vendeur reçoit la demande sur l'interface web et l'examine.", "Il approuve ou rejette la demande en saisissant un motif si nécessaire.", "Le vendeur reçoit une notification du résultat."], postcond: "La commande est assignée au vendeur (si approuvée) : le vendeur est notifié.", exceptions: "Rejet : le vendeur reçoit une notification avec le motif de refus. Expiration du délai de réponse : la demande est automatiquement annulée." },
+    { name: "Consulter l'inventaire d'articles et exporter en Excel (XLSX)", actors: "Gestionnaire Stock, Responsable Production", precond: "Les données d'inventaire ASTOCKDATE sont à jour dans le Data Warehouse.", scenario: ["Le gestionnaire accède à la console de gestion des stocks Metronic.", "Il applique des filtres multi-critères (site, famille d'article, niveau de stock).", "Il consulte la liste paginée et les alertes de seuil critique.", "Il clique sur le bouton d'export Excel XLSX.", "Le système génère un fichier Excel structuré contenant uniquement la vue filtrée."], postcond: "Le fichier Excel horodaté est téléchargé par l'utilisateur.", exceptions: "Aucune donnée correspondant aux filtres : l'exportation produit un fichier contenant les en-têtes." },
+    { name: "Analyser l'historique des mouvements DWH (FACT_ILE) et Dashboards Power BI", actors: "Gestionnaire Stock, Administrateur", precond: "La table FACT_ILE (1,5M lignes) est indexée sur Entry No_ DESC.", scenario: ["L'utilisateur accède à l'onglet des mouvements réels d'entrée/sortie.", "Le backend exécute la requête SQL optimisée et retourne les 5 000 derniers mouvements en 448 ms.", "L'utilisateur interagit avec les 6 tableaux de bord décisionnels Power BI intégrés.", "Il analyse la valorisation du stock en Dinars Tunisiens (DT) et les rotations d'articles."], postcond: "L'historique des mouvements et les analyses Power BI sont affichés de manière ultra-fluide.", exceptions: "Timeout base de données : intercepté et géré par le cache d'indexation." }
   ],
   4: [
-    { name: "Consulter les tableaux de bord analytiques", actors: "Administrateur, Service Finance", precond: "L'utilisateur est authentifié avec le rôle Administrateur ou Service Finance.", scenario: ["L'utilisateur accède au module analytique depuis le menu principal.", "Le système charge les données globales de performance.", "L'utilisateur consulte le tableau de bord avec les indicateurs clés (chiffre d'affaires, paniers moyens, volumes de commandes).", "L'utilisateur consulte les graphiques de distribution des statuts de livraison et le top 10 des vendeurs et produits."], postcond: "Le tableau de bord de performance globale est affiché.", exceptions: "Erreur de connexion au service : le chargement échoue et un message d'alerte s'affiche." },
-    { name: "Consulter les rapports logistiques", actors: "Administrateur, Service Logistique", precond: "L'utilisateur est authentifié avec le rôle Administrateur ou Service Logistique.", scenario: ["L'utilisateur accède à la console de reporting logistique.", "Le système charge les rapports d'expédition (volumes d'envois, taux de réussite des transporteurs, délais de livraison).", "L'utilisateur applique des filtres par transporteur, région ou période.", "L'utilisateur exporte les rapports ou explore les anomalies de livraison."], postcond: "Les rapports logistiques détaillés sont affichés.", exceptions: "Erreur de base de données : les statistiques logistiques ne se chargent pas, un message d'erreur s'affiche." }
+    { name: "Générer les prévisions de production et de stock (Prophet / ARIMA)", actors: "Responsable Production, Data Scientist", precond: "Le microservice FastAPI (Python) est actif et alimenté par l'historique DWH.", scenario: ["L'utilisateur sélectionne un article ou un poste de production.", "Il choisit l'horizon de prévision (30, 60 ou 90 jours).", "Le service FastAPI entraîne le modèle Prophet sur la série temporelle.", "Les prédictions de demande et intervalles de confiance sont renvoyés au frontend React.", "Les courbes prédictives ApexCharts sont affichées à l'utilisateur."], postcond: "Les tendances de consommation et besoins futurs sont visualisés.", exceptions: "Historique insuffisant (< 30 points) : basculement automatique sur un modèle de moyenne mobile." },
+    { name: "Réaliser la segmentation ABC et la détection d'anomalies (K-Means & Isolation Forest)", actors: "Gestionnaire Stock, Data Scientist", precond: "Les caractéristiques d'inventaire et historiques de mouvements sont chargés.", scenario: ["L'utilisateur lance l'analyse décisionnelle avancée.", "L'algorithme K-Means classe les articles en catégories ABC (Valeur / Volume).", "L'algorithme Isolation Forest identifie les mouvements aberrants ou consommations anormales.", "Le frontend affiche le rapport de segmentation et les alertes d'anomalies prioritaires."], postcond: "Les articles stratégiques de classe A et les anomalies de stock sont identifiés.", exceptions: "Données aberrantes majeures : signalées dans le rapport d'exécution du modèle." }
   ],
   5: [
-    { name: "Gérer le pipeline commercial (CRM)", actors: "Service Client, Service Vendeur, Service Finance, Service Logistique", precond: "L'utilisateur est authentifié avec un rôle autorisé.", scenario: ["L'utilisateur accède au module CRM depuis le menu principal.", "Il consulte le pipeline commercial sous forme de tableau Kanban.", "Il déplace un lead d'une étape à l'autre par glisser-déposer.", "Il enregistre une activité (appel, e-mail, réunion) sur le lead sélectionné.", "Il programme un rappel pour le suivi de la relance commerciale."], postcond: "Le pipeline est mis à jour : les activités et rappels sont enregistrés et consultables.", exceptions: "Erreur réseau : les modifications du pipeline ne sont pas sauvegardées et un message d'erreur est affiché." },
-    { name: "Activer l'automatisation du traitement des commandes", actors: "Service Logistique", precond: "Le Service Logistique est authentifié.", scenario: ["Le Service Logistique accède à la console d'automatisation.", "Il active le workflow de traitement automatique (n8n).", "Le système exécute le workflow et traite les commandes en attente (attribution des transporteurs, mise à jour des statuts).", "Le système affiche les logs d'exécution du workflow à l'utilisateur."], postcond: "Le traitement automatisé des commandes est déclenché avec succès.", exceptions: "Erreur d'API ou de connexion n8n : le traitement est interrompu et un rapport d'anomalie s'affiche." }
-  ],
-  6: [
-    { name: "Générer une facture", actors: "Service Finance", precond: "Des bordereaux de livraison confirmés et non facturés existent pour le vendeur.", scenario: ["Le Service Finance accède à la liste des bordereaux de livraison non facturés.", "Il sélectionne les bordereaux correspondants à un vendeur.", "Il lance la génération automatique de la facture.", "Le système calcule le montant total HT, applique le taux de TVA tunisienne à 19% et génère le fichier PDF de la facture.", "Le système enregistre la facture avec le statut \"Impayée\".", "La facture est envoyée automatiquement par e-mail au vendeur."], postcond: "La facture est générée, envoyée au vendeur et enregistrée dans le système.", exceptions: "Échec du calcul ou d'envoi e-mail : la facture est conservée et une notification d'erreur est affichée." }
-  ],
-  7: [
-    { name: "Consulter les journaux d'activité", actors: "Administrateur", precond: "L'Administrateur est authentifié.", scenario: ["L'Administrateur accède à la page de monitoring d'activité.", "Il choisit des filtres de recherche (par utilisateur, type d'action ou période).", "Le système extrait de la base de données l'historique des actions correspondantes.", "Le système affiche la liste paginée des logs d'activité avec leurs détails.", "L'Administrateur peut cliquer sur une action pour consulter les détails ou exporter l'historique."], postcond: "L'historique d'activité est affiché et filtrable.", exceptions: "Base de données inaccessible : affichage d'un message d'erreur temporaire." },
-    { name: "Consulter les notifications", actors: "Administrateur", precond: "L'Administrateur est authentifié.", scenario: ["L'Administrateur accède à la page des notifications système.", "Le système charge l'ensemble des notifications générées pour chaque service de la plateforme.", "L'Administrateur consulte la liste des alertes de livraison, d'importation ou système.", "Le système marque les notifications consultées comme lues."], postcond: "Les notifications sont affichées et leur statut de lecture est mis à jour.", exceptions: "Erreur de connexion réseau : les notifications ne se chargent pas, affichage d'un bouton de rechargement." }
-  ],
+    { name: "Consulter les journaux d'audit technique (ActivityLog)", actors: "Administrateur", precond: "L'Administrateur est authentifié avec les privilèges d'audit.", scenario: ["L'Administrateur accède au centre de monitoring technique.", "Il applique des filtres par utilisateur, type d'événement ou plage de dates.", "Le système extrait les journaux d'activité (connexions, modifications critiques, exports).", "L'Administrateur consulte les détails techniques et adresses IP des actions."], postcond: "La traçabilité et l'auditabilité des opérations sont assurées.", exceptions: "Base de données de logs saturée : archivage automatique déclenché." },
+    { name: "Superviser le centre de notifications et d'alertes d'atelier", actors: "Administrateur, Responsable Production", precond: "Des seuils d'alerte (stock bas, arrêt machine prolongé) sont définis.", scenario: ["L'utilisateur consulte le centre de notifications en haut de l'interface Metronic.", "Le système liste les alertes récentes classées par sévérité (Info, Avertissement, Critique).", "L'utilisateur valide une alerte ou déclenche une action corrective.", "Le statut de notification passe à \"Lue / Traitée\"."], postcond: "L'alerte est prise en compte et le journal d'événements est mis à jour.", exceptions: "Erreur de transmission d'alerte : réémission automatique de la notification." }
+  ]
 };
 
-// ─── SPRINT SECTION HELPER ─────────────────────────────────────────────────
-// ─── SPRINT SECTION HELPER ──────────────────────────────────────────────────
-// testsRows : array of [type, perimetre, outil, resultat] for the tests table
-// seqUcName : name of the use case illustrated by the sequence diagram
+
+
+
+
 const SPRINT_CONCLUSIONS = {
   1: "En conclusion, ce premier sprint a permis d'implémenter les fondations de sécurité du système Nexora. Grâce à l'authentification JWT et la gestion fine des rôles (RBAC), les accès à la plateforme sont sécurisés et toutes les transactions critiques sont tracées.",
   2: "En conclusion, ce deuxième sprint a permis de mettre en œuvre le suivi de production d'atelier. La gestion des machines et des ordres de production offre une visibilité totale sur l'avancement et le calcul automatique du rendement (TRG).",
@@ -436,7 +426,7 @@ const sprintSection = (
     body(`Le Sprint Backlog traduit les User Stories sélectionnées pour ce sprint en tâches de développement concrètes. Contrairement au Backlog Produit qui exprime les besoins utilisateurs, ce tableau détaille les tâches de réalisation, l'estimation en Story Points (SP) et le statut de chaque tâche.`),
     pb(),
     makeTable(
-      ["ID US", "User Story", "Tâche de développement", "Estimation (SP)", "Statut"],
+      ["ID US", "Récit Utilisateur (User Story)", "Tâche de développement", "Estimation (SP)", "Statut"],
       backlogRows.map(r => [...r.slice(0, 3), getEstSP(r[3], num), r[4]]),
       backlogWidths
     ),
@@ -617,7 +607,7 @@ const fusedSprintSection = (
     body(`Le Sprint Backlog traduit les User Stories sélectionnées pour ce sprint en tâches de développement concrètes. Contrairement au Backlog Produit qui exprime les besoins utilisateurs, ce tableau détaille les tâches de réalisation, l'estimation en Story Points (SP) et le statut de chaque tâche.`),
     pb(),
     makeTable(
-      ["ID US", "User Story", "Tâche de développement", "Estimation (SP)", "Statut"],
+      ["ID US", "Récit Utilisateur (User Story)", "Tâche de développement", "Estimation (SP)", "Statut"],
       backlogRows.map(r => [...r.slice(0, 3), getEstSP(r[3], num), r[4]]),
       backlogWidths
     ),
@@ -823,9 +813,9 @@ const fusedSprintSection = (
 
 
 
-// ══════════════════════════════════════════════════════════════════════════
-//  DOCUMENT
-// ══════════════════════════════════════════════════════════════════════════
+
+
+
 const doc = new Document({
   features: { updateFields: true },
   numbering: {
@@ -861,9 +851,6 @@ const doc = new Document({
     ]
   },
   sections: [
-    // ══════════════════════════════════════════════════
-    // SECTION 1 — PAGE DE GARDE (SESAME style)
-    // ══════════════════════════════════════════════════
     {
       properties: {
         page: {
@@ -873,13 +860,11 @@ const doc = new Document({
       },
       footers: { default: new Footer({ children: [] }) },
       children: [
-        // SESAME header banner
         new Paragraph({
           children: [new ImageRun({ data: fs.readFileSync('scratch/garde_extract/content/word/media/image1.png'), transformation: { width: 595, height: 70 } })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 0 },
         }),
-        // Background grid (behind document)
         new Paragraph({
           children: [new ImageRun({
             data: fs.readFileSync('scratch/garde_extract/content/word/media/image2.png'),
@@ -892,83 +877,68 @@ const doc = new Document({
           })],
           spacing: { before: 0, after: 0 },
         }),
-        // Main title
         new Paragraph({
           children: [new TextRun({ text: "RAPPORT DE STAGE DE PROJET DE FIN D'ETUDES", font: FONT, size: 30, bold: true, color: "000000" })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 600, after: 400 },
         }),
-        // Separator line
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 0, after: 40 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000", space: 2 } } }),
-        // Intitulé label
         new Paragraph({
           children: [new TextRun({ text: "Intitulé du stage", font: FONT, size: 20, color: "2E74B5", italic: true })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 200, after: 80 },
         }),
-        // Project title
         new Paragraph({
           children: [new TextRun({ text: "Conception et Développement d'une Plateforme Intelligente de Gestion de Production et de Stock : Nexora", font: FONT, size: 24, bold: true, color: "000000" })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 160 },
         }),
-        // Separator line
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 0, after: 40 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000", space: 2 } } }),
-        // Réalisé par label
         new Paragraph({
           children: [new TextRun({ text: "Réalisé par", font: FONT, size: 20, color: "2E74B5", italic: true })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 200, after: 60 },
         }),
-        // Student name
         new Paragraph({
           children: [new TextRun({ text: "Imen", font: FONT, size: 26, bold: true, color: "000000" })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 500 },
         }),
-        // Entreprise d'accueil label
         new Paragraph({
           children: [new TextRun({ text: "Entreprise d'accueil", font: FONT, size: 20, color: "2E74B5", italic: true })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 120 },
         }),
-        // Arkan logo
         new Paragraph({
           children: [new ImageRun({ data: fs.readFileSync('scratch/pg_tmp/word/media/arkan_logo.png'), transformation: { width: 100, height: 80 } })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 80 },
         }),
-        // Arkan name
         new Paragraph({
           children: [new TextRun({ text: "........................", font: FONT, size: 26, bold: true, color: "000000" })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 400 },
         }),
-        // Encadrant Entreprise label
         new Paragraph({
           children: [new TextRun({ text: "Encadrant Entreprise", font: FONT, size: 20, color: "2E74B5", italic: true })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 60 },
         }),
-        // Encadrant Entreprise name
         new Paragraph({
           children: [new TextRun({ text: "........................", font: FONT, size: 24, bold: true, color: "000000" })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 200 },
         }),
-        // Encadrant SESAME label
         new Paragraph({
           children: [new TextRun({ text: "Encadrant SESAME", font: FONT, size: 20, color: "2E74B5", italic: true })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 60 },
         }),
-        // Encadrant SESAME name
         new Paragraph({
           children: [new TextRun({ text: "........................", font: FONT, size: 24, bold: true, color: "000000" })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 300 },
         }),
-        // Année Universitaire
         new Paragraph({
           children: [new TextRun({ text: "Année Universitaire 2025-2026", font: FONT, size: 22, bold: true, color: "E97132" })],
           alignment: AlignmentType.CENTER,
@@ -976,8 +946,6 @@ const doc = new Document({
         }),
       ]
     },
-    // SECTION 2 — PRELIMINARY PAGES (Roman numbering)
-    // ══════════════════════════════════════════════════
     {
       properties: {
         page: {
@@ -1007,9 +975,16 @@ const doc = new Document({
         })
       },
       children: [
-        // ══════════════════════════════════════════════════
-        // REMERCIEMENTS
-        // ══════════════════════════════════════════════════
+        frontTitle("Dédicace"),
+        body("Je dédie ce travail de fin d'études :", { align: AlignmentType.CENTER, italics: true }),
+        pb(),
+        body("À mes très chers parents, pour leur amour inconditionnel, leurs prières et leur soutien indéfectible tout au long de mon parcours universitaire.", { align: AlignmentType.CENTER, italics: true }),
+        pb(),
+        body("À toute ma famille, mes proches et mes ami(e)s qui m'ont encouragée, soutenue et accompagnée dans l'accomplissement de ce projet.", { align: AlignmentType.CENTER, italics: true }),
+        pb(),
+        body("À tous mes enseignants et encadrants pour leur bienveillance, leurs conseils précieux et la qualité de la formation dispensée.", { align: AlignmentType.CENTER, italics: true }),
+        pageBreak(),
+
         frontTitle("Remerciements"),
         body("Mes premiers remerciements s'adressent chaleureusement à mon encadrant(e) académique, [..........], pour son suivi attentif, sa rigueur scientifique et ses conseils avisés qui ont guidé l'orientation de ce projet de fin d'études."),
         pb(),
@@ -1024,34 +999,28 @@ const doc = new Document({
         body("Enfin, je salue l'ensemble du corps professoral et de l'administration de mon établissement d'enseignement pour la rigueur de la formation académique reçue, sans oublier tous ceux qui ont contribué de près ou de loin au succès de cette étape importante de mon parcours."),
         pageBreak(),
 
-        // ══════════════════════════════════════════════════
-        // RÉSUMÉ
-        // ══════════════════════════════════════════════════
         frontTitle("Résumé"),
         body("Ce travail de fin d'études expose la conception et le déploiement de Nexora, une plateforme intelligente destinée à moderniser la gestion de production et le suivi des stocks au sein de l'entreprise [..........]. Le dispositif intègre une interface web d'administration et de pilotage d'atelier permettant d'unifier l'échange d'informations entre les gestionnaires et les opérateurs."),
         pb(),
         body("Développée sous un socle technologique moderne combinant Spring Boot 3 (Java), React.js (TypeScript), FastAPI (Python) et Microsoft SQL Server, la solution a été conduite selon l'approche itérative Scrum en cinq cycles distincts. L'application couvre des fonctionnalités clés telles que le suivi des machines et du rendement d'atelier (TRG), la planification des ordres de production, la traçabilité des mouvements d'inventaire, ainsi que des modules d'Intelligence Artificielle prédictive pour l'aide à la décision."),
         pageBreak(),
 
-        // ══════════════════════════════════════════════════
-        // TABLE DES MATIÈRES (SOMMAIRE)
-        // ══════════════════════════════════════════════════
         frontTitle("Sommaire"),
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 0, after: 120 } }),
 
-        tocLine("Remerciements", 0, "i"),
-        tocLine("Résumé", 0, "ii"),
-        tocLine("Sommaire", 0, "iii"),
-        tocLine("Liste des Figures", 0, "iv"),
-        tocLine("Liste des Tableaux", 0, "v"),
-        tocLine("Liste des Abréviations", 0, "vi"),
+        tocLine("Dédicace", 0, "i"),
+        tocLine("Remerciements", 0, "ii"),
+        tocLine("Résumé", 0, "iii"),
+        tocLine("Résumé Exécutif", 0, "iv"),
+        tocLine("Sommaire", 0, "v"),
+        tocLine("Liste des Figures", 0, "vi"),
+        tocLine("Liste des Tableaux", 0, "vii"),
+        tocLine("Liste des Abréviations", 0, "viii"),
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 40, after: 0 } }),
 
-        // ── Introduction ─────────────────────────────────
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 80, after: 0 } }),
         tocLine("Introduction Générale", 0, "1"),
 
-        // ── Chapitre 1 ───────────────────────────────────
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 80, after: 0 } }),
         tocLine("Chapitre 1 : Cadre Général du Projet", 0, "13"),
         tocLine("1.1 Introduction", 1, "13"),
@@ -1071,7 +1040,6 @@ const doc = new Document({
         tocLine("1.5 Langage de Modélisation UML", 1, "19"),
         tocLine("1.6 Conclusion", 1, "19"),
 
-        // ── Chapitre 2 ───────────────────────────────────
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 80, after: 0 } }),
         tocLine("Chapitre 2 : Analyse et Spécification des Besoins", 0, "21"),
         tocLine("2.1 Introduction", 1, "21"),
@@ -1091,7 +1059,6 @@ const doc = new Document({
         tocLine("2.7 Déploiement de l'Application", 1, "38"),
         tocLine("2.8 Conclusion", 1, "40"),
 
-        // ── Chapitre 3 ───────────────────────────────────
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 80, after: 0 } }),
         tocLine("Chapitre 3 : Sprint 1 – Sécurité et Accès", 0, "41"),
         tocLine("3.1 Introduction", 1, "41"),
@@ -1108,7 +1075,6 @@ const doc = new Document({
         tocLine("3.7 Rétrospective", 1, "47"),
         tocLine("3.8 Conclusion", 1, "47"),
 
-        // ── Chapitre 4 ───────────────────────────────────
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 80, after: 0 } }),
         tocLine("Chapitre 4 : Sprint 2 – Gestion de Production et Suivi des Machines d'Atelier", 0, "48"),
         tocLine("4.1 Introduction", 1, "48"),
@@ -1125,7 +1091,6 @@ const doc = new Document({
         tocLine("4.7 Rétrospective", 1, "56"),
         tocLine("4.8 Conclusion", 1, "56"),
 
-                // ── Chapitre 5 ───────────────────────────────────
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 80, after: 0 } }),
         tocLine("Chapitre 5 : Sprint 3 – Gestion des Stocks, Mouvements DWH, Power BI et Refonte UI Metronic", 0, "57"),
         tocLine("5.1 Introduction", 1, "57"),
@@ -1143,7 +1108,6 @@ const doc = new Document({
         tocLine("5.8 Tests du Sprint", 1, "72"),
         tocLine("5.9 Conclusion", 1, "72"),
 
-        // ── Chapitre 6 ───────────────────────────────────
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 80, after: 0 } }),
         tocLine("Chapitre 6 : Sprint 4 – Intelligence Artificielle et Data Science", 0, "72"),
         tocLine("6.1 Introduction", 1, "72"),
@@ -1161,7 +1125,6 @@ const doc = new Document({
         tocLine("6.7 Rétrospective", 1, "80"),
         tocLine("6.8 Conclusion", 1, "81"),
 
-        // ── Chapitre 7 ───────────────────────────────────
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 80, after: 0 } }),
         tocLine("Chapitre 7 : Sprint 5 – Administration, Supervision et Monitoring", 0, "82"),
         tocLine("7.1 Introduction", 1, "82"),
@@ -1178,7 +1141,6 @@ const doc = new Document({
         tocLine("7.7 Rétrospective", 1, "86"),
         tocLine("7.8 Conclusion", 1, "87"),
 
-        // ── Conclusion ───────────────────────────────────
         new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 80, after: 0 } }),
         tocLine("Conclusion Générale et Perspectives", 0, "89"),
         tocLine("Synthèse des Difficultés Rencontrées et Solutions Apportées", 1, "89"),
@@ -1251,9 +1213,6 @@ const doc = new Document({
 
         pageBreak(),
 
-        // ══════════════════════════════════════════════════
-        // LISTE DES ABRÉVIATIONS
-        // ══════════════════════════════════════════════════
         frontTitle("Liste des Abréviations"),
 
         makeTable(
@@ -1284,9 +1243,6 @@ const doc = new Document({
         ),
       ]
     },
-    // ══════════════════════════════════════════════════
-    // SECTION 3 — MAIN CONTENT (Arabic numbering)
-    // ══════════════════════════════════════════════════
     {
       properties: {
         page: {
@@ -1316,9 +1272,6 @@ const doc = new Document({
         })
       },
       children: [
-        // ══════════════════════════════════════════════════
-        // INTRODUCTION GÉNÉRALE
-        // ══════════════════════════════════════════════════
         title1("Introduction Générale", false),
         body("Dans le paysage industriel moderne, la transition vers l'industrie 4.0 et l'automatisation des flux d'information imposent aux ateliers de production une révision profonde de leurs méthodes de gestion interne. Ce processus de transformation numérique est devenu un prérequis incontournable pour pérenniser la compétitivité des entreprises manufacturières, accroître l'efficacité de leurs lignes de fabrication et optimiser les niveaux de stock en temps réel. Au cœur de cette dynamique, le suivi du rendement d'atelier (TRG) s'impose à la fois comme un défi opérationnel majeur et comme un levier d'optimisation central."),
         pb(),
@@ -1340,9 +1293,6 @@ const doc = new Document({
         pb(),
         body("Pour finir, une conclusion générale synthétise les apports techniques et fonctionnels du projet, puis présente les futures opportunités d'amélioration de la solution."),
 
-        // ══════════════════════════════════════════════════
-        // CHAPITRE 1 — CADRE GÉNÉRAL DU PROJET
-        // ══════════════════════════════════════════════════
         title1("Chapitre 1 : Cadre Général du Projet"),
 
         title2("1.1 Introduction"),
@@ -1351,7 +1301,7 @@ const doc = new Document({
 
         title2("1.2 Cadre du Projet"),
         title3("1.2.1 Description Générale du Projet"),
-        body("Le projet \"Nexora\" consiste à concevoir, développer et déployer une plateforme d'information centralisée sur mesure. Cette solution vise à unifier, automatiser et optimiser l'ensemble des processus logistiques, commerciaux et décisionnels de l'entreprise Arkan. Elle englobe une application d'administration web multi-rôles et une application mobile dédiée aux marchands partenaires (vendeurs)."),
+        body("Le projet \"Nexora\" consiste à concevoir, développer et déployer une plateforme d'information centralisée sur mesure. Cette solution vise à unifier, automatiser et optimiser l'ensemble des processus logistiques, commerciaux et décisionnels de l'entreprise [..........]. Elle englobe une application d'administration web multi-rôles et une application mobile dédiée aux marchands partenaires (vendeurs)."),
         pb(),
 
         title3("1.2.2 Présentation de l'Organisme d'Accueil"),
@@ -1425,7 +1375,7 @@ const doc = new Document({
         body("L'analyse détaillée du fonctionnement interne de l'atelier met en évidence plusieurs faiblesses opérationnelles majeures :"),
         pb(),
         bullet("**Ruptures d'information** : le stockage d'informations sur fiches papier empêche toute analyse instantanée des performances de production."),
-        bullet("**Absence de temps réel** : les statuts de livraison ne sont pas synchronisés automatiquement entre Arkan, les transporteurs et Magento."),
+        bullet("**Absence de temps réel** : les statuts de livraison ne sont pas synchronisés automatiquement entre l'atelier, la gestion de stock et le Data Warehouse."),
         bullet("**Silo de données d'inventaire** : les stocks ne sont pas reliés dynamiquement à la consommation réelle d'atelier, ce qui entraîne de fréquentes ruptures de matières premières."),
         bullet("**Absence d'anticipation** : le manque de modèles prédictifs empêche de planifier efficacement la production future et l'approvisionnement."),
         pb(),
@@ -1486,7 +1436,7 @@ const doc = new Document({
         body("Pour répondre aux exigences d'un projet logiciel complexe dans un environnement métier évolutif, la méthodologie Agile Scrum [1] [3] a été adoptée. Elle structure le développement en **5 sprints** de durée variable (de 2 à 4 semaines), couvrant l'ensemble du périmètre fonctionnel défini dans le backlog produit, pour une durée totale d'environ 4,5 mois :"),
         pb(),
         bullet("Découpage en **sprints courts**, assurant des livraisons fonctionnelles régulières."),
-        bullet("Gestion des priorités via un backlog produit classé par niveaux **High / Medium / Low**."),
+        bullet("Gestion des priorités via un backlog produit classé par niveaux de priorité **Haute / Moyenne / Basse**."),
         bullet("Coopération continue avec les différents acteurs du projet afin de valider les livrables au terme de chaque itération."),
         pb(),
         ...(fs.existsSync("scrum-framework-9.29.23.png") ? [
@@ -1516,9 +1466,6 @@ const doc = new Document({
         title2("1.6 Conclusion"),
         conclusionBox("En conclusion, ce premier chapitre a permis de présenter le cadre général du projet Nexora, en introduisant l’organisme d’accueil, les problématiques logistiques identifiées ainsi que les objectifs visés. Le choix de la méthodologie Agile Scrum [1] garantit une démarche de développement incrémentale, tandis que le langage UML structure la phase de conception. La partie qui suit s'attachera à détailler l'analyse ainsi que la spécification des besoins requis pour le système."),
 
-        // ══════════════════════════════════════════════════
-        // CHAPITRE 2 — ANALYSE ET SPÉCIFICATION DES BESOINS
-        // ══════════════════════════════════════════════════
         title1("Chapitre 2 : Analyse et Spécification des Besoins"),
         title2("2.1 Introduction"),
         body("Ce deuxième chapitre détaille la phase d'analyse, l'expression des exigences et la modélisation générale de la plateforme Nexora. Nous y décrivons les différents rôles utilisateurs intervenant sur le système, recensons les exigences fonctionnelles et non fonctionnels, organisons le backlog produit ordonné, puis établissons les fondations d'architecture physique, logique et de persistance de la solution."),
@@ -1663,45 +1610,40 @@ const doc = new Document({
         pb(),
         body("Ce backlog présente uniquement les exigences fonctionnelles du système et ne détaille pas les aspects techniques liés à la réalisation. Les tâches de développement, les choix d’architecture ainsi que les détails d’implémentation sont définis dans les backlogs de sprint présentés dans la suite de ce document."),
         pb(),
-        body("Le tableau ci-dessous présente la liste ordonnée des récits utilisateurs, regroupés par domaine fonctionnel, priorisés selon les niveaux High / Medium / Low et répartis sur les cinq sprints du projet :"),
+        body("Le tableau ci-dessous présente la liste ordonnée des récits utilisateurs, regroupés par domaine fonctionnel, priorisés selon les niveaux Haute / Moyenne / Basse et répartis sur les cinq sprints du projet :"),
         pb(),
         makeTable(
-          ["ID", "Thème", "User Story", "Priorité", "Estimation (SP)", "Sprint", "Statut"],
+          ["ID", "Thème", "Récit Utilisateur (User Story)", "Priorité", "Estimation (SP)", "Sprint", "Statut"],
           [
-                        // SPRINT 1
-            ["1.1", "Sécurité", "En tant qu'utilisateur, je veux m'authentifier de manière sécurisée afin d'accéder aux fonctions de la plateforme.", "High", "8", "S1", "Terminé"],
-            ["1.2", "Sécurité", "En tant qu'administrateur, je veux sécuriser l'accès aux routes de l'API afin de protéger les données", "High", "5", "S1", "Terminé"],
-            ["1.3", "Sécurité", "En tant qu'administrateur, je veux définir des permissions par rôle afin de restreindre l'accès selon les rôles (ADMIN, MANAGER, OPERATEUR)", "High", "8", "S1", "Terminé"],
-            ["1.4", "Sécurité", "En tant qu'administrateur, je veux gérer les comptes utilisateurs afin d'ajouter, modifier ou désactiver les collaborateurs", "Medium", "5", "S1", "Terminé"],
-            ["1.5", "Sécurité", "En tant qu'utilisateur, je veux disposer d'un menu adapté à mon rôle afin de naviguer de manière intuitive", "Medium", "3", "S1", "Terminé"],
-            ["1.6", "Sécurité", "En tant qu'administrateur, je veux consulter le monitoring de sécurité afin de détecter les tentatives d'accès suspectes", "Low", "3", "S1", "Terminé"],
+            ["1.1", "Sécurité", "En tant qu'utilisateur, je veux m'authentifier de manière sécurisée afin d'accéder aux fonctions de la plateforme.", "Haute", "8", "S1", "Terminé"],
+            ["1.2", "Sécurité", "En tant qu'administrateur, je veux sécuriser l'accès aux routes de l'API afin de protéger les données", "Haute", "5", "S1", "Terminé"],
+            ["1.3", "Sécurité", "En tant qu'administrateur, je veux définir des permissions par rôle afin de restreindre l'accès selon les rôles (ADMIN, MANAGER, OPERATEUR)", "Haute", "8", "S1", "Terminé"],
+            ["1.4", "Sécurité", "En tant qu'administrateur, je veux gérer les comptes utilisateurs afin d'ajouter, modifier ou désactiver les collaborateurs", "Moyenne", "5", "S1", "Terminé"],
+            ["1.5", "Sécurité", "En tant qu'utilisateur, je veux disposer d'un menu adapté à mon rôle afin de naviguer de manière intuitive", "Moyenne", "3", "S1", "Terminé"],
+            ["1.6", "Sécurité", "En tant qu'administrateur, je veux consulter le monitoring de sécurité afin de détecter les tentatives d'accès suspectes", "Basse", "3", "S1", "Terminé"],
 
-            // SPRINT 2
-            ["2.1", "Gestion Production", "En tant que manager, je veux consulter les postes de travail (machines) d'atelier afin de voir leur disponibilité", "High", "8", "S2", "Terminé"],
-            ["2.2", "Gestion Production", "En tant que manager, je veux suivre le TRG (taux de rendement global) en direct afin de piloter la productivité", "High", "8", "S2", "Terminé"],
-            ["2.3", "Gestion Production", "En tant que manager, je veux planifier et créer un ordre de production afin d'organiser le planning d'atelier", "High", "8", "S2", "Terminé"],
-            ["2.4", "Gestion Production", "En tant que manager, je veux affecter une machine à un ordre de production afin de distribuer les tâches", "Medium", "5", "S2", "Terminé"],
-            ["2.5", "Gestion Production", "En tant qu'opérateur, je veux mettre à jour le statut d'exécution d'un ordre afin de signaler l'avancement", "Medium", "5", "S2", "Terminé"],
-            ["2.6", "Gestion Production", "En tant que manager, je veux enregistrer et suivre les temps d'arrêt des machines afin d'analyser les pannes", "Low", "3", "S2", "Terminé"],
+            ["2.1", "Gestion Production", "En tant que manager, je veux consulter les postes de travail (machines) d'atelier afin de voir leur disponibilité", "Haute", "8", "S2", "Terminé"],
+            ["2.2", "Gestion Production", "En tant que manager, je veux suivre le TRG (taux de rendement global) en direct afin de piloter la productivité", "Haute", "8", "S2", "Terminé"],
+            ["2.3", "Gestion Production", "En tant que manager, je veux planifier et créer un ordre de production afin d'organiser le planning d'atelier", "Haute", "8", "S2", "Terminé"],
+            ["2.4", "Gestion Production", "En tant que manager, je veux affecter une machine à un ordre de production afin de distribuer les tâches", "Moyenne", "5", "S2", "Terminé"],
+            ["2.5", "Gestion Production", "En tant qu'opérateur, je veux mettre à jour le statut d'exécution d'un ordre afin de signaler l'avancement", "Moyenne", "5", "S2", "Terminé"],
+            ["2.6", "Gestion Production", "En tant que manager, je veux enregistrer et suivre les temps d'arrêt des machines afin d'analyser les pannes", "Basse", "3", "S2", "Terminé"],
 
-            // SPRINT 3
-            ["3.1", "Gestion Stock", "En tant que manager, je veux consulter l'état et la quantité en stock de chaque article afin de prévenir les ruptures", "High", "8", "S3", "Terminé"],
-            ["3.2", "Gestion Stock", "En tant qu'opérateur, je veux saisir une entrée de stock afin de mettre à jour le niveau d'inventaire suite aux livraisons", "High", "5", "S3", "Terminé"],
-            ["3.3", "Gestion Stock", "En tant qu'opérateur, je veux saisir une sortie de stock afin de tracer l'utilisation des matières premières", "High", "5", "S3", "Terminé"],
-            ["3.4", "Gestion Stock", "En tant que manager, je veux réaliser un ajustement de stock afin de corriger les anomalies constatées lors d'un inventaire", "Medium", "5", "S3", "Terminé"],
-            ["3.5", "Gestion Stock", "En tant que manager, je veux paramétrer des seuils d'alerte critiques afin d'être averti avant une rupture", "Medium", "5", "S3", "Terminé"],
-            ["3.6", "Gestion Stock", "En tant qu'opérateur, je veux recevoir des alertes de rupture en temps réel afin de déclencher les réapprovisionnements", "Medium", "3", "S3", "Terminé"],
+            ["3.1", "Gestion Stock", "En tant que manager, je veux consulter l'état et la quantité en stock de chaque article afin de prévenir les ruptures", "Haute", "8", "S3", "Terminé"],
+            ["3.2", "Gestion Stock", "En tant qu'opérateur, je veux saisir une entrée de stock afin de mettre à jour le niveau d'inventaire suite aux livraisons", "Haute", "5", "S3", "Terminé"],
+            ["3.3", "Gestion Stock", "En tant qu'opérateur, je veux saisir une sortie de stock afin de tracer l'utilisation des matières premières", "Haute", "5", "S3", "Terminé"],
+            ["3.4", "Gestion Stock", "En tant que manager, je veux réaliser un ajustement de stock afin de corriger les anomalies constatées lors d'un inventaire", "Moyenne", "5", "S3", "Terminé"],
+            ["3.5", "Gestion Stock", "En tant que manager, je veux paramétrer des seuils d'alerte critiques afin d'être averti avant une rupture", "Moyenne", "5", "S3", "Terminé"],
+            ["3.6", "Gestion Stock", "En tant qu'opérateur, je veux recevoir des alertes de rupture en temps réel afin de déclencher les réapprovisionnements", "Moyenne", "3", "S3", "Terminé"],
 
-            // SPRINT 4
-            ["4.1", "IA & Data Science", "En tant que manager, je veux prévoir les volumes de production futurs (ARIMA, Prophet, Régression Linéaire) afin de planifier les ressources", "High", "8", "S4", "Terminé"],
-            ["4.2", "IA & Data Science", "En tant que manager, je veux comparer les performances et erreurs des modèles (MAE, RMSE, MAPE) afin de retenir le plus fiable", "High", "8", "S4", "Terminé"],
-            ["4.3", "IA & Data Science", "En tant que manager, je veux prévoir l'évolution des niveaux de stock afin d'ajuster le stockage", "Medium", "5", "S4", "Terminé"],
-            ["4.4", "IA & Data Science", "En tant que manager, je veux segmenter les articles en stock (K-Means, analyse ABC) afin d'identifier les pièces critiques", "Medium", "5", "S4", "Terminé"],
-            ["4.5", "IA & Data Science", "En tant qu'administrateur, je veux détecter les anomalies de fonctionnement (Isolation Forest) afin de prévenir les défaillances", "Low", "5", "S4", "Terminé"],
+            ["4.1", "IA & Data Science", "En tant que manager, je veux prévoir les volumes de production futurs (ARIMA, Prophet, Régression Linéaire) afin de planifier les ressources", "Haute", "8", "S4", "Terminé"],
+            ["4.2", "IA & Data Science", "En tant que manager, je veux comparer les performances et erreurs des modèles (MAE, RMSE, MAPE) afin de retenir le plus fiable", "Haute", "8", "S4", "Terminé"],
+            ["4.3", "IA & Data Science", "En tant que manager, je veux prévoir l'évolution des niveaux de stock afin d'ajuster le stockage", "Moyenne", "5", "S4", "Terminé"],
+            ["4.4", "IA & Data Science", "En tant que manager, je veux segmenter les articles en stock (K-Means, analyse ABC) afin d'identifier les pièces critiques", "Moyenne", "5", "S4", "Terminé"],
+            ["4.5", "IA & Data Science", "En tant qu'administrateur, je veux détecter les anomalies de fonctionnement (Isolation Forest) afin de prévenir les défaillances", "Basse", "5", "S4", "Terminé"],
 
-            // SPRINT 5
-            ["5.1", "Supervision", "En tant qu'administrateur, je veux consulter la console de monitoring (ActivityLog) afin de tracer les actions des utilisateurs", "High", "5", "S5", "Terminé"],
-            ["5.2", "Supervision", "En tant qu'administrateur, je veux historiser les notifications d'alertes afin de disposer d'un historique complet d'audit", "Medium", "5", "S5", "Terminé"],
+            ["5.1", "Supervision", "En tant qu'administrateur, je veux consulter la console de monitoring (ActivityLog) afin de tracer les actions des utilisateurs", "Haute", "5", "S5", "Terminé"],
+            ["5.2", "Supervision", "En tant qu'administrateur, je veux historiser les notifications d'alertes afin de disposer d'un historique complet d'audit", "Moyenne", "5", "S5", "Terminé"],
 
             ].map(r => {
             const sprintNum = parseInt(r[5].replace("S", ""));
@@ -1848,9 +1790,6 @@ const doc = new Document({
         title2("2.8 Conclusion"),
         conclusionBox("En conclusion, la phase d'analyse des exigences, des choix technologiques et de conception globale a permis de définir une architecture robuste pour la plateforme Nexora. L'articulation de l'API Spring Boot, de l'interface web React, du service FastAPI (Python) et de la base SQL Server garantit des temps de réponse faibles, une sécurité rigoureuse et une évolutivité fonctionnelle. Le chapitre suivant détaille l'implémentation de cette architecture itération par itération."),
 
-        // ══════════════════════════════════════════════════
-        // CHAPITRE 3 — SPRINT 1 : Sécurité et Accès
-        // ══════════════════════════════════════════════════
         title1("Chapitre 3 : Sprint 1 – Sécurité et Accès"),
         ...sprintSection(
           1, 3, "Sécurité et Accès",
@@ -1880,9 +1819,6 @@ const doc = new Document({
           "diagrams/sprint1_activity.png"
         ),
 
-        // ══════════════════════════════════════════════════
-        // CHAPITRE 4 — SPRINT 2 : Gestion de Production et Suivi des Machines
-        // ══════════════════════════════════════════════════
         title1("Chapitre 4 : Sprint 2 – Gestion de Production et Suivi des Machines d'Atelier"),
         ...sprintSection(
           2, 4, "Gestion de Production et Suivi des Machines d'Atelier",
@@ -1912,10 +1848,6 @@ const doc = new Document({
           "diagrams/sprint2_activity.png"
         ),
 
-        // ══════════════════════════════════════════════════
-                // ══════════════════════════════════════════════════
-        // CHAPITRE 5 — SPRINT 3 : Gestion des Stocks et Mouvements
-        // ══════════════════════════════════════════════════
         title1("Chapitre 5 : Sprint 3 – Gestion des Stocks, Mouvements DWH, Power BI et Refonte UI Metronic"),
         ...sprintSection(
           3, 5, "Gestion des Stocks, Mouvements DWH, Power BI et Refonte UI Metronic",
@@ -1981,9 +1913,6 @@ const doc = new Document({
           }),
         ] : []),
 
-        // ══════════════════════════════════════════════════
-        // CHAPITRE 6 — SPRINT 4 : Intelligence Artificielle & Data Science
-        // ══════════════════════════════════════════════════
         title1("Chapitre 6 : Sprint 4 – Intelligence Artificielle et Data Science"),
         ...sprintSection(
           4, 6, "Intelligence Artificielle et Data Science",
@@ -2014,9 +1943,6 @@ const doc = new Document({
           "diagrams/sprint4_interface.png"
         ),
 
-        // ══════════════════════════════════════════════════
-        // CHAPITRE 7 — SPRINT 5 : Administration et Supervision
-        // ══════════════════════════════════════════════════
         title1("Chapitre 7 : Sprint 5 – Administration, Supervision et Monitoring"),
         ...sprintSection(
           5, 7, "Administration, Supervision et Monitoring",
@@ -2044,8 +1970,6 @@ const doc = new Document({
           "diagrams/sprint7_interface.png"
         ),
 
-        // CONCLUSION GÉNÉRALE
-        // ══════════════════════════════════════════════════
         title1("Conclusion Générale et Perspectives"),
         body("Ce travail de stage s'est concrétisé par la réalisation de la plateforme intelligente Nexora, un écosystème logiciel regroupant une interface web monopage d'administration et de pilotage d'atelier et un microservice d'Intelligence Artificielle prédictive. Ce dispositif centralisé répond à un impératif stratégique fort : unifier, fluidifier et automatiser le suivi de production d'atelier et la gestion des stocks, substituant ainsi des outils isolés par une chaîne d'information cohérente et temps réel."),
         pb(),
@@ -2099,9 +2023,6 @@ const doc = new Document({
         bullet("Frontend (React Metronic) : Implémentation d'un synoptique d'atelier interactif 2D (représentation visuelle de l'état des machines), intégration de React Query pour le cache intelligent des prévisions d'IA et composants de pré-visualisation des exports Excel."),
         bullet("Data Science & IoT : Connexion directe aux capteurs IoT d'atelier (MQTT/OPC-UA) et déploiement de modèles de Deep Learning (LSTM) pour la maintenance prédictive avancée des équipements."),
 
-        // ══════════════════════════════════════════════════
-        // BIBLIOGRAPHIE
-        // ══════════════════════════════════════════════════
         title1("Bibliographie et Webographie"),
         body("Les références bibliographiques et webographiques sont présentées ci-dessous selon le standard de style IEEE (Institute of Electrical and Electronics Engineers), couramment utilisé en génie logiciel et informatique :"),
         pb(),
@@ -2133,5 +2054,3 @@ Packer.toBuffer(doc).then(buffer => {
   fs.writeFileSync("rapport_pfe_v76_raw.docx", buffer);
   console.log("Done!");
 });
-
-

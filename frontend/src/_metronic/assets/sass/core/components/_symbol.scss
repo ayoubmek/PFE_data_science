@@ -1,15 +1,14 @@
-//
-// symbol
-//
 
-// Base
+
+
+
+
 .symbol {
   display: inline-block;
   flex-shrink: 0;
   position: relative;
   @include border-radius($border-radius);
 
-  // Label
   .symbol-label {
     display: flex;
     align-items: center;
@@ -27,7 +26,6 @@
     }
   }
 
-  // Badge
   .symbol-badge {
     position: absolute;
     border-radius: 100%;
@@ -36,7 +34,6 @@
     transform: translateX(-50%) translateY(-50%) !important;
   }
 
-  // Image
   > img {
     width: 100%;
     flex-shrink: 0;
@@ -44,7 +41,6 @@
     @include border-radius($border-radius);
   }
 
-  // Square
   &.symbol-square {
     &,
     > img,
@@ -53,7 +49,6 @@
     }
   }
 
-  // Circle
   &.symbol-circle {
     &,
     > img,
@@ -66,7 +61,6 @@
     }
   }
 
-  // Sizes
   @include symbol-size(get($symbol-sizes, default));
 
   @each $breakpoint in map-keys($grid-breakpoints) {
@@ -84,7 +78,7 @@
   }
 }
 
-// Group
+
 .symbol-group {
   display: flex;
   flex-wrap: wrap;
@@ -120,8 +114,8 @@
       left: 0;
       bottom: 0;
       border: 2px solid var(--#{$prefix}symbol-border-color);
-      -webkit-background-clip: padding-box; /* for Safari */
-      background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
+      -webkit-background-clip: padding-box; 
+      background-clip: padding-box; 
     }
   }
 

@@ -1,6 +1,6 @@
-//
-// Pagination
-//
+
+
+
 
 .pagination {
   display: flex;
@@ -8,14 +8,12 @@
   justify-content: center;
   margin: 0;
 
-  // Pagination circle
   &.pagination-circle {
     .page-link {
       border-radius: 50%;
     }
   }
 
-  // Pagination outline
   &.pagination-outline {
     .page-link {
       border: 1px solid var(--#{$prefix}border-color);
@@ -53,22 +51,18 @@
       font-size: $pagination-icon-font-size;
     }
 
-    /*rtl:options:{"autoRename":false}*/
     .previous,
     .next {
       display: block;
       height: $pagination-icon-height;
       width: $pagination-icon-height;
 
-      /*rtl:raw:transform: rotateZ(-180deg);*/
     }
-    /*rtl:end:ignore*/
 
     .previous {
       @include svg-bg-icon(arrow-start, $pagination-color);
     }
 
-    /*rtl:options:{"autoRename":false}*/
     .next {
       @include svg-bg-icon(arrow-end, $pagination-color);
     }
@@ -87,7 +81,6 @@
         @include svg-bg-icon(arrow-start, var(--#{$prefix}pagination-focus-color));
       }
 
-      /*rtl:options:{"autoRename":false}*/
       .next {
         @include svg-bg-icon(arrow-end, var(--#{$prefix}pagination-focus-color));
       }
@@ -111,7 +104,6 @@
         @include svg-bg-icon(arrow-start, var(--#{$prefix}pagination-hover-color));
       }
 
-      /*rtl:options:{"autoRename":false}*/
       .next {
         @include svg-bg-icon(arrow-end, var(--#{$prefix}pagination-hover-color));
       }
@@ -135,7 +127,6 @@
         @include svg-bg-icon(arrow-start, var(--#{$prefix}pagination-active-color));
       }
 
-      /*rtl:options:{"autoRename":false}*/
       .next {
         @include svg-bg-icon(arrow-end, var(--#{$prefix}pagination-active-color));
       }
@@ -155,16 +146,14 @@
         @include svg-bg-icon(arrow-start, var(--#{$prefix}pagination-disabled-color));
       }
 
-      /*rtl:options:{"autoRename":false}*/
       .next {
         @include svg-bg-icon(arrow-end, var(--#{$prefix}pagination-disabled-color));
       }
     }
   }
-  /*rtl:end:ignore*/
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
   .page-item {
     margin-right: $pagination-item-space-tablet-and-mobile;

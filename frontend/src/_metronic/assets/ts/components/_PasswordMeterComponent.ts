@@ -1,5 +1,5 @@
-/* eslint-disable array-callback-return */
-/* eslint-disable no-useless-escape */
+
+
 import {DataUtil} from '../_utils/index'
 
 export interface IPasswordMeterOptions {
@@ -57,12 +57,10 @@ class PasswordMeterComponent {
     this.score = 0
     this.checkSteps = 5
 
-    // Elements
     this.inputElement = this.element.querySelector(this.queries.inputQuery)
     this.visibilityElement = this.element.querySelector(this.queries.visibilityQuery)
     this.highlightElement = this.element.querySelector(this.queries.highlightQuery)
 
-    // Event Handlers
     this.handlers()
 
     DataUtil.set(this.element, this.queries.componentName, this)
@@ -109,7 +107,7 @@ class PasswordMeterComponent {
 
   private checkLength(): boolean {
     if (this.inputElement) {
-      return this.inputElement.value.length >= this.options.minLength // 20 score
+      return this.inputElement.value.length >= this.options.minLength 
     }
 
     return false
@@ -117,22 +115,22 @@ class PasswordMeterComponent {
 
   private checkLowerCase(): boolean {
     const val = this.inputElement ? this.inputElement.value : ''
-    return /[a-z]/.test(val) // 20 score
+    return /[a-z]/.test(val) 
   }
 
   private checkUppercase(): boolean {
     const val = this.inputElement ? this.inputElement.value : ''
-    return /[A-Z]/.test(val) // 20 score
+    return /[A-Z]/.test(val) 
   }
 
   private checkDigit(): boolean {
     const val = this.inputElement ? this.inputElement.value : ''
-    return /[0-9]/.test(val) // 20 score
+    return /[0-9]/.test(val) 
   }
 
   private checkChar(): boolean {
     const val = this.inputElement ? this.inputElement.value : ''
-    return /[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(val) // 20 score
+    return /[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(val) 
   }
 
   private getCheckScore(): number {
@@ -176,9 +174,6 @@ class PasswordMeterComponent {
     })
   }
 
-  ///////////////////////
-  // ** Public API  ** //
-  ///////////////////////
   public reset = () => {
     this.score = 0
     this.highlight()
@@ -215,7 +210,6 @@ class PasswordMeterComponent {
     this.highlight()
   }
 
-  // Static methods
   public static getInstance = (
     el: HTMLElement,
     componentName: string = defaultPasswordMeterQueires.componentName

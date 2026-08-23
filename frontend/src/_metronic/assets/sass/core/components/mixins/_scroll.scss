@@ -1,12 +1,10 @@
-//
-// Scroll mixins
-//
+
+
+
 
 @mixin scrollbar-color($color, $hover-color: null) {
-  // Firefox
   scrollbar-color: $color transparent;
 
-  // Webkit
   &::-webkit-scrollbar-thumb {
     background-color: $color;
   }
@@ -16,12 +14,9 @@
   }
 
   @if ($hover-color != null) {
-    // Hover state
     &:hover {
-      // Firefox
       scrollbar-color: $hover-color transparent;
 
-      // Webkit
       &::-webkit-scrollbar-thumb {
         background-color: $hover-color;
       }

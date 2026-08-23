@@ -132,7 +132,7 @@ export default function ProductionPage() {
   return (
     <div className='card card-flush'>
 
-      {/* ── KPI STATS ROW ── */}
+      {}
       <div className='card-header border-0 pt-6 pb-0'>
         <div className='d-flex gap-4 flex-wrap'>
           {[
@@ -155,7 +155,7 @@ export default function ProductionPage() {
         </div>
       </div>
 
-      {/* ── TOOLBAR ── */}
+      {}
       <div className='card-header border-0 pt-4 pb-2'>
         <div className='card-title'>
           <div className='d-flex align-items-center position-relative my-1'>
@@ -170,7 +170,7 @@ export default function ProductionPage() {
           </div>
         </div>
         <div className='card-toolbar gap-2 flex-wrap'>
-          {/* Rows per page */}
+          {}
           <select
             className='form-select form-select-solid form-select-sm w-auto'
             value={rowsPerPage}
@@ -179,7 +179,7 @@ export default function ProductionPage() {
             {[25, 50, 100, 200].map(n => <option key={n} value={n}>{n} lignes</option>)}
           </select>
 
-          {/* Filters toggle */}
+          {}
           <button
             type='button'
             className={`btn btn-sm ${showFilters ? 'btn-primary' : 'btn-light-primary'}`}
@@ -205,13 +205,13 @@ export default function ProductionPage() {
             </button>
           )}
 
-          {/* Export Excel */}
+          {}
           <button type='button' className='btn btn-sm btn-light-success' onClick={exportExcel}>
             <KTIcon iconName='exit-up' className='fs-3 me-1' />
             Excel ({filteredOrders.length})
           </button>
 
-          {/* Refresh */}
+          {}
           <button type='button' className='btn btn-sm btn-light-primary' onClick={fetchOrders} disabled={loading}>
             {loading
               ? <span className='spinner-border spinner-border-sm me-2' />
@@ -222,7 +222,7 @@ export default function ProductionPage() {
         </div>
       </div>
 
-      {/* ── FILTER PANEL ── */}
+      {}
       {showFilters && (
         <div className='card-header border-0 pt-0 pb-3'>
           <div className='d-flex flex-wrap gap-4 align-items-end bg-light rounded p-4 w-100'>
@@ -267,7 +267,7 @@ export default function ProductionPage() {
         </div>
       )}
 
-      {/* ── TABLE ── */}
+      {}
       <div className='card-body pt-0'>
         <div className='table-responsive'>
           <table className='table align-middle table-row-dashed table-hover fs-7 gy-2'>
@@ -346,7 +346,7 @@ export default function ProductionPage() {
           </table>
         </div>
 
-        {/* ── PAGINATION ── */}
+        {}
         <div className='d-flex justify-content-between align-items-center flex-wrap gap-3 pt-4 border-top'>
           <div className='text-muted fs-7'>
             Affichage de{' '}
@@ -380,7 +380,7 @@ export default function ProductionPage() {
         </div>
       </div>
 
-      {/* ── DETAIL MODAL ── */}
+      {}
       <Modal show={showModal} onHide={() => setShowModal(false)} size='lg' centered>
         <Modal.Header closeButton>
           <Modal.Title className='fw-bold fs-5'>

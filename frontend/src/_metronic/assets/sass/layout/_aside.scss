@@ -1,8 +1,8 @@
-//
-// Aside
-//
 
-// Desktop mode
+
+
+
+
 @include media-breakpoint-up(lg) {
   .app-aside {
     border: 1px solid var(--#{$prefix}border-color);
@@ -11,12 +11,10 @@
   }
 }
 
-// Dark mode
+
 @include color-mode(dark) {
-  // Desktop mode
   @include media-breakpoint-up(lg) {
     .app-aside {
-      //box-shadow: $card-box-shadow-dark;
     }
   }
 }

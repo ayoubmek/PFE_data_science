@@ -1,8 +1,8 @@
-//
-// Secondary button
-//
 
-// Desktop mode
+
+
+
+
 @include media-breakpoint-up(lg) {
   .btn.btn-secondary {
     @include button-custom-variant(
@@ -19,7 +19,6 @@
 }
 
 @include color-mode(dark) {
-  // Secondary button
   .btn.btn-secondary {
     @include button-custom-variant(
       $color: null,

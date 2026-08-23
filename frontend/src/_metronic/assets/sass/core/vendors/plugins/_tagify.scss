@@ -1,8 +1,8 @@
-//
-// Tagify
-//
 
-// Bootstrap .form-control sizing integration
+
+
+
+
 $tagify-tag-padding-y-sm: 0.3rem;
 $tagify-tag-padding-x-sm: 0.3rem;
 $tagify-input-padding-y-sm: #{$input-padding-y-sm - $tagify-tag-padding-y-sm};
@@ -15,7 +15,7 @@ $tagify-tag-padding-y-lg: 0.5rem;
 $tagify-tag-padding-x-lg: 0.5rem;
 $tagify-input-padding-y-lg: $input-padding-y-lg - $tagify-tag-padding-y-lg;
 
-// Base
+
 .tagify {
   --tagify-dd-bg-color: var(--#{$prefix}body-bg);
   --tags-border-color: #{$input-border-color};
@@ -69,7 +69,6 @@ $tagify-input-padding-y-lg: $input-padding-y-lg - $tagify-tag-padding-y-lg;
       }
     }
 
-    // Not allowed state
     &.tagify--notAllowed {
       div {
         .tagify__tag-text {
@@ -100,7 +99,6 @@ $tagify-input-padding-y-lg: $input-padding-y-lg - $tagify-tag-padding-y-lg;
     }
   }
 
-  // Sizing
   &.form-control {
     display: flex;
     align-items: center;
@@ -156,7 +154,7 @@ $tagify-input-padding-y-lg: $input-padding-y-lg - $tagify-tag-padding-y-lg;
   }
 }
 
-// Dropdown
+
 .tagify__dropdown {
   box-shadow: var(--#{$prefix}dropdown-box-shadow);
   border: 0 !important;
@@ -166,13 +164,11 @@ $tagify-input-padding-y-lg: $input-padding-y-lg - $tagify-tag-padding-y-lg;
   background-color: var(--#{$prefix}body-bg);
   @include border-radius($border-radius);
 
-  // Wrapper
   ._wrapper {
     max-height: none;
     @include border-radius($border-radius);
   }
 
-  // In modal
   .modal-open & {
     z-index: $zindex-modal + 1;
   }
@@ -199,7 +195,6 @@ $tagify-input-padding-y-lg: $input-padding-y-lg - $tagify-tag-padding-y-lg;
     }
   }
 
-  // Suggestions
   &.tagify__inline__suggestions {
     padding: $input-padding-y $input-padding-x;
 

@@ -29,7 +29,6 @@ public class ProductionController {
     private final FactCleRepository factCleRepository;
     private final SseService sseService;
 
-    // ── PRODUCTION ORDERS ─────────────────────────────────────────────────
 
     @GetMapping("/orders")
     public ResponseEntity<List<ProductionDTO.Response>> getAllOrders() {
@@ -71,14 +70,12 @@ public class ProductionController {
         return ResponseEntity.ok(productionService.getRetardes());
     }
 
-    // ── KPI ───────────────────────────────────────────────────────────────
 
     @GetMapping("/kpi")
     public ResponseEntity<ProductionDTO.KpiResponse> getKpi() {
         return ResponseEntity.ok(productionService.getKpi());
     }
 
-    // ── MACHINES (Work Centers from FACT_CLE) ────────────────────────────────
 
     @GetMapping("/machines")
     public ResponseEntity<List<Map<String, Object>>> getAllMachines() {
@@ -142,7 +139,6 @@ public class ProductionController {
         return ResponseEntity.noContent().build();
     }
 
-    // ── FACT_CLE (Real SQL Server production data) ────────────────────────
 
     @GetMapping("/fact-cle")
     public ResponseEntity<List<Map<String, Object>>> getFactCle() {

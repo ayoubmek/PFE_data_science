@@ -32,12 +32,10 @@ public class DataSeeder implements CommandLineRunner {
             log.info("Seeding users...");
             seedUsers();
         }
-        
         if (machineRepo.count() == 0) {
             log.info("Seeding machines...");
             seedMachines();
         }
-        
         if (productionRepo.count() == 0) {
             log.info("Seeding production orders...");
             seedProductionOrders();

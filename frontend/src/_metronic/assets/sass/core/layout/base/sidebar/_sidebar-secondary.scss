@@ -1,8 +1,8 @@
-//
-// sidebar Secondary
-//
 
-// General mode
+
+
+
+
 .app-sidebar-secondary {
   transition: $app-sidebar-secondary-base-transition;
   position: relative;
@@ -13,7 +13,7 @@
   border-right: var(--#{$prefix}app-sidebar-secondary-base-border-end);
 }
 
-// Utilities
+
 .app-sidebar-secondary-collapse-d-flex,
 .app-sidebar-secondary-minimize-d-flex,
 .app-sidebar-secondary-collapse-mobile-d-flex,
@@ -21,9 +21,8 @@
   display: none;
 }
 
-// Desktop mode
+
 @include media-breakpoint-up(lg) {
-  // Base
   .app-sidebar-secondary {
     @include property(z-index, $app-sidebar-secondary-base-z-index);
     @include property(margin-left, $app-sidebar-secondary-base-gap-start-mobile);
@@ -32,7 +31,6 @@
     @include property(margin-bottom, $app-sidebar-secondary-base-gap-bottom-mobile);
   }
 
-  // Vars
   [data-kt-app-sidebar-secondary-enabled='true'] {
     --#{$prefix}app-sidebar-secondary-width-actual: calc(
       #{$app-sidebar-base-width} - #{$app-sidebar-primary-base-width} - #{$app-sidebar-primary-base-gap-start} -
@@ -70,7 +68,6 @@
     --#{$prefix}app-sidebar-secondary-width: 0px;
   }
 
-  // States
   .app-sidebar-secondary {
     width: var(--#{$prefix}app-sidebar-secondary-width);
 
@@ -83,10 +80,6 @@
     [data-kt-app-sidebar-secondary-minimize='on'] & {
       transition: $app-sidebar-secondary-base-transition;
 
-      //background-color: var(--#{$prefix}app-sidebar-secondary-minimize-bg-color);
-      //box-shadow: var(--#{$prefix}app-sidebar-secondary-minimize-box-shadow);
-      //border-left: var(--#{$prefix}app-sidebar-secondary-minimize-border-start);
-      //border-right: var(--#{$prefix}app-sidebar-secondary-minimize-border-end);
 
       @include property(margin-left, $app-sidebar-secondary-minimize-gap-start-mobile);
       @include property(margin-right, $app-sidebar-secondary-minimize-gap-end-mobile);
@@ -108,22 +101,18 @@
     }
   }
 
-  // Integration
   .app-sidebar-secondary {
-    // Header
     [data-kt-app-sidebar-fixed='true'][data-kt-app-header-fixed='true'][data-kt-app-sidebar-secondary-below-header='true']
       & {
       top: var(--#{$prefix}app-header-height);
     }
 
-    // Toolbar
     [data-kt-app-sidebar-fixed='true'][data-kt-app-header-fixed='true'][data-kt-app-toolbar-fixed='true'][data-kt-app-sidebar-secondary-below-toolbar='true']
       & {
       top: calc(var(--#{$prefix}app-header-height) + var(--#{$prefix}app-toolbar-height, 0));
     }
   }
 
-  // Utilities
   [data-kt-app-sidebar-secondary-enabled='true'][data-kt-app-sidebar-secondary-minimize='on'] {
     .app-sidebar-secondary-minimize-d-none {
       display: none !important;
@@ -145,9 +134,8 @@
   }
 }
 
-// Tablet & mobile modes
+
 @include media-breakpoint-down(lg) {
-  // Base
   .app-sidebar-secondary {
     @include property(z-index, $app-sidebar-secondary-base-z-index-mobile);
     @include property(margin-left, $app-sidebar-secondary-base-gap-start-mobile);
@@ -156,7 +144,6 @@
     @include property(margin-bottom, $app-sidebar-secondary-base-gap-bottom-mobile);
   }
 
-  // Vars
   [data-kt-app-sidebar-secondary-enabled='true'] {
     --#{$prefix}app-sidebar-secondary-width-actual: calc(
       #{$app-sidebar-base-width-mobile} - #{$app-sidebar-primary-base-width-mobile} - #{$app-sidebar-primary-base-gap-start-mobile} -
@@ -197,7 +184,6 @@
     --#{$prefix}app-sidebar-secondary-width: 0px;
   }
 
-  // States
   .app-sidebar-secondary {
     width: var(--#{$prefix}app-sidebar-secondary-width);
 
@@ -214,10 +200,6 @@
       border-left: var(--#{$prefix}app-sidebar-secondary-minimize-border-start-mobile);
       border-right: var(--#{$prefix}app-sidebar-secondary-minimize-border-end-mobile);
 
-      //@include property( margin-left, $app-sidebar-secondary-minimize-gap-start-mobile);
-      //@include property( margin-right, $app-sidebar-secondary-minimize-gap-end-mobile);
-      //@include property( margin-top, $app-sidebar-secondary-minimize-gap-top-mobile);
-      //@include property( margin-bottom, $app-sidebar-secondary-minimize-gap-bottom-mobile);
     }
 
     [data-kt-app-sidebar-secondary-hoverable-mobile='true'] & {
@@ -234,7 +216,6 @@
     }
   }
 
-  // Utilities
   [data-kt-app-sidebar-secondary-enabled='true'][data-kt-app-sidebar-secondary-minimize-mobile='on'] {
     .app-sidebar-secondary-minimize-mobile-d-none {
       display: none !important;

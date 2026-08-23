@@ -1,6 +1,6 @@
-//
-// Fullcalendar plugin customization: https://fullcalendar.io/
-//
+
+
+
 
 body {
   --fc-event-border-color: var(--#{$prefix}primary);
@@ -8,29 +8,19 @@ body {
   --fc-event-text-color: var(--#{$prefix}primary-inverse);
 }
 
-// Base
+
 .fc {
-  // Border color
   --fc-border-color: #{var(--#{$prefix}gray-200)};
   --fc-page-bg-color: #{$white};
   --fc-small-font-size: 0.95rem;
 
-  // General
   --fc-highlight-color: var(--#{$prefix}light);
-  //--fc-non-business-color:
-  //--fc-bg-event-color:
   --fc-bg-event-opacity: 0.3;
   --fc-neutral-bg-color: var(--#{$prefix}light);
-  //--fc-event-selected-overlay-color:
   --fc-today-bg-color: var(--#{$prefix}success-light);
-  //--fc-neutral-bg-color:
-  //--fc-neutral-text-color:
-  //--fc-more-link-text-color:
-  //--fc-more-link-bg-color:
   --fc-now-indicator-color: var(--#{$prefix}danger);
   --fc-list-event-hover-bg-color: var(--#{$prefix}light);
 
-  // Buttons
   --fc-button-text-color: var(--#{$prefix}gray-600);
   --fc-button-bg-color: var(--#{$prefix}gray-100);
   --fc-button-border-color: var(--#{$prefix}gray-100);
@@ -41,12 +31,10 @@ body {
   --fc-button-active-bg-color: var(--#{$prefix}gray-200);
   --fc-button-active-border-color: var(--#{$prefix}gray-200);
 
-  // Table
   table {
     font-size: 1rem;
   }
 
-  // Button
   .fc-button {
     padding: 0.75rem 1.25rem;
     box-shadow: none !important;
@@ -57,11 +45,9 @@ body {
     text-transform: capitalize;
   }
 
-  // Primary button
   .fc-button-primary {
     margin: 0;
 
-    // Icon
     .fc-icon {
       font-size: 1.35rem;
       margin-bottom: 0.15rem;
@@ -88,21 +74,18 @@ body {
     }
   }
 
-  // Button group
   .fc-button-group {
     .fc-button {
       margin: 0 !important;
     }
   }
 
-  // Toolbar title
   .fc-toolbar-title {
     font-size: 1.5rem;
     font-weight: $font-weight-bold;
     color: var(--#{$prefix}gray-800);
   }
 
-  // Header cell
   .fc-col-header-cell {
     padding: 0.75rem 0.5rem;
 
@@ -113,7 +96,6 @@ body {
     }
   }
 
-  // Border radius
   .fc-scrollgrid {
     @include border-radius($border-radius);
 
@@ -138,12 +120,10 @@ body {
     }
   }
 
-  // Event
   .fc-daygrid-event {
     margin-top: 3px;
   }
 
-  // Event title
   .fc-daygrid-dot-event,
   .fc-daygrid-block-event {
     .fc-event-title,
@@ -152,12 +132,10 @@ body {
     }
   }
 
-  // Day number
   .fc-daygrid-day-number {
     color: var(--#{$prefix}gray-800);
   }
 
-  // Dot event
   .fc-daygrid-dot-event {
     background-color: var(--#{$prefix}light);
     color: var(--#{$prefix}gray-600);
@@ -173,13 +151,11 @@ body {
     }
   }
 
-  // Event dot
   .fc-daygrid-event-dot {
     margin-left: 0.5rem;
     margin-right: 0.1rem;
   }
 
-  // Popover
   .fc-popover {
     border: 0 !important;
     background-color: $tooltip-bg;
@@ -212,18 +188,15 @@ body {
     }
   }
 
-  // More link
   .fc-daygrid-more-link {
     font-weight: $font-weight-semibold;
   }
 
-  // Slot
   .fc-timegrid-slot {
     height: 2rem;
     font-size: 0.95rem;
   }
 
-  // List
   .fc-list-day-cushion,
   .fc-list-table td {
     padding: 0.85rem 1.15rem;
@@ -237,7 +210,6 @@ body {
   }
 
   .fc-list,
-    //.fc-scroller,
     .fc-list-table {
     @include border-radius($border-radius);
   }
@@ -247,32 +219,28 @@ body {
     position: relative;
   }
 
-  // Week
   .fc-timegrid-axis {
     padding-left: 0rem;
     padding-right: 0;
   }
 
-  // Main
   .fc-timegrid-event .fc-event-main {
     padding: 0.25rem 0.25rem;
   }
 
-  // Indicator arrow
   .fc-timegrid-now-indicator-arrow {
     margin-top: -1px;
   }
 }
 
-// Event
+
 .fc-h-event {
   font-weight: $font-weight-normal;
 }
 
-// Mobile mode
+
 @include media-breakpoint-down(md) {
   .fc {
-    // Header toolbar
     .fc-header-toolbar {
       flex-direction: column;
       align-items: flex-start;

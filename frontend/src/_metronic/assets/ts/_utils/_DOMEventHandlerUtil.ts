@@ -43,17 +43,14 @@ export class DOMEventHandlerUtil {
 
   public static one(element: HTMLElement, eventName: string, callBack: Function): void {
     element.addEventListener(eventName, function calee(e) {
-      // remove event
       if (e.target && e.target.removeEventListener) {
         e.target.removeEventListener(e.type, calee)
       }
 
       if (element && e && e.currentTarget) {
-        // if (element && element.removeEventListener && e && e.currentTarget) {
         e.currentTarget.removeEventListener(e.type, calee)
       }
 
-      // call hander
       return callBack(e)
     })
   }

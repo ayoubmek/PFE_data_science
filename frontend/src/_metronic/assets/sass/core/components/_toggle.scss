@@ -1,16 +1,16 @@
-//
-// Toggle
-//
+
+
+
 
 .toggle {
-  &.collapsible:not(.collapsed), // Integration with Bootstrap Collapse
+  &.collapsible:not(.collapsed), 
     &.active {
     .toggle-off {
       display: none;
     }
   }
 
-  &.collapsible.collapsed, // Integration with Bootstrap Collapse
+  &.collapsible.collapsed, 
     &:not(.collapsible):not(.active) {
     .toggle-on {
       display: none;

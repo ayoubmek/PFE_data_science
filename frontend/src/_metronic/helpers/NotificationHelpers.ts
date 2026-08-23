@@ -1,7 +1,6 @@
 export const getNotificationUI = (type: string | undefined, title?: string) => {
     let finalType = type?.toLowerCase();
 
-    // Guess type if missing based on title/message for improved aesthetics on old data
     if (!finalType && title) {
         const lowerTitle = title.toLowerCase();
         if (lowerTitle.includes('order')) finalType = 'order';
@@ -19,42 +18,42 @@ export const getNotificationUI = (type: string | undefined, title?: string) => {
         case 'order':
         case 'order_created':
         case 'orders':
-            return { icon: 'basket', color: '#00C2FF', textColor: '#ffffff' }; // Electric Cyan
+            return { icon: 'basket', color: '#00C2FF', textColor: '#ffffff' }; 
         case 'shipment':
         case 'shipment_created':
         case 'tracking':
-            return { icon: 'delivery-3', color: '#FFB800', textColor: '#ffffff' }; // Golden Orange
+            return { icon: 'delivery-3', color: '#FFB800', textColor: '#ffffff' }; 
         case 'export':
         case 'export_completed':
-            return { icon: 'exit-up', color: '#7E8299', textColor: '#ffffff' }; // Steel Grey
+            return { icon: 'exit-up', color: '#7E8299', textColor: '#ffffff' }; 
         case 'user':
         case 'user_created':
         case 'users':
-            return { icon: 'profile-circle', color: '#007AFF', textColor: '#ffffff' }; // Apple Blue
+            return { icon: 'profile-circle', color: '#007AFF', textColor: '#ffffff' }; 
         case 'error':
         case 'alert':
-            return { icon: 'cross-circle', color: '#FF3B30', textColor: '#ffffff' }; // Vibrant Alert Red
+            return { icon: 'cross-circle', color: '#FF3B30', textColor: '#ffffff' }; 
         case 'status':
         case 'status_updated':
         case 'order_status_update':
-            return { icon: 'arrows-loop', color: '#F1416C', textColor: '#ffffff' }; // Rose Pink
+            return { icon: 'arrows-loop', color: '#F1416C', textColor: '#ffffff' }; 
         case 'bordereau':
         case 'bordereaux':
-            return { icon: 'document', color: '#FF2D55', textColor: '#ffffff' }; // Vivid Crimson
+            return { icon: 'document', color: '#FF2D55', textColor: '#ffffff' }; 
         case 'intigo':
-            return { icon: 'truck', color: '#5856D6', textColor: '#ffffff' }; // Electric Indigo
+            return { icon: 'truck', color: '#5856D6', textColor: '#ffffff' }; 
         case 'vendor':
         case 'vendors':
-            return { icon: 'shop', color: '#34C759', textColor: '#ffffff' }; // Bright Success Green
+            return { icon: 'shop', color: '#34C759', textColor: '#ffffff' }; 
         case 'product':
         case 'products':
-            return { icon: 'package', color: '#AF52DE', textColor: '#ffffff' }; // Modern Purple
+            return { icon: 'package', color: '#AF52DE', textColor: '#ffffff' }; 
         case 'config':
-            return { icon: 'setting-2', color: '#1C1C1E', textColor: '#ffffff' }; // Deep Onyx
+            return { icon: 'setting-2', color: '#1C1C1E', textColor: '#ffffff' }; 
         case 'confirm':
         case 'to-confirm':
-            return { icon: 'check-circle', color: '#30D158', textColor: '#ffffff' }; // Mint Success
+            return { icon: 'check-circle', color: '#30D158', textColor: '#ffffff' }; 
         default:
-            return { icon: 'notification-on', color: '#8E8E93', textColor: '#ffffff' }; // iOS Style Grey
+            return { icon: 'notification-on', color: '#8E8E93', textColor: '#ffffff' }; 
     }
 };

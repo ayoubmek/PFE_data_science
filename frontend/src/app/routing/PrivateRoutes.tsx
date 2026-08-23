@@ -18,14 +18,14 @@ const PrivateRoutes = () => {
   return (
     <Routes>
       <Route element={<MasterLayout />}>
-        {/* Redirects */}
+        {}
         <Route path='auth/*' element={<Navigate to='/dashboard' />} />
         <Route path='/' element={<Navigate to='/dashboard' />} />
 
-        {/* Dashboard */}
+        {}
         <Route path='dashboard' element={<DashboardWrapper />} />
 
-        {/* Industrial Stock & Production Routes */}
+        {}
         <Route path='production' element={<SuspensedView><ProductionPage /></SuspensedView>} />
         <Route path='production/machines' element={<SuspensedView><MachinesPage /></SuspensedView>} />
         <Route path='stock' element={<SuspensedView><StockInventoryPage /></SuspensedView>} />
@@ -35,7 +35,7 @@ const PrivateRoutes = () => {
         <Route path='admin/monitoring' element={<SuspensedView><AdminMonitoringPage /></SuspensedView>} />
         <Route path='data-science' element={<SuspensedView><DataSciencePage /></SuspensedView>} />
 
-        {/* Catch-all */}
+        {}
         <Route path='*' element={<Navigate to='/error/404' />} />
       </Route>
     </Routes>

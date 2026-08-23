@@ -1,8 +1,8 @@
-//
-// Bootstrap Daterangepicker plugin customization: https://www.daterangepicker.com
-//
 
-// Base
+
+
+
+
 .daterangepicker {
   padding: 0;
   margin: 0;
@@ -246,7 +246,7 @@
   }
 }
 
-// Tablet mode
+
 @include media-breakpoint-down(md) {
   .daterangepicker {
     &.show-calendar {

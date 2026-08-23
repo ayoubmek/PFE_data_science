@@ -63,7 +63,6 @@ const updateDOM = (config: ILayout) => {
 
     setTimeout(() => {
       const toolbarElement = document.getElementById('kt_app_toolbar')
-      // toolbar
       if (toolbarElement) {
         const toolbarAttributes = toolbarElement
           .getAttributeNames()

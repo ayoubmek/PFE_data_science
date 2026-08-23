@@ -1,6 +1,6 @@
-//
-// Scrolltop
-//
+
+
+
 
 .scrolltop {
   position: fixed;
@@ -50,7 +50,7 @@
   }
 }
 
-// Tablet & Mobile Modess
+
 @include media-breakpoint-down(lg) {
   .scrolltop {
     bottom: $scrolltop-bottom-mobile;
@@ -60,7 +60,7 @@
   }
 }
 
-// Animations
+
 @keyframes animation-scrolltop {
   from {
     margin-bottom: -15px;
