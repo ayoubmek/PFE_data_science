@@ -1,18 +1,6 @@
--- ============================================================
--- PFE Platform - SQL Server Init Script
--- Microsoft SQL Server 2019+
--- Run against the existing dbDWH database
---
--- NOTE: With ddl-auto=update, Hibernate auto-creates these tables.
--- Use this script only for manual setup or reference.
--- Table names are snake_case to match SpringPhysicalNamingStrategy.
--- ============================================================
-
 USE dbDWH;
 GO
 
--- ── USERS ────────────────────────────────────────────────────────────────────
--- Entity: User  @Table(name="AppUsers") → Hibernate generates: app_users
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='app_users' AND xtype='U')
 CREATE TABLE app_users (
     id          BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -26,8 +14,6 @@ CREATE TABLE app_users (
 );
 GO
 
--- ── MACHINES ─────────────────────────────────────────────────────────────────
--- Entity: Machine  @Table(name="Machines") → Hibernate generates: machines
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='machines' AND xtype='U')
 CREATE TABLE machines (
     id                    BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -43,8 +29,6 @@ CREATE TABLE machines (
 );
 GO
 
--- ── PRODUCTION ORDERS ────────────────────────────────────────────────────────
--- Entity: ProductionOrder  @Table(name="ProductionOrders") → production_orders
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='production_orders' AND xtype='U')
 CREATE TABLE production_orders (
     id                  BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -63,9 +47,6 @@ CREATE TABLE production_orders (
 );
 GO
 
--- ── STOCK MOVEMENTS ──────────────────────────────────────────────────────────
--- Entity: StockMovement  @Table(name="StockMovements") → stock_movements
--- References items by reference string (joins to legacy dbo.ASTOCKDATE)
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='stock_movements' AND xtype='U')
 CREATE TABLE stock_movements (
     id                    BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -79,8 +60,6 @@ CREATE TABLE stock_movements (
 );
 GO
 
--- ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
--- Entity: Notification  @Table(name="Notifications") → notifications
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='notifications' AND xtype='U')
 CREATE TABLE notifications (
     id          BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -96,8 +75,6 @@ CREATE TABLE notifications (
 );
 GO
 
--- ── KPI LOGS ─────────────────────────────────────────────────────────────────
--- No Java entity — used for raw logging if needed
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='kpi_logs' AND xtype='U')
 CREATE TABLE kpi_logs (
     id          BIGINT IDENTITY(1,1) PRIMARY KEY,

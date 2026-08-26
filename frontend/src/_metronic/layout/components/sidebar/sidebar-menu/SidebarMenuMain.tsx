@@ -108,23 +108,6 @@ const SidebarMenuMain = () => {
         fontIcon='bi-cpu'
         iconColor='#009EF7'
       />
-
-      {}
-      <div className='menu-item'>
-        <div className='menu-content pt-8 pb-2'>
-          <span className='menu-section text-muted text-uppercase fs-8 ls-1'>
-            Administration
-          </span>
-        </div>
-      </div>
-
-      <SidebarMenuItem
-        to='/admin/monitoring'
-        icon='shield-tick'
-        title='Supervision Admin'
-        fontIcon='bi-shield-check'
-        iconColor='#E11D48'
-      />
     </>
   )
 }

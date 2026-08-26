@@ -319,7 +319,7 @@ class DrawerComponent {
   }
 
   public static handleDismiss = () => {
-    DOMEventHandlerUtil.on(document.body, '[data-kt-drawer-dismiss="true"]', 'click', () => {
+    DOMEventHandlerUtil.on(document.body, '[data-kt-drawer-dismiss="true"]', 'click', function (this: any) {
       const element = this.closest('[data-kt-drawer="true"]')
       if (element) {
         const drawer = DrawerComponent.getInstance(element)

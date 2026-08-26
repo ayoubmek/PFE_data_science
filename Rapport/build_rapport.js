@@ -119,7 +119,7 @@ const getSprintIntro = (num, title) => {
     return "Ce chapitre est consacré au Sprint 4, portant sur les modules d'Intelligence Artificielle et de Data Science. Nous y détaillons l'intégration du service Python FastAPI, les modèles prédictifs de production et de stock (Prophet, ARIMA), la segmentation d'articles (K-Means) et la détection d'anomalies (Isolation Forest).";
   }
   if (num === 5) {
-    return "Ce chapitre présente le Sprint 5, centré sur la supervision globale, le monitoring et l'administration système. Il décrit le backlog de l'itération, la traçabilité des actions via ActivityLog, la télémétrie de santé applicative et les consoles de contrôle d'audit.";
+    return "Ce chapitre présente le Sprint 5, centré sur la supervision globale des notifications et alertes système. Il décrit le backlog de l'itération, la traçabilité des événements d'atelier et la télémétrie de santé applicative.";
   }
   return `Ce chapitre présente la réalisation du Sprint ${num} : ${title}.`;
 };
@@ -384,8 +384,7 @@ const UC_DATA = {
     { name: "Réaliser la segmentation ABC et la détection d'anomalies (K-Means & Isolation Forest)", actors: "Gestionnaire Stock, Data Scientist", precond: "Les caractéristiques d'inventaire et historiques de mouvements sont chargés.", scenario: ["L'utilisateur lance l'analyse décisionnelle avancée.", "L'algorithme K-Means classe les articles en catégories ABC (Valeur / Volume).", "L'algorithme Isolation Forest identifie les mouvements aberrants ou consommations anormales.", "Le frontend affiche le rapport de segmentation et les alertes d'anomalies prioritaires."], postcond: "Les articles stratégiques de classe A et les anomalies de stock sont identifiés.", exceptions: "Données aberrantes majeures : signalées dans le rapport d'exécution du modèle." }
   ],
   5: [
-    { name: "Consulter les journaux d'audit technique (ActivityLog)", actors: "Administrateur", precond: "L'Administrateur est authentifié avec les privilèges d'audit.", scenario: ["L'Administrateur accède au centre de monitoring technique.", "Il applique des filtres par utilisateur, type d'événement ou plage de dates.", "Le système extrait les journaux d'activité (connexions, modifications critiques, exports).", "L'Administrateur consulte les détails techniques et adresses IP des actions."], postcond: "La traçabilité et l'auditabilité des opérations sont assurées.", exceptions: "Base de données de logs saturée : archivage automatique déclenché." },
-    { name: "Superviser le centre de notifications et d'alertes d'atelier", actors: "Administrateur, Responsable Production", precond: "Des seuils d'alerte (stock bas, arrêt machine prolongé) sont définis.", scenario: ["L'utilisateur consulte le centre de notifications en haut de l'interface Metronic.", "Le système liste les alertes récentes classées par sévérité (Info, Avertissement, Critique).", "L'utilisateur valide une alerte ou déclenche une action corrective.", "Le statut de notification passe à \"Lue / Traitée\"."], postcond: "L'alerte est prise en compte et le journal d'événements est mis à jour.", exceptions: "Erreur de transmission d'alerte : réémission automatique de la notification." }
+    { name: "Superviser le centre de notifications et d'alertes d'atelier", actors: "Responsable Production, Gestionnaire Stock", precond: "Des seuils d'alerte (stock bas, arrêt machine prolongé) sont définis.", scenario: ["L'utilisateur consulte le centre de notifications en haut de l'interface Metronic.", "Le système liste les alertes récentes classées par sévérité (Info, Avertissement, Critique).", "L'utilisateur valide une alerte ou déclenche une action corrective.", "Le statut de notification passe à \"Lue / Traitée\"."], postcond: "L'alerte est prise en compte et le journal d'événements est mis à jour.", exceptions: "Erreur de transmission d'alerte : réémission automatique de la notification." }
   ]
 };
 
@@ -398,7 +397,7 @@ const SPRINT_CONCLUSIONS = {
   2: "En conclusion, ce deuxième sprint a permis de mettre en œuvre le suivi de production d'atelier. La gestion des machines et des ordres de production offre une visibilité totale sur l'avancement et le calcul automatique du rendement (TRG).",
   3: "En conclusion, ce troisième sprint a finalisé la gestion de l'inventaire. Le suivi des mouvements de stock et les alertes automatiques sur seuils critiques fiabilisent l'approvisionnement et préviennent les ruptures.",
   4: "En conclusion, ce quatrième sprint a intégré les modules d'Intelligence Artificielle et de Data Science. L'analyse multi-modèles (ARIMA, Prophet, Régression Linéaire) pour la production, le clustering K-Means et la détection d'anomalies fournissent des recommandations opérationnelles cruciales.",
-  5: "En conclusion, ce dernier sprint a fourni les consoles d'administration, de supervision des notifications et de monitoring de l'activité. Il garantit la traçabilité complète de l'application et facilite l'audit technique."
+  5: "En conclusion, ce dernier sprint a fourni les consoles de supervision des notifications et alertes système. Il garantit la traçabilité des événements d'atelier."
 };
 
 const INTERFACE_TITLES = {
@@ -406,7 +405,7 @@ const INTERFACE_TITLES = {
   2: "Tableau de bord de suivi des machines et Taux TRG en direct",
   3: "Console de gestion d'inventaire, entrées/sorties et alertes de seuils",
   4: "Interface d'Intelligence Artificielle et prévisions Data Science",
-  5: "Console technique d'audit ActivityLog et notifications d'atelier"
+  5: "Console de supervision des notifications et alertes d'atelier"
 };
 
 const sprintSection = (
@@ -1132,7 +1131,7 @@ const doc = new Document({
         tocLine("7.3 Analyse Fonctionnelle", 1, "82"),
         tocLine("7.3.1 Diagramme des Cas d'Utilisation", 2, "83"),
         tocLine("7.3.2 Descriptions Textuelles des Cas d'Utilisation", 2, "83"),
-        tocLine("7.3.3 Diagramme de Séquence : Consultation des journaux de monitoring d'activité", 2, "84"),
+        tocLine("7.3.3 Diagramme de Séquence : Consultation des notifications et alertes d'atelier", 2, "84"),
         tocLine("7.4 Conception", 1, "84"),
         tocLine("7.4.1 Diagramme de Classes", 2, "84"),
         tocLine("7.4.2 Diagramme d'Activité", 2, "85"),
@@ -1177,7 +1176,7 @@ const doc = new Document({
         tocLine("Figure 6.4 : Diagramme d'activité : Sprint 4 – IA et Data Science", 1, "78"),
         tocLine("Figure 6.5 : Captures d'écran : Interface d'Intelligence Artificielle et prévisions Data Science", 1, "79"),
         tocLine("Figure 7.1 : Diagramme de cas d'utilisation : Sprint 5 – Administration", 1, "83"),
-        tocLine("Figure 7.2 : Diagramme de séquence : Consultation du monitoring d'activité", 1, "84"),
+        tocLine("Figure 7.2 : Diagramme de séquence : Consultation des alertes d'atelier", 1, "84"),
         tocLine("Figure 7.3 : Diagramme de classes : Sprint 5 – Administration", 1, "84"),
         tocLine("Figure 7.4 : Diagramme d'activité : Sprint 5 – Administration", 1, "85"),
         tocLine("Figure 7.5 : Captures d'écran : Console technique d'audit ActivityLog et notifications d'atelier", 1, "86"),
@@ -1289,7 +1288,7 @@ const doc = new Document({
         bullet("**Chapitre 4 : Sprint 2 – Gestion de Production et Suivi des Machines** – Il présente la configuration des postes de travail d'atelier, le suivi des états des machines en direct, le calcul automatique du taux de rendement global (TRG) et la gestion des ordres de production."),
         bullet("**Chapitre 5 : Sprint 3 – Gestion des Stocks et Mouvements** – Ce chapitre est dédié à la mise en œuvre du suivi d'inventaire, de la saisie des mouvements d'entrée/sorties, de la gestion des ajustements et des alertes de seuils critiques de réapprovisionnement."),
         bullet("**Chapitre 6 : Sprint 4 – Intelligence Artificielle et Data Science** – Il décrit le service FastAPI (Python) hébergeant les modèles prédictifs de production et de stock (ARIMA, Prophet), la segmentation ABC des articles via K-Means et la détection d'anomalies de fonctionnement via Isolation Forest."),
-        bullet("**Chapitre 7 : Sprint 5 – Administration, Supervision et Monitoring** – Ce chapitre présente la console technique de monitoring d'activité (ActivityLog) et le centre d'historisation des notifications d'alertes système."),
+        bullet("**Chapitre 7 : Sprint 5 – Supervision et Centre d'Alertes** – Ce chapitre présente le centre d'historisation des notifications d'alertes système."),
         pb(),
         body("Pour finir, une conclusion générale synthétise les apports techniques et fonctionnels du projet, puis présente les futures opportunités d'amélioration de la solution."),
 
@@ -1502,7 +1501,7 @@ const doc = new Document({
             { code: "F06", name: "Prévision de Stock", description: "Modélisation prédictive de l'évolution des stocks par Prophet pour anticiper les ruptures et le surstockage." },
             { code: "F07", name: "Segmentation d'Articles", description: "Classification automatique ABC des articles en stock par l'algorithme de clustering non supervisé K-Means." },
             { code: "F08", name: "Détection d'Anomalies", description: "Détection automatique d'anomalies de fonctionnement dans l'atelier par l'algorithme Isolation Forest." },
-            { code: "F09", name: "Supervision et Audit logs", description: "Suivi chronologique technique des actions d'administration et d'exécution au sein des journaux de monitoring." },
+            { code: "F09", name: "Supervision et Alertes", description: "Suivi chronologique et notification des événements de stock et de production." },
             { code: "F10", name: "Reporting et Dashboards Power BI", description: "Conception et publication de tableaux de bord décisionnels interactifs Microsoft Power BI connectés au Data Warehouse pour l'analyse des mouvements, stocks et performances." }
           ];
 
@@ -1642,7 +1641,7 @@ const doc = new Document({
             ["4.4", "IA & Data Science", "En tant que manager, je veux segmenter les articles en stock (K-Means, analyse ABC) afin d'identifier les pièces critiques", "Moyenne", "5", "S4", "Terminé"],
             ["4.5", "IA & Data Science", "En tant qu'administrateur, je veux détecter les anomalies de fonctionnement (Isolation Forest) afin de prévenir les défaillances", "Basse", "5", "S4", "Terminé"],
 
-            ["5.1", "Supervision", "En tant qu'administrateur, je veux consulter la console de monitoring (ActivityLog) afin de tracer les actions des utilisateurs", "Haute", "5", "S5", "Terminé"],
+            ["5.1", "Supervision", "En tant qu'utilisateur, je veux consulter les alertes système afin d'anticiper les ruptures et anomalies", "Haute", "5", "S5", "Terminé"],
             ["5.2", "Supervision", "En tant qu'administrateur, je veux historiser les notifications d'alertes afin de disposer d'un historique complet d'audit", "Moyenne", "5", "S5", "Terminé"],
 
             ].map(r => {
@@ -1943,22 +1942,20 @@ const doc = new Document({
           "diagrams/sprint4_interface.png"
         ),
 
-        title1("Chapitre 7 : Sprint 5 – Administration, Supervision et Monitoring"),
+        title1("Chapitre 7 : Sprint 5 – Supervision et Centre d'Alertes"),
         ...sprintSection(
-          5, 7, "Administration, Supervision et Monitoring",
+          5, 7, "Supervision et Centre d'Alertes",
           [
-            ["5.1", "En tant qu'administrateur, je veux consulter la console de monitoring technique (ActivityLog) afin de suivre les actions", "Développement de l'interface de consultation chronologique des logs d'activité", "5", "Terminé"],
-            ["5.2", "En tant qu'administrateur, je veux journaliser les modifications critiques afin d'assurer l'auditibilité du système", "Implémentation du mécanisme d'interception et de persistance automatique des logs kpi_logs", "5", "Terminé"],
-            ["5.3", "En tant qu'administrateur, je veux consulter les notifications générées afin d'assurer le suivi des alertes", "Développement du centre de supervision et d'archivage des notifications système", "5", "Terminé"],
+            ["5.1", "En tant qu'utilisateur, je veux consulter le centre de notifications d'atelier afin de suivre les alertes", "Développement du centre de supervision et d'archivage des notifications système", "5", "Terminé"],
           ],
           [500, 2500, 2100, 1100, 900],
-          "Ce diagramme illustre les interactions réservées à l'administrateur pour la consultation des historiques d'audit et des alertes.",
-          "Ce diagramme représente la structure statique du module technique, présentant la classe ActivityLog et Notification liées à l'utilisateur.",
-          "Consultation des journaux d'activité par l'administrateur",
-          "Ce diagramme de séquence illustre la récupération filtrée des historiques d'activité kpi_logs à partir de la console d'administration.",
-          "Ce schéma modélise le flux d'interception des événements système et d'écriture automatique dans le journal d'audit.",
-          "Le module d'administration et de supervision technique centralise le pilotage de la plateforme. Il comprend une page de monitoring d'activité offrant une traçabilité totale sur les actions effectuées (connexions, modifications critiques) et un centre de notifications supervisant l'ensemble des alertes d'atelier.",
-          "Le sprint s'est terminé avec succès. Les tests d'intégrité sur l'enregistrement systématique des actions d'administration ont été complétés.",
+          "Ce diagramme illustre les interactions pour la consultation des alertes et des notifications d'atelier.",
+          "Ce diagramme représente la structure statique du module technique, présentant la classe Notification liée à l'utilisateur.",
+          "Consultation des notifications d'atelier",
+          "Ce diagramme de séquence illustre la récupération des alertes système.",
+          "Ce schéma modélise le flux d'émission et de lecture des notifications.",
+          "Le module de supervision centralise les alertes d'atelier et le centre de notifications pour une réactivité optimale.",
+          "Le sprint s'est terminé avec succès. Les tests d'intégrité sur l'enregistrement systématique des alertes ont été complétés.",
           [
             ["Tests unitaires", "Formatage JSON des ActivityLog et persistance asynchrone des logs d'audit", "JUnit 5", "✓ Écritures non bloquantes validées"],
             ["Tests d'intégration", "Vérification de la centralisation et de l'état de lecture des notifications", "Spring MockMVC", "✓ Notifications émises et lues"],

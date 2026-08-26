@@ -188,14 +188,6 @@ export default function StockPage() {
             <KTIcon iconName='exit-up' className='fs-3 me-1' />
             Excel ({filteredItems.length})
           </button>
-
-          <button type='button' className='btn btn-sm btn-light-primary' onClick={fetchItems} disabled={loading}>
-            {loading
-              ? <span className='spinner-border spinner-border-sm me-2' />
-              : <KTIcon iconName='arrows-loop' className='fs-3 me-1' />
-            }
-            Actualiser
-          </button>
         </div>
       </div>
 

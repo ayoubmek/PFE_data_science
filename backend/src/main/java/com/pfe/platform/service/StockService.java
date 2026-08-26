@@ -183,7 +183,7 @@ public class StockService {
     public StockDTO.KpiResponse getKpi() {
         LocalDateTime today = LocalDateTime.now().toLocalDate().atStartOfDay();
         StockDTO.KpiResponse kpi = new StockDTO.KpiResponse();
-        kpi.setTotalArticles(itemRepo.count());
+        kpi.setTotalArticles(itemRepo.countFast());
         kpi.setEnRupture(0); 
         kpi.setEnAlerte(0);
         kpi.setEnNiveauCritique(0);

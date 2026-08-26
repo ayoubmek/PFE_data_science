@@ -14,7 +14,7 @@ import java.util.List;
 public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
 
     @Query(value = """
-        SELECT TOP 5000
+        SELECT TOP 200
             f.[Entry No_], f.[Data Base], f.[No_], f.[Posting Date],
             f.[Type], f.[Document No_], f.[Description], f.[Operation No_],
             f.[Work Center No_], f.[Output Quantity],
@@ -23,12 +23,11 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
             f.[Quantité produite TRS]
         FROM dbo.FACT_CLE f WITH (NOLOCK)
         WHERE f.[Output Quantity] > 0
-        ORDER BY f.[Posting Date] DESC
         """, nativeQuery = true)
     List<Object[]> findTop200Raw();
 
     @Query(value = """
-        SELECT TOP 5000
+        SELECT TOP 200
             f.[Document No_] AS code,
             f.[Description] AS articleNom,
             CAST(ISNULL(f.[Output Quantity], 100) AS INT) AS quantiteObjectif,
@@ -38,7 +37,6 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
             f.[Data Base] AS responsable
         FROM dbo.FACT_CLE f WITH (NOLOCK)
         WHERE f.[Document No_] IS NOT NULL
-        ORDER BY f.[Entry No_] DESC
         """, nativeQuery = true)
     List<Object[]> findProductionOrdersFromFactCle();
 
@@ -49,8 +47,7 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
             SUM(f.[Output Quantity]) AS total_output,
             SUM(f.[Scrap Quantity]) AS total_scrap,
             SUM(f.[Run Time]) AS total_run_time
-        FROM dbo.FACT_CLE f WITH (NOLOCK)
-        WHERE f.[Output Quantity] > 0
+        FROM (SELECT TOP 5000 * FROM dbo.FACT_CLE WITH (NOLOCK) WHERE [Output Quantity] > 0) f
         GROUP BY CAST(f.[Posting Date] AS DATE)
         ORDER BY CAST(f.[Posting Date] AS DATE) DESC
         """, nativeQuery = true)
@@ -63,8 +60,7 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
             SUM(f.[Output Quantity]) AS totalOutput,
             SUM(f.[Scrap Quantity]) AS totalScrap,
             SUM(f.[Run Time]) AS totalRunTime
-        FROM dbo.FACT_CLE f WITH (NOLOCK)
-        WHERE f.[Output Quantity] > 0
+        FROM (SELECT TOP 5000 * FROM dbo.FACT_CLE WITH (NOLOCK) WHERE [Output Quantity] > 0) f
         GROUP BY f.[Work Center No_]
         ORDER BY SUM(f.[Output Quantity]) DESC
         """, nativeQuery = true)
@@ -79,13 +75,12 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
             SUM(f.[Run Time]) AS totalRunTime,
             COUNT(DISTINCT f.[Work Center No_]) AS totalWorkCenters,
             COUNT(DISTINCT f.[Item No_]) AS totalItems
-        FROM dbo.FACT_CLE f WITH (NOLOCK)
-        WHERE f.[Output Quantity] > 0
+        FROM (SELECT TOP 5000 * FROM dbo.FACT_CLE WITH (NOLOCK) WHERE [Output Quantity] > 0) f
         """, nativeQuery = true)
     List<Object[]> findKpiStats();
 
     @Query(value = """
-        SELECT TOP 5000
+        SELECT TOP 200
             f.[Entry No_]               AS id,
             f.[Item No_]                AS itemReference,
             f.[Description]             AS designation,
@@ -100,7 +95,6 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
             f.[Data Base]               AS database_
         FROM dbo.FACT_ILE f WITH (NOLOCK)
         WHERE f.[Quantity] <> 0
-        ORDER BY f.[Entry No_] DESC
         """, nativeQuery = true)
     List<Object[]> findStockMovementsFromDWH();
 }

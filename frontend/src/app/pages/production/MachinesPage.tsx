@@ -151,14 +151,6 @@ export default function MachinesPage() {
             Postes de Travail & Synoptique d'Atelier
           </h3>
         </div>
-        <div className='card-toolbar d-flex gap-3'>
-          {}
-          <button className='btn btn-light-primary btn-sm px-5 py-2' onClick={fetchMachines} disabled={loading}>
-            {loading ? <span className='spinner-border spinner-border-sm me-2'></span> : null}
-            <KTIcon iconName='arrows-loop' className='fs-2 me-1' />
-            Actualiser
-          </button>
-        </div>
       </div>
 
       <div className='card-body pt-0'>

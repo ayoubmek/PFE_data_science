@@ -12,7 +12,6 @@ const PrivateRoutes = () => {
   const StockInventoryPage = lazy(() => import('../pages/stock/StockPage'))
   const MovementsPage = lazy(() => import('../pages/stock/MovementsPage'))
   const AnalyticsPage = lazy(() => import('../pages/analytics/AnalyticsPage'))
-  const AdminMonitoringPage = lazy(() => import('../pages/analytics/AdminMonitoringPage'))
   const DataSciencePage = lazy(() => import('../pages/data-science/DataSciencePage'))
 
   return (
@@ -31,8 +30,6 @@ const PrivateRoutes = () => {
         <Route path='stock' element={<SuspensedView><StockInventoryPage /></SuspensedView>} />
         <Route path='stock/movements' element={<SuspensedView><MovementsPage /></SuspensedView>} />
         <Route path='analytics' element={<SuspensedView><AnalyticsPage /></SuspensedView>} />
-        <Route path='analytics/monitoring' element={<SuspensedView><AdminMonitoringPage /></SuspensedView>} />
-        <Route path='admin/monitoring' element={<SuspensedView><AdminMonitoringPage /></SuspensedView>} />
         <Route path='data-science' element={<SuspensedView><DataSciencePage /></SuspensedView>} />
 
         {}

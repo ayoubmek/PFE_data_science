@@ -34,5 +34,8 @@ public interface StockItemRepository extends JpaRepository<StockItem, StockItemI
     @Query("SELECT SUM(s.quantite * s.valeurUnitaire) FROM StockItem s")
     Double getTotalValeurStock();
 
+    @Query(value = "SELECT COUNT(*) FROM (SELECT TOP 1000 * FROM dbo.ASTOCKDATE WITH (NOLOCK)) s", nativeQuery = true)
+    long countFast();
+
 
 }

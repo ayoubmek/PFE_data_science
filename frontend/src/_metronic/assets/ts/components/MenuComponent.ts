@@ -452,7 +452,7 @@ class MenuComponent {
     }
 
     if (DataUtil.has(item, 'popper') === true) {
-      DataUtil.get(item, 'popper').destroy()
+      (DataUtil.get(item, 'popper') as any)?.destroy()
       DataUtil.remove(item, 'popper')
     }
 
@@ -462,7 +462,7 @@ class MenuComponent {
 
   private destroyDropdownPopper = (item: HTMLElement) => {
     if (DataUtil.has(item, 'popper') === true) {
-      DataUtil.get(item, 'popper').destroy()
+      (DataUtil.get(item, 'popper') as any)?.destroy()
       DataUtil.remove(item, 'popper')
     }
 
@@ -828,7 +828,7 @@ class MenuComponent {
         if (menu && menu.getItemSubType(item) === 'dropdown') {
           if (skip) {
             if (
-              menu.getItemSubElement(item).contains(skip) === false &&
+              menu.getItemSubElement(item)?.contains(skip) === false &&
               item.contains(skip) === false &&
               item !== skip
             ) {
@@ -849,7 +849,7 @@ class MenuComponent {
         var item = items[i]
 
         if (DataUtil.has(item as HTMLElement, 'popper')) {
-          DataUtil.get(item as HTMLElement, 'popper').forceUpdate()
+          (DataUtil.get(item as HTMLElement, 'popper') as any)?.forceUpdate()
         }
       }
     }

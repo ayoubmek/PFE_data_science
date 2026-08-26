@@ -48,7 +48,7 @@ def get_stock_df() -> pd.DataFrame:
     engine = get_engine()
     if engine:
         try:
-            sql = 
+            sql = "SELECT [No_] AS reference, [Description] AS designation, groupeitem AS categorie, [Quantité] AS quantite, [Cout] AS cout, [Site] AS site FROM dbo.ASTOCKDATE"
             df = pd.read_sql(sql, engine)
             df["quantite"] = pd.to_numeric(df["quantite"], errors="coerce").fillna(0)
             df["cout"]     = pd.to_numeric(df["cout"],     errors="coerce").fillna(0)

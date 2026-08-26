@@ -210,15 +210,6 @@ export default function ProductionPage() {
             <KTIcon iconName='exit-up' className='fs-3 me-1' />
             Excel ({filteredOrders.length})
           </button>
-
-          {}
-          <button type='button' className='btn btn-sm btn-light-primary' onClick={fetchOrders} disabled={loading}>
-            {loading
-              ? <span className='spinner-border spinner-border-sm me-2' />
-              : <KTIcon iconName='arrows-loop' className='fs-3 me-1' />
-            }
-            Actualiser
-          </button>
         </div>
       </div>
 

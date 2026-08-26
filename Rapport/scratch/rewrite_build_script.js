@@ -33,7 +33,7 @@ const replacements = [
         bullet("**Chapitre 4 : Sprint 2 – Gestion de Production et Suivi des Machines** – Il présente la configuration des postes de travail d'atelier, le suivi des états des machines en direct, le calcul automatique du taux de rendement global (TRG) et la gestion des ordres de production."),
         bullet("**Chapitre 5 : Sprint 3 – Gestion des Stocks et Mouvements** – Ce chapitre est dédié à la mise en œuvre du suivi d'inventaire, de la saisie des mouvements d'entrée/sorties, de la gestion des ajustements et des alertes de seuils critiques de réapprovisionnement."),
         bullet("**Chapitre 6 : Sprint 4 – Intelligence Artificielle et Data Science** – Il décrit le service FastAPI (Python) hébergeant les modèles prédictifs de production et de stock (ARIMA, Prophet), la segmentation ABC des articles via K-Means et la détection d'anomalies de fonctionnement via Isolation Forest."),
-        bullet("**Chapitre 7 : Sprint 5 – Administration, Supervision et Monitoring** – Ce chapitre présente la console technique de monitoring d'activité (ActivityLog) et le centre d'historisation des notifications d'alertes système."),`
+        bullet("**Chapitre 7 : Sprint 5 – Supervision et Centre d'Alertes** – Ce chapitre présente le centre d'historisation des notifications d'alertes système."),`
   },
   {
     target: `        title2("1.1 Introduction"),
