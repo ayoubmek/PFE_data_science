@@ -61,10 +61,30 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
             SUM(f.[Scrap Quantity]) AS totalScrap,
             SUM(f.[Run Time]) AS totalRunTime
         FROM (SELECT TOP 5000 * FROM dbo.FACT_CLE WITH (NOLOCK) WHERE [Output Quantity] > 0) f
+        WHERE f.[Work Center No_] IS NOT NULL AND LTRIM(RTRIM(f.[Work Center No_])) <> ''
         GROUP BY f.[Work Center No_]
         ORDER BY SUM(f.[Output Quantity]) DESC
         """, nativeQuery = true)
     List<Object[]> findWorkCenterStats();
+
+    @Query(value = """
+        SELECT
+            f.[No_] AS machineCode,
+            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Name])), ''), f.[No_]) AS machineName,
+            ISNULL(NULLIF(LTRIM(RTRIM(f.[Work Center No_])), ''), ISNULL(mc.[Work Center No_], 'Atelier Standard')) AS workCenter,
+            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Machine Family])), ''), 'Standard') AS family,
+            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Database])), ''), ISNULL(f.[Data Base], 'Principal')) AS site,
+            COUNT(*) AS operationCount,
+            SUM(f.[Output Quantity]) AS totalOutput,
+            SUM(f.[Scrap Quantity]) AS totalScrap,
+            SUM(f.[Run Time]) AS totalRunTime
+        FROM (SELECT TOP 5000 * FROM dbo.FACT_CLE WITH (NOLOCK) WHERE [Output Quantity] > 0) f
+        LEFT JOIN dbo.MCMachineCenter mc ON f.[No_] = mc.[No_]
+        WHERE f.[No_] IS NOT NULL AND LTRIM(RTRIM(f.[No_])) <> ''
+        GROUP BY f.[No_], mc.[Name], f.[Work Center No_], mc.[Work Center No_], mc.[Machine Family], mc.[Database], f.[Data Base]
+        ORDER BY SUM(f.[Output Quantity]) DESC
+        """, nativeQuery = true)
+    List<Object[]> findMachineCenterStats();
 
     @Query(value = """
         SELECT

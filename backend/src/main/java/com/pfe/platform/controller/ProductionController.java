@@ -79,21 +79,29 @@ public class ProductionController {
 
     @GetMapping("/machines")
     public ResponseEntity<List<Map<String, Object>>> getAllMachines() {
-        List<Object[]> rows = factCleRepository.findWorkCenterStats();
+        List<Object[]> rows = factCleRepository.findMachineCenterStats();
         List<Map<String, Object>> result = new ArrayList<>();
+        long id = 1;
         for (Object[] r : rows) {
-            String wc      = r[0] != null ? r[0].toString().trim() : "N/A";
-            long opCount   = r[1] != null ? ((Number) r[1]).longValue() : 0;
-            double output  = r[2] != null ? ((Number) r[2]).doubleValue() : 0;
-            double scrap   = r[3] != null ? ((Number) r[3]).doubleValue() : 0;
-            double runTime = r[4] != null ? ((Number) r[4]).doubleValue() : 0;
-            double efficiency = (output + scrap) > 0
+            String machineCode = r[0] != null ? r[0].toString().trim() : "";
+            if (machineCode.isEmpty()) continue;
+            String machineName = r[1] != null && !r[1].toString().trim().isEmpty() ? r[1].toString().trim() : machineCode;
+            String workCenter  = r[2] != null ? r[2].toString().trim() : "Atelier";
+            String family      = r[3] != null ? r[3].toString().trim() : "Standard";
+            String site        = r[4] != null ? r[4].toString().trim() : "Principal";
+            long opCount       = r[5] != null ? ((Number) r[5]).longValue() : 0;
+            double output      = r[6] != null ? ((Number) r[6]).doubleValue() : 0;
+            double scrap       = r[7] != null ? ((Number) r[7]).doubleValue() : 0;
+            double runTime     = r[8] != null ? ((Number) r[8]).doubleValue() : 0;
+            double efficiency  = (output + scrap) > 0
                 ? Math.round(output / (output + scrap) * 1000.0) / 10.0 : 100.0;
             Map<String, Object> row = new LinkedHashMap<>();
-            row.put("nom",            wc);
-            row.put("code",           wc);
-            row.put("type",           "Poste de travail");
-            row.put("emplacement",    "Atelier Production");
+            row.put("id",             id++);
+            row.put("code",           machineCode);
+            row.put("nom",            machineName);
+            row.put("workCenter",     workCenter);
+            row.put("family",         family);
+            row.put("emplacement",    site);
             row.put("statut",         "DISPONIBLE");
             row.put("tauxRendement",  efficiency);
             row.put("totalOutput",    Math.round(output));

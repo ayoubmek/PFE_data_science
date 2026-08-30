@@ -268,7 +268,6 @@ export default function MovementsPage() {
               <tr className='text-start text-muted fw-bold fs-7 text-uppercase gs-0'>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('date')}>Date <SortIcon field='date' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('itemReference')}>Référence <SortIcon field='itemReference' /></th>
-                <th className='cursor-pointer user-select-none min-w-150px' onClick={() => handleSort('itemNom')}>Désignation <SortIcon field='itemNom' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('type')}>Type <SortIcon field='type' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('motif')}>Nature <SortIcon field='motif' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('quantite')}>Quantité <SortIcon field='quantite' /></th>
@@ -280,7 +279,7 @@ export default function MovementsPage() {
             <tbody className='text-gray-600 fw-semibold'>
               {currentMovements.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className='text-center py-10'>
+                  <td colSpan={8} className='text-center py-10'>
                     <KTIcon iconName='search-list' className='fs-2x text-gray-300 d-block mb-2' />
                     <span className='text-muted fs-6'>Aucun mouvement trouvé</span>
                   </td>
@@ -291,7 +290,6 @@ export default function MovementsPage() {
                   <tr key={`${m.id}-${idx}`}>
                     <td className='ps-4 text-muted'>{formatDateTime(m.date)}</td>
                     <td className='fw-bold text-gray-800'>{m.itemReference}</td>
-                    <td className='text-gray-700 mw-200px text-truncate' title={m.itemNom}>{m.itemNom}</td>
                     <td>
                       <span className={`badge badge-light-${isEntree ? 'success' : 'danger'}`}>
                         {isEntree ? '↓ ENTRÉE' : '↑ SORTIE'}

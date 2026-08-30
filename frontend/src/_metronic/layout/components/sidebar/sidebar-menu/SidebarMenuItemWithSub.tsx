@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import clsx from 'clsx'
-import {useLocation, Link} from 'react-router-dom'
+import {useLocation} from 'react-router-dom'
 import {checkIsActive, KTIcon, WithChildren} from '../../../../helpers'
 import {useLayout} from '../../../core'
 
@@ -11,6 +11,7 @@ type Props = {
   fontIcon?: string
   hasBullet?: boolean
   iconColor?: string
+  alwaysOpen?: boolean
 }
 
 const SidebarMenuItemWithSub: React.FC<Props & WithChildren> = ({
@@ -21,18 +22,29 @@ const SidebarMenuItemWithSub: React.FC<Props & WithChildren> = ({
   fontIcon,
   hasBullet,
   iconColor,
+  alwaysOpen = true,
 }) => {
   const {pathname} = useLocation()
   const isActive = checkIsActive(pathname, to)
+  const [isOpen, setIsOpen] = useState(true)
   const {config} = useLayout()
   const {app} = config
 
+  const isExpanded = alwaysOpen || isOpen || isActive
+
   return (
     <div
-      className={clsx('menu-item', {'here show': isActive}, 'menu-accordion')}
-      data-kt-menu-trigger='click'
+      className={clsx('menu-item', {'here': isActive, 'show': isExpanded}, 'menu-accordion')}
     >
-      <span className='menu-link' style={{ cursor: 'pointer' }}>
+      <span
+        className='menu-link'
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          if (!alwaysOpen) {
+            setIsOpen(!isOpen)
+          }
+        }}
+      >
         {hasBullet && (
           <span className='menu-bullet'>
             <span className='bullet bullet-dot'></span>
@@ -47,11 +59,16 @@ const SidebarMenuItemWithSub: React.FC<Props & WithChildren> = ({
           <i className={clsx('bi fs-3', fontIcon)} style={iconColor ? { color: iconColor } : undefined}></i>
         )}
         <span className='menu-title'>{title}</span>
-        <span className='menu-arrow'>
-          <KTIcon iconName='down' className='fs-6 text-gray-500' />
-        </span>
+        {!alwaysOpen && (
+          <span className='menu-arrow'>
+            <KTIcon iconName='down' className='fs-6 text-gray-500' />
+          </span>
+        )}
       </span>
-      <div className={clsx('menu-sub menu-sub-accordion', {'menu-active-bg': isActive})}>
+      <div
+        className={clsx('menu-sub menu-sub-accordion', {'menu-active-bg': isActive, show: isExpanded})}
+        style={isExpanded ? { display: 'block' } : undefined}
+      >
         {children}
       </div>
     </div>
