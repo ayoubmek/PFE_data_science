@@ -50,12 +50,13 @@ const removeAuth = () => {
 export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = 'application/json'
   axios.interceptors.request.use(
-    (config: {headers: {Authorization: string}}) => {
+    (config: any) => {
       const auth = getAuth()
-      if (auth && auth.api_token) {
-        config.headers.Authorization = `Bearer ${auth.api_token}`
+      const token = auth?.api_token || auth?.access_token || (auth as any)?.token
+      if (token) {
+        config.headers = config.headers || {}
+        config.headers.Authorization = `Bearer ${token}`
       }
-
       return config
     },
     (err: any) => Promise.reject(err)

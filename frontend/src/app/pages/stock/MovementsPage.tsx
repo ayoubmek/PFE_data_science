@@ -5,9 +5,11 @@ import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
 
+let globalCachedMovements: any[] = []
+
 export default function MovementsPage() {
-  const [movements, setMovements] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [movements, setMovements] = useState<any[]>(globalCachedMovements)
+  const [loading, setLoading] = useState(globalCachedMovements.length === 0)
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('ALL')
   const [dateFrom, setDateFrom] = useState('')
@@ -24,28 +26,24 @@ export default function MovementsPage() {
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
 
   const fetchMovements = async () => {
-    setLoading(true)
+    if (globalCachedMovements.length === 0) setLoading(true)
     try {
       const { data } = await axios.get(`${apiUrl}/stock/movements/recent?months=${months}`)
-      const mapped = (data || []).map((m: any) => ({
+      const mapped = (Array.isArray(data) ? data : []).map((m: any) => ({
         id: m.id,
-        date: m.date || m.dateCreation,
-        itemReference: m.stockItemReference || m.itemReference,
-        itemNom: m.stockItemDesignation || m.itemNom,
-        type: m.type,
-        quantite: m.quantite,
-        operateur: m.operateur,
-        motif: m.motif,
-        reference: m.reference,
+        date: m.date || m.dateCreation || new Date().toISOString(),
+        itemReference: m.stockItemReference || m.itemReference || 'REF',
+        itemNom: m.stockItemDesignation || m.itemNom || 'Article Industriel',
+        type: m.type || 'ENTREE',
+        quantite: m.quantite || 0,
+        operateur: m.operateur || 'Système',
+        motif: m.motif || 'Mouvement DWH',
+        reference: m.reference || ('BON-' + m.id),
       }))
+      globalCachedMovements = mapped
       setMovements(mapped)
-    } catch {
-      setMovements([
-        { id: 1, date: '2026-07-18T10:15:30Z', itemReference: 'REF-AXE-01', itemNom: 'Axe Cylindrique A1', type: 'ENTREE', quantite: 150, operateur: 'Opérateur 1' },
-        { id: 2, date: '2026-07-18T11:45:12Z', itemReference: 'REF-MOT-02', itemNom: 'Support Moteur M2', type: 'SORTIE', quantite: 30, operateur: 'Opérateur 2' },
-        { id: 3, date: '2026-07-17T09:30:00Z', itemReference: 'REF-CHA-01', itemNom: 'Châssis Alu C1', type: 'SORTIE', quantite: 5, operateur: 'Opérateur 2' },
-        { id: 4, date: '2026-07-16T08:20:00Z', itemReference: 'B0112XX', itemNom: 'BOITIER INJECTION T4', type: 'ENTREE', quantite: 600, operateur: 'Magasinier' },
-      ])
+    } catch (err) {
+      console.error('Failed to fetch stock movements from API:', err)
     } finally {
       setLoading(false)
     }

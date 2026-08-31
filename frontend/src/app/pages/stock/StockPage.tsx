@@ -5,9 +5,11 @@ import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
 
+let globalCachedStockItems: any[] = []
+
 export default function StockPage() {
-  const [items, setItems] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [items, setItems] = useState<any[]>(globalCachedStockItems)
+  const [loading, setLoading] = useState(globalCachedStockItems.length === 0)
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('ALL')
   const [siteFilter, setSiteFilter] = useState('ALL')
@@ -23,16 +25,14 @@ export default function StockPage() {
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
 
   const fetchItems = async () => {
-    setLoading(true)
+    if (globalCachedStockItems.length === 0) setLoading(true)
     try {
       const { data } = await axios.get(`${apiUrl}/stock/items`)
-      setItems(data || [])
-    } catch {
-      setItems([
-        { id: '1', reference: 'A0362AC', designation: 'FLOTTEUR J81 ASSY', categorie: 'PF-PSF', quantite: 10000, valeurUnitaire: 617.90, dateStock: '2026-03-31', emplacement: 'Kondar Site A', encours: 0, genProdPostingGroup: '09-PF-TN1', nomAbrege: 'MOLDFR3', groupeClient: 'M+H', valeurTotale: 6179000, seuilAlerte: 20 },
-        { id: '2', reference: 'A0391B', designation: 'FLOTTEUR F199/X4400', categorie: 'PF-PSF', quantite: 5, valeurUnitaire: 94.59, dateStock: '2026-03-31', emplacement: 'Kondar Site A', encours: 0, genProdPostingGroup: '03-SEM-TN1', nomAbrege: '0', groupeClient: '0', valeurTotale: 472.95, seuilAlerte: 20 },
-        { id: '3', reference: 'B0112XX', designation: 'BOITIER INJECTION T4', categorie: 'COMPOSANTS', quantite: 4500, valeurUnitaire: 145.00, dateStock: '2026-03-31', emplacement: 'Magasin Central', encours: 150, genProdPostingGroup: '01-MP-TN1', nomAbrege: 'INJ01', groupeClient: 'VALEO', valeurTotale: 652500, seuilAlerte: 50 },
-      ])
+      const list = Array.isArray(data) ? data : []
+      globalCachedStockItems = list
+      setItems(list)
+    } catch (err) {
+      console.error('Failed to fetch stock items from API:', err)
     } finally {
       setLoading(false)
     }

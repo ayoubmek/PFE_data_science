@@ -81,17 +81,20 @@ const StatisticsWidget: FC<{
   )
 }
 
+let globalCachedDashboardData: DashboardData | null = null
+let globalCachedRecentOfs: any[] = []
+
 const DashboardPage: FC = () => {
-  const [data, setData] = useState<DashboardData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [recentOfs, setRecentOfs] = useState<any[]>([])
+  const [data, setData] = useState<DashboardData | null>(globalCachedDashboardData)
+  const [loading, setLoading] = useState(globalCachedDashboardData === null)
+  const [recentOfs, setRecentOfs] = useState<any[]>(globalCachedRecentOfs)
   const [selectedOf, setSelectedOf] = useState<any>(null)
   const [showOfModal, setShowOfModal] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<any>(null)
   const [showCategoryModal, setShowCategoryModal] = useState(false)
 
   const fetchDashboardData = async () => {
-    setLoading(true)
+    if (!globalCachedDashboardData) setLoading(true)
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
     try {
       const [summaryRes, statsRes, ofsRes] = await Promise.all([
@@ -114,7 +117,9 @@ const DashboardPage: FC = () => {
         responsable: o.responsable,
         notes: o.notes
       }))
-      setRecentOfs(mappedOfs.slice(0, 5))
+      const sliceOfs = mappedOfs.slice(0, 5)
+      globalCachedRecentOfs = sliceOfs
+      setRecentOfs(sliceOfs)
 
       const sorted = [...stats].reverse().slice(-14)
       const dates = sorted.map((s: any) => {
@@ -127,25 +132,25 @@ const DashboardPage: FC = () => {
       const mappedData: DashboardData = {
         statistics: {
           total_revenue: {
-            value: summary?.production?.totalOutput || 14250,
-            label: "Volume Produit Cumulé",
-            growth: "+10%",
-            comparison_label: "Pièces produites"
+            value: summary?.production?.totalOrdres || 46810,
+            label: "Ordres de Fabrication DWH",
+            growth: "+12%",
+            comparison_label: "Base DWH consolidée"
           },
           total_orders: {
-            value: summary?.production?.ordresEnCours || 3,
-            label: "Ordres de Fab. Actifs",
+            value: summary?.production?.enCours || 4681,
+            label: "Ordres en Cours d'Usinage",
             growth: "En cours"
           },
           total_vendors: {
-            value: summary?.production?.tauxRendementMoyen ? `${summary.production.tauxRendementMoyen}%` : '78.4%',
-            label: "Taux de Rendement (TRG)",
+            value: summary?.production?.tauxRendementMoyen ? `${summary.production.tauxRendementMoyen}%` : '99.7%',
+            label: "Taux de Rendement (TRS / OEE)",
             growth: "Efficacité atelier"
           },
           total_products: {
-            value: summary?.stock?.lowStockAlerts || 12,
-            label: "Alertes de Stock Bas",
-            growth: "À réapprovisionner"
+            value: summary?.stock?.totalArticles || 982,
+            label: "Articles en Stock (DWH)",
+            growth: "Catalogue actif"
           }
         },
         status_distribution: {
@@ -165,6 +170,7 @@ const DashboardPage: FC = () => {
           gmv: 0, nmv: 0, aov: 0, success_rate: 0, failure_rate: 0, pickup_rate: 0, avg_delivery_time: '', on_time_delivery_rate: 0, cost_per_order: 0
         }
       }
+      globalCachedDashboardData = mappedData
       setData(mappedData)
     } catch (err) {
       console.warn('Failed to fetch Spring Boot stats, using mock stats:', err)

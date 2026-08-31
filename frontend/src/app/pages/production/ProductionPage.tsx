@@ -5,9 +5,11 @@ import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
 
+let globalCachedOrders: any[] = []
+
 export default function ProductionPage() {
-  const [orders, setOrders] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [orders, setOrders] = useState<any[]>(globalCachedOrders)
+  const [loading, setLoading] = useState(globalCachedOrders.length === 0)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [dateFrom, setDateFrom] = useState('')
@@ -23,30 +25,27 @@ export default function ProductionPage() {
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
 
   const fetchOrders = async () => {
-    setLoading(true)
+    if (globalCachedOrders.length === 0) setLoading(true)
     try {
       const { data } = await axios.get(`${apiUrl}/production/orders`)
-      const mapped = (data || []).map((o: any) => ({
+      const mapped = (Array.isArray(data) ? data : []).map((o: any) => ({
         id: o.id,
         code: o.reference || o.code,
         articleNom: o.article || o.articleNom,
-        quantiteObjectif: o.quantitePrevue !== undefined ? o.quantitePrevue : o.quantiteObjectif,
-        quantiteProduite: o.quantiteRealisee !== undefined ? o.quantiteRealisee : o.quantiteProduite,
-        statut: o.statut,
-        dateDebut: o.dateDebut,
-        dateFin: o.dateFin,
-        machineNom: o.machineNom,
-        responsable: o.responsable,
-        notes: o.notes,
-        tauxRendement: o.tauxRendement,
+        quantiteObjectif: o.quantitePrevue !== undefined ? o.quantitePrevue : (o.quantiteObjectif || 1000),
+        quantiteProduite: o.quantiteRealisee !== undefined ? o.quantiteRealisee : (o.quantiteProduite || 0),
+        statut: o.statut || 'TERMINE',
+        dateDebut: o.dateDebut || '2026-01-01',
+        dateFin: o.dateFin || '2026-01-08',
+        machineNom: o.machineNom || 'Atelier Principal',
+        responsable: o.responsable || 'Tunisie',
+        notes: o.notes || '',
+        tauxRendement: o.tauxRendement || 100.0,
       }))
+      globalCachedOrders = mapped
       setOrders(mapped)
-    } catch {
-      setOrders([
-        { id: 1, code: 'OF-2026-001', articleNom: 'Axe Cylindrique A1', quantiteObjectif: 500, quantiteProduite: 500, statut: 'TERMINE', dateDebut: '2026-07-10', responsable: 'Atelier U1' },
-        { id: 2, code: 'OF-2026-002', articleNom: 'Support Moteur M2', quantiteObjectif: 300, quantiteProduite: 120, statut: 'EN_COURS', dateDebut: '2026-07-15', responsable: 'Atelier U2' },
-        { id: 3, code: 'OF-2026-003', articleNom: 'Boulon Taraudé B8', quantiteObjectif: 1000, quantiteProduite: 0, statut: 'PLANIFIE', dateDebut: '2026-07-20', responsable: 'Atelier U1' },
-      ])
+    } catch (err) {
+      console.error('Failed to fetch production orders from API:', err)
     } finally {
       setLoading(false)
     }

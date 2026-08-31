@@ -5,9 +5,11 @@ import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
 
+let globalCachedMachines: any[] = []
+
 export default function MachinesPage() {
-  const [machines, setMachines] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [machines, setMachines] = useState<any[]>(globalCachedMachines)
+  const [loading, setLoading] = useState(globalCachedMachines.length === 0)
   const [searchTerm, setSearchTerm] = useState('')
   const [workshopFilter, setWorkshopFilter] = useState('ALL')
   const [siteFilter, setSiteFilter] = useState('ALL')
@@ -22,17 +24,14 @@ export default function MachinesPage() {
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
 
   const fetchMachines = async () => {
-    setLoading(true)
+    if (globalCachedMachines.length === 0) setLoading(true)
     try {
       const { data } = await axios.get(`${apiUrl}/production/machines`)
-      setMachines(data || [])
+      const list = Array.isArray(data) ? data : []
+      globalCachedMachines = list
+      setMachines(list)
     } catch (err) {
-      console.warn('Failed to fetch machines, using fallback data:', err)
-      setMachines([
-        { id: 1, code: 'TN1-PHD50.4', nom: 'Demag 50.4', workCenter: 'TN1-INJE', family: 'TN1 - 50T-60T', emplacement: 'Tunisie', statut: 'DISPONIBLE', tauxRendement: 100.0, totalOutput: 502027, totalScrap: 0 },
-        { id: 2, code: 'CZ1-A102', nom: 'Ass. Station Bushing Rack NEXTEER', workCenter: 'CZA', family: 'CZ1 - MACHINE TEST', emplacement: 'Brno', statut: 'DISPONIBLE', tauxRendement: 99.8, totalOutput: 654411, totalScrap: 1463 },
-        { id: 3, code: 'TN2-PED50.2', nom: 'Demag 50.2', workCenter: 'TN2-INJ', family: 'TN2 - 50T-60T', emplacement: 'Tunisie', statut: 'DISPONIBLE', tauxRendement: 100.0, totalOutput: 439589, totalScrap: 0 },
-      ])
+      console.error('Failed to fetch machines from API:', err)
     } finally {
       setLoading(false)
     }

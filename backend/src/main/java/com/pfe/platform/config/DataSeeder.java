@@ -107,7 +107,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedStockMovements() {
-        var items = stockRepo.findTop200ByOrderByDateStockDesc();
+        var items = stockRepo.findAllLatestSnapshot();
         if (items.isEmpty()) return;
 
         String[] operators = {"admin", "manager", "operateur"};

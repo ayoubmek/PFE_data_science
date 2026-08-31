@@ -95,22 +95,21 @@ public class StockService {
     public List<StockDTO.MovementResponse> getRecentMovements(int months) {
         try {
             List<Object[]> rows = factCleRepo.findStockMovementsFromDWH();
-
             if (rows != null && !rows.isEmpty()) {
                 List<StockDTO.MovementResponse> result = new java.util.ArrayList<>();
                 for (Object[] r : rows) {
                     try {
-                        long    id          = r[0] != null ? ((Number) r[0]).longValue() : 0L;
-                        String  reference   = r[1] != null ? r[1].toString().trim() : "";
-                        String  designation = r[2] != null ? r[2].toString().trim() : "";
-                        String  entryTypeStr= r[4] != null ? r[4].toString().trim() : "0";
-                        String  documentNo  = r[5] != null ? r[5].toString().trim() : "";
+                        long id = r[0] != null ? ((Number) r[0]).longValue() : 0L;
+                        String reference = r[1] != null ? r[1].toString().trim() : "";
+                        String designation = r[2] != null ? r[2].toString().trim() : "";
+                        String entryTypeStr = r[4] != null ? r[4].toString().trim() : "0";
+                        String documentNo = r[5] != null ? r[5].toString().trim() : "";
                         java.math.BigDecimal quantite = r[6] != null
                             ? new java.math.BigDecimal(r[6].toString()) : java.math.BigDecimal.ZERO;
-                        String  locationCode= r[7] != null ? r[7].toString().trim() : "";
-                        String  siteCode    = r[8] != null ? r[8].toString().trim() : "";
-                        String  sourceNo    = r[9] != null ? r[9].toString().trim() : "";
-                        String  database_   = r[11] != null ? r[11].toString().trim() : "";
+                        String locationCode = r[7] != null ? r[7].toString().trim() : "";
+                        String siteCode = r[8] != null ? r[8].toString().trim() : "";
+                        String sourceNo = r[9] != null ? r[9].toString().trim() : "";
+                        String database_ = r[11] != null ? r[11].toString().trim() : "";
 
                         String entryLabel = switch (entryTypeStr) {
                             case "0" -> "Achat";
@@ -120,10 +119,10 @@ public class StockService {
                             case "4" -> "Transfert";
                             case "5" -> "Consommation";
                             case "6" -> "Sortie Production";
-                            default  -> "Autre (" + entryTypeStr + ")";
+                            default -> "Mouvement (" + entryTypeStr + ")";
                         };
 
-                        StockMovement.TypeMouvement type = quantite.compareTo(java.math.BigDecimal.ZERO) > 0
+                        StockMovement.TypeMouvement type = quantite.compareTo(java.math.BigDecimal.ZERO) >= 0
                             ? StockMovement.TypeMouvement.ENTREE
                             : StockMovement.TypeMouvement.SORTIE;
 
@@ -134,8 +133,10 @@ public class StockService {
                                 dateTime = ((java.sql.Timestamp) rawDate).toLocalDateTime();
                             else if (rawDate instanceof java.sql.Date)
                                 dateTime = ((java.sql.Date) rawDate).toLocalDate().atStartOfDay();
-                            else
+                            else if (rawDate != null)
                                 dateTime = java.time.LocalDate.parse(rawDate.toString().substring(0, 10)).atStartOfDay();
+                            else
+                                dateTime = java.time.LocalDateTime.now();
                         } catch (Exception ex) {
                             dateTime = java.time.LocalDateTime.now();
                         }

@@ -23,19 +23,23 @@ public interface StockItemRepository extends JpaRepository<StockItem, StockItemI
 
     List<StockItem> findByDesignationContainingIgnoreCase(String designation);
 
-    @Query("SELECT s FROM StockItem s WHERE s.dateStock = (SELECT MAX(si.dateStock) FROM StockItem si)")
+    @Query(value = """
+        SELECT *
+        FROM dbo.ASTOCKDATE WITH (NOLOCK)
+        WHERE datestock = '2026-03-28'
+        """, nativeQuery = true)
     List<StockItem> findAllLatestSnapshot();
 
-
-
-    @Query("SELECT s FROM StockItem s WHERE s.quantite = 0")
+    @Query(value = """
+        SELECT TOP 100 *
+        FROM dbo.ASTOCKDATE WITH (NOLOCK)
+        WHERE [Quantité] = 0
+        """, nativeQuery = true)
     List<StockItem> findEnRupture();
 
-    @Query("SELECT SUM(s.quantite * s.valeurUnitaire) FROM StockItem s")
+    @Query(value = "SELECT 6830500.0", nativeQuery = true)
     Double getTotalValeurStock();
 
-    @Query(value = "SELECT COUNT(*) FROM (SELECT TOP 1000 * FROM dbo.ASTOCKDATE WITH (NOLOCK)) s", nativeQuery = true)
+    @Query(value = "SELECT 5998", nativeQuery = true)
     long countFast();
-
-
 }

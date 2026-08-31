@@ -29,7 +29,7 @@ def get_engine():
     try:
         from sqlalchemy import create_engine, text
         conn_str = (
-            f"mssql+pyodbc://{DB_SERVER}/{DB_NAME}"
+            f"mssql+pyodbc://@{DB_SERVER}/{DB_NAME}"
             "?driver=ODBC+Driver+17+for+SQL+Server"
             "&trusted_connection=yes"
             "&TrustServerCertificate=yes"
@@ -39,7 +39,7 @@ def get_engine():
         with eng.connect() as c:
             c.execute(text("SELECT 1"))
         _engine = eng
-        print("DB connection OK")
+        print("DB connection OK: Connected to dbDWH directly!")
         return _engine
     except Exception as e:
         print(f"DB unavailable, using simulated data: {e}")
@@ -48,7 +48,7 @@ def get_stock_df() -> pd.DataFrame:
     engine = get_engine()
     if engine:
         try:
-            sql = "SELECT [No_] AS reference, [Description] AS designation, groupeitem AS categorie, [Quantité] AS quantite, [Cout] AS cout, [Site] AS site FROM dbo.ASTOCKDATE"
+            sql = "SELECT [No_] AS reference, [Description] AS designation, groupeitem AS categorie, [Quantité] AS quantite, [Cout] AS cout, [Site] AS site FROM dbo.ASTOCKDATE WHERE datestock = '2026-03-28'"
             df = pd.read_sql(sql, engine)
             df["quantite"] = pd.to_numeric(df["quantite"], errors="coerce").fillna(0)
             df["cout"]     = pd.to_numeric(df["cout"],     errors="coerce").fillna(0)
@@ -113,7 +113,7 @@ def predict_stock(item_id: int = 1, horizon: int = 30):
 def predict_production(horizon: int = 30):
     try:
         dates = [datetime.now() + timedelta(days=i) for i in range(1, horizon + 1)]
-        base_qty = 120
+        base_qty = 8500
         predictions = []
         for i, date in enumerate(dates):
             wd = date.weekday()
