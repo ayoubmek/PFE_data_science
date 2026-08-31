@@ -79,9 +79,10 @@ const Navbar = () => {
       }
     }
 
+    const cleanTitle = (n.titre || '').replace(/^[\?\s\uFFFD]+/, '').trim()
     return {
       id: n.id,
-      title: n.titre,
+      title: cleanTitle || n.titre,
       description: n.message,
       time: timeStr,
       icon: icon,

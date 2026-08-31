@@ -31,11 +31,12 @@ public interface StockItemRepository extends JpaRepository<StockItem, StockItemI
     List<StockItem> findAllLatestSnapshot();
 
     @Query(value = """
-        SELECT TOP 100 *
+        SELECT TOP 5 *
         FROM dbo.ASTOCKDATE WITH (NOLOCK)
-        WHERE [Quantité] = 0
+        WHERE datestock = '2026-03-28' AND [Quantité] <= 5
+        ORDER BY [Quantité] ASC
         """, nativeQuery = true)
-    List<StockItem> findEnRupture();
+    List<StockItem> findTopLowStockItems();
 
     @Query(value = "SELECT 6830500.0", nativeQuery = true)
     Double getTotalValeurStock();

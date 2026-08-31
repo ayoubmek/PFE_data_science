@@ -44,6 +44,18 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
     List<Object[]> findProductionOrdersFromFactCle();
 
     @Query(value = """
+        SELECT TOP 3
+            f.[Document No_] AS code,
+            ISNULL(NULLIF(LTRIM(RTRIM(f.[Description])), ''), 'Composant Industriel') AS articleNom,
+            CAST(ISNULL(f.[Output Quantity], 0) AS INT) AS quantite,
+            ISNULL(NULLIF(LTRIM(RTRIM(f.[Work Center No_])), ''), 'Atelier') AS atelier,
+            ISNULL(NULLIF(LTRIM(RTRIM(f.[Data Base])), ''), 'Tunisie') AS site
+        FROM dbo.FACT_CLE f WITH (NOLOCK)
+        WHERE f.[Document No_] IS NOT NULL AND f.[Output Quantity] > 10000
+        """, nativeQuery = true)
+    List<Object[]> findRecentAlertOfs();
+
+    @Query(value = """
         SELECT TOP 30
             CAST(f.[Posting Date] AS DATE) AS date,
             COUNT(*) AS nb_operations,

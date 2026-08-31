@@ -2,6 +2,7 @@ package com.pfe.platform.config;
 
 import com.pfe.platform.entity.*;
 import com.pfe.platform.repository.*;
+import com.pfe.platform.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -23,6 +24,7 @@ public class DataSeeder implements CommandLineRunner {
     private final StockItemRepository stockRepo;
     private final StockMovementRepository movementRepo;
     private final NotificationRepository notificationRepo;
+    private final NotificationService notificationService;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -48,9 +50,9 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         if (notificationRepo.count() == 0) {
-            log.info("Seeding initial notifications...");
-            seedNotifications();
-            log.info("Notifications seeded.");
+            log.info("Syncing dynamic DWH alerts for notifications...");
+            notificationService.syncDynamicDwhAlerts();
+            log.info("DWH notifications synced.");
         }
     }
 
@@ -160,37 +162,5 @@ public class DataSeeder implements CommandLineRunner {
             .categorie("Consommable").emplacement("Local Chimie").unite("bidon")
             .quantite(new BigDecimal("3")).seuilCritique(new BigDecimal("2")).seuilAlerte(new BigDecimal("5"))
             .valeurUnitaire(new BigDecimal("28.00")).build());
-    }
-
-    private void seedNotifications() {
-        notificationRepo.save(Notification.builder()
-            .titre("🚨 Rupture de stock: RB724")
-            .message("L'article [RB724] REPACK BOX DRX a atteint le niveau RUPTURE. Quantité actuelle: 16 | Seuil: 20")
-            .type(Notification.Type.ALERTE_STOCK)
-            .priorite(Notification.Priorite.CRITIQUE)
-            .module("STOCK")
-            .entityId("RB724")
-            .createdAt(LocalDateTime.now().minusHours(2))
-            .build());
-
-        notificationRepo.save(Notification.builder()
-            .titre("⚠️ Niveau critique: RB725")
-            .message("L'article [RB725] HYBOX ESD COMPLETE a atteint le niveau CRITIQUE. Quantité actuelle: 16 | Seuil: 20")
-            .type(Notification.Type.ALERTE_STOCK)
-            .priorite(Notification.Priorite.HAUTE)
-            .module("STOCK")
-            .entityId("RB725")
-            .createdAt(LocalDateTime.now().minusHours(5))
-            .build());
-
-        notificationRepo.save(Notification.builder()
-            .titre("📈 OF Complété: OF-2026-001")
-            .message("L'ordre de fabrication OF-2026-001 pour 500 unités de Axe Cylindrique A1 a été complété avec succès.")
-            .type(Notification.Type.SUCCES)
-            .priorite(Notification.Priorite.NORMALE)
-            .module("PRODUCTION")
-            .entityId("OF-2026-001")
-            .createdAt(LocalDateTime.now().minusDays(1))
-            .build());
     }
 }
