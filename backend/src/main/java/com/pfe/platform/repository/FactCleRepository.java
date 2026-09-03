@@ -29,17 +29,21 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
 
     @Query(value = """
         SELECT TOP 2000
-            f.[Document No_] AS code,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Description])), ''), 'Composant Industriel') AS articleNom,
-            CAST(ISNULL(f.[Output Quantity], 1000) AS INT) AS quantiteObjectif,
-            CAST(ISNULL(f.[Output Quantity], 0) AS INT) AS quantiteProduite,
-            f.[Posting Date] AS dateDebut,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Work Center No_])), ''), 'Atelier Standard') AS machineNom,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Data Base])), ''), 'Tunisie') AS responsable,
-            DATEADD(day, 7, f.[Posting Date]) AS dateFin,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Item No_])), ''), f.[No_]) AS referenceArticle
+            f.[Document No_]                                                            AS code,
+            ISNULL(NULLIF(LTRIM(RTRIM(f.[Item No_])), ''), f.[No_])                     AS itemNo,
+            ISNULL(NULLIF(LTRIM(RTRIM(f.[Description])), ''), 'Composant Industriel')   AS articleNom,
+            CAST(ISNULL(f.[Output Quantity], 0) AS INT)                                 AS quantiteProduite,
+            CAST(ISNULL(f.[Scrap Quantity], 0) AS FLOAT)                                AS scrapQuantity,
+            CAST(ISNULL(f.[Run Time], 0) AS FLOAT)                                       AS runTime,
+            f.[Posting Date]                                                            AS dateDebut,
+            ISNULL(NULLIF(LTRIM(RTRIM(f.[Work Center No_])), ''), 'Atelier')             AS workCenter,
+            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Name])), ''), ISNULL(NULLIF(LTRIM(RTRIM(f.[Description])), ''), 'Poste')) AS machineNom,
+            ISNULL(NULLIF(LTRIM(RTRIM(f.[No_])), ''), 'POSTE')                          AS machineCode,
+            ISNULL(NULLIF(LTRIM(RTRIM(f.[Data Base])), ''), 'Tunisie')                   AS site
         FROM dbo.FACT_CLE f WITH (NOLOCK)
+        LEFT JOIN dbo.MCMachineCenter mc WITH (NOLOCK) ON f.[No_] = mc.[No_]
         WHERE f.[Document No_] IS NOT NULL AND f.[Output Quantity] > 0
+        ORDER BY f.[Posting Date] DESC
         """, nativeQuery = true)
     List<Object[]> findProductionOrdersFromFactCle();
 

@@ -32,13 +32,17 @@ public class ProductionDTO {
     public static class Response {
         private Long id;
         private String reference;
+        private String itemNo;
         private String article;
         private Integer quantitePrevue;
         private Integer quantiteRealisee;
+        private Double scrapQuantity;
+        private Double runTime;
         private ProductionOrder.Statut statut;
         private LocalDate dateDebut;
         private LocalDate dateFin;
         private String machineNom;
+        private String machineCode;
         private Long machineId;
         private String responsable;
         private String notes;

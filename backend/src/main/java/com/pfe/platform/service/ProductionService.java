@@ -38,61 +38,37 @@ public class ProductionService {
                         ProductionDTO.Response res = new ProductionDTO.Response();
                         res.setId(idCounter++);
                         res.setReference(r[0] != null ? r[0].toString().trim() : "OF-" + idCounter);
-                        res.setArticle(r[1] != null && !r[1].toString().isBlank() ? r[1].toString().trim() : "Article de Production");
-                        int obj = r[2] != null ? ((Number) r[2]).intValue() : 1000;
+                        res.setItemNo(r[1] != null ? r[1].toString().trim() : "-");
+                        res.setArticle(r[2] != null && !r[2].toString().isBlank() ? r[2].toString().trim() : "Article de Production");
                         int prod = r[3] != null ? ((Number) r[3]).intValue() : 0;
-                        res.setQuantitePrevue(Math.max(obj, prod));
+                        double scrap = r[4] != null ? ((Number) r[4]).doubleValue() : 0.0;
+                        double runTime = r[5] != null ? ((Number) r[5]).doubleValue() : 0.0;
                         res.setQuantiteRealisee(prod);
+                        res.setQuantitePrevue(prod);
+                        res.setScrapQuantity(scrap);
+                        res.setRunTime(runTime);
 
-                        // Date Début
-                        if (r[4] != null) {
+                        // Date Début (Posting Date)
+                        if (r[6] != null) {
                             try {
-                                if (r[4] instanceof java.sql.Date) {
-                                    res.setDateDebut(((java.sql.Date) r[4]).toLocalDate());
-                                } else if (r[4] instanceof java.sql.Timestamp) {
-                                    res.setDateDebut(((java.sql.Timestamp) r[4]).toLocalDateTime().toLocalDate());
+                                if (r[6] instanceof java.sql.Date) {
+                                    res.setDateDebut(((java.sql.Date) r[6]).toLocalDate());
+                                } else if (r[6] instanceof java.sql.Timestamp) {
+                                    res.setDateDebut(((java.sql.Timestamp) r[6]).toLocalDateTime().toLocalDate());
                                 } else {
-                                    res.setDateDebut(java.time.LocalDate.parse(r[4].toString().substring(0, 10)));
+                                    res.setDateDebut(java.time.LocalDate.parse(r[6].toString().substring(0, 10)));
                                 }
                             } catch (Exception ex) {
-                                res.setDateDebut(java.time.LocalDate.now().minusDays(10));
+                                res.setDateDebut(java.time.LocalDate.now());
                             }
                         } else {
-                            res.setDateDebut(java.time.LocalDate.now().minusDays(10));
+                            res.setDateDebut(java.time.LocalDate.now());
                         }
 
-                        // Date Fin
-                        if (r.length > 7 && r[7] != null) {
-                            try {
-                                if (r[7] instanceof java.sql.Date) {
-                                    res.setDateFin(((java.sql.Date) r[7]).toLocalDate());
-                                } else if (r[7] instanceof java.sql.Timestamp) {
-                                    res.setDateFin(((java.sql.Timestamp) r[7]).toLocalDateTime().toLocalDate());
-                                } else {
-                                    res.setDateFin(java.time.LocalDate.parse(r[7].toString().substring(0, 10)));
-                                }
-                            } catch (Exception ex) {
-                                res.setDateFin(res.getDateDebut().plusDays(7));
-                            }
-                        } else {
-                            res.setDateFin(res.getDateDebut() != null ? res.getDateDebut().plusDays(7) : java.time.LocalDate.now().plusDays(7));
-                        }
-
-                        // Statut
-                        if (prod >= obj && obj > 0) {
-                            res.setStatut(ProductionOrder.Statut.TERMINE);
-                        } else if (prod > 0) {
-                            res.setStatut(ProductionOrder.Statut.EN_COURS);
-                        } else if (res.getDateFin() != null && res.getDateFin().isBefore(java.time.LocalDate.now())) {
-                            res.setStatut(ProductionOrder.Statut.EN_RETARD);
-                        } else {
-                            res.setStatut(ProductionOrder.Statut.EN_ATTENTE);
-                        }
-
-                        res.setMachineNom(r[5] != null && !r[5].toString().isBlank() ? r[5].toString().trim() : "Atelier Principal");
-                        res.setResponsable(r[6] != null && !r[6].toString().isBlank() ? r[6].toString().trim() : "Tunisie");
-                        double yield = obj > 0 ? Math.round((double) prod / obj * 1000.0) / 10.0 : (prod > 0 ? 100.0 : 0.0);
-                        res.setTauxRendement(yield);
+                        res.setMachineNom(r[7] != null && !r[7].toString().isBlank() ? r[7].toString().trim() : "Atelier");
+                        res.setNotes(r[8] != null ? r[8].toString().trim() : "");
+                        res.setMachineCode(r[9] != null ? r[9].toString().trim() : "");
+                        res.setResponsable(r[10] != null && !r[10].toString().isBlank() ? r[10].toString().trim() : "Tunisie");
                         list.add(res);
                     } catch (Exception rowErr) {
                     }
@@ -181,7 +157,6 @@ public class ProductionService {
             row.put("workCenter", workCenter);
             row.put("family", family);
             row.put("emplacement", site.equalsIgnoreCase("CZA") ? "Brno" : "Tunisie");
-            row.put("statut", "DISPONIBLE");
             row.put("tauxRendement", efficiency);
             row.put("totalOutput", output);
             row.put("totalScrap", scrap);

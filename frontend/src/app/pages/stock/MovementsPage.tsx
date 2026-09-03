@@ -109,13 +109,13 @@ export default function MovementsPage() {
 
   const exportExcel = () => {
     const rows = filteredMovements.map(m => ({
-      'Horodatage': formatDateTime(m.date),
-      'Référence Article': m.itemReference,
-      'Désignation': m.itemNom,
-      'Type': m.type,
-      'Quantité': Number(m.quantite),
-      'Opérateur': m.operateur || '—',
-      'Motif': m.motif || '—',
+      'Posting Date': formatDateTime(m.date),
+      'Item No_': m.itemReference,
+      'Description': m.itemNom,
+      'Entry Type': m.type,
+      'Quantity': Number(m.quantite),
+      'Location Code / Site': m.operateur || '—',
+      'Document No_': m.reference || '—',
     }))
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.json_to_sheet(rows)
@@ -161,7 +161,7 @@ export default function MovementsPage() {
             <input
               type='text'
               className='form-control form-control-solid w-250px ps-14'
-              placeholder='Référence, désignation, opérateur...'
+              placeholder='Item No_, Description, Document No_...'
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
@@ -264,13 +264,13 @@ export default function MovementsPage() {
           <table className='table align-middle table-row-dashed table-hover fs-7 gy-2'>
             <thead>
               <tr className='text-start text-muted fw-bold fs-7 text-uppercase gs-0'>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('date')}>Date <SortIcon field='date' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('itemReference')}>Référence <SortIcon field='itemReference' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('type')}>Type <SortIcon field='type' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('motif')}>Nature <SortIcon field='motif' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('quantite')}>Quantité <SortIcon field='quantite' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('operateur')}>Site <SortIcon field='operateur' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('reference')}>Document <SortIcon field='reference' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('date')}>Posting Date <SortIcon field='date' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('itemReference')}>Item No_ <SortIcon field='itemReference' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('type')}>Entry Type <SortIcon field='type' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('motif')}>Description <SortIcon field='motif' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('quantite')}>Quantity <SortIcon field='quantite' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('operateur')}>Location Code / Site <SortIcon field='operateur' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('reference')}>Document No_ <SortIcon field='reference' /></th>
                 <th className='text-end pe-4'>Actions</th>
               </tr>
             </thead>
@@ -365,13 +365,13 @@ export default function MovementsPage() {
           {selectedMovement && (
             <div>
               {[
-                { label: 'Désignation', val: selectedMovement.itemNom || '—' },
-                { label: 'Date / Heure', val: formatDateTime(selectedMovement.date) },
-                { label: 'Type mouvement', val: <span className={`badge badge-light-${selectedMovement.type === 'ENTREE' ? 'success' : 'danger'}`}>{selectedMovement.type === 'ENTREE' ? '↓ Entrée' : '↑ Sortie'}</span> },
-                { label: 'Nature opération', val: selectedMovement.motif || '—' },
-                { label: 'Quantité', val: <span className={`fw-bolder fs-4 text-${selectedMovement.type === 'ENTREE' ? 'success' : 'danger'}`}>{selectedMovement.type === 'ENTREE' ? '+' : '-'}{Number(selectedMovement.quantite).toLocaleString()}</span> },
-                { label: 'Site / Source', val: selectedMovement.operateur || '—' },
-                { label: 'N° Document', val: selectedMovement.reference || '—' },
+                { label: 'Description', val: selectedMovement.itemNom || '—' },
+                { label: 'Posting Date', val: formatDateTime(selectedMovement.date) },
+                { label: 'Entry Type', val: <span className={`badge badge-light-${selectedMovement.type === 'ENTREE' ? 'success' : 'danger'}`}>{selectedMovement.type === 'ENTREE' ? '↓ Entrée' : '↑ Sortie'}</span> },
+                { label: 'Description (Nature)', val: selectedMovement.motif || '—' },
+                { label: 'Quantity', val: <span className={`fw-bolder fs-4 text-${selectedMovement.type === 'ENTREE' ? 'success' : 'danger'}`}>{selectedMovement.type === 'ENTREE' ? '+' : '-'}{Number(selectedMovement.quantite).toLocaleString()}</span> },
+                { label: 'Location Code / Site', val: selectedMovement.operateur || '—' },
+                { label: 'Document No_', val: selectedMovement.reference || '—' },
               ].map(({ label, val }) => (
                 <div key={label} className='d-flex align-items-center justify-content-between py-3 border-bottom'>
                   <span className='text-muted fw-semibold fs-7'>{label}</span>

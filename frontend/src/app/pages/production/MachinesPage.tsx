@@ -62,21 +62,6 @@ export default function MachinesPage() {
   const workshops = useMemo(() => ['ALL', ...Array.from(new Set(machines.map(m => m.workCenter).filter(Boolean)))], [machines])
   const sites = useMemo(() => ['ALL', ...Array.from(new Set(machines.map(m => m.emplacement).filter(Boolean)))], [machines])
 
-  const getStatusConfig = (statut: string) => {
-    switch (statut) {
-      case 'EN_PRODUCTION':
-        return { badge: 'success', label: 'En Production', border: 'border-l-success', pulse: 'pulse-green' }
-      case 'DISPONIBLE':
-        return { badge: 'primary', label: 'Disponible', border: 'border-l-primary', pulse: 'pulse-blue' }
-      case 'EN_MAINTENANCE':
-        return { badge: 'warning', label: 'En Maintenance', border: 'border-l-warning', pulse: '' }
-      case 'EN_PANNE':
-        return { badge: 'danger', label: 'En Panne', border: 'border-l-danger', pulse: 'pulse-red' }
-      default:
-        return { badge: 'secondary', label: statut || 'Disponible', border: '', pulse: '' }
-    }
-  }
-
   const getYieldColor = (rate: number) => {
     if (rate >= 80) return 'text-success'
     if (rate >= 50) return 'text-warning'
@@ -137,15 +122,13 @@ export default function MachinesPage() {
 
   const exportExcel = () => {
     const rows = filteredMachines.map(m => ({
-      'Code Machine': m.code,
-      'Nom de la Machine': m.nom,
-      'Atelier / Centre de Charge': m.workCenter,
-      'Famille Machine': m.family,
-      'Site': m.emplacement,
-      'Statut': m.statut,
-      'Volume Produit': Number(m.totalOutput) || 0,
-      'Rebut Total': Number(m.totalScrap) || 0,
-      'Taux TRG (%)': Number(m.tauxRendement) || 0,
+      'No_': m.code,
+      'Name': m.nom,
+      'Work Center No_': m.workCenter,
+      'Machine Family': m.family,
+      'Database': m.emplacement,
+      'Capacity': Number(m.totalOutput) || 0,
+      'Efficiency (%)': Number(m.tauxRendement) || 0,
     }))
     const ws = XLSX.utils.json_to_sheet(rows)
     const wb = XLSX.utils.book_new()
@@ -344,19 +327,18 @@ export default function MachinesPage() {
               <thead>
                 <tr className='text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0 border-0'>
                   <th className='ps-4 cursor-pointer' onClick={() => handleSort('nom')}>
-                    Machine & Marque <SortIcon field='nom' />
+                    No_ & Name <SortIcon field='nom' />
                   </th>
                   <th className='cursor-pointer' onClick={() => handleSort('workCenter')}>
-                    Atelier / Centre de Charge <SortIcon field='workCenter' />
+                    Work Center No_ <SortIcon field='workCenter' />
                   </th>
-                  <th>Famille Machine</th>
-                  <th>Site</th>
-                  <th>Statut</th>
+                  <th>Machine Family</th>
+                  <th>Database</th>
                   <th className='cursor-pointer' onClick={() => handleSort('totalOutput')}>
-                    Volume Produit <SortIcon field='totalOutput' />
+                    Capacity <SortIcon field='totalOutput' />
                   </th>
                   <th className='cursor-pointer' onClick={() => handleSort('tauxRendement')}>
-                    Indice TRG <SortIcon field='tauxRendement' />
+                    Efficiency <SortIcon field='tauxRendement' />
                   </th>
                   <th style={{ minWidth: '70px' }} className='text-end pe-4'>Actions</th>
                 </tr>
@@ -364,13 +346,12 @@ export default function MachinesPage() {
               <tbody className='text-gray-600 fw-semibold'>
                 {currentMachines.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className='text-center py-10 text-muted'>
+                    <td colSpan={7} className='text-center py-10 text-muted'>
                       Aucune machine trouvée pour ces critères
                     </td>
                   </tr>
                 ) : (
                   currentMachines.map((m) => {
-                    const conf = getStatusConfig(m.statut)
                     return (
                       <tr key={m.code || m.id} className='row-hover-effect'>
                         <td className='ps-4'>
@@ -389,12 +370,6 @@ export default function MachinesPage() {
                         <td className='text-gray-700 fs-7'>{m.family || 'Standard'}</td>
                         <td>
                           <span className='badge badge-light-dark fs-8'>{m.emplacement || 'Principal'}</span>
-                        </td>
-                        <td>
-                          <span className={`pro-badge badge-light-${conf.badge} text-${conf.badge}`}>
-                            {conf.pulse && <span className={`pulse-dot-small ${conf.pulse}`}></span>}
-                            {conf.label}
-                          </span>
                         </td>
                         <td className='fw-bold text-gray-800'>
                           {m.totalOutput ? `${m.totalOutput.toLocaleString()} u` : '0 u'}
@@ -486,7 +461,6 @@ export default function MachinesPage() {
 
       {/* Machine Details Modal */}
       {selectedMachine && (() => {
-        const conf = getStatusConfig(selectedMachine.statut)
         return (
           <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
             <Modal.Header closeButton className='border-0 pt-6 px-8 bg-light'>
@@ -500,11 +474,11 @@ export default function MachinesPage() {
                 <div className='col-12'>
                   <div className='p-5 rounded-3 bg-light d-flex justify-content-between align-items-center'>
                     <div>
-                      <span className='text-muted fs-8 fw-semibold text-uppercase ls-1'>Nom Commercial & Marque</span>
+                      <span className='text-muted fs-8 fw-semibold text-uppercase ls-1'>Name</span>
                       <div className='fw-bold fs-4 mt-1 text-gray-900'>{selectedMachine.nom}</div>
                     </div>
                     <span className='badge badge-light-primary fs-7 fw-bold px-4 py-2'>
-                      Code : {selectedMachine.code}
+                      No_ : {selectedMachine.code}
                     </span>
                   </div>
                 </div>
@@ -513,23 +487,16 @@ export default function MachinesPage() {
                   <div className='card bg-body border border-dashed p-5 rounded-3 h-100'>
                     <div className='d-flex flex-column gap-4'>
                       <div className='d-flex justify-content-between border-bottom pb-3'>
-                        <span className='text-gray-500 fw-bold fs-7'>Atelier de Rattachement :</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Work Center No_ :</span>
                         <span className='fw-extrabolder fs-6 text-primary'>{selectedMachine.workCenter || '-'}</span>
                       </div>
                       <div className='d-flex justify-content-between border-bottom pb-3'>
-                        <span className='text-gray-500 fw-bold fs-7'>Famille de Machine :</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Machine Family :</span>
                         <span className='fw-bold fs-6'>{selectedMachine.family || '-'}</span>
                       </div>
-                      <div className='d-flex justify-content-between border-bottom pb-3'>
-                        <span className='text-gray-500 fw-bold fs-7'>Site Industriel :</span>
-                        <span className='badge badge-light-dark fs-8'>{selectedMachine.emplacement || 'Principal'}</span>
-                      </div>
                       <div className='d-flex justify-content-between'>
-                        <span className='text-gray-500 fw-bold fs-7'>Statut Opérationnel :</span>
-                        <span className={`pro-badge badge-light-${conf.badge} text-${conf.badge} fs-8`}>
-                          {conf.pulse && <span className={`pulse-dot-small ${conf.pulse} me-1`}></span>}
-                          {conf.label}
-                        </span>
+                        <span className='text-gray-500 fw-bold fs-7'>Database :</span>
+                        <span className='badge badge-light-dark fs-8'>{selectedMachine.emplacement || 'Principal'}</span>
                       </div>
                     </div>
                   </div>
@@ -539,7 +506,7 @@ export default function MachinesPage() {
                   <div className='card bg-body border border-dashed p-5 rounded-3 h-100'>
                     <div className='d-flex flex-column gap-4 justify-content-center'>
                       <div className='d-flex justify-content-between border-bottom pb-3'>
-                        <span className='text-gray-500 fw-bold fs-7'>Volume Produit Total :</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Capacity :</span>
                         <span className='fw-extrabolder fs-6 text-success'>
                           {selectedMachine.totalOutput ? `${selectedMachine.totalOutput.toLocaleString()} unités` : '0 unité'}
                         </span>
@@ -555,7 +522,7 @@ export default function MachinesPage() {
                         <span className='fw-bold fs-6'>{selectedMachine.operationCount || 0}</span>
                       </div>
                       <div className='d-flex justify-content-between'>
-                        <span className='text-gray-500 fw-bold fs-7'>Indice TRG / Rendement :</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Efficiency :</span>
                         <span className={`fw-extrabolder fs-5 ${getYieldColor(selectedMachine.tauxRendement)}`}>
                           {selectedMachine.tauxRendement ? `${selectedMachine.tauxRendement}%` : '0%'}
                         </span>

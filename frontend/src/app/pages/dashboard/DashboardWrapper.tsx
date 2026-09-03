@@ -522,11 +522,11 @@ const DashboardPage: FC = () => {
                   <div className='card bg-body border border-dashed border-gray-300 p-5 rounded-3 h-100'>
                     <div className='d-flex flex-column gap-4'>
                       <div className='d-flex justify-content-between border-bottom pb-3'>
-                        <span className='text-gray-500 fw-bold fs-7'>Code OF :</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Document No_ :</span>
                         <span className='text-gray-900 fw-extrabolder fs-6'>{selectedOf.code || '-'}</span>
                       </div>
                       <div className='d-flex justify-content-between border-bottom pb-3'>
-                        <span className='text-gray-500 fw-bold fs-7'>Date Début :</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Posting Date :</span>
                         <span className='text-gray-900 fw-bold fs-6'>{selectedOf.dateDebut || '-'}</span>
                       </div>
                       <div className='d-flex justify-content-between pb-1'>

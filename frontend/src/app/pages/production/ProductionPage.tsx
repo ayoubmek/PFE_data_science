@@ -31,16 +31,16 @@ export default function ProductionPage() {
       const mapped = (Array.isArray(data) ? data : []).map((o: any) => ({
         id: o.id,
         code: o.reference || o.code,
+        itemNo: o.itemNo || '-',
         articleNom: o.article || o.articleNom,
-        quantiteObjectif: o.quantitePrevue !== undefined ? o.quantitePrevue : (o.quantiteObjectif || 1000),
-        quantiteProduite: o.quantiteRealisee !== undefined ? o.quantiteRealisee : (o.quantiteProduite || 0),
-        statut: o.statut || 'TERMINE',
+        quantiteProduite: Number(o.quantiteRealisee) || 0,
+        scrapQuantity: Number(o.scrapQuantity) || 0,
+        runTime: Number(o.runTime) || 0,
         dateDebut: o.dateDebut || '2026-01-01',
-        dateFin: o.dateFin || '2026-01-08',
-        machineNom: o.machineNom || 'Atelier Principal',
+        machineNom: o.machineNom || 'Atelier',
+        machineCode: o.machineCode || '',
+        machineLabel: o.notes || '',
         responsable: o.responsable || 'Tunisie',
-        notes: o.notes || '',
-        tauxRendement: o.tauxRendement || 100.0,
       }))
       globalCachedOrders = mapped
       setOrders(mapped)
@@ -54,16 +54,7 @@ export default function ProductionPage() {
   useEffect(() => { fetchOrders() }, [])
   useEffect(() => { setCurrentPage(1) }, [searchTerm, statusFilter, dateFrom, dateTo, sortField, sortDir, rowsPerPage])
 
-  const getStatusInfo = (status: string) => {
-    switch (status) {
-      case 'TERMINE': return { color: 'success', label: 'Terminé' }
-      case 'EN_COURS': return { color: 'primary', label: 'En cours' }
-      case 'PLANIFIE':
-      case 'EN_ATTENTE': return { color: 'warning', label: 'Planifié' }
-      case 'EN_RETARD': return { color: 'danger', label: 'En retard' }
-      default: return { color: 'info', label: status || 'Autre' }
-    }
-  }
+  const workshops = useMemo(() => ['ALL', ...Array.from(new Set(orders.map(o => o.machineNom).filter(Boolean)))], [orders])
 
   const handleSort = (field: string) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -79,11 +70,11 @@ export default function ProductionPage() {
   const filteredOrders = useMemo(() => {
     let result = orders.filter(o => {
       const s = searchTerm.toLowerCase()
-      const matchSearch = !s || o.code?.toLowerCase().includes(s) || o.articleNom?.toLowerCase().includes(s) || o.responsable?.toLowerCase().includes(s)
-      const matchStatus = statusFilter === 'ALL' || o.statut === statusFilter
+      const matchSearch = !s || o.code?.toLowerCase().includes(s) || o.itemNo?.toLowerCase().includes(s) || o.articleNom?.toLowerCase().includes(s) || o.responsable?.toLowerCase().includes(s) || o.machineCode?.toLowerCase().includes(s)
+      const matchWorkshop = statusFilter === 'ALL' || o.machineNom === statusFilter
       const matchFrom = !dateFrom || (o.dateDebut && o.dateDebut >= dateFrom)
       const matchTo = !dateTo || (o.dateDebut && o.dateDebut <= dateTo)
-      return matchSearch && matchStatus && matchFrom && matchTo
+      return matchSearch && matchWorkshop && matchFrom && matchTo
     })
     result.sort((a, b) => {
       const va = a[sortField] ?? '', vb = b[sortField] ?? ''
@@ -97,33 +88,41 @@ export default function ProductionPage() {
   const start = (currentPage - 1) * rowsPerPage
   const currentOrders = filteredOrders.slice(start, start + rowsPerPage)
 
-  const stats = useMemo(() => ({
-    total: orders.length,
-    termine: orders.filter(o => o.statut === 'TERMINE').length,
-    enCours: orders.filter(o => o.statut === 'EN_COURS').length,
-    planifie: orders.filter(o => ['PLANIFIE', 'EN_ATTENTE'].includes(o.statut)).length,
-    retard: orders.filter(o => o.statut === 'EN_RETARD').length,
-  }), [orders])
+  const stats = useMemo(() => {
+    const total = orders.length
+    const totalOutput = orders.reduce((s, o) => s + (Number(o.quantiteProduite) || 0), 0)
+    const totalScrap = orders.reduce((s, o) => s + (Number(o.scrapQuantity) || 0), 0)
+    const totalRunTime = Math.round(orders.reduce((s, o) => s + (Number(o.runTime) || 0), 0) * 10) / 10
+    const scrapRate = totalOutput + totalScrap > 0 ? ((totalScrap / (totalOutput + totalScrap)) * 100).toFixed(2) : '0.00'
+    return {
+      total,
+      totalOutput,
+      totalScrap,
+      totalRunTime,
+      scrapRate,
+    }
+  }, [orders])
 
   const activeFilters = [searchTerm, statusFilter !== 'ALL', dateFrom, dateTo].filter(Boolean).length
 
   const exportExcel = () => {
     const rows = filteredOrders.map(o => ({
-      'Code OF': o.code,
-      'Article': o.articleNom,
-      'Volume Cible': o.quantiteObjectif,
-      'Volume Réalisé': o.quantiteProduite,
-      'Progression (%)': Math.min(100, Math.round(((o.quantiteProduite || 0) / (o.quantiteObjectif || 1)) * 100)),
-      'Statut': getStatusInfo(o.statut).label,
-      'Date Début': o.dateDebut,
-      'Machine': o.machineNom || '',
-      'Responsable': o.responsable || '',
+      'Document No_': o.code,
+      'Item No_': o.itemNo,
+      'Description': o.articleNom,
+      'Output Quantity': o.quantiteProduite,
+      'Scrap Quantity': o.scrapQuantity,
+      'Run Time (h)': o.runTime,
+      'Work Center No_': o.machineNom || '',
+      'Machine': o.machineCode ? `${o.machineCode} (${o.machineLabel || o.articleNom})` : '',
+      'Posting Date': o.dateDebut,
+      'Data Base': o.responsable || '',
     }))
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.json_to_sheet(rows)
-    ws['!cols'] = [18, 35, 15, 15, 14, 12, 14, 20, 16].map(w => ({ wch: w }))
+    ws['!cols'] = [18, 16, 32, 16, 14, 12, 16, 25, 14, 14].map(w => ({ wch: w }))
     XLSX.utils.book_append_sheet(wb, ws, 'Production')
-    XLSX.writeFile(wb, `production_${new Date().toISOString().slice(0, 10)}.xlsx`)
+    XLSX.writeFile(wb, `production_FACT_CLE_${new Date().toISOString().slice(0, 10)}.xlsx`)
   }
 
   if (loading && orders.length === 0) return <PageSkeleton type='table' />
@@ -131,15 +130,13 @@ export default function ProductionPage() {
   return (
     <div className='card card-flush'>
 
-      {}
-      <div className='card-header border-0 pt-6 pb-0'>
+      <div className='card-header border-0 pt-6 pb-2'>
         <div className='d-flex gap-4 flex-wrap'>
           {[
-            { label: 'Total OFs', val: stats.total, color: 'primary', icon: 'abstract-26' },
-            { label: 'Terminés', val: stats.termine, color: 'success', icon: 'check-circle' },
-            { label: 'En cours', val: stats.enCours, color: 'info', icon: 'time' },
-            { label: 'Planifiés', val: stats.planifie, color: 'warning', icon: 'calendar' },
-            { label: 'En retard', val: stats.retard, color: 'danger', icon: 'warning-2' },
+            { label: 'Total Document No_', val: stats.total.toLocaleString(), color: 'primary', icon: 'element-11', sub: 'Ordres exécutés' },
+            { label: 'Total Output Quantity', val: `${stats.totalOutput.toLocaleString()} u`, color: 'success', icon: 'check-circle', sub: 'Pièces conformes' },
+            { label: 'Total Scrap Quantity', val: `${stats.totalScrap.toLocaleString()} u`, color: 'danger', icon: 'cross-circle', sub: `Taux : ${stats.scrapRate}%` },
+            { label: 'Total Run Time', val: `${stats.totalRunTime.toLocaleString()} h`, color: 'info', icon: 'time', sub: 'Heures machine' },
           ].map(s => (
             <div key={s.label} className='d-flex align-items-center gap-2 bg-light-subtle rounded px-4 py-2'>
               <span className={`badge badge-circle badge-light-${s.color} p-4`}>
@@ -147,14 +144,13 @@ export default function ProductionPage() {
               </span>
               <div>
                 <div className={`fw-bolder fs-4 text-${s.color}`}>{s.val}</div>
-                <div className='text-muted fs-8 fw-semibold'>{s.label}</div>
+                <div className='text-muted fs-8 fw-semibold'>{s.label} <span className='badge badge-light fs-9 ms-1'>{s.sub}</span></div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {}
       <div className='card-header border-0 pt-4 pb-2'>
         <div className='card-title'>
           <div className='d-flex align-items-center position-relative my-1'>
@@ -162,14 +158,13 @@ export default function ProductionPage() {
             <input
               type='text'
               className='form-control form-control-solid w-250px ps-14'
-              placeholder='Code OF, article, atelier...'
+              placeholder='Document No_, Description, Atelier...'
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
         <div className='card-toolbar gap-2 flex-wrap'>
-          {}
           <select
             className='form-select form-select-solid form-select-sm w-auto'
             value={rowsPerPage}
@@ -178,7 +173,6 @@ export default function ProductionPage() {
             {[25, 50, 100, 200].map(n => <option key={n} value={n}>{n} lignes</option>)}
           </select>
 
-          {}
           <button
             type='button'
             className={`btn btn-sm ${showFilters ? 'btn-primary' : 'btn-light-primary'}`}
@@ -196,15 +190,19 @@ export default function ProductionPage() {
           {activeFilters > 0 && (
             <button
               type='button'
-              className='btn btn-sm btn-light-danger'
-              onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); setDateFrom(''); setDateTo('') }}
+              className='btn btn-sm btn-light'
+              onClick={() => {
+                setSearchTerm('')
+                setStatusFilter('ALL')
+                setDateFrom('')
+                setDateTo('')
+              }}
             >
               <KTIcon iconName='cross-circle' className='fs-3 me-1' />
               Réinitialiser
             </button>
           )}
 
-          {}
           <button type='button' className='btn btn-sm btn-light-success' onClick={exportExcel}>
             <KTIcon iconName='exit-up' className='fs-3 me-1' />
             Excel ({filteredOrders.length})
@@ -212,24 +210,20 @@ export default function ProductionPage() {
         </div>
       </div>
 
-      {}
       {showFilters && (
         <div className='card-header border-0 pt-0 pb-3'>
           <div className='d-flex flex-wrap gap-4 align-items-end bg-light rounded p-4 w-100'>
             <div>
-              <label className='form-label fs-7 fw-bold text-gray-600'>Statut</label>
+              <label className='form-label fs-7 fw-bold text-gray-600'>Work Center No_</label>
               <select
                 className='form-select form-select-solid form-select-sm'
-                style={{ width: 160 }}
+                style={{ width: 180 }}
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value)}
               >
-                <option value='ALL'>Tous les statuts</option>
-                <option value='TERMINE'>Terminé</option>
-                <option value='EN_COURS'>En cours</option>
-                <option value='PLANIFIE'>Planifié</option>
-                <option value='EN_ATTENTE'>En attente</option>
-                <option value='EN_RETARD'>En retard</option>
+                {workshops.map(w => (
+                  <option key={w} value={w}>{w === 'ALL' ? 'Tous les Ateliers' : w}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -257,30 +251,37 @@ export default function ProductionPage() {
         </div>
       )}
 
-      {}
       <div className='card-body pt-0'>
         <div className='table-responsive'>
           <table className='table align-middle table-row-dashed table-hover fs-7 gy-2'>
             <thead>
               <tr className='text-start text-muted fw-bold fs-7 text-uppercase gs-0'>
                 <th className='ps-4 cursor-pointer user-select-none' onClick={() => handleSort('code')}>
-                  Code OF <SortIcon field='code' />
+                  Document No_ <SortIcon field='code' />
+                </th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('itemNo')}>
+                  Item No_ <SortIcon field='itemNo' />
                 </th>
                 <th className='cursor-pointer user-select-none min-w-150px' onClick={() => handleSort('articleNom')}>
-                  Article <SortIcon field='articleNom' />
-                </th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('quantiteObjectif')}>
-                  Cible <SortIcon field='quantiteObjectif' />
+                  Description <SortIcon field='articleNom' />
                 </th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('quantiteProduite')}>
-                  Réalisé <SortIcon field='quantiteProduite' />
+                  Output Quantity <SortIcon field='quantiteProduite' />
                 </th>
-                <th className='min-w-100px'>Progression</th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('statut')}>
-                  Statut <SortIcon field='statut' />
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('scrapQuantity')}>
+                  Scrap Quantity <SortIcon field='scrapQuantity' />
+                </th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('runTime')}>
+                  Run Time <SortIcon field='runTime' />
+                </th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('machineNom')}>
+                  Work Center No_ <SortIcon field='machineNom' />
                 </th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('dateDebut')}>
-                  Date <SortIcon field='dateDebut' />
+                  Posting Date <SortIcon field='dateDebut' />
+                </th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('responsable')}>
+                  Data Base <SortIcon field='responsable' />
                 </th>
                 <th className='text-end pe-4'>Actions</th>
               </tr>
@@ -288,37 +289,35 @@ export default function ProductionPage() {
             <tbody className='text-gray-600 fw-semibold'>
               {currentOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className='text-center py-10'>
+                  <td colSpan={10} className='text-center py-10'>
                     <KTIcon iconName='search-list' className='fs-2x text-gray-300 d-block mb-2' />
                     <span className='text-muted fs-6'>Aucun ordre de fabrication trouvé</span>
                   </td>
                 </tr>
               ) : currentOrders.map(o => {
-                const pct = Math.min(100, Math.round(((o.quantiteProduite || 0) / (o.quantiteObjectif || 1)) * 100))
-                const si = getStatusInfo(o.statut)
                 return (
                   <tr key={o.id}>
                     <td className='ps-4 fw-bold text-gray-800'>{o.code}</td>
+                    <td>
+                      <span className='badge badge-light-primary fw-bold fs-8'>{o.itemNo}</span>
+                    </td>
                     <td className='text-gray-700'>{o.articleNom}</td>
-                    <td className='text-gray-600'>{(o.quantiteObjectif || 0).toLocaleString()}</td>
-                    <td className='text-gray-600'>{(o.quantiteProduite || 0).toLocaleString()}</td>
-                    <td className='min-w-100px'>
-                      <div className='d-flex align-items-center gap-2'>
-                        <span className={`text-${pct >= 100 ? 'success' : 'primary'} fw-bold fs-8`} style={{ minWidth: 30 }}>
-                          {pct}%
-                        </span>
-                        <div className='progress h-6px w-100px bg-secondary'>
-                          <div
-                            className={`progress-bar bg-${pct >= 100 ? 'success' : 'primary'}`}
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
+                    <td className='text-gray-900 fw-bold'>{(o.quantiteProduite || 0).toLocaleString()} u</td>
+                    <td>
+                      <span className={o.scrapQuantity > 0 ? 'badge badge-light-danger fw-bold' : 'text-muted'}>
+                        {o.scrapQuantity > 0 ? `${o.scrapQuantity.toLocaleString()} u` : '0 u'}
+                      </span>
+                    </td>
+                    <td className='text-gray-700 fw-semibold'>
+                      {o.runTime > 0 ? `${o.runTime} h` : '—'}
                     </td>
                     <td>
-                      <span className={`badge badge-light-${si.color}`}>{si.label}</span>
+                      <span className='badge badge-light-info fw-bold'>{o.machineNom || 'Atelier'}</span>
                     </td>
                     <td className='text-muted'>{o.dateDebut}</td>
+                    <td>
+                      <span className='badge badge-light-dark'>{o.responsable || 'Tunisie'}</span>
+                    </td>
                     <td className='text-end pe-4'>
                       <button
                         type='button'
@@ -378,51 +377,28 @@ export default function ProductionPage() {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {selectedOrder && (() => {
-            const pct = Math.min(100, Math.round(((selectedOrder.quantiteProduite || 0) / (selectedOrder.quantiteObjectif || 1)) * 100))
-            const si = getStatusInfo(selectedOrder.statut)
-            return (
-              <div>
-                <div className='mb-5'>
-                  <div className='d-flex justify-content-between fs-7 fw-semibold text-gray-600 mb-2'>
-                    <span>Progression de production</span>
-                    <span className={`text-${pct >= 100 ? 'success' : 'primary'} fw-bold`}>{pct}%</span>
-                  </div>
-                  <div className='progress h-8px'>
-                    <div className={`progress-bar bg-${pct >= 100 ? 'success' : 'primary'}`} style={{ width: `${pct}%` }} />
-                  </div>
-                  <div className='d-flex justify-content-between text-muted fs-8 mt-1'>
-                    <span>Produit : {selectedOrder.quantiteProduite?.toLocaleString()}</span>
-                    <span>Objectif : {selectedOrder.quantiteObjectif?.toLocaleString()}</span>
-                  </div>
+          {selectedOrder && (
+            <div className='row g-4'>
+              {[
+                { label: 'Document No_', val: selectedOrder.code },
+                { label: 'Item No_', val: <span className='badge badge-light-primary fw-bold fs-7'>{selectedOrder.itemNo}</span> },
+                { label: 'Description', val: selectedOrder.articleNom },
+                { label: 'Output Quantity', val: <span className='fw-bolder text-success fs-6'>{selectedOrder.quantiteProduite?.toLocaleString()} unités</span> },
+                { label: 'Scrap Quantity', val: <span className={`fw-bold ${selectedOrder.scrapQuantity > 0 ? 'text-danger' : 'text-muted'}`}>{selectedOrder.scrapQuantity?.toLocaleString()} unités</span> },
+                { label: 'Run Time', val: <span className='fw-semibold text-gray-800'>{selectedOrder.runTime > 0 ? `${selectedOrder.runTime} heures` : '0 heure'}</span> },
+                { label: 'Work Center No_', val: <span className='badge badge-light-info fw-bold'>{selectedOrder.machineNom || '—'}</span> },
+                { label: 'Machine (No_)', val: selectedOrder.machineCode ? `${selectedOrder.machineCode} ${selectedOrder.machineLabel ? `(${selectedOrder.machineLabel})` : ''}` : '—' },
+                { label: 'Posting Date', val: selectedOrder.dateDebut || '—' },
+                { label: 'Data Base', val: <span className='badge badge-light-dark'>{selectedOrder.responsable || 'Tunisie'}</span> },
+              ].map(({ label, val }) => (
+                <div className='col-md-6' key={label}>
+                  <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>
+                  <div className='fs-7 fw-bold text-gray-800'>{val}</div>
+                  <div className='separator separator-dashed mt-3' />
                 </div>
-                <div className='separator separator-dashed mb-5' />
-                <div className='row g-4'>
-                  {[
-                    { label: 'Statut', val: <span className={`badge badge-light-${si.color}`}>{si.label}</span> },
-                    { label: 'Date début', val: selectedOrder.dateDebut || '—' },
-                    { label: 'Date fin', val: selectedOrder.dateFin || '—' },
-                    { label: 'Machine / Poste', val: selectedOrder.machineNom || '—' },
-                    { label: 'Responsable', val: selectedOrder.responsable || '—' },
-                    { label: 'Taux rendement', val: selectedOrder.tauxRendement ? `${selectedOrder.tauxRendement}%` : '—' },
-                  ].map(({ label, val }) => (
-                    <div className='col-md-6' key={label}>
-                      <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>
-                      <div className='fs-7 fw-bold text-gray-800'>{val}</div>
-                    </div>
-                  ))}
-                  {selectedOrder.notes && (
-                    <div className='col-12'>
-                      <div className='notice d-flex bg-light-warning rounded border-warning border border-dashed p-4'>
-                        <KTIcon iconName='information-5' className='fs-2tx text-warning me-4' />
-                        <div className='fs-7 text-gray-700'>{selectedOrder.notes}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          })()}
+              ))}
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer>
           <button type='button' className='btn btn-sm btn-light' onClick={() => setShowModal(false)}>Fermer</button>

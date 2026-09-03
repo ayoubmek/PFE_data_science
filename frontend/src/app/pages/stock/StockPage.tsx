@@ -89,18 +89,18 @@ export default function StockPage() {
 
   const exportExcel = () => {
     const rows = filteredItems.map(i => ({
-      'Date Stock': i.dateStock,
-      'Référence': i.reference,
-      'Désignation': i.designation,
-      'Catégorie': i.categorie,
+      'datestock': i.dateStock,
+      'No_': i.reference,
+      'Description': i.designation,
+      'groupeitem': i.categorie,
       'Quantité': Number(i.quantite),
-      'Coût Unitaire (DT)': Number(i.valeurUnitaire),
-      'Valeur Globale (DT)': Number(i.valeurTotale) || Number(i.quantite) * Number(i.valeurUnitaire),
+      'Cout (DT)': Number(i.valeurUnitaire),
+      'Valeur Totale (DT)': Number(i.valeurTotale) || Number(i.quantite) * Number(i.valeurUnitaire),
       'Site': i.emplacement,
-      'Nom Abrégé': i.nomAbrege,
-      'Groupe Client': i.groupeClient,
-      'Groupe Prod': i.genProdPostingGroup,
-      'Alerte': isLowStock(i) ? 'Stock Bas' : 'Normal',
+      'Nom abrégé': i.nomAbrege,
+      'groupeclient': i.groupeClient,
+      'Gen_ Prod_ Posting Group': i.genProdPostingGroup,
+      'Encours': i.encours ?? 0,
     }))
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.json_to_sheet(rows)
@@ -120,7 +120,7 @@ export default function StockPage() {
           {[
             { label: 'Total Articles', val: stats.total.toLocaleString(), color: 'primary', icon: 'element-11' },
             { label: 'Stock Bas', val: stats.lowStock.toLocaleString(), color: 'danger', icon: 'warning-2' },
-            { label: 'Catégories', val: stats.nbCategories.toString(), color: 'info', icon: 'category' },
+            { label: 'groupeitem', val: stats.nbCategories.toString(), color: 'info', icon: 'category' },
             { label: 'Valeur Totale', val: `${(stats.totalValue / 1e6).toFixed(2)}M DT`, color: 'success', icon: 'dollar' },
           ].map(s => (
             <div key={s.label} className='d-flex align-items-center gap-2 bg-light-subtle rounded px-4 py-2'>
@@ -144,7 +144,7 @@ export default function StockPage() {
             <input
               type='text'
               className='form-control form-control-solid w-250px ps-14'
-              placeholder='Réf, désignation, site, client...'
+              placeholder='No_, Description, Site, groupeitem...'
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
@@ -228,16 +228,16 @@ export default function StockPage() {
           <table className='table align-middle table-row-dashed table-hover fs-8 gy-2'>
             <thead>
               <tr className='text-start text-muted fw-bold fs-7 text-uppercase gs-0'>
-                <th className='ps-4 cursor-pointer user-select-none' onClick={() => handleSort('dateStock')}>Date <SortIcon field='dateStock' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('reference')}>Référence <SortIcon field='reference' /></th>
-                <th className='cursor-pointer user-select-none min-w-150px' onClick={() => handleSort('designation')}>Désignation <SortIcon field='designation' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('genProdPostingGroup')}>Groupe Prod <SortIcon field='genProdPostingGroup' /></th>
+                <th className='ps-4 cursor-pointer user-select-none' onClick={() => handleSort('dateStock')}>datestock <SortIcon field='dateStock' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('reference')}>No_ <SortIcon field='reference' /></th>
+                <th className='cursor-pointer user-select-none min-w-150px' onClick={() => handleSort('designation')}>Description <SortIcon field='designation' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('genProdPostingGroup')}>Gen_ Prod_ Posting Group <SortIcon field='genProdPostingGroup' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('quantite')}>Quantité <SortIcon field='quantite' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('valeurUnitaire')}>Coût Unit. <SortIcon field='valeurUnitaire' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('valeurUnitaire')}>Cout <SortIcon field='valeurUnitaire' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('valeurTotale')}>Valeur Totale <SortIcon field='valeurTotale' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('emplacement')}>Site <SortIcon field='emplacement' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('nomAbrege')}>Abrégé <SortIcon field='nomAbrege' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('categorie')}>Catégorie <SortIcon field='categorie' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('nomAbrege')}>Nom abrégé <SortIcon field='nomAbrege' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('categorie')}>groupeitem <SortIcon field='categorie' /></th>
                 <th className='text-end pe-4'>Actions</th>
               </tr>
             </thead>
@@ -331,16 +331,16 @@ export default function StockPage() {
           {selectedItem && (
             <div className='row g-4'>
               {[
-                { label: 'Référence', val: selectedItem.reference },
-                { label: 'Date Stock', val: selectedItem.dateStock ? String(selectedItem.dateStock).slice(0, 10) : '—' },
-                { label: 'Catégorie', val: <span className='badge badge-light-info'>{selectedItem.categorie || '—'}</span> },
+                { label: 'No_', val: selectedItem.reference },
+                { label: 'datestock', val: selectedItem.dateStock ? String(selectedItem.dateStock).slice(0, 10) : '—' },
+                { label: 'groupeitem', val: <span className='badge badge-light-info'>{selectedItem.categorie || '—'}</span> },
                 { label: 'Site', val: selectedItem.emplacement || '—' },
                 { label: 'Quantité', val: <span className={`fw-bolder text-${isLowStock(selectedItem) ? 'danger' : 'success'}`}>{Number(selectedItem.quantite).toLocaleString()}</span> },
-                { label: 'Coût Unitaire', val: `${Number(selectedItem.valeurUnitaire).toFixed(3)} DT` },
-                { label: 'Valeur Globale', val: `${(Number(selectedItem.valeurTotale) || Number(selectedItem.quantite) * Number(selectedItem.valeurUnitaire)).toLocaleString('fr-TN', { minimumFractionDigits: 2 })} DT` },
-                { label: 'Groupe Prod', val: selectedItem.genProdPostingGroup || '—' },
-                { label: 'Nom Abrégé', val: selectedItem.nomAbrege || '—' },
-                { label: 'Groupe Client', val: selectedItem.groupeClient || '—' },
+                { label: 'Cout', val: `${Number(selectedItem.valeurUnitaire).toFixed(3)} DT` },
+                { label: 'Valeur Totale', val: `${(Number(selectedItem.valeurTotale) || Number(selectedItem.quantite) * Number(selectedItem.valeurUnitaire)).toLocaleString('fr-TN', { minimumFractionDigits: 2 })} DT` },
+                { label: 'Gen_ Prod_ Posting Group', val: selectedItem.genProdPostingGroup || '—' },
+                { label: 'Nom abrégé', val: selectedItem.nomAbrege || '—' },
+                { label: 'groupeclient', val: selectedItem.groupeClient || '—' },
                 { label: 'Encours', val: selectedItem.encours ?? '—' },
                 { label: 'Niveau Stock', val: isLowStock(selectedItem) ? <span className='badge badge-light-danger'>⚠ Stock Bas</span> : <span className='badge badge-light-success'>✓ Normal</span> },
               ].map(({ label, val }) => (
