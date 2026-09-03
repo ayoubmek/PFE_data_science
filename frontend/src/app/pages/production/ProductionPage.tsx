@@ -12,6 +12,9 @@ export default function ProductionPage() {
   const [loading, setLoading] = useState(globalCachedOrders.length === 0)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [siteFilter, setSiteFilter] = useState('ALL')
+  const [scrapFilter, setScrapFilter] = useState('ALL')
+  const [volumeFilter, setVolumeFilter] = useState('ALL')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [sortField, setSortField] = useState('dateDebut')
@@ -52,9 +55,24 @@ export default function ProductionPage() {
   }
 
   useEffect(() => { fetchOrders() }, [])
-  useEffect(() => { setCurrentPage(1) }, [searchTerm, statusFilter, dateFrom, dateTo, sortField, sortDir, rowsPerPage])
+  useEffect(() => { setCurrentPage(1) }, [searchTerm, statusFilter, siteFilter, scrapFilter, volumeFilter, dateFrom, dateTo, sortField, sortDir, rowsPerPage])
 
   const workshops = useMemo(() => ['ALL', ...Array.from(new Set(orders.map(o => o.machineNom).filter(Boolean)))], [orders])
+  const sites = useMemo(() => ['ALL', ...Array.from(new Set(orders.map(o => o.responsable).filter(Boolean)))], [orders])
+
+  const getWorkshopLabel = (code: string) => {
+    switch (code) {
+      case 'TN1-INJE': return 'TN1-INJE — Injection Tunisie 1'
+      case 'TN1-ASSE': return 'TN1-ASSE — Assemblage Tunisie 1'
+      case 'TN2-INJ':  return 'TN2-INJ — Injection Tunisie 2'
+      case 'TN2-ASSE': return 'TN2-ASSE — Assemblage Tunisie 2'
+      case 'TN1-MO':   return 'TN1-MO — Moules & Outillage Tunisie'
+      case 'CZA':      return 'CZA — Assemblage Brno (Rép. Tchèque)'
+      case 'CZM':      return 'CZM — Moulage Brno (Rép. Tchèque)'
+      case 'CZQ':      return 'CZQ — Contrôle Qualité Brno'
+      default: return code
+    }
+  }
 
   const handleSort = (field: string) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -72,9 +90,16 @@ export default function ProductionPage() {
       const s = searchTerm.toLowerCase()
       const matchSearch = !s || o.code?.toLowerCase().includes(s) || o.itemNo?.toLowerCase().includes(s) || o.articleNom?.toLowerCase().includes(s) || o.responsable?.toLowerCase().includes(s) || o.machineCode?.toLowerCase().includes(s)
       const matchWorkshop = statusFilter === 'ALL' || o.machineNom === statusFilter
+      const matchSite = siteFilter === 'ALL' || o.responsable === siteFilter
+      const matchScrap = scrapFilter === 'ALL' || (scrapFilter === 'WITH_SCRAP' ? (o.scrapQuantity > 0) : (o.scrapQuantity === 0))
+      const matchVolume = volumeFilter === 'ALL' || (
+        volumeFilter === 'HIGH' ? (o.quantiteProduite >= 10000) :
+        volumeFilter === 'MEDIUM' ? (o.quantiteProduite >= 1000 && o.quantiteProduite < 10000) :
+        (o.quantiteProduite < 1000)
+      )
       const matchFrom = !dateFrom || (o.dateDebut && o.dateDebut >= dateFrom)
       const matchTo = !dateTo || (o.dateDebut && o.dateDebut <= dateTo)
-      return matchSearch && matchWorkshop && matchFrom && matchTo
+      return matchSearch && matchWorkshop && matchSite && matchScrap && matchVolume && matchFrom && matchTo
     })
     result.sort((a, b) => {
       const va = a[sortField] ?? '', vb = b[sortField] ?? ''
@@ -82,11 +107,31 @@ export default function ProductionPage() {
       return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va))
     })
     return result
-  }, [orders, searchTerm, statusFilter, dateFrom, dateTo, sortField, sortDir])
+  }, [orders, searchTerm, statusFilter, siteFilter, scrapFilter, volumeFilter, dateFrom, dateTo, sortField, sortDir])
 
   const totalPages = Math.ceil(filteredOrders.length / rowsPerPage) || 1
   const start = (currentPage - 1) * rowsPerPage
   const currentOrders = filteredOrders.slice(start, start + rowsPerPage)
+
+  const resetFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('ALL')
+    setSiteFilter('ALL')
+    setScrapFilter('ALL')
+    setVolumeFilter('ALL')
+    setDateFrom('')
+    setDateTo('')
+  }
+
+  const setYearPreset = (year: string) => {
+    if (year === 'ALL') {
+      setDateFrom('')
+      setDateTo('')
+    } else {
+      setDateFrom(`${year}-01-01`)
+      setDateTo(`${year}-12-31`)
+    }
+  }
 
   const stats = useMemo(() => {
     const total = orders.length
@@ -103,7 +148,23 @@ export default function ProductionPage() {
     }
   }, [orders])
 
-  const activeFilters = [searchTerm, statusFilter !== 'ALL', dateFrom, dateTo].filter(Boolean).length
+  const activeFilters = [
+    searchTerm,
+    statusFilter !== 'ALL',
+    siteFilter !== 'ALL',
+    scrapFilter !== 'ALL',
+    volumeFilter !== 'ALL',
+    dateFrom,
+    dateTo
+  ].filter(Boolean).length
+
+  const filteredStats = useMemo(() => {
+    const total = filteredOrders.length
+    const totalOutput = filteredOrders.reduce((s, o) => s + (Number(o.quantiteProduite) || 0), 0)
+    const totalScrap = filteredOrders.reduce((s, o) => s + (Number(o.scrapQuantity) || 0), 0)
+    const totalRunTime = Math.round(filteredOrders.reduce((s, o) => s + (Number(o.runTime) || 0), 0) * 10) / 10
+    return { total, totalOutput, totalScrap, totalRunTime }
+  }, [filteredOrders])
 
   const exportExcel = () => {
     const rows = filteredOrders.map(o => ({
@@ -191,12 +252,7 @@ export default function ProductionPage() {
             <button
               type='button'
               className='btn btn-sm btn-light'
-              onClick={() => {
-                setSearchTerm('')
-                setStatusFilter('ALL')
-                setDateFrom('')
-                setDateTo('')
-              }}
+              onClick={resetFilters}
             >
               <KTIcon iconName='cross-circle' className='fs-3 me-1' />
               Réinitialiser
@@ -211,41 +267,150 @@ export default function ProductionPage() {
       </div>
 
       {showFilters && (
-        <div className='card-header border-0 pt-0 pb-3'>
-          <div className='d-flex flex-wrap gap-4 align-items-end bg-light rounded p-4 w-100'>
-            <div>
-              <label className='form-label fs-7 fw-bold text-gray-600'>Work Center No_</label>
-              <select
-                className='form-select form-select-solid form-select-sm'
-                style={{ width: 180 }}
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-              >
-                {workshops.map(w => (
-                  <option key={w} value={w}>{w === 'ALL' ? 'Tous les Ateliers' : w}</option>
+        <div className='card-header border-0 pt-0 pb-4'>
+          <div className='bg-light-subtle rounded p-5 w-100 border border-gray-300'>
+            {/* Header avec sélecteur rapide d'année */}
+            <div className='d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom'>
+              <div className='d-flex align-items-center gap-2'>
+                <KTIcon iconName='setting-4' className='fs-2 text-primary' />
+                <span className='fw-bolder fs-6 text-gray-800'>Filtres Décisionnels de Production</span>
+                <span className='badge badge-light-primary fw-bold fs-8 ms-2'>Mode Responsable d'Atelier</span>
+              </div>
+              <div className='d-flex align-items-center gap-2 mt-2 mt-md-0'>
+                <span className='text-muted fs-8 fw-semibold me-1'>Période rapide :</span>
+                {['ALL', '2026', '2025', '2024'].map(y => (
+                  <button
+                    key={y}
+                    type='button'
+                    className={`btn btn-xs fw-bold ${(!dateFrom && y === 'ALL') || (dateFrom.startsWith(y)) ? 'btn-primary' : 'btn-light'}`}
+                    onClick={() => setYearPreset(y)}
+                  >
+                    {y === 'ALL' ? 'Toutes' : y}
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
-            <div>
-              <label className='form-label fs-7 fw-bold text-gray-600'>Date début — de</label>
-              <input
-                type='date'
-                className='form-control form-control-solid form-control-sm'
-                value={dateFrom}
-                onChange={e => setDateFrom(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className='form-label fs-7 fw-bold text-gray-600'>Date début — à</label>
-              <input
-                type='date'
-                className='form-control form-control-solid form-control-sm'
-                value={dateTo}
-                onChange={e => setDateTo(e.target.value)}
-              />
-            </div>
-            <div className='ms-auto d-flex align-items-end'>
-              <span className='text-muted fs-7'><strong className='text-primary'>{filteredOrders.length}</strong> résultat(s)</span>
+
+            {/* Grille de 4 filtres principaux */}
+            <div className='row g-4'>
+              {/* 1. Atelier */}
+              <div className='col-lg-3 col-md-6'>
+                <label className='form-label fs-7 fw-bold text-gray-700'>
+                  <KTIcon iconName='abstract-26' className='fs-6 me-1 text-primary' />
+                  Work Center No_ (Atelier)
+                </label>
+                <select
+                  className='form-select form-select-solid form-select-sm'
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                >
+                  <option value='ALL'>Tous les Ateliers</option>
+                  {workshops.filter(w => w !== 'ALL').map(w => (
+                    <option key={w} value={w}>{getWorkshopLabel(w)}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 2. Site */}
+              <div className='col-lg-3 col-md-6'>
+                <label className='form-label fs-7 fw-bold text-gray-700'>
+                  <KTIcon iconName='geolocation' className='fs-6 me-1 text-warning' />
+                  Data Base (Site Industriel)
+                </label>
+                <select
+                  className='form-select form-select-solid form-select-sm'
+                  value={siteFilter}
+                  onChange={e => setSiteFilter(e.target.value)}
+                >
+                  <option value='ALL'>Tous les Sites</option>
+                  {sites.filter(s => s !== 'ALL').map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 3. Contrôle Qualité / Rebut */}
+              <div className='col-lg-3 col-md-6'>
+                <label className='form-label fs-7 fw-bold text-gray-700'>
+                  <KTIcon iconName='cross-circle' className='fs-6 me-1 text-danger' />
+                  Contrôle Qualité (Rebut / Scrap)
+                </label>
+                <select
+                  className='form-select form-select-solid form-select-sm'
+                  value={scrapFilter}
+                  onChange={e => setScrapFilter(e.target.value)}
+                >
+                  <option value='ALL'>Tous les ordres (Rebut et Conforme)</option>
+                  <option value='WITH_SCRAP'>🚨 Avec Rebut uniquement (Scrap &gt; 0)</option>
+                  <option value='ZERO_SCRAP'>✅ 100% Conformes (Scrap = 0)</option>
+                </select>
+              </div>
+
+              {/* 4. Taille de la Série */}
+              <div className='col-lg-3 col-md-6'>
+                <label className='form-label fs-7 fw-bold text-gray-700'>
+                  <KTIcon iconName='chart-line-star' className='fs-6 me-1 text-success' />
+                  Taille de Série (Output Quantity)
+                </label>
+                <select
+                  className='form-select form-select-solid form-select-sm'
+                  value={volumeFilter}
+                  onChange={e => setVolumeFilter(e.target.value)}
+                >
+                  <option value='ALL'>Toutes les tailles de série</option>
+                  <option value='HIGH'>🚀 Grandes Séries (&gt; 10 000 pièces)</option>
+                  <option value='MEDIUM'>⚙️ Séries Moyennes (1 000 à 10 000 pièces)</option>
+                  <option value='LOW'>📦 Petits Lots (&lt; 1 000 pièces)</option>
+                </select>
+              </div>
+
+              {/* 5. Date From / To */}
+              <div className='col-lg-6 col-md-12'>
+                <label className='form-label fs-7 fw-bold text-gray-700'>
+                  <KTIcon iconName='calendar' className='fs-6 me-1 text-info' />
+                  Posting Date (Date d'Atelier) — Période
+                </label>
+                <div className='d-flex gap-2 align-items-center'>
+                  <input
+                    type='date'
+                    className='form-control form-control-solid form-control-sm'
+                    placeholder='Date début'
+                    value={dateFrom}
+                    onChange={e => setDateFrom(e.target.value)}
+                  />
+                  <span className='text-muted fs-7'>à</span>
+                  <input
+                    type='date'
+                    className='form-control form-control-solid form-control-sm'
+                    placeholder='Date fin'
+                    value={dateTo}
+                    onChange={e => setDateTo(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* 6. Barre de synthèse instantanée & Bouton Réinitialiser */}
+              <div className='col-lg-6 col-md-12 d-flex align-items-end justify-content-lg-end justify-content-start flex-wrap gap-3'>
+                <div className='bg-body rounded px-4 py-2 border d-flex gap-3 align-items-center'>
+                  <span className='fs-8 text-muted fw-semibold'>Résultats filtrés :</span>
+                  <strong className='text-primary fs-7'>{filteredStats.total.toLocaleString()} OFs</strong>
+                  <span className='text-gray-300'>|</span>
+                  <strong className='text-success fs-7'>{filteredStats.totalOutput.toLocaleString()} u</strong>
+                  <span className='text-gray-300'>|</span>
+                  <strong className={filteredStats.totalScrap > 0 ? 'text-danger fs-7' : 'text-muted fs-7'}>
+                    {filteredStats.totalScrap.toLocaleString()} rebuts
+                  </strong>
+                </div>
+                <button
+                  type='button'
+                  className='btn btn-sm btn-light-danger'
+                  onClick={resetFilters}
+                  title='Effacer tous les critères'
+                >
+                  <KTIcon iconName='arrows-circle' className='fs-4 me-1' />
+                  Réinitialiser
+                </button>
+              </div>
             </div>
           </div>
         </div>
