@@ -49,6 +49,7 @@ out/
 *.db
 *.sqlite
 *.sqlite3
+*.bak
 
 # Compiled Python
 *.pyc
