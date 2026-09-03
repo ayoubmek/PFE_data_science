@@ -309,7 +309,7 @@ export default function ProductionPage() {
                       </span>
                     </td>
                     <td className='text-gray-700 fw-semibold'>
-                      {o.runTime > 0 ? `${o.runTime} h` : '—'}
+                      {o.runTime > 0 ? `${o.runTime} h` : '0 h'}
                     </td>
                     <td>
                       <span className='badge badge-light-info fw-bold'>{o.machineNom || 'Atelier'}</span>
