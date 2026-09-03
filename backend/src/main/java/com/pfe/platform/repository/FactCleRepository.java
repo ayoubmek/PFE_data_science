@@ -133,4 +133,30 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
         FROM dbo.FACT_ILE f WITH (NOLOCK)
         """, nativeQuery = true)
     List<Object[]> findStockMovementsFromDWH();
+
+    @Query(value = """
+        SELECT 
+            ISNULL(NULLIF(LTRIM(RTRIM(s.[groupeitem])), ''), 'Autres') AS groupe,
+            COUNT(*) AS nbArticles,
+            CAST(SUM(s.[Quantité]) AS FLOAT) AS totalQuantite,
+            CAST(SUM(s.[Quantité] * s.[Cout]) AS FLOAT) AS totalValeur
+        FROM dbo.ASTOCKDATE s WITH (NOLOCK)
+        WHERE s.[datestock] = '2026-03-28' AND s.[groupeitem] IS NOT NULL
+        GROUP BY s.[groupeitem]
+        ORDER BY SUM(s.[Quantité] * s.[Cout]) DESC
+        """, nativeQuery = true)
+    List<Object[]> findStockDistributionByGroup();
+
+    @Query(value = """
+        SELECT 
+            ISNULL(NULLIF(LTRIM(RTRIM(s.[Site])), ''), 'Principal') AS site,
+            COUNT(*) AS nbArticles,
+            CAST(SUM(s.[Quantité]) AS FLOAT) AS totalQuantite,
+            CAST(SUM(s.[Quantité] * s.[Cout]) AS FLOAT) AS totalValeur
+        FROM dbo.ASTOCKDATE s WITH (NOLOCK)
+        WHERE s.[datestock] = '2026-03-28' AND s.[Site] IS NOT NULL
+        GROUP BY s.[Site]
+        ORDER BY SUM(s.[Quantité] * s.[Cout]) DESC
+        """, nativeQuery = true)
+    List<Object[]> findStockDistributionBySite();
 }
