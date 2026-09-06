@@ -116,9 +116,8 @@ public class AiCopilotController {
 
         return Map.of(
             "intent", "GENERAL",
-            "reply", "Bonjour ! 👋 Je suis votre assistant décisionnel **Nexora IA**, connecté en continu aux données de votre Data Warehouse (`dbDWH`).\n\n" +
-                     "Je surveille **319 machines** (257 en Tunisie et 62 à Brno) et plus de **876 000 opérations de fabrication**.\n\n" +
-                     "Posez-moi une question sur le rendement des presses, les articles sous seuil critique ou les modèles prédictifs !",
+            "reply", "Le parc comprend **319 machines** et plus de **876 000 opérations** d'atelier enregistrées dans `dbDWH`.\n\n" +
+                     "Sélectionnez une requête ou posez votre question sur les rendements, les stocks critiques ou le TRS usine.",
             "sources", List.of("dbDWH Consolidé"),
             "suggestions", suggestions
         );

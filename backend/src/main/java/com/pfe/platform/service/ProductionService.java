@@ -141,7 +141,16 @@ public class ProductionService {
             String machineName = r[1] != null && !r[1].toString().trim().isEmpty() ? r[1].toString().trim() : machineCode;
             String workCenter  = r[2] != null ? r[2].toString().trim() : "Atelier";
             String family      = r[3] != null ? r[3].toString().trim() : "Standard";
-            String site        = r[4] != null ? r[4].toString().trim() : "Principal";
+            String site        = r[4] != null ? r[4].toString().trim() : "Kondar";
+            if (site.equalsIgnoreCase("Principal") || site.equalsIgnoreCase("Tunisie")) {
+                if (machineCode.startsWith("TN2") || workCenter.startsWith("TN2")) {
+                    site = "Sousse";
+                } else if (machineCode.startsWith("CZ") || workCenter.startsWith("CZ")) {
+                    site = "Brno";
+                } else {
+                    site = "Kondar";
+                }
+            }
             long opCount       = r[5] != null ? ((Number) r[5]).longValue() : 0;
             double output      = r[6] != null ? ((Number) r[6]).doubleValue() : 0;
             double scrap       = r[7] != null ? ((Number) r[7]).doubleValue() : 0;
@@ -156,7 +165,7 @@ public class ProductionService {
             row.put("nom", machineName);
             row.put("workCenter", workCenter);
             row.put("family", family);
-            row.put("emplacement", site.equalsIgnoreCase("CZA") ? "Brno" : "Tunisie");
+            row.put("emplacement", site);
             row.put("tauxRendement", efficiency);
             row.put("totalOutput", output);
             row.put("totalScrap", scrap);

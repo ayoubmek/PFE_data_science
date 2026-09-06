@@ -37,10 +37,7 @@ const DEFAULT_SUGGESTIONS = [
 const INITIAL_MESSAGE: NexoraMessage = {
   id: 'welcome',
   sender: 'bot',
-  text: `### Module Décisionnel
-Bonjour. Vous pouvez interroger en direct les indicateurs de performance des ateliers et l'état des stocks.
-
-Sélectionnez une requête ou saisissez votre question ci-dessous :`,
+  text: 'Sélectionnez une requête ou saisissez votre question :',
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   suggestions: DEFAULT_SUGGESTIONS
 }

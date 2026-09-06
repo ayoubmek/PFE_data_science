@@ -60,15 +60,16 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
     List<Object[]> findRecentAlertOfs();
 
     @Query(value = """
-        SELECT TOP 30
+        SELECT
             CAST(f.[Posting Date] AS DATE) AS date,
             COUNT(*) AS nb_operations,
-            SUM(f.[Output Quantity]) AS total_output,
-            SUM(f.[Scrap Quantity]) AS total_scrap,
-            SUM(f.[Run Time]) AS total_run_time
-        FROM (SELECT TOP 5000 * FROM dbo.FACT_CLE WITH (NOLOCK) WHERE [Output Quantity] > 0) f
+            SUM(CAST(f.[Output Quantity] AS FLOAT)) AS total_output,
+            SUM(CAST(f.[Scrap Quantity] AS FLOAT)) AS total_scrap,
+            SUM(CAST(f.[Run Time] AS FLOAT)) AS total_run_time
+        FROM dbo.FACT_CLE f WITH (NOLOCK)
+        WHERE f.[Posting Date] >= '2026-03-14' AND f.[Posting Date] <= '2026-03-29' AND f.[Output Quantity] > 0
         GROUP BY CAST(f.[Posting Date] AS DATE)
-        ORDER BY CAST(f.[Posting Date] AS DATE) DESC
+        ORDER BY CAST(f.[Posting Date] AS DATE) ASC
         """, nativeQuery = true)
     List<Object[]> findDailyStats();
 
@@ -92,7 +93,11 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
             ISNULL(NULLIF(LTRIM(RTRIM(mc.[Name])), ''), mc.[No_]) AS machineName,
             ISNULL(NULLIF(LTRIM(RTRIM(mc.[Work Center No_])), ''), 'Atelier Standard') AS workCenter,
             ISNULL(NULLIF(LTRIM(RTRIM(mc.[Machine Family])), ''), 'Standard') AS family,
-            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Database])), ''), 'Principal') AS site,
+            CASE 
+                WHEN mc.[Database] = 'Brno' OR mc.[No_] LIKE 'CZ%' OR mc.[Work Center No_] LIKE 'CZ%' THEN 'Brno'
+                WHEN mc.[No_] LIKE 'TN2%' OR mc.[Work Center No_] LIKE 'TN2%' OR mc.[Location Code] = 'S-PROD' THEN 'Sousse'
+                ELSE 'Kondar'
+            END AS site,
             12 AS operationCount,
             CAST(ISNULL(mc.[Capacity], 2500) * 8 AS FLOAT) AS totalOutput,
             0 AS totalScrap,

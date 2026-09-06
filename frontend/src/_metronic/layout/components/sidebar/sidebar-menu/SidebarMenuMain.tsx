@@ -104,8 +104,16 @@ const SidebarMenuMain = () => {
       <SidebarMenuItem
         to='/data-science'
         icon='technology'
-        title='Prévisions Production'
+        title='Prévisions IA (Prophet)'
         fontIcon='bi-cpu'
+        iconColor='#50CD89'
+      />
+
+      <SidebarMenuItem
+        to='/data-science/benchmark'
+        icon='chart-line-star'
+        title='Benchmark Modèles IA'
+        fontIcon='bi-bar-chart'
         iconColor='#009EF7'
       />
     </>

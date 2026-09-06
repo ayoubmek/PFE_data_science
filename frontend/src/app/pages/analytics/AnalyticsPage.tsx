@@ -51,10 +51,12 @@ export default function AnalyticsPage() {
   const workshops = useMemo(() => {
     const set = new Set<string>()
     machines.forEach((m) => {
-      if (m.workCenter) set.add(m.workCenter)
+      if (selectedSite === 'ALL' || m.emplacement === selectedSite) {
+        if (m.workCenter) set.add(m.workCenter)
+      }
     })
     return Array.from(set).sort()
-  }, [machines])
+  }, [machines, selectedSite])
 
   const sites = useMemo(() => {
     const set = new Set<string>()
@@ -127,7 +129,8 @@ export default function AnalyticsPage() {
   // Répartition par Site (Donut)
   const siteData = useMemo(() => {
     const map: { [key: string]: number } = {}
-    filteredMachines.forEach((m) => {
+    const dataset = selectedSite === 'ALL' ? machines : filteredMachines
+    dataset.forEach((m) => {
       const s = m.emplacement || 'Non défini'
       map[s] = (map[s] || 0) + (m.totalOutput || 0)
     })
@@ -135,7 +138,7 @@ export default function AnalyticsPage() {
       labels: Object.keys(map),
       series: Object.values(map)
     }
-  }, [filteredMachines])
+  }, [machines, filteredMachines, selectedSite])
 
   // Top 8 Machines par Volume
   const top8Output = useMemo(() => {
@@ -185,6 +188,15 @@ export default function AnalyticsPage() {
     }
   }
 
+  // Couleurs harmonisées et vives par site
+  const getSiteColor = (label: string) => {
+    const l = (label || '').toLowerCase()
+    if (l.includes('kondar')) return '#009EF7' // Bleu Kondar
+    if (l.includes('sousse')) return '#50CD89' // Vert Sousse
+    if (l.includes('brno')) return '#F59E0B'   // Ambre Brno
+    return '#7239EA'
+  }
+
   // Graphique 2 : Répartition par Site (Donut)
   const siteDonutOptions: any = {
     series: siteData.series.length > 0 ? siteData.series : [1],
@@ -195,7 +207,7 @@ export default function AnalyticsPage() {
         height: 290
       },
       labels: siteData.labels.length > 0 ? siteData.labels : ['Aucune donnée'],
-      colors: ['#009EF7', '#50CD89', '#7239EA', '#F1BC00'],
+      colors: siteData.labels.length > 0 ? siteData.labels.map(getSiteColor) : ['#009EF7', '#50CD89', '#F59E0B'],
       plotOptions: {
         pie: {
           donut: {
@@ -280,6 +292,61 @@ export default function AnalyticsPage() {
     }
   }
 
+  // Badge visuel et contrasté pour distinguer immédiatement chaque site
+  const renderSiteBadge = (siteName: string) => {
+    const s = (siteName || '').toLowerCase()
+    if (s.includes('kondar')) {
+      return (
+        <span
+          className='badge fw-bolder fs-8 px-3 py-2'
+          style={{
+            backgroundColor: '#E8F3FF',
+            color: '#0066CC',
+            border: '1px solid #B6D9FF'
+          }}
+        >
+          <span className='bullet bullet-dot bg-primary me-2' style={{ width: '6px', height: '6px' }}></span>
+          Kondar
+        </span>
+      )
+    }
+    if (s.includes('sousse')) {
+      return (
+        <span
+          className='badge fw-bolder fs-8 px-3 py-2'
+          style={{
+            backgroundColor: '#E8FFF3',
+            color: '#0BB783',
+            border: '1px solid #A8F0CB'
+          }}
+        >
+          <span className='bullet bullet-dot bg-success me-2' style={{ width: '6px', height: '6px' }}></span>
+          Sousse
+        </span>
+      )
+    }
+    if (s.includes('brno')) {
+      return (
+        <span
+          className='badge fw-bolder fs-8 px-3 py-2'
+          style={{
+            backgroundColor: '#FFF4E5',
+            color: '#B45309',
+            border: '1px solid #FCD34D'
+          }}
+        >
+          <span className='bullet bullet-dot bg-warning me-2' style={{ width: '6px', height: '6px' }}></span>
+          Brno
+        </span>
+      )
+    }
+    return (
+      <span className='badge badge-light-secondary text-gray-700 fw-bold fs-8 px-3 py-2 border'>
+        {siteName}
+      </span>
+    )
+  }
+
   if (loading && machines.length === 0) {
     return <PageSkeleton type='charts' />
   }
@@ -306,9 +373,12 @@ export default function AnalyticsPage() {
               <select
                 className='form-select form-select-sm form-select-solid w-140px'
                 value={selectedSite}
-                onChange={(e) => setSelectedSite(e.target.value)}
+                onChange={(e) => {
+                  setSelectedSite(e.target.value)
+                  setSelectedWorkshop('ALL')
+                }}
               >
-                <option value='ALL'>Tous les Sites</option>
+                <option value='ALL'>Tous les Sites ({sites.length})</option>
                 {sites.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
@@ -503,7 +573,7 @@ export default function AnalyticsPage() {
                           <span className='fw-bold text-gray-900 fs-7'>{w.name}</span>
                         </td>
                         <td>
-                          <span className='badge badge-light-secondary fw-semibold fs-8'>{w.site}</span>
+                          {renderSiteBadge(w.site)}
                         </td>
                         <td className='text-center text-gray-700 fw-semibold fs-7'>{w.machines}</td>
                         <td className='text-end text-gray-900 fw-bold fs-7'>{w.output.toLocaleString()} u</td>

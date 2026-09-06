@@ -13,6 +13,7 @@ const PrivateRoutes = () => {
   const MovementsPage = lazy(() => import('../pages/stock/MovementsPage'))
   const AnalyticsPage = lazy(() => import('../pages/analytics/AnalyticsPage'))
   const DataSciencePage = lazy(() => import('../pages/data-science/DataSciencePage'))
+  const DataScienceBenchmarkPage = lazy(() => import('../pages/data-science/DataScienceBenchmarkPage'))
 
   return (
     <Routes>
@@ -31,6 +32,7 @@ const PrivateRoutes = () => {
         <Route path='stock/movements' element={<SuspensedView><MovementsPage /></SuspensedView>} />
         <Route path='analytics' element={<SuspensedView><AnalyticsPage /></SuspensedView>} />
         <Route path='data-science' element={<SuspensedView><DataSciencePage /></SuspensedView>} />
+        <Route path='data-science/benchmark' element={<SuspensedView><DataScienceBenchmarkPage /></SuspensedView>} />
 
         {}
         <Route path='*' element={<Navigate to='/error/404' />} />
