@@ -300,7 +300,7 @@ const DashboardPage: FC = () => {
           max: 500000,
           labels: {
             style: { colors: '#7E8299', fontSize: '11px' },
-            formatter: (val: number) => `${Math.round(val / 1000)}k u`
+            formatter: (val: number) => `${Math.round(val / 1000)}k unités`
           }
         },
         {
@@ -310,7 +310,7 @@ const DashboardPage: FC = () => {
           max: 2500,
           labels: {
             style: { colors: '#F1416C', fontSize: '11px' },
-            formatter: (val: number) => `${Math.round(val)} u`
+            formatter: (val: number) => `${Math.round(val)} unités`
           }
         }
       ],
@@ -378,7 +378,7 @@ const DashboardPage: FC = () => {
             color='primary'
             icon='delivery'
             title='Volume Total Produit'
-            value={`${data.statistics.totalOutput.toLocaleString()} u`}
+            value={`${data.statistics.totalOutput.toLocaleString()} unités`}
             subtitle='46 810 Ordres de Fabrication exécutés'
             badgeText='Production Réelle'
             badgeColor='primary'
@@ -489,7 +489,7 @@ const DashboardPage: FC = () => {
                           </div>
                         </td>
                         <td>
-                          <span className='text-gray-900 fw-bolder'>{of.quantiteProduite.toLocaleString()} u</span>
+                          <span className='text-gray-900 fw-bolder'>{of.quantiteProduite.toLocaleString()} unités</span>
                           {of.scrapQuantity > 0 && (
                             <span className='badge badge-light-danger ms-1 fs-9'>
                               {of.scrapQuantity} reb.
@@ -561,7 +561,7 @@ const DashboardPage: FC = () => {
                         <td>
                           <span className='badge badge-light-secondary fw-bold fs-8'>{group.count} réf.</span>
                         </td>
-                        <td className='fw-bolder text-gray-900'>{group.quantity.toLocaleString()} u</td>
+                        <td className='fw-bolder text-gray-900'>{group.quantity.toLocaleString()} unités</td>
                         <td>
                           <div className='d-flex align-items-center gap-2'>
                             <span className='fw-bold text-gray-800 fs-8'>{group.percentage}%</span>
@@ -683,7 +683,7 @@ const DashboardPage: FC = () => {
                 { label: 'N° Document / OF', val: selectedOf.code },
                 { label: 'Référence Composant', val: <span className='badge badge-light-primary fw-bold'>{selectedOf.itemNo}</span> },
                 { label: 'Quantité Conforme Produite', val: <span className='fw-bolder text-success fs-6'>{selectedOf.quantiteProduite.toLocaleString()} unités</span> },
-                { label: 'Quantité Rebutée', val: selectedOf.scrapQuantity > 0 ? <span className='badge badge-light-danger fw-bold'>{selectedOf.scrapQuantity} u</span> : '0 u' },
+                { label: 'Quantité Rebutée', val: selectedOf.scrapQuantity > 0 ? <span className='badge badge-light-danger fw-bold'>{selectedOf.scrapQuantity} unités</span> : '0 unité' },
                 { label: 'Temps d\'Usinage Machine', val: `${selectedOf.runTime} h` },
                 { label: 'Centre de Charge / Atelier', val: <span className='badge badge-light-info fw-bold'>{selectedOf.machineNom}</span> },
                 { label: 'Date de Fabrication', val: selectedOf.dateDebut },

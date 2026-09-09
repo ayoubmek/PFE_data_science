@@ -5,24 +5,24 @@ participant "Spring Boot API" as Spring
 participant "FastAPI Service" as FastAPI
 database "SQL Server DB" as DB
 
-MGR -> React : Accéder à la page Data Science
+MGR -> React : Accéder aux Prévisions de Production (Prophet)
 React -> Spring : GET /api/data-science/predictions
 activate Spring
 
-Spring -> DB : Récupérer l'historique de production
+Spring -> DB : Récupérer l'historique d'atelier
 activate DB
-DB --> Spring : Données de production
+DB --> Spring : Données historiques de production
 deactivate DB
 
-Spring -> FastAPI : GET /predict/production
+Spring -> FastAPI : GET /predict/production?horizon=30
 activate FastAPI
 
-FastAPI -> FastAPI : Calcul des prévisions avec Prophet
-FastAPI --> Spring : Prévisions et métriques
+FastAPI -> FastAPI : Entraînement du modèle Prophet & Calcul des incertitudes
+FastAPI --> Spring : Prévisions Prophet, bornes de confiance et métriques
 deactivate FastAPI
 
-Spring --> React : Données de prévision
+Spring --> React : Données prédictives structurées
 deactivate Spring
 
-React --> MGR : Afficher courbes comparatives
+React --> MGR : Afficher courbes interactives et recommandations opérationnelles
 @enduml

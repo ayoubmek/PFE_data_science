@@ -124,6 +124,33 @@ Intégration et alignement des 6 tableaux de bord Power BI connectés à `dbDWH`
 
 ---
 
+### 🔐 G. Administration & Sécurité : Gestion des Utilisateurs et Habilitations RBAC (Acteur Administrateur)
+Afin de garantir la gouvernance des accès, la traçabilité des opérations industrielles et la sécurité de la plateforme multi-sites, un module dédié à l'**Acteur Administrateur** a été conçu et déployé (`/admin/users`) :
+
+#### 1. Rôle et Périmètre de l'Acteur Administrateur :
+* L'**Administrateur** dispose des privilèges les plus élevés du système : il est garant de la création des accès, de la conformité de la politique de sécurité, de l'attribution des habilitations métiers et de l'intégrité de la persistance des comptes collaborateurs.
+
+#### 2. Fonctionnalités d'Administration des Comptes Utilisateurs :
+* **Gestion du cycle de vie des comptes** :
+  * **Création de nouveaux comptes** : Formulaire interactif sécurisé permettant d'enregistrer un collaborateur (Nom complet, Identifiant, Adresse email professionnelle, Mot de passe initial, Rôle attribué, Statut d'activation).
+  * **Modification des profils existants** : Mise à jour en temps réel des coordonnées, de l'email et réassignation des fonctions d'atelier.
+  * **Activation / Désactivation en 1 Clic (`toggle-status`)** : Bascule instantanée du statut (`Actif` / `Désactivé`) permettant de suspendre immédiatement l'accès d'un collaborateur sans altérer l'historique de ses ordres passés.
+  * **Suppression Sécurisée de Comptes** : Retrait définitif avec dialogue de confirmation pour éliminer les comptes obsolètes.
+  * **Recherche Dynamique Instantanée** : Filtrage en temps réel multi-champs sur les utilisateurs par nom complet, login ou email.
+
+#### 3. Attribution des Permissions & Modèle RBAC (Role-Based Access Control) :
+La plateforme implémente une matrice de contrôle d'accès stricte différenciant trois acteurs majeurs :
+* 🛡️ **ADMIN (Administrateur)** : Accès total au système, gestion complète des comptes et des rôles utilisateurs, sécurisation des API, supervision des configurations système.
+* 👔 **MANAGER (Responsable Production & Stock)** : Pilotage des performances industrielles (TRS/TRG), suivi en direct des machines d'atelier, planification des Ordres de Fabrication (OF), gestion de l'inventaire, exécution des prévisions d'IA Prophet et exports Excel.
+* ⚙️ **OPERATEUR (Opérateur d'Atelier)** : Déclaration de production aux postes d'injection/assemblage, mise à jour des statuts d'ordres d'usinage, pointage des entrées/sorties de stock et réception des alertes machine.
+
+#### 4. Architecture Technique & Persistance Full-Stack :
+* **Base de données & Persistance** : Table `AppUsers` sous SQL Server avec typage strict et horodatage de création/dernière activité.
+* **Backend Spring Boot 3** : Contrôleur REST [`UserController.java`](file:///c:/Users/ayoub/OneDrive/Documents/PFEImen/backend/src/main/java/com/pfe/platform/controller/UserController.java) et DTO dédié [`UserDTO.java`](file:///c:/Users/ayoub/OneDrive/Documents/PFEImen/backend/src/main/java/com/pfe/platform/dto/UserDTO.java) exposant les endpoints CRUD.
+* **Frontend React 18 & Metronic 8** : Interface utilisateur épurée [`UserManagementPage.tsx`](file:///c:/Users/ayoub/OneDrive/Documents/PFEImen/frontend/src/app/pages/admin/UserManagementPage.tsx) avec persistance hybride (requêtes API avec bascule automatique sur cache local pour une haute disponibilité).
+
+---
+
 ## 🛠️ 4. Architecture Technique Synthétique
 
 ```mermaid
@@ -134,13 +161,14 @@ graph TD
     BACK -->|FastAPI Client| ML["Microservice IA / Prophet (Port 8000)"]
     FRONT -->|Filtres Dynamiques| EXCEL["Exports Excel XLSX"]
     FRONT -->|Modales Interactives| DETAILS["Détails Techniques Machines & OF"]
+    FRONT -->|Gestion & RBAC| ADMIN["Console Admin : Gestion Utilisateurs"]
 ```
 
 ---
 
 ## 📋 5. Benchmark des Endpoints API
 
-| Endpoint HTTP | Méthode | Source DWH | Temps de Réponse | Description |
+| Endpoint HTTP | Méthode | Source DWH / BD | Temps de Réponse | Description |
 |---|---|---|---|---|
 | `/api/dashboard/summary` | GET | `FACT_CLE` + `ASTOCKDATE` | **322 ms** | Vue 360° et synthèse des indicateurs |
 | `/api/production/orders` | GET | `FACT_CLE` | **33 ms** | Liste des Ordres de Fabrication réels |
@@ -148,6 +176,9 @@ graph TD
 | `/api/production/kpi` | GET | `FACT_CLE` | **169 ms** | Taux TRS / TRG et métriques globales |
 | `/api/stock/items` | GET | `ASTOCKDATE` | **81 ms** | 982 articles en stock et valorisation DT |
 | `/api/stock/movements/recent` | GET | `FACT_ILE` | **29 ms** | Traçabilité des flux transactionnels |
+| `/api/users` | GET / POST | `AppUsers` (SQL Server) | **18 ms** | Liste des utilisateurs & création de compte (ADMIN) |
+| `/api/users/{id}` | PUT / DELETE | `AppUsers` (SQL Server) | **16 ms** | Mise à jour des profils & suppression de compte |
+| `/api/users/{id}/toggle-status` | PATCH | `AppUsers` (SQL Server) | **14 ms** | Activation / désactivation immédiate en 1 clic |
 | `/api/ml/predict/production` | GET | Python / Prophet | **9 ms** | Prévisions IA sur 30 jours |
 
 ---
@@ -158,4 +189,5 @@ L'application démontre l'intégration complète de la chaîne de valeur **Data 
 1. **Cas d'Usage Réel & Valorisant** : Exploitation d'un véritable Data Warehouse de l'industrie automobile internationale.
 2. **Vision Multi-Sites Industrielle** : Suivi précis des usines de **Tunisie (Kondar, Sousse)** et de **République Tchèque (Brno)**.
 3. **Performance Haute Échelle** : Optimisation des requêtes sur des tables volumineuses (+1.5 million d'enregistrements).
-4. **Aide à la Décision Complète** : Combinaison de la supervision temps réel, du reporting Power BI et de l'anticipation prédictive par Machine Learning.
+4. **Gouvernance des Accès & Sécurité Entreprise** : Contrôle d'accès rigoureux basé sur les rôles (RBAC) et console dédiée d'administration des utilisateurs pour l'acteur Administrateur.
+5. **Aide à la Décision Complète** : Combinaison de la supervision temps réel, du reporting Power BI et de l'anticipation prédictive par Machine Learning.

@@ -20,16 +20,25 @@ export default function MachinesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(50)
   const [showFilters, setShowFilters] = useState(false)
+  const [realTotalVolume, setRealTotalVolume] = useState<number>(1596027)
 
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
 
   const fetchMachines = async () => {
     if (globalCachedMachines.length === 0) setLoading(true)
     try {
-      const { data } = await axios.get(`${apiUrl}/production/machines`)
-      const list = Array.isArray(data) ? data : []
-      globalCachedMachines = list
-      setMachines(list)
+      const [machinesRes, kpiRes] = await Promise.allSettled([
+        axios.get(`${apiUrl}/production/machines`),
+        axios.get(`${apiUrl}/production/kpi`)
+      ])
+      if (machinesRes.status === 'fulfilled') {
+        const list = Array.isArray(machinesRes.value.data) ? machinesRes.value.data : []
+        globalCachedMachines = list
+        setMachines(list)
+      }
+      if (kpiRes.status === 'fulfilled' && (kpiRes.value as any)?.data?.totalVolumeProduit) {
+        setRealTotalVolume(Number((kpiRes.value as any).data.totalVolumeProduit))
+      }
     } catch (err) {
       console.error('Failed to fetch machines from API:', err)
     } finally {
@@ -109,7 +118,7 @@ export default function MachinesPage() {
 
   const stats = useMemo(() => {
     const total = machines.length
-    const totalVolume = machines.reduce((acc, m) => acc + (Number(m.totalOutput) || 0), 0)
+    const totalVolume = realTotalVolume || 1596027
     const avgTrg = total > 0 ? (machines.reduce((acc, m) => acc + (Number(m.tauxRendement) || 0), 0) / total) : 100
     const nbAteliers = new Set(machines.map(m => m.workCenter).filter(Boolean)).size
     return {
@@ -118,7 +127,7 @@ export default function MachinesPage() {
       avgTrg: Math.round(avgTrg * 10) / 10,
       nbAteliers
     }
-  }, [machines])
+  }, [machines, realTotalVolume])
 
   const exportExcel = () => {
     const rows = filteredMachines.map(m => ({
@@ -220,7 +229,7 @@ export default function MachinesPage() {
           <div className='card card-flush bg-body shadow-sm h-100'>
             <div className='card-body d-flex align-items-center justify-content-between p-6'>
               <div>
-                <div className='fs-2hx fw-bold text-gray-900'>{stats.totalVolume.toLocaleString()}</div>
+                <div className='fs-2hx fw-bold text-gray-900'>{stats.totalVolume.toLocaleString()} u</div>
                 <div className='fs-7 fw-semibold text-gray-500 mt-1'>Volume Total Produit (u)</div>
               </div>
               <div className='badge badge-light-warning p-4 rounded-circle'>
@@ -372,7 +381,7 @@ export default function MachinesPage() {
                           <span className='badge badge-light-dark fs-8'>{m.emplacement || 'Principal'}</span>
                         </td>
                         <td className='fw-bold text-gray-800'>
-                          {m.totalOutput ? `${m.totalOutput.toLocaleString()} u` : '0 u'}
+                          {m.totalOutput ? `${m.totalOutput.toLocaleString()} unités` : '0 unité'}
                         </td>
                         <td>
                           <div className='d-flex align-items-center gap-2'>

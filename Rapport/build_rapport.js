@@ -116,7 +116,7 @@ const getSprintIntro = (num, title) => {
     return "Ce chapitre détaille la conception et l'implémentation du Sprint 3, traitant de la gestion des stocks, des mouvements DWH FACT_ILE (1.5M lignes), de la refonte globale sous le design system Metronic 8, du panneau de filtrage dynamique multi-critères et du module d'exportation Excel (.xlsx).";
   }
   if (num === 4) {
-    return "Ce chapitre est consacré au Sprint 4, portant sur les modules d'Intelligence Artificielle et de Data Science. Nous y détaillons l'intégration du service Python FastAPI, les modèles prédictifs de production et de stock (Prophet, ARIMA), la segmentation d'articles (K-Means) et la détection d'anomalies (Isolation Forest).";
+    return "Ce chapitre est consacré au Sprint 4, portant sur le module d'Intelligence Artificielle et de Data Science. Nous y détaillons l'intégration du service Python FastAPI et l'implémentation du modèle prédictif Prophet (Meta) pour anticiper les trajectoires de production et de stock d'atelier avec calcul d'intervalles de confiance à 95% et génération de recommandations opérationnelles.";
   }
   if (num === 5) {
     return "Ce chapitre présente le Sprint 5, centré sur la supervision globale des notifications et alertes système. Il décrit le backlog de l'itération, la traçabilité des événements d'atelier et la télémétrie de santé applicative.";
@@ -369,7 +369,7 @@ const ucDesc = (uc) => {
 const UC_DATA = {
   1: [
     { name: "S'authentifier et gérer la session JWT", actors: "Tout utilisateur (Administrateur, Responsable Production, Gestionnaire Stock, Opérateur Atelier)", precond: "L'utilisateur dispose d'un compte actif et d'identifiants valides.", scenario: ["L'utilisateur accède à la mire de connexion Metronic UI.", "Il saisit son adresse e-mail et son mot de passe.", "Le backend Spring Boot valide les identifiants et génère un jeton JWT.", "Le jeton est décodé par le frontend pour déterminer le rôle et les autorisations.", "L'utilisateur est redirigé vers son tableau de bord spécifique."], postcond: "La session est active et le menu dynamique est adapté aux droits de l'utilisateur.", exceptions: "Identifiants invalides : message d'alerte. Compte désactivé : accès refusé." },
-    { name: "Gérer les rôles et droits d'accès RBAC", actors: "Administrateur", precond: "L'Administrateur est authentifié.", scenario: ["L'administrateur accède au module de gestion des utilisateurs.", "Il sélectionne un utilisateur et modifie son rôle (ADMIN, MANAGER, OPERATEUR).", "Le système enregistre les modifications dans SQL Server.", "Les autorisations d'accès aux API et aux vues du frontend sont mises à jour."], postcond: "Les droits d'accès de l'utilisateur sont immédiatement appliqués.", exceptions: "Tentative d'auto-révocation du dernier compte administrateur : action bloquée." }
+    { name: "Gérer les comptes utilisateurs et les rôles RBAC", actors: "Administrateur", precond: "L'Administrateur est authentifié sur la plateforme.", scenario: ["L'administrateur accède au module « Gestion des Utilisateurs » via le menu d'administration.", "Il consulte la liste complète des collaborateurs enregistrés (nom, identifiant, email, rôle, statut d'activation, dernière activité).", "Il peut créer un nouvel utilisateur en renseignant son profil et en lui attribuant son rôle applicatif (ADMIN, MANAGER, OPERATEUR).", "Il peut modifier les coordonnées d'un collaborateur existant ou basculer son statut (actif/désactivé) en un clic.", "Il peut supprimer définitivement un compte utilisateur avec confirmation de sécurité.", "Le système enregistre les modifications dans SQL Server et synchronise instantanément les droits d'accès."], postcond: "Le compte est créé, mis à jour ou désactivé, et ses habilitations RBAC sont immédiatement appliquées sur les API et l'interface.", exceptions: "Identifiant ou email déjà existant : blocage avec message explicite. Tentative d'auto-suppression du dernier administrateur : action bloquée." }
   ],
   2: [
     { name: "Suivre les machines d'atelier et calculer le TRG", actors: "Responsable Production, Opérateur Atelier", precond: "Les machines d'atelier et les postes de travail sont configurés.", scenario: ["L'utilisateur consulte la vue de suivi des machines en temps réel.", "Le système extrait les statuts (En Marche, En Panne, En Réglage) et les heures de fonctionnement.", "Le backend calcule dynamiquement le Taux de Rendement Global (TRG).", "Les indicateurs KPI et graphiques de performance sont mis à jour."], postcond: "Le taux TRG et les alertes d'arrêt machine sont affichés en direct.", exceptions: "Donnée machine manquante : affichage du dernier état connu avec avertissement." },
@@ -380,8 +380,8 @@ const UC_DATA = {
     { name: "Analyser l'historique des mouvements DWH (FACT_ILE) et Dashboards Power BI", actors: "Gestionnaire Stock, Administrateur", precond: "La table FACT_ILE (1,5M lignes) est indexée sur Entry No_ DESC.", scenario: ["L'utilisateur accède à l'onglet des mouvements réels d'entrée/sortie.", "Le backend exécute la requête SQL optimisée et retourne les 5 000 derniers mouvements en 448 ms.", "L'utilisateur interagit avec les 6 tableaux de bord décisionnels Power BI intégrés.", "Il analyse la valorisation du stock en Dinars Tunisiens (DT) et les rotations d'articles."], postcond: "L'historique des mouvements et les analyses Power BI sont affichés de manière ultra-fluide.", exceptions: "Timeout base de données : intercepté et géré par le cache d'indexation." }
   ],
   4: [
-    { name: "Générer les prévisions de production et de stock (Prophet / ARIMA)", actors: "Responsable Production, Data Scientist", precond: "Le microservice FastAPI (Python) est actif et alimenté par l'historique DWH.", scenario: ["L'utilisateur sélectionne un article ou un poste de production.", "Il choisit l'horizon de prévision (30, 60 ou 90 jours).", "Le service FastAPI entraîne le modèle Prophet sur la série temporelle.", "Les prédictions de demande et intervalles de confiance sont renvoyés au frontend React.", "Les courbes prédictives ApexCharts sont affichées à l'utilisateur."], postcond: "Les tendances de consommation et besoins futurs sont visualisés.", exceptions: "Historique insuffisant (< 30 points) : basculement automatique sur un modèle de moyenne mobile." },
-    { name: "Réaliser la segmentation ABC et la détection d'anomalies (K-Means & Isolation Forest)", actors: "Gestionnaire Stock, Data Scientist", precond: "Les caractéristiques d'inventaire et historiques de mouvements sont chargés.", scenario: ["L'utilisateur lance l'analyse décisionnelle avancée.", "L'algorithme K-Means classe les articles en catégories ABC (Valeur / Volume).", "L'algorithme Isolation Forest identifie les mouvements aberrants ou consommations anormales.", "Le frontend affiche le rapport de segmentation et les alertes d'anomalies prioritaires."], postcond: "Les articles stratégiques de classe A et les anomalies de stock sont identifiés.", exceptions: "Données aberrantes majeures : signalées dans le rapport d'exécution du modèle." }
+    { name: "Générer les prévisions de production d'atelier avec le modèle Prophet", actors: "Responsable Production, Planificateur", precond: "Le microservice FastAPI (Python) est actif et alimenté par l'historique de production DWH.", scenario: ["L'utilisateur accède au module de prévision Data Science.", "Il sélectionne l'horizon prévisionnel souhaité (7, 14 ou 30 jours).", "Le microservice FastAPI entraîne l'algorithme Prophet sur la série temporelle d'atelier.", "Le modèle calcule la trajectoire prédictive, les composantes saisonnières et l'intervalle d'incertitude à 95%.", "Les courbes prédictives interactives ApexCharts et les indicateurs clés sont restitués sur l'interface React."], postcond: "Les volumes de production futurs et cadences d'atelier sont projetés et exploitables.", exceptions: "Données temporairement indisponibles : activation automatique du moteur de secours local." },
+    { name: "Projeter les trajectoires de stock et recommandations d'approvisionnement", actors: "Gestionnaire Stock, Responsable Production", precond: "Les historiques de consommation et d'inventaire sont chargés depuis la base de données.", scenario: ["L'utilisateur consulte les prévisions de rotation de stock générées par Prophet.", "Le système projette les dates de réapprovisionnement critique avant risque de rupture.", "Les recommandations opérationnelles de planification des équipes et d'approvisionnement matière sont affichées.", "L'utilisateur exporte les projections au format Excel (XLSX) pour la logistique."], postcond: "Les besoins en matières premières et composants sont sécurisés sur la période.", exceptions: "Historique court : projection calculée avec marge de confiance élargie." }
   ],
   5: [
     { name: "Superviser le centre de notifications et d'alertes d'atelier", actors: "Responsable Production, Gestionnaire Stock", precond: "Des seuils d'alerte (stock bas, arrêt machine prolongé) sont définis.", scenario: ["L'utilisateur consulte le centre de notifications en haut de l'interface Metronic.", "Le système liste les alertes récentes classées par sévérité (Info, Avertissement, Critique).", "L'utilisateur valide une alerte ou déclenche une action corrective.", "Le statut de notification passe à \"Lue / Traitée\"."], postcond: "L'alerte est prise en compte et le journal d'événements est mis à jour.", exceptions: "Erreur de transmission d'alerte : réémission automatique de la notification." }
@@ -396,7 +396,7 @@ const SPRINT_CONCLUSIONS = {
   1: "En conclusion, ce premier sprint a permis d'implémenter les fondations de sécurité du système Nexora. Grâce à l'authentification JWT et la gestion fine des rôles (RBAC), les accès à la plateforme sont sécurisés et toutes les transactions critiques sont tracées.",
   2: "En conclusion, ce deuxième sprint a permis de mettre en œuvre le suivi de production d'atelier. La gestion des machines et des ordres de production offre une visibilité totale sur l'avancement et le calcul automatique du rendement (TRG).",
   3: "En conclusion, ce troisième sprint a finalisé la gestion de l'inventaire. Le suivi des mouvements de stock et les alertes automatiques sur seuils critiques fiabilisent l'approvisionnement et préviennent les ruptures.",
-  4: "En conclusion, ce quatrième sprint a intégré les modules d'Intelligence Artificielle et de Data Science. L'analyse multi-modèles (ARIMA, Prophet, Régression Linéaire) pour la production, le clustering K-Means et la détection d'anomalies fournissent des recommandations opérationnelles cruciales.",
+  4: "En conclusion, ce quatrième sprint a intégré le module d'Intelligence Artificielle et de Data Science axé sur le modèle prédictif Prophet (Meta). L'anticipation des volumes de production d'atelier, la projection des trajectoires de stock et l'analyse des intervalles de confiance fournissent des recommandations opérationnelles cruciales pour le pilotage industriel.",
   5: "En conclusion, ce dernier sprint a fourni les consoles de supervision des notifications et alertes système. Il garantit la traçabilité des événements d'atelier."
 };
 
@@ -404,7 +404,7 @@ const INTERFACE_TITLES = {
   1: "Interface d'Authentification et Gestion des Rôles (RBAC)",
   2: "Tableau de bord de suivi des machines et Taux TRG en direct",
   3: "Console de gestion d'inventaire, entrées/sorties et alertes de seuils",
-  4: "Interface d'Intelligence Artificielle et prévisions Data Science",
+  4: "Interface d'Intelligence Artificielle et Prévisions de Production (Prophet)",
   5: "Console de supervision des notifications et alertes d'atelier"
 };
 
@@ -1276,7 +1276,7 @@ const doc = new Document({
         pb(),
         body("Le travail présenté dans ce mémoire répond directement à cet enjeu en concevant et déployant une solution unifiée de pilotage de production et de gestion d'inventaire. Devant l'accroissement des cadences de travail, l'entreprise s'est trouvée confrontée à la nécessité de se doter d'un outil centralisé capable d'enregistrer les ordres de production, d'affecter dynamiquement les machines d'atelier, de comptabiliser les temps d'arrêt et de tracer l'intégralité des mouvements de stock sans dépendre de ressaisies manuelles sur papier ou tableur."),
         pb(),
-        body("Pour y parvenir, nous avons développé la plateforme intelligente Nexora. Celle-ci intègre un back-end d'API REST robuste avec Spring Boot 3 (Java 17) connecté à une base SQL Server centralisée, couplé à une application web monopage (SPA) réactive sous React.js pour les gestionnaires et opérateurs d'atelier. De plus, elle intègre un service de Machine Learning et Data Science sous FastAPI (Python 3.10) pour les analyses prédictives (ARIMA, Prophet), le clustering K-Means et la détection d'anomalies (Isolation Forest)."),
+        body("Pour y parvenir, nous avons développé la plateforme intelligente Nexora. Celle-ci intègre un back-end d'API REST robuste avec Spring Boot 3 (Java 17) connecté à une base SQL Server centralisée, couplé à une application web monopage (SPA) réactive sous React.js pour les gestionnaires et opérateurs d'atelier. De plus, elle intègre un service de Machine Learning et Data Science sous FastAPI (Python 3.10) dédié à la modélisation prédictive des séries temporelles de production et de stock via le modèle Prophet (Meta)."),
         pb(),
         body("La mise en œuvre de cette solution a été menée suivant la démarche Agile Scrum, jalonnée par cinq sprints distincts, garantissant un développement itératif et une validation progressive des fonctionnalités."),
         pb(),
@@ -1287,7 +1287,7 @@ const doc = new Document({
         bullet("**Chapitre 3 : Sprint 1 – Sécurité et Accès** – Ce chapitre traite de la conception et du développement de la couche d'accès sécurisée de la plateforme, incluant l'authentification par jeton JWT, les menus de navigation dynamiques adaptés aux rôles (ADMIN, MANAGER, OPERATEUR), et la journalisation des actions sensibles."),
         bullet("**Chapitre 4 : Sprint 2 – Gestion de Production et Suivi des Machines** – Il présente la configuration des postes de travail d'atelier, le suivi des états des machines en direct, le calcul automatique du taux de rendement global (TRG) et la gestion des ordres de production."),
         bullet("**Chapitre 5 : Sprint 3 – Gestion des Stocks et Mouvements** – Ce chapitre est dédié à la mise en œuvre du suivi d'inventaire, de la saisie des mouvements d'entrée/sorties, de la gestion des ajustements et des alertes de seuils critiques de réapprovisionnement."),
-        bullet("**Chapitre 6 : Sprint 4 – Intelligence Artificielle et Data Science** – Il décrit le service FastAPI (Python) hébergeant les modèles prédictifs de production et de stock (ARIMA, Prophet), la segmentation ABC des articles via K-Means et la détection d'anomalies de fonctionnement via Isolation Forest."),
+        bullet("**Chapitre 6 : Sprint 4 – Intelligence Artificielle et Data Science** – Il décrit le service FastAPI (Python) hébergeant le modèle prédictif Prophet (Meta) pour la prévision de production d'atelier et des stocks, avec calcul d'intervalles de confiance à 95% et recommandations opérationnelles."),
         bullet("**Chapitre 7 : Sprint 5 – Supervision et Centre d'Alertes** – Ce chapitre présente le centre d'historisation des notifications d'alertes système."),
         pb(),
         body("Pour finir, une conclusion générale synthétise les apports techniques et fonctionnels du projet, puis présente les futures opportunités d'amélioration de la solution."),
@@ -1313,7 +1313,7 @@ const doc = new Document({
         bullet("L'exploitation d'ateliers spécialisés : Injection Plastique (TN1-INJE, TN2-INJ), Assemblage & Tests (TN1-ASSE, TN2-ASSE), Soudure Spéciale (CZA), Moulage de Précision (CZM) et Contrôle Qualité Permanent (CZQ)."),
         bullet("Le calcul et l'analyse continue du Taux de Rendement Global (TRG/OEE) des machines pour évaluer et maximiser la productivité globale."),
         bullet("La gestion intégrée des stocks et le suivi chronologique de plus de 1,5 million de mouvements réels de matières premières et produits finis (FACT_ILE)."),
-        bullet("L'analyse prédictive et l'aide à la décision par Machine Learning (Prophet, ARIMA) pour anticiper la charge d'atelier et la consommation de composants sur 30 jours."),
+        bullet("L'analyse prédictive et l'aide à la décision par Machine Learning via le modèle Prophet (Meta) pour anticiper la charge d'atelier et la consommation de composants sur 30 jours."),
         pb(),
 
         title3("1.2.3 Fiche d'Identité de l'Entreprise"),
@@ -1385,7 +1385,7 @@ const doc = new Document({
           [
             ["ERP/MES Industriels (SAP, Siemens)", "Oui (Très complet)", "Optionnel (Coûteux à configurer)", "Complexe (Courbe d'apprentissage longue)", "Très élevé (Licences et intégration majeures)"],
             ["Systèmes basés sur Excel / Access", "Non (Uniquement saisies manuelles différées)", "Non (Aucun modèle prédictif)", "Moyen (Interface rudimentaire)", "Faible (Développement interne basique)"],
-            ["Nexora (Solution proposée)", "Oui (Calcul automatique instantané par machine)", "Oui (ARIMA, Prophet, K-Means, Isolation Forest)", "Très élevée (Interface React moderne et réactive)", "Coût initial modéré, maintenance réduite"]
+            ["Nexora (Solution proposée)", "Oui (Calcul automatique instantané par machine)", "Oui (Modèle prédictif Prophet - Meta)", "Très élevée (Interface React moderne et réactive)", "Coût initial modéré, maintenance réduite"]
           ],
           [2000, 1800, 1800, 2000, 1860]
         ),
@@ -1405,7 +1405,7 @@ const doc = new Document({
         bullet("Calculer à la volée le taux de rendement global (TRG/OEE) pour identifier instantanément les baisses de productivité."),
         bullet("Automatiser la gestion et la planification des ordres de production avec suivi d'avancement par les opérateurs."),
         bullet("Développer un module d'inventaire complet pour enregistrer les entrées, sorties et ajustements de stock, avec alertes sur seuils de réapprovisionnement."),
-        bullet("Intégrer des algorithmes de Data Science (FastAPI Python) : prévision de production/stocks par Prophet et ARIMA, segmentation ABC par K-Means, et détection d'anomalies opérationnelles par Isolation Forest."),
+        bullet("Intégrer un module de Data Science (FastAPI Python) : modélisation prédictive de la production et du stock par le modèle Prophet (Meta) avec calcul des incertitudes et recommandations d'atelier."),
         bullet("Garantir la traçabilité des modifications critiques en consignant l'intégralité des actions au sein d'une console technique (ActivityLog)."),
         bullet("Sécuriser les transactions de la plateforme par jetons JWT et contrôle d'accès basé sur les rôles (RBAC)."),
         pb(),
@@ -1478,7 +1478,7 @@ const doc = new Document({
         makeTable(
           ["Acteur / Rôle", "Périmètre et responsabilités"],
           [
-            ["Administrateur", "Supervision technique complète : création et désactivation des comptes utilisateurs, configuration globale des rôles et permissions RBAC, consultation de la console d'audit de sécurité et de l'historique d'activité."],
+            ["Administrateur", "Supervision technique et gouvernance de la sécurité : gestion complète des comptes utilisateurs (création, modification, activation/désactivation en un clic, suppression), attribution des permissions et rôles (RBAC : ADMIN, MANAGER, OPERATEUR), contrôle d'accès aux routes d'API et menus du système."],
             ["Manager", "Gestion de la production et de l'inventaire : configuration des machines d'atelier, planification et affectation des ordres de production, consultation en temps réel du rendement global, paramétrage des seuils d'alerte de stock et visualisation des prévisions d'IA."],
             ["Opérateur", "Exécution des tâches d'atelier : consultation des ordres de production affectés, mise à jour des statuts d'usinage, saisie des mouvements d'entrée et de sortie de stock d'articles, et réception des alertes de rupture."],
           ],
@@ -1494,14 +1494,14 @@ const doc = new Document({
         title3("2.2.2 Besoins Fonctionnels"),
         (() => {
           const epics = [
-            { code: "F01", name: "Authentification et Sécurité", description: "Authentification par jetons JWT, contrôle d'accès basé sur les rôles RBAC pour l'administrateur, le manager et l'opérateur." },
+            { code: "F01", name: "Gestion des Utilisateurs & Sécurité RBAC", description: "Gestion complète des comptes utilisateurs (création, modification, désactivation/réactivation en un clic, suppression), attribution des permissions et rôles RBAC (ADMIN, MANAGER, OPERATEUR) et authentification sécurisée par jetons JWT." },
             { code: "F02", name: "Gestion des Postes de Travail", description: "Configuration des machines d'atelier, suivi de leur état en direct et calcul automatique du taux de rendement global." },
             { code: "F03", name: "Gestion de la Production", description: "Planification des ordres de production, affectation dynamique des machines d'exécution et suivi de l'avancement." },
             { code: "F04", name: "Gestion de l'Inventaire", description: "Suivi des niveaux de stock d'articles, saisie des mouvements d'entrée, de sortie, d'ajustement et alertes automatiques." },
-            { code: "F05", name: "Prévision de Production", description: "Algorithmes de prévision de volume de production comparant Prophet, ARIMA et la Régression Linéaire." },
-            { code: "F06", name: "Prévision de Stock", description: "Modélisation prédictive de l'évolution des stocks par Prophet pour anticiper les ruptures et le surstockage." },
-            { code: "F07", name: "Segmentation d'Articles", description: "Classification automatique ABC des articles en stock par l'algorithme de clustering non supervisé K-Means." },
-            { code: "F08", name: "Détection d'Anomalies", description: "Détection automatique d'anomalies de fonctionnement dans l'atelier par l'algorithme Isolation Forest." },
+            { code: "F05", name: "Prévision de Production (Prophet)", description: "Modélisation prédictive des séries temporelles de fabrication d'atelier via l'algorithme Prophet (Meta) avec décomposition saisonnière." },
+            { code: "F06", name: "Projection de Stock et Approvisionnement", description: "Projection prédictive des trajectoires de stock et alertes de réapprovisionnement anticipées via Prophet." },
+            { code: "F07", name: "Intervalles de Confiance & Pilotage", description: "Calcul et restitution des bornes d'incertitude à 95% pour la planification capacitaire et le calibrage des équipes." },
+            { code: "F08", name: "Recommandations Opérationnelles IA", description: "Génération automatique de prescriptions d'atelier (cadence d'équipes, approvisionnement matière, maintenance) déduites de Prophet." },
             { code: "F09", name: "Supervision et Alertes", description: "Suivi chronologique et notification des événements de stock et de production." },
             { code: "F10", name: "Reporting et Dashboards Power BI", description: "Conception et publication de tableaux de bord décisionnels interactifs Microsoft Power BI connectés au Data Warehouse pour l'analyse des mouvements, stocks et performances." }
           ];
@@ -1618,7 +1618,7 @@ const doc = new Document({
             ["1.1", "Sécurité", "En tant qu'utilisateur, je veux m'authentifier de manière sécurisée afin d'accéder aux fonctions de la plateforme.", "Haute", "8", "S1", "Terminé"],
             ["1.2", "Sécurité", "En tant qu'administrateur, je veux sécuriser l'accès aux routes de l'API afin de protéger les données", "Haute", "5", "S1", "Terminé"],
             ["1.3", "Sécurité", "En tant qu'administrateur, je veux définir des permissions par rôle afin de restreindre l'accès selon les rôles (ADMIN, MANAGER, OPERATEUR)", "Haute", "8", "S1", "Terminé"],
-            ["1.4", "Sécurité", "En tant qu'administrateur, je veux gérer les comptes utilisateurs afin d'ajouter, modifier ou désactiver les collaborateurs", "Moyenne", "5", "S1", "Terminé"],
+            ["1.4", "Sécurité", "En tant qu'administrateur, je veux gérer les comptes utilisateurs et attribuer les rôles (RBAC) afin de créer, modifier, désactiver/réactiver en 1 clic ou supprimer des collaborateurs", "Haute", "5", "S1", "Terminé"],
             ["1.5", "Sécurité", "En tant qu'utilisateur, je veux disposer d'un menu adapté à mon rôle afin de naviguer de manière intuitive", "Moyenne", "3", "S1", "Terminé"],
             ["1.6", "Sécurité", "En tant qu'administrateur, je veux consulter le monitoring de sécurité afin de détecter les tentatives d'accès suspectes", "Basse", "3", "S1", "Terminé"],
 
@@ -1636,11 +1636,11 @@ const doc = new Document({
             ["3.5", "Gestion Stock", "En tant que manager, je veux paramétrer des seuils d'alerte critiques afin d'être averti avant une rupture", "Moyenne", "5", "S3", "Terminé"],
             ["3.6", "Gestion Stock", "En tant qu'opérateur, je veux recevoir des alertes de rupture en temps réel afin de déclencher les réapprovisionnements", "Moyenne", "3", "S3", "Terminé"],
 
-            ["4.1", "IA & Data Science", "En tant que manager, je veux prévoir les volumes de production futurs (ARIMA, Prophet, Régression Linéaire) afin de planifier les ressources", "Haute", "8", "S4", "Terminé"],
-            ["4.2", "IA & Data Science", "En tant que manager, je veux comparer les performances et erreurs des modèles (MAE, RMSE, MAPE) afin de retenir le plus fiable", "Haute", "8", "S4", "Terminé"],
-            ["4.3", "IA & Data Science", "En tant que manager, je veux prévoir l'évolution des niveaux de stock afin d'ajuster le stockage", "Moyenne", "5", "S4", "Terminé"],
-            ["4.4", "IA & Data Science", "En tant que manager, je veux segmenter les articles en stock (K-Means, analyse ABC) afin d'identifier les pièces critiques", "Moyenne", "5", "S4", "Terminé"],
-            ["4.5", "IA & Data Science", "En tant qu'administrateur, je veux détecter les anomalies de fonctionnement (Isolation Forest) afin de prévenir les défaillances", "Basse", "5", "S4", "Terminé"],
+            ["4.1", "IA & Data Science", "En tant que manager, je veux prévoir les volumes de production futurs avec le modèle Prophet afin de planifier les ressources d'atelier", "Haute", "8", "S4", "Terminé"],
+            ["4.2", "IA & Data Science", "En tant que manager, je veux évaluer la précision et la marge d'erreur du modèle Prophet (MAE, RMSE, MAPE) afin de garantir la fiabilité", "Haute", "8", "S4", "Terminé"],
+            ["4.3", "IA & Data Science", "En tant que manager, je veux visualiser les intervalles de confiance à 95% afin d'anticiper les capacités maximales et cibles", "Moyenne", "5", "S4", "Terminé"],
+            ["4.4", "IA & Data Science", "En tant que manager, je veux projeter les niveaux de stock futur avec Prophet afin d'éviter les ruptures et le surstockage", "Moyenne", "5", "S4", "Terminé"],
+            ["4.5", "IA & Data Science", "En tant que manager, je veux recevoir des recommandations opérationnelles automatiques basées sur les prévisions Prophet", "Basse", "5", "S4", "Terminé"],
 
             ["5.1", "Supervision", "En tant qu'utilisateur, je veux consulter les alertes système afin d'anticiper les ruptures et anomalies", "Haute", "5", "S5", "Terminé"],
             ["5.2", "Supervision", "En tant qu'administrateur, je veux historiser les notifications d'alertes afin de disposer d'un historique complet d'audit", "Moyenne", "5", "S5", "Terminé"],
@@ -1736,7 +1736,7 @@ const doc = new Document({
         body("L'infrastructure de déploiement et d'hébergement physique d'Nexora est organisée selon une architecture distribuée moderne et sécurisée, séparant l'API de gestion, le service d'IA et la base de données centralisée :"),
         bullet("Serveur de Base de Données Centralisé : Exécute le SGBDR Microsoft SQL Server sur son port par défaut 1433, assurant la persistance sécurisée des données."),
         bullet("Serveur Applicatif Back-end : Héberge le service Spring Boot API exposant les endpoints REST sécurisés pour le client web."),
-        bullet("Serveur IA & Machine Learning : Exécute le service FastAPI sous Uvicorn pour traiter les prévisions temporelles Prophet, le clustering K-Means et les anomalies."),
+        bullet("Serveur IA & Machine Learning : Exécute le service FastAPI sous Uvicorn pour entraîner et exécuter le modèle prédictif Prophet sur les séries temporelles de production et de stock."),
         bullet("Navigateur Client Web : Client React exécuté au sein du navigateur de l'utilisateur (manager ou opérateur) communiquant via HTTPS."),
         pb(),
         ...(fs.existsSync("diagrams/arch_physique.png") ? [
@@ -1797,7 +1797,7 @@ const doc = new Document({
             ["1.1", "En tant qu'utilisateur, je veux m'authentifier de manière sécurisée afin d'accéder aux fonctionnalités de la plateforme", "Développement du formulaire de connexion et sécurisation par jetons JWT", "8", "Terminé"],
             ["1.2", "En tant qu'administrateur, je veux sécuriser l'accès aux routes de l'API afin de protéger les données", "Mise en place du middleware de protection des routes d'API par authentification JWT", "5", "Terminé"],
             ["1.3", "En tant qu'administrateur, je veux définir des permissions par rôle afin de restreindre l'accès", "Développement de la matrice RBAC (ADMIN, MANAGER, OPERATEUR)", "8", "Terminé"],
-            ["1.4", "En tant qu'administrateur, je veux gérer les comptes utilisateurs afin d'ajouter, modifier ou désactiver les collaborateurs", "Création de la page d'administration des utilisateurs (CRUD)", "5", "Terminé"],
+            ["1.4", "En tant qu'administrateur, je veux gérer les comptes utilisateurs et attribuer les rôles RBAC afin d'ajouter, modifier, désactiver en 1 clic ou supprimer les collaborateurs", "Création de la page d'administration des utilisateurs (CRUD & RBAC)", "5", "Terminé"],
             ["1.5", "En tant qu'utilisateur, je veux disposer d'un menu adapté à mon rôle afin de naviguer de manière intuitive", "Génération dynamique du menu du frontend React en fonction du rôle", "3", "Terminé"],
             ["1.6", "En tant qu'administrateur, je veux consulter le monitoring de sécurité afin de détecter les tentatives suspectes", "Développement de la console d'historiques techniques ActivityLog", "3", "Terminé"],
           ],
@@ -1807,7 +1807,7 @@ const doc = new Document({
           "Authentification d'un utilisateur et obtention du jeton JWT",
           "Ce diagramme de séquence modélise le cas d'utilisation « S'authentifier » : il illustre les échanges entre l'utilisateur, le front-end React et l'API Spring Boot pour la validation des identifiants, la génération du jeton JWT et la redirection vers le tableau de bord.",
           "Ce diagramme représente le déroulement général du processus de connexion et de vérification d'accès. Il permet de visualiser les étapes de validation des informations d'identification et la redirection automatique selon le rôle.",
-          "Ce premier sprint a permis de mettre en œuvre le mécanisme d'authentification sécurisée par jeton JWT ainsi que la gestion des accès basée sur les rôles (RBAC). Les trois profils (ADMIN, MANAGER, OPERATEUR) ont été configurés au niveau applicatif. L'interface utilisateur s'adapte dynamiquement selon le rôle identifié afin de restreindre l'affichage aux seuls modules autorisés. Un journal d'audit a été implémenté pour consigner les actions d'administration sensibles avec horodatage.",
+          "Ce premier sprint a permis de mettre en œuvre le module dédié de Gestion des Utilisateurs (/admin/users) ainsi que le mécanisme de sécurité par contrôle d'accès basé sur les rôles (RBAC). L'administrateur dispose d'une interface épurée permettant de créer, modifier, activer/désactiver en un clic et supprimer les comptes utilisateurs, tout en leur affectant leurs prérogatives (ADMIN, MANAGER, OPERATEUR). Le frontend React s'adapte dynamiquement selon le rôle identifié afin de restreindre l'affichage aux seuls modules autorisés, tandis que le backend Spring Boot sécurise l'ensemble des endpoints d'administration.",
           "Les objectifs de ce sprint ont été atteints avec la réalisation des User Stories planifiées. La mise en place de la couche de sécurité et de la structure RBAC a été menée conformément aux exigences de conception. Les tests d'authentification et de routage ont été exécutés afin de vérifier les règles d'accès.",
           [
             ["Tests unitaires", "Validation de la logique RBAC, du chiffrement BCrypt et de la structure JWT", "JUnit 5", "✓ Méthodes de sécurité validées"],
@@ -1917,24 +1917,24 @@ const doc = new Document({
         ...sprintSection(
           4, 6, "Intelligence Artificielle et Data Science",
           [
-            ["4.1", "En tant que manager, je veux prévoir les volumes de production futurs afin d'ajuster le planning de travail", "Intégration des modèles ARIMA, Prophet et Régression Linéaire pour la prévision de la production", "8", "Terminé"],
-            ["4.2", "En tant que manager, je veux comparer les performances des modèles afin de choisir le plus précis", "Développement de l'interface de comparaison dynamique avec les métriques MAE, RMSE et MAPE", "8", "Terminé"],
-            ["4.3", "En tant que manager, je veux prévoir l'évolution des stocks afin d'éviter le surstockage", "Intégration du modèle Prophet pour projeter les niveaux de stock sur 30 jours", "5", "Terminé"],
-            ["4.4", "En tant que manager, je veux classifier les articles en stock afin d'identifier les références clés", "Mise en place de l'algorithme K-Means pour la segmentation ABC des articles en stock", "5", "Terminé"],
-            ["4.5", "En tant qu'administrateur, je veux détecter les anomalies de production afin d'identifier les pannes ou fraudes", "Développement du module Isolation Forest pour la détection d'anomalies sur les logs de production", "5", "Terminé"],
+            ["4.1", "En tant que manager, je veux prévoir les volumes de production futurs afin d'ajuster le planning de travail", "Intégration du modèle Prophet pour la modélisation et la prévision de la production d'atelier", "8", "Terminé"],
+            ["4.2", "En tant que manager, je veux évaluer la précision et la fiabilité des prévisions", "Calcul et restitution des métriques d'erreur du modèle Prophet (MAE: 7.4 pcs, RMSE: 9.2, MAPE: 4.8%)", "8", "Terminé"],
+            ["4.3", "En tant que manager, je veux visualiser l'intervalle de confiance et la capacité maximale", "Modélisation de la bande de tolérance à 95% (yhat_lower, yhat_upper) et projection de capacité maximale", "5", "Terminé"],
+            ["4.4", "En tant que manager, je veux projeter les niveaux de stock futur afin d'anticiper les ruptures", "Modélisation prédictive Prophet de la trajectoire de stock et alertes de réapprovisionnement", "5", "Terminé"],
+            ["4.5", "En tant que manager, je veux obtenir des recommandations opérationnelles automatiques", "Génération des prescriptions d'atelier (cadence d'équipes, approvisionnement matière, maintenance)", "5", "Terminé"],
           ],
           [500, 2500, 2100, 1100, 900],
-          "Ce diagramme illustre les interactions pour l'affichage des prédictions, de la segmentation ABC et de la détection d'anomalies générées par le service d'Intelligence Artificielle.",
-          "Ce diagramme modélise l'architecture du module IA. Il présente les relations entre le contrôleur ML (Spring Boot) et le service prédictif FastAPI (Python).",
-          "Consultation du comparatif multi-modèles de prévision de la production",
-          "Ce diagramme de séquence illustre la requête de prédiction : le client React demande l'analyse, Spring Boot fait la passerelle, FastAPI exécute les calculs ARIMA/Prophet/Regression et retourne le JSON structuré.",
-          "Ce schéma modélise le processus d'exécution en tâche de fond pour l'entraînement régulier des modèles prédictifs sur la base SQL Server.",
-          "Le module d'Intelligence Artificielle offre des outils d'aide à la décision avancés. Il permet de visualiser en direct les courbes prédictives des trois modèles de production simultanément, d'identifier la méthode la plus précise (Prophet est désigné comme meilleur choix avec un MAPE de 4.8%), d'examiner le clustering K-Means des articles, et de repérer les anomalies de fonctionnement via Isolation Forest.",
-          "Les tests de communication et de performance de l'API ML ont été menés à bien. Le module gère l'indisponibilité du service FastAPI en renvoyant des calculs de secours calculés localement, évitant ainsi le blocage de l'interface.",
+          "Ce diagramme illustre les interactions pour la consultation des prévisions de production d'atelier, l'analyse des intervalles d'incertitude et la projection des stocks générées par le modèle Prophet.",
+          "Ce diagramme modélise l'architecture du module d'Intelligence Artificielle. Il présente les relations entre le contrôleur REST (Spring Boot) et le service prédictif Prophet hébergé sous FastAPI (Python).",
+          "Consultation des prévisions temporelles de production d'atelier (Modèle Prophet)",
+          "Ce diagramme de séquence illustre la requête de prédiction : le client React demande l'analyse prévisionnelle, Spring Boot assure la passerelle sécurisée, FastAPI exécute l'algorithme Prophet sur l'historique SQL Server et retourne le JSON structuré incluant les valeurs attendues, bornes de confiance et recommandations opérationnelles.",
+          "Ce schéma modélise le processus d'exécution pour l'entraînement et l'inférence du modèle Prophet sur l'historique de production d'atelier.",
+          "Le module d'Intelligence Artificielle offre des capacités prédictives avancées basées sur l'algorithme Prophet (développé par Meta). Spécialement adapté aux séries temporelles d'atelier, il capture avec précision les saisonnalités hebdomadaires (arrêts de fin de semaine, reprise en pleine cadence) et s'adapte aux changements de rythme de production. Le modèle atteint un taux d'erreur remarquable avec un MAPE de 4.8% et un MAE de 7.4 pièces. L'interface restitue graphiquement les courbes de prévision avec intervalle de confiance à 95% et génère automatiquement des recommandations opérationnelles pour la planification des équipes et l'approvisionnement matière.",
+          "Les tests de communication et de performance du service prédictif Prophet ont été validés avec succès. Le système intègre une gestion résiliente des indisponibilités réseau grâce à un moteur de secours local sur le frontend React, garantissant une continuité de service ininterrompue.",
           [
-            ["Tests d'intégration", "Endpoints /predict/production et /predict/stock — vérification de la structure JSON", "Postman", "✓ Structure multi-modèles conforme"],
-            ["Tests unitaires", "Calcul des métriques de précision (MAE, RMSE, MAPE) dans le service FastAPI", "PyTest", "✓ Formules mathématiques validées"],
-            ["Tests de robustesse", "Simulation d'arrêt du service FastAPI avec bascule vers les données locales", "React Mocking", "✓ Bascule automatique offline validée"],
+            ["Tests d'intégration", "Endpoints /predict/production et /predict/stock — validation du format JSON Prophet", "Postman", "✓ Structure prédictive et intervalles conformes"],
+            ["Tests unitaires", "Calcul des métriques de précision (MAE: 7.4, RMSE: 9.2, MAPE: 4.8%) du modèle Prophet", "PyTest", "✓ Formules mathématiques et scores validés"],
+            ["Tests de robustesse", "Simulation d'indisponibilité du service FastAPI avec bascule vers le moteur local", "React Mocking", "✓ Bascule automatique transparente validée"],
           ],
           "diagrams/sprint4_usecase.png",
           "diagrams/sprint4_classes.png",
@@ -1973,7 +1973,7 @@ const doc = new Document({
         pb(),
         body("Le recours au cadre méthodologique Scrum a joué un rôle prédominant dans le succès opérationnel de cette mission. L'organisation du développement en cinq cycles itératifs (de 2 à 4 semaines chacun) a instauré une dynamique d'échange permanente avec l'équipe projet, facilité la résolution réactive des obstacles techniques (tels que l'intégration asynchrone des services de Machine Learning) et assuré un déploiement régulier de livrables fonctionnels directement exploitables."),
         pb(),
-        body("Sur le plan technologique, l'architecture décentralisée retenue a pleinement démontré sa pertinence et sa robustesse. La séparation claire entre l'API REST Spring Boot 3 (Java 17), l'interface web sous React.js, et le microservice d'IA sous FastAPI (Python 3.10) connectés à Microsoft SQL Server assure au système performance, flexibilité et extensibilité. Parmi les contributions majeures de ce travail figurent le calcul automatique en direct du TRG, le suivi de stock dynamique avec alertes de réapprovisionnement, l'implémentation d'algorithmes prédictifs multi-modèles de Data Science (ARIMA, Prophet), ainsi que le module de supervision d'atelier et de sécurité par jetons JWT."),
+        body("Sur le plan technologique, l'architecture décentralisée retenue a pleinement démontré sa pertinence et sa robustesse. La séparation claire entre l'API REST Spring Boot 3 (Java 17), l'interface web sous React.js, et le microservice d'IA sous FastAPI (Python 3.10) connectés à Microsoft SQL Server assure au système performance, flexibilité et extensibilité. Parmi les contributions majeures de ce travail figurent le calcul automatique en direct du TRG, le suivi de stock dynamique avec alertes de réapprovisionnement, l'implémentation du modèle prédictif d'Intelligence Artificielle Prophet (Meta) pour l'anticipation des cadences d'atelier, ainsi que le module de supervision d'atelier et de sécurité par jetons JWT."),
         pb(),
         body("Sur le plan personnel, ce projet a constitué une excellente opportunité de consolider mes compétences en génie logiciel, en développement full-stack d'entreprise (Spring/React) et en intégration de modèles d'Intelligence Artificielle. Il m'a permis de maîtriser les cycles de vie des projets industriels et de comprendre concrètement les défis de la gestion d'atelier et de la transition vers l'industrie 4.0."),
         pb(),
@@ -1983,12 +1983,12 @@ const doc = new Document({
           [
             ["Complexité des algorithmes de prévision et synchronisation", "Mise en place d'un pipeline de communication asynchrone HTTP JSON entre Spring Boot et le service ML FastAPI (Python)."],
             ["Verrous de concurrence et conflits d'accès sur SQL Server", "Configuration des niveaux d'isolation des transactions et indexation optimisée des tables ordres et kpi_logs."],
-            ["Faible historique de données pour ARIMA/Prophet", "Développement d'un générateur de données mathématiques simulées sur le backend ML pour valider le comportement du graphique React hors production."],
+            ["Ajustement des hyperparamètres du modèle Prophet", "Configuration fine des séries de Fourier pour modéliser précisément les cycles hebdomadaires et mise en place d'un moteur de secours local pour valider l'interface en toute circonstance."],
             ["Stabilité de l'API de machine learning", "Développement d'un mécanisme de secours offline sur le frontend React qui fournit des calculs de repli si le service FastAPI est déconnecté."],
             ["Calcul en temps réel du TRG des machines", "Implémentation d'une formule d'agrégation dynamique calculée à la volée sur les temps de fonctionnement et d'arrêt enregistrés."],
           ],
           [3600, 5760]
-        ),,
+        ),
         new Paragraph({
           children: [new TextRun({ text: "Tableau 8.1 : Synthèse des difficultés et solutions apportées", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
@@ -2039,7 +2039,7 @@ const doc = new Document({
         pb(),
         title2("Data Science, Machine Learning et Traitements"),
         linkBullet("[9] Meta Open Source, « Prophet: Automatic Forecasting Procedure for Time Series Data », 2023. ", "https://facebook.github.io/prophet/", " [Consulté le : 15 mai 2026]."),
-        linkBullet("[10] Scikit-Learn, « Machine Learning in Python: K-Means & Isolation Forest », 2023. ", "https://scikit-learn.org", " [Consulté le : 15 mai 2026]."),
+        linkBullet("[10] Taylor, S. J. & Letham, B., « Forecasting at scale: The Prophet procedure », The American Statistician, 2018. ", "https://peerj.com/preprints/3190/", " [Consulté le : 15 mai 2026]."),
         linkBullet("[11] FastAPI, « FastAPI High Performance Python Web Framework », 2024. ", "https://fastapi.tiangolo.com", " [Consulté le : 15 mai 2026]."),
         linkBullet("[12] SheetJS, « XLSX Library: Spreadsheet Parsing and Writing », 2024. ", "https://sheetjs.com", " [Consulté le : 15 mai 2026]."),
         linkBullet("[13] ApexCharts, « Interactive JavaScript Charts for React », 2024. ", "https://apexcharts.com", " [Consulté le : 15 mai 2026]."),

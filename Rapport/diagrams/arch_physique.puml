@@ -30,7 +30,7 @@ node "Serveur Applicatif Spring Boot" as AppServer {
 
 node "Serveur IA et Machine Learning" as MLServer {
     component "FastAPI Web Service" as FastAPIApp
-    component "Modèles Prophet et ARIMA" as IAEngine
+    component "Moteur Prédictif Prophet (Meta)" as IAEngine
 }
 
 ReactApp -down-> SpringApp : HTTPS JSON

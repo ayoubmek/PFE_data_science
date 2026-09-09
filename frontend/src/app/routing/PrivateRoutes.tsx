@@ -14,6 +14,8 @@ const PrivateRoutes = () => {
   const AnalyticsPage = lazy(() => import('../pages/analytics/AnalyticsPage'))
   const DataSciencePage = lazy(() => import('../pages/data-science/DataSciencePage'))
   const DataScienceBenchmarkPage = lazy(() => import('../pages/data-science/DataScienceBenchmarkPage'))
+  const DataScienceSandboxPage = lazy(() => import('../pages/data-science/DataScienceSandboxPage'))
+  const UserManagementPage = lazy(() => import('../pages/admin/UserManagementPage'))
 
   return (
     <Routes>
@@ -33,6 +35,12 @@ const PrivateRoutes = () => {
         <Route path='analytics' element={<SuspensedView><AnalyticsPage /></SuspensedView>} />
         <Route path='data-science' element={<SuspensedView><DataSciencePage /></SuspensedView>} />
         <Route path='data-science/benchmark' element={<SuspensedView><DataScienceBenchmarkPage /></SuspensedView>} />
+        <Route path='data-science/sandbox' element={<SuspensedView><DataScienceSandboxPage /></SuspensedView>} />
+
+        {/* Administration & RBAC */}
+        <Route path='admin/users' element={<SuspensedView><UserManagementPage /></SuspensedView>} />
+        <Route path='users' element={<Navigate to='/admin/users' />} />
+        <Route path='gestion-users' element={<Navigate to='/admin/users' />} />
 
         {}
         <Route path='*' element={<Navigate to='/error/404' />} />

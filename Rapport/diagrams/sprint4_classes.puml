@@ -1,4 +1,4 @@
-@startuml
+@startuml sprint4_classes
 skinparam monochrome true
 skinparam shadowing false
 skinparam classAttributeIconSize 0
@@ -6,24 +6,34 @@ skinparam fontName "Arial"
 skinparam fontSize 12
 
 class ProphetService {
-    + predictProduction(historicalData)
-    + predictStock(historicalData)
-}
-
-class KMeansSegmentation {
-    + classifyABC(stockItems)
-}
-
-class IsolationForestAnomaly {
-    + detectAnomalies(telemetryData)
+    + predictProduction(historicalData, horizonDays)
+    + predictStock(historicalData, horizonDays)
+    + calculateSeasonality(timeSeries)
+    + computeMetrics(actual, predicted)
 }
 
 class PredictionResult {
     + String date
-    + Double predictedValue
+    + Double predictedQuantity
     + Double lowerBound
     + Double upperBound
+    + Boolean workingDay
+}
+
+class OperationalRecommendation {
+    + String title
+    + String description
+    + String category
+    + Double plannedCadence
+}
+
+class ForecastMetrics {
+    + Double mae
+    + Double rmse
+    + String mape
 }
 
 ProphetService "1" -- "0..*" PredictionResult : génère
+ProphetService "1" -- "0..*" OperationalRecommendation : déduit
+ProphetService "1" -- "1" ForecastMetrics : calcule
 @enduml

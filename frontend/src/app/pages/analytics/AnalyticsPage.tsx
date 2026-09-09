@@ -220,13 +220,13 @@ export default function AnalyticsPage() {
                 fontSize: '12px',
                 fontWeight: '600',
                 color: '#7E8299',
-                formatter: () => `${metrics.totalOutput.toLocaleString()} u`
+                formatter: () => `${metrics.totalOutput.toLocaleString()} unités`
               },
               value: {
                 fontSize: '16px',
                 fontWeight: '700',
                 color: '#181C32',
-                formatter: (val: string) => `${Number(val).toLocaleString()} u`
+                formatter: (val: string) => `${Number(val).toLocaleString()} unités`
               }
             }
           }
@@ -267,7 +267,7 @@ export default function AnalyticsPage() {
       },
       dataLabels: {
         enabled: true,
-        formatter: (val: number) => `${(val / 1000).toFixed(0)}k u`,
+        formatter: (val: number) => `${(val / 1000).toFixed(0)}k unités`,
         style: { fontSize: '10px', fontWeight: '600', colors: ['#ffffff'] },
         offsetX: -10
       },
@@ -576,9 +576,9 @@ export default function AnalyticsPage() {
                           {renderSiteBadge(w.site)}
                         </td>
                         <td className='text-center text-gray-700 fw-semibold fs-7'>{w.machines}</td>
-                        <td className='text-end text-gray-900 fw-bold fs-7'>{w.output.toLocaleString()} u</td>
+                        <td className='text-end text-gray-900 fw-bold fs-7'>{w.output.toLocaleString()} unités</td>
                         <td className='text-end text-danger fw-semibold fs-7'>
-                          {w.scrap > 0 ? `${w.scrap.toLocaleString()} u` : '0 u'}
+                          {w.scrap > 0 ? `${w.scrap.toLocaleString()} unités` : '0 unité'}
                         </td>
                         <td>
                           <div className='d-flex align-items-center justify-content-center gap-2'>

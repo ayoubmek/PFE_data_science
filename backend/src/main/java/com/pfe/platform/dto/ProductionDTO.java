@@ -61,5 +61,6 @@ public class ProductionDTO {
         private Double tauxRendementMoyen;
         private long machinesDisponibles;
         private long machinesEnPanne;
+        private Double totalVolumeProduit;
     }
 }

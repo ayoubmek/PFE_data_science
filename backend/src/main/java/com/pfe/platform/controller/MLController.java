@@ -65,6 +65,24 @@ public class MLController {
         }
     }
 
+    @PostMapping("/predict/custom")
+    public ResponseEntity<Object> predictCustom(@RequestBody Map<String, Object> payload) {
+        try {
+            return ResponseEntity.ok(postToMl("/predict/custom", payload));
+        } catch (Exception e) {
+            return unavailable();
+        }
+    }
+
+    @PostMapping("/cluster/custom")
+    public ResponseEntity<Object> clusterCustom(@RequestBody Map<String, Object> payload) {
+        try {
+            return ResponseEntity.ok(postToMl("/cluster/custom", payload));
+        } catch (Exception e) {
+            return unavailable();
+        }
+    }
+
     @PostMapping("/simulate/scenario")
     public ResponseEntity<Object> simulateScenario(@RequestBody Map<String, Object> payload) {
         try {

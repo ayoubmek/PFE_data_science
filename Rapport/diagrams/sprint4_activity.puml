@@ -1,17 +1,12 @@
 @startuml sprint4_activity
 start
-:Chargement des données de production de la base;
-:Prétraitement et nettoyage des données;
-fork
-    :Exécuter le modèle Prophet;
-fork again
-    :Exécuter le modèle ARIMA;
-fork again
-    :Exécuter la Régression Linéaire;
-end fork
-:Calculer les métriques d'erreur (MAE, RMSE, MAPE);
-:Identifier le modèle le plus performant (lowest MAPE);
-:Générer les recommandations d'IA correspondantes;
-:Rendu des graphiques de prévision sur React;
+:Chargement des données de production de la base SQL Server;
+:Prétraitement et nettoyage de la série temporelle d'atelier;
+:Entraînement de l'algorithme prédictif Prophet (Meta);
+:Modélisation des composantes de tendance et saisonnalité;
+:Calcul des intervalles de confiance à 95% (yhat_lower, yhat_upper);
+:Évaluation des métriques de précision (MAE, RMSE, MAPE);
+:Génération automatique des recommandations opérationnelles;
+:Rendu interactif des courbes prédictives sur l'interface React;
 stop
 @enduml

@@ -195,8 +195,8 @@ export default function ProductionPage() {
         <div className='d-flex gap-4 flex-wrap'>
           {[
             { label: 'Total Document No_', val: stats.total.toLocaleString(), color: 'primary', icon: 'element-11', sub: 'Ordres exécutés' },
-            { label: 'Total Output Quantity', val: `${stats.totalOutput.toLocaleString()} u`, color: 'success', icon: 'check-circle', sub: 'Pièces conformes' },
-            { label: 'Total Scrap Quantity', val: `${stats.totalScrap.toLocaleString()} u`, color: 'danger', icon: 'cross-circle', sub: `Taux : ${stats.scrapRate}%` },
+            { label: 'Total Output Quantity', val: `${stats.totalOutput.toLocaleString()} unités`, color: 'success', icon: 'check-circle', sub: 'Pièces conformes' },
+            { label: 'Total Scrap Quantity', val: `${stats.totalScrap.toLocaleString()} unités`, color: 'danger', icon: 'cross-circle', sub: `Taux : ${stats.scrapRate}%` },
             { label: 'Total Run Time', val: `${stats.totalRunTime.toLocaleString()} h`, color: 'info', icon: 'time', sub: 'Heures machine' },
           ].map(s => (
             <div key={s.label} className='d-flex align-items-center gap-2 bg-light-subtle rounded px-4 py-2'>
@@ -395,7 +395,7 @@ export default function ProductionPage() {
                   <span className='fs-8 text-muted fw-semibold'>Résultats filtrés :</span>
                   <strong className='text-primary fs-7'>{filteredStats.total.toLocaleString()} OFs</strong>
                   <span className='text-gray-300'>|</span>
-                  <strong className='text-success fs-7'>{filteredStats.totalOutput.toLocaleString()} u</strong>
+                  <strong className='text-success fs-7'>{filteredStats.totalOutput.toLocaleString()} unités</strong>
                   <span className='text-gray-300'>|</span>
                   <strong className={filteredStats.totalScrap > 0 ? 'text-danger fs-7' : 'text-muted fs-7'}>
                     {filteredStats.totalScrap.toLocaleString()} rebuts
@@ -467,10 +467,10 @@ export default function ProductionPage() {
                       <span className='badge badge-light-primary fw-bold fs-8'>{o.itemNo}</span>
                     </td>
                     <td className='text-gray-700'>{o.articleNom}</td>
-                    <td className='text-gray-900 fw-bold'>{(o.quantiteProduite || 0).toLocaleString()} u</td>
+                    <td className='text-gray-900 fw-bold'>{(o.quantiteProduite || 0).toLocaleString()} unités</td>
                     <td>
                       <span className={o.scrapQuantity > 0 ? 'badge badge-light-danger fw-bold' : 'text-muted'}>
-                        {o.scrapQuantity > 0 ? `${o.scrapQuantity.toLocaleString()} u` : '0 u'}
+                        {o.scrapQuantity > 0 ? `${o.scrapQuantity.toLocaleString()} unités` : '0 unité'}
                       </span>
                     </td>
                     <td className='text-gray-700 fw-semibold'>

@@ -107,7 +107,7 @@ export default function DataSciencePage() {
         enabled: true,
         formatter: function(val: number) {
           if (val <= 0) return ''
-          return `${val.toLocaleString()} u`
+          return `${val.toLocaleString()} unités`
         },
         style: {
           fontSize: '9px',
@@ -143,7 +143,7 @@ export default function DataSciencePage() {
       yaxis: {
         labels: {
           style: { colors: '#7E8299', fontSize: '11px', fontWeight: '500' },
-          formatter: (val: number) => `${val.toLocaleString()} u`
+          formatter: (val: number) => `${val.toLocaleString()} unités`
         }
       },
       fill: {
@@ -244,17 +244,17 @@ export default function DataSciencePage() {
       <div className='d-flex flex-wrap gap-4 mb-6 border-bottom pb-4'>
         <div className='d-flex align-items-center gap-2'>
           <span className='text-muted fs-7'>Volume prévu :</span>
-          <strong className='text-gray-900 fs-6'>{totalVolume.toLocaleString()} u</strong>
+          <strong className='text-gray-900 fs-6'>{totalVolume.toLocaleString()} unités</strong>
         </div>
         <div className='text-gray-300'>|</div>
         <div className='d-flex align-items-center gap-2'>
           <span className='text-muted fs-7'>Moyenne / jour :</span>
-          <strong className='text-primary fs-6'>{avgDaily.toLocaleString()} u</strong>
+          <strong className='text-primary fs-6'>{avgDaily.toLocaleString()} unités</strong>
         </div>
         <div className='text-gray-300'>|</div>
         <div className='d-flex align-items-center gap-2'>
           <span className='text-muted fs-7'>Pic max :</span>
-          <strong className='text-warning fs-6'>{maxPeak.toLocaleString()} u</strong>
+          <strong className='text-warning fs-6'>{maxPeak.toLocaleString()} unités</strong>
         </div>
         <div className='text-gray-300'>|</div>
         <div className='d-flex align-items-center gap-2'>

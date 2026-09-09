@@ -44,9 +44,7 @@ package "Couche Service Métier" as ServiceLayer {
 
 package "Microservice IA FastAPI Python" as MLService {
     component "Uvicorn FastAPI" as FastAPIApp
-    component "ForecastingService" as ForecastServ
-    component "ClusteringService" as ClusterServ
-    component "AnomalyService" as AnomalyServ
+    component "ForecastingService (Prophet)" as ForecastServ
 }
 
 package "Couche Persistance Spring Data JPA" as RepoLayer {
@@ -71,8 +69,6 @@ DSCtrl -down-> DSServ
 
 DSServ -right-> FastAPIApp : HTTP Client REST
 FastAPIApp -down-> ForecastServ
-FastAPIApp -down-> ClusterServ
-FastAPIApp -down-> AnomalyServ
 
 AuthServ -down-> JPARepo
 MachineServ -down-> JPARepo
