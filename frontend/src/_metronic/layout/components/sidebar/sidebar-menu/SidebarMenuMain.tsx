@@ -56,7 +56,7 @@ const SidebarMenuMain = () => {
 
       <SidebarMenuItemWithSub
         to='/stock'
-        title='Stock & Flux'
+        title='Stock'
         fontIcon='bi-archive'
         icon='element-plus'
         iconColor='#10B981'
@@ -107,22 +107,6 @@ const SidebarMenuMain = () => {
         title='Prévisions IA (Prophet)'
         fontIcon='bi-cpu'
         iconColor='#50CD89'
-      />
-
-      <SidebarMenuItem
-        to='/data-science/benchmark'
-        icon='chart-line-star'
-        title='Benchmark Modèles IA'
-        fontIcon='bi-bar-chart'
-        iconColor='#009EF7'
-      />
-
-      <SidebarMenuItem
-        to='/data-science/sandbox'
-        icon='file-up'
-        title='Tester Modèles IA (Fichier)'
-        fontIcon='bi-cloud-upload'
-        iconColor='#F59E0B'
       />
 
       {/* Administration & Sécurité */}

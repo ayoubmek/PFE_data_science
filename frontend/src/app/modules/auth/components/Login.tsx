@@ -80,15 +80,9 @@ export function Login() {
         <div className='text-gray-500 fw-semibold fs-7'>Plateforme Intelligente de Gestion Industrielle</div>
       </div>
 
-      {formik.status ? (
+      {formik.status && (
         <div className='mb-lg-15 alert alert-danger'>
           <div className='alert-text font-weight-bold'>{formik.status}</div>
-        </div>
-      ) : (
-        <div className='mb-10 bg-light-info p-8 rounded'>
-          <div className='text-info'>
-            Connectez-vous avec votre <strong>nom d'utilisateur</strong> et votre <strong>mot de passe</strong>.
-          </div>
         </div>
       )}
 

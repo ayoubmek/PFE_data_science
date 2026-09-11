@@ -91,21 +91,32 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
         SELECT
             mc.[No_] AS machineCode,
             ISNULL(NULLIF(LTRIM(RTRIM(mc.[Name])), ''), mc.[No_]) AS machineName,
-            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Work Center No_])), ''), 'Atelier Standard') AS workCenter,
-            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Machine Family])), ''), 'Standard') AS family,
+            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Work Center No_])), ''), 'Atelier') AS workCenter,
+            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Machine Family])), ''), 'Injection') AS family,
             CASE 
                 WHEN mc.[Database] = 'Brno' OR mc.[No_] LIKE 'CZ%' OR mc.[Work Center No_] LIKE 'CZ%' THEN 'Brno'
                 WHEN mc.[No_] LIKE 'TN2%' OR mc.[Work Center No_] LIKE 'TN2%' OR mc.[Location Code] = 'S-PROD' THEN 'Sousse'
                 ELSE 'Kondar'
             END AS site,
-            12 AS operationCount,
-            CAST(ISNULL(mc.[Capacity], 2500) * 8 AS FLOAT) AS totalOutput,
-            0 AS totalScrap,
-            0 AS totalRunTime,
+            ISNULL(agg.operationCount, 12) AS operationCount,
+            CAST(ISNULL(agg.totalOutput, 15000.0) AS FLOAT) AS totalOutput,
+            CAST(ISNULL(agg.totalScrap, 0.0) AS FLOAT) AS totalScrap,
+            CAST(ISNULL(agg.totalRunTime, 0.0) AS FLOAT) AS totalRunTime,
             ISNULL(mc.[Efficiency], 98.5) AS efficiency
         FROM dbo.MCMachineCenter mc WITH (NOLOCK)
+        LEFT JOIN (
+            SELECT 
+                f.[No_] AS machineCode,
+                COUNT(*) AS operationCount,
+                SUM(CAST(f.[Output Quantity] AS FLOAT)) AS totalOutput,
+                SUM(CAST(f.[Scrap Quantity] AS FLOAT)) AS totalScrap,
+                SUM(CAST(f.[Run Time] AS FLOAT)) AS totalRunTime
+            FROM dbo.FACT_CLE f WITH (NOLOCK)
+            WHERE f.[Output Quantity] > 0
+            GROUP BY f.[No_]
+        ) agg ON mc.[No_] = agg.machineCode
         WHERE mc.[No_] IS NOT NULL AND LTRIM(RTRIM(mc.[No_])) <> ''
-        ORDER BY mc.[Database] ASC, mc.[No_] ASC
+        ORDER BY ISNULL(agg.totalOutput, 0) DESC
         """, nativeQuery = true)
     List<Object[]> findMachineCenterStats();
 

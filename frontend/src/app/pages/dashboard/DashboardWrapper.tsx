@@ -356,19 +356,6 @@ const DashboardPage: FC = () => {
             Tableau de Bord Décisionnel Industriel
           </h1>
         </div>
-        <div className='d-flex gap-2'>
-          <button
-            type='button'
-            className='btn btn-sm btn-light-primary fw-bold'
-            onClick={() => {
-              globalCachedDashboardData = null
-              fetchDashboardData()
-            }}
-          >
-            <KTIcon iconName='arrows-circle' className='fs-4 me-1' />
-            Actualiser
-          </button>
-        </div>
       </div>
 
       {/* 2. Top 4 Cartes KPI Exécutives */}
@@ -559,7 +546,9 @@ const DashboardPage: FC = () => {
                           </div>
                         </td>
                         <td>
-                          <span className='badge badge-light-secondary fw-bold fs-8'>{group.count} réf.</span>
+                          <span className='badge badge-light-primary text-primary fw-bolder fs-7 px-2 py-1'>
+                            {group.count} réf.
+                          </span>
                         </td>
                         <td className='fw-bolder text-gray-900'>{group.quantity.toLocaleString()} unités</td>
                         <td>

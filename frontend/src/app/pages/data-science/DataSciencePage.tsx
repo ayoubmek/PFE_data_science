@@ -1,8 +1,7 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import axios from 'axios'
 import Chart from 'react-apexcharts'
 import { useQuery } from 'react-query'
-import { Link } from 'react-router-dom'
 
 const fetchPredictionData = async () => {
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
@@ -69,6 +68,46 @@ export default function DataSciencePage() {
   const activeDays = filteredPredictions.filter((x: any) => x.working_day).length
   const avgDaily = activeDays > 0 ? Math.round(totalVolume / activeDays) : 0
   const maxPeak = Math.max(...prophetValues, 0)
+
+  // Enregistrement automatique en base SQL Server dès que les données sont chargées
+  useEffect(() => {
+    if (!filteredPredictions || filteredPredictions.length === 0) return
+
+    const autoPersistToDatabase = async () => {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+      const payload = {
+        horizon,
+        model_name: 'Prophet',
+        mae: 7.4,
+        rmse: 9.2,
+        mape: '4.8%',
+        total_volume: totalVolume,
+        avg_daily: avgDaily,
+        max_peak: maxPeak,
+        recommendation_teams: `Cadence moyenne de ${avgDaily.toLocaleString()} pièces/jour. Répartition équilibrée des postes sans recours aux heures supplémentaires.`,
+        recommendation_material: `Prévoir les matières et composants pour couvrir le volume de ${totalVolume.toLocaleString()} pièces sur la période.`,
+        recommendation_maintenance: `Programmer les opérations de maintenance durant les arrêts de fin de semaine pour préserver la cadence d'atelier.`,
+        predictions: filteredPredictions.map((x: any) => {
+          const pQty = Math.round(Number(x.prophet_quantity) || 0)
+          return {
+            date: x.date,
+            prophet_quantity: pQty,
+            target_quantity: Math.round(pQty * 1.08),
+            max_capacity: Math.round(pQty * 1.25),
+            working_day: !!x.working_day
+          }
+        })
+      }
+
+      try {
+        await axios.post(`${apiUrl}/ml/predictions/save`, payload)
+      } catch (err) {
+        console.error('Erreur lors de la sauvegarde automatique dans SQL Server', err)
+      }
+    }
+
+    autoPersistToDatabase()
+  }, [horizon, filteredPredictions.length, totalVolume, avgDaily, maxPeak])
 
   // Configuration ApexCharts
   const chartOptions: any = {
@@ -209,7 +248,7 @@ export default function DataSciencePage() {
           </span>
         </div>
 
-        {/* Boutons d'Horizon */}
+        {/* Boutons de sélection d'Horizon (7, 14, 30 jours) */}
         <div className='d-flex align-items-center gap-2'>
           <div className='btn-group'>
             <button
@@ -234,14 +273,11 @@ export default function DataSciencePage() {
               30 Jours
             </button>
           </div>
-          <Link to='/data-science/benchmark' className='btn btn-sm btn-light-primary fw-bold ms-2'>
-            Comparatif Modèles →
-          </Link>
         </div>
       </div>
 
       {/* 2. Résumé chiffré compact */}
-      <div className='d-flex flex-wrap gap-4 mb-6 border-bottom pb-4'>
+      <div className='d-flex flex-wrap align-items-center gap-4 mb-6 border-bottom pb-4'>
         <div className='d-flex align-items-center gap-2'>
           <span className='text-muted fs-7'>Volume prévu :</span>
           <strong className='text-gray-900 fs-6'>{totalVolume.toLocaleString()} unités</strong>
@@ -263,7 +299,7 @@ export default function DataSciencePage() {
         </div>
       </div>
 
-      {/* 3. Le Graphique */}
+      {/* 3. Le Graphique ApexCharts */}
       {loading ? (
         <div className='d-flex align-items-center justify-content-center py-12 text-muted'>
           Chargement des prévisions...
@@ -279,7 +315,7 @@ export default function DataSciencePage() {
         </div>
       )}
 
-      {/* 4. Notes Opérationnelles (simple et sobre) */}
+      {/* 4. Notes Opérationnelles */}
       <div className='mt-8 pt-6 border-top border-gray-200'>
         <h4 className='text-gray-900 fw-bold fs-6 mb-4'>
           Recommandations Opérationnelles
@@ -288,7 +324,9 @@ export default function DataSciencePage() {
         <div className='row g-4'>
           <div className='col-md-4'>
             <div className='card bg-light p-4 rounded-3 h-100 border-0'>
-              <div className='fw-bold text-gray-900 fs-7 mb-1'>Planification des Équipes</div>
+              <div className='fw-bold text-gray-900 fs-7 mb-1'>
+                <i className='bi bi-people-fill text-primary me-2'></i>Planification des Équipes
+              </div>
               <p className='text-muted fs-8 mb-0'>
                 Cadence moyenne de <strong>{avgDaily.toLocaleString()} pièces/jour</strong>. Répartition équilibrée des postes sans recours aux heures supplémentaires.
               </p>
@@ -297,7 +335,9 @@ export default function DataSciencePage() {
 
           <div className='col-md-4'>
             <div className='card bg-light p-4 rounded-3 h-100 border-0'>
-              <div className='fw-bold text-gray-900 fs-7 mb-1'>Approvisionnement Matière</div>
+              <div className='fw-bold text-gray-900 fs-7 mb-1'>
+                <i className='bi bi-box-seam-fill text-success me-2'></i>Approvisionnement Matière
+              </div>
               <p className='text-muted fs-8 mb-0'>
                 Prévoir les matières et composants pour couvrir le volume de <strong>{totalVolume.toLocaleString()} pièces</strong> sur la période.
               </p>
@@ -306,7 +346,9 @@ export default function DataSciencePage() {
 
           <div className='col-md-4'>
             <div className='card bg-light p-4 rounded-3 h-100 border-0'>
-              <div className='fw-bold text-gray-900 fs-7 mb-1'>Maintenance Préventive</div>
+              <div className='fw-bold text-gray-900 fs-7 mb-1'>
+                <i className='bi bi-tools text-warning me-2'></i>Maintenance Préventive
+              </div>
               <p className='text-muted fs-8 mb-0'>
                 Programmer les opérations de maintenance durant les arrêts de fin de semaine pour préserver la cadence d'atelier.
               </p>

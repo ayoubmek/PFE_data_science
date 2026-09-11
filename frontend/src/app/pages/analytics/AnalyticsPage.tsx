@@ -245,49 +245,75 @@ export default function AnalyticsPage() {
     }
   }
 
-  // Graphique 3 : Top 8 Machines (Horizontal Bar)
+  // Graphique 3 : Top 8 Machines (Horizontal Bar) - Mode Pro
   const topMachinesBarOptions: any = {
     series: [{
-      name: 'Volume Produit',
+      name: 'Volume Produit Réel',
       data: top8Output.map((m) => Math.round(m.totalOutput || 0))
     }],
     options: {
       chart: {
         fontFamily: 'Inter, sans-serif',
         type: 'bar',
-        height: 290,
+        height: 310,
         toolbar: { show: false }
       },
       plotOptions: {
         bar: {
           horizontal: true,
-          barHeight: '50%',
-          borderRadius: 4
+          barHeight: '62%',
+          borderRadius: 6,
+          distributed: true,
+          dataLabels: {
+            position: 'top'
+          }
         }
       },
+      colors: [
+        '#009EF7', '#0083FF', '#22C55E', '#50CD89',
+        '#7239EA', '#F59E0B', '#E11D48', '#0D9488'
+      ],
       dataLabels: {
         enabled: true,
-        formatter: (val: number) => `${(val / 1000).toFixed(0)}k unités`,
-        style: { fontSize: '10px', fontWeight: '600', colors: ['#ffffff'] },
-        offsetX: -10
+        formatter: (val: number) => {
+          if (!val || val <= 0) return ''
+          return `${val.toLocaleString()} u`
+        },
+        style: {
+          fontSize: '11px',
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: '700',
+          colors: ['#181C32']
+        },
+        offsetX: 42
       },
       xaxis: {
         categories: top8Output.map((m) => m.nom || m.code),
+        axisBorder: { show: false },
+        axisTicks: { show: false },
         labels: {
-          style: { colors: '#7E8299', fontSize: '11px' },
-          formatter: (val: number) => (val >= 1000 ? `${(val / 1000).toFixed(0)}k` : `${val}`)
+          style: { colors: '#7E8299', fontSize: '11px', fontWeight: '500' },
+          formatter: (val: number) => (val >= 1000 ? `${Math.round(val / 1000)}k` : `${val}`)
         }
       },
       yaxis: {
         labels: {
-          style: { colors: '#3F4254', fontSize: '11px', fontWeight: '600' },
-          maxWidth: 160
+          style: { colors: '#181C32', fontSize: '12px', fontWeight: '600' },
+          maxWidth: 220
         }
       },
-      colors: ['#50CD89'],
-      grid: { borderColor: '#EFF2F5', strokeDashArray: 4 },
+      grid: {
+        borderColor: '#F1F1F4',
+        strokeDashArray: 4,
+        xaxis: { lines: { show: true } },
+        yaxis: { lines: { show: false } }
+      },
+      legend: { show: false },
       tooltip: {
-        y: { formatter: (val: number) => `${val.toLocaleString()} pièces` }
+        theme: 'light',
+        y: {
+          formatter: (val: number) => `${val.toLocaleString()} pièces produites (dbo.FACT_CLE)`
+        }
       }
     }
   }
@@ -361,9 +387,6 @@ export default function AnalyticsPage() {
               <KTIcon iconName='chart-line-up' className='fs-1 text-primary me-3' />
               Tableau de Bord Analytique & Performance
             </h1>
-            <span className='text-muted fw-semibold fs-7'>
-              Indicateurs clés de performance industrielle, rendement opérationnel (TRS) et suivi des centres de charge
-            </span>
           </div>
 
           {/* Filtres interactifs */}
@@ -532,12 +555,12 @@ export default function AnalyticsPage() {
               </h3>
             </div>
             <div className='card-body pt-2'>
-              <div style={{ height: '300px' }}>
+              <div style={{ height: '320px' }}>
                 <Chart
                   options={topMachinesBarOptions.options}
                   series={topMachinesBarOptions.series}
                   type='bar'
-                  height={290}
+                  height={310}
                 />
               </div>
             </div>
