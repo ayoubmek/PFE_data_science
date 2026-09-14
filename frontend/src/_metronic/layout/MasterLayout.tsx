@@ -27,17 +27,17 @@ const MasterLayout = () => {
     window.addEventListener('open-nexora-drawer', handleOpen)
     window.addEventListener('close-nexora-drawer', handleClose)
     window.addEventListener('toggle-nexora-drawer', handleToggle)
-    window.addEventListener('open-copilot-drawer', handleOpen)
-    window.addEventListener('close-copilot-drawer', handleClose)
-    window.addEventListener('toggle-copilot-drawer', handleToggle)
+    window.addEventListener('open-agent-drawer', handleOpen)
+    window.addEventListener('close-agent-drawer', handleClose)
+    window.addEventListener('toggle-agent-drawer', handleToggle)
 
     return () => {
       window.removeEventListener('open-nexora-drawer', handleOpen)
       window.removeEventListener('close-nexora-drawer', handleClose)
       window.removeEventListener('toggle-nexora-drawer', handleToggle)
-      window.removeEventListener('open-copilot-drawer', handleOpen)
-      window.removeEventListener('close-copilot-drawer', handleClose)
-      window.removeEventListener('toggle-copilot-drawer', handleToggle)
+      window.removeEventListener('open-agent-drawer', handleOpen)
+      window.removeEventListener('close-agent-drawer', handleClose)
+      window.removeEventListener('toggle-agent-drawer', handleToggle)
     }
   }, [])
 
@@ -63,9 +63,9 @@ const MasterLayout = () => {
 
       <ScrollTop />
 
-      {/* Floating Action Button (FAB) for Copilot IA */}
+      {/* Floating Action Button (FAB) for Agent IA */}
       <div
-        id='kt_copilot_fab_wrapper'
+        id='kt_agent_fab_wrapper'
         style={{
           position: 'fixed',
           bottom: '24px',
@@ -75,12 +75,12 @@ const MasterLayout = () => {
       >
         <button
           type='button'
-          id='kt_copilot_fab_button'
+          id='kt_agent_fab_button'
           className='btn btn-icon rounded-circle d-flex align-items-center justify-content-center border-0 position-relative'
           onClick={() => setIsDrawerOpen((prev) => !prev)}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          title='Assistant Décisionnel'
+          title='Agent IA - Assistant Décisionnel'
           style={{
             width: '56px',
             height: '56px',
@@ -121,7 +121,7 @@ const MasterLayout = () => {
         </button>
       </div>
 
-      {/* Adjust ScrollTop position so it floats cleanly above Copilot button */}
+      {/* Adjust ScrollTop position so it floats cleanly above Agent button */}
       <style>{`
         #kt_scrolltop {
           bottom: 96px !important;

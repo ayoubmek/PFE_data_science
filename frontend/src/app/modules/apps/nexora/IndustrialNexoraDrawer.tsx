@@ -10,23 +10,26 @@ export interface NexoraMessage {
   suggestions?: string[]
 }
 
-export type CopilotMessage = NexoraMessage
+export type AgentMessage = NexoraMessage
 
 export const openNexoraDrawer = () => {
   window.dispatchEvent(new CustomEvent('open-nexora-drawer'))
+  window.dispatchEvent(new CustomEvent('open-agent-drawer'))
 }
 
 export const toggleNexoraDrawer = () => {
   window.dispatchEvent(new CustomEvent('toggle-nexora-drawer'))
+  window.dispatchEvent(new CustomEvent('toggle-agent-drawer'))
 }
 
 export const closeNexoraDrawer = () => {
   window.dispatchEvent(new CustomEvent('close-nexora-drawer'))
+  window.dispatchEvent(new CustomEvent('close-agent-drawer'))
 }
 
-export const openCopilotDrawer = openNexoraDrawer
-export const toggleCopilotDrawer = toggleNexoraDrawer
-export const closeCopilotDrawer = closeNexoraDrawer
+export const openAgentDrawer = openNexoraDrawer
+export const toggleAgentDrawer = toggleNexoraDrawer
+export const closeAgentDrawer = closeNexoraDrawer
 
 const DEFAULT_SUGGESTIONS = [
   "Rendement des presses d'injection",
@@ -72,17 +75,17 @@ export const IndustrialNexoraDrawer: React.FC<DrawerProps> = ({ isOpen: controll
     window.addEventListener('open-nexora-drawer', handleOpen)
     window.addEventListener('close-nexora-drawer', handleCloseEvent)
     window.addEventListener('toggle-nexora-drawer', handleToggle)
-    window.addEventListener('open-copilot-drawer', handleOpen)
-    window.addEventListener('close-copilot-drawer', handleCloseEvent)
-    window.addEventListener('toggle-copilot-drawer', handleToggle)
+    window.addEventListener('open-agent-drawer', handleOpen)
+    window.addEventListener('close-agent-drawer', handleCloseEvent)
+    window.addEventListener('toggle-agent-drawer', handleToggle)
 
     return () => {
       window.removeEventListener('open-nexora-drawer', handleOpen)
       window.removeEventListener('close-nexora-drawer', handleCloseEvent)
       window.removeEventListener('toggle-nexora-drawer', handleToggle)
-      window.removeEventListener('open-copilot-drawer', handleOpen)
-      window.removeEventListener('close-copilot-drawer', handleCloseEvent)
-      window.removeEventListener('toggle-copilot-drawer', handleToggle)
+      window.removeEventListener('open-agent-drawer', handleOpen)
+      window.removeEventListener('close-agent-drawer', handleCloseEvent)
+      window.removeEventListener('toggle-agent-drawer', handleToggle)
     }
   }, [])
 
@@ -123,11 +126,11 @@ export const IndustrialNexoraDrawer: React.FC<DrawerProps> = ({ isOpen: controll
     try {
       let responseData: any = null
       try {
-        const res = await axios.post(`${apiUrl}/ai/copilot/chat`, { message: text }, { timeout: 4000 })
+        const res = await axios.post(`${apiUrl}/ai/agent/chat`, { message: text }, { timeout: 4000 })
         responseData = res.data
       } catch (backendErr) {
         try {
-          const directRes = await axios.post('http://localhost:8000/ai/copilot/chat', { message: text }, { timeout: 3000 })
+          const directRes = await axios.post('http://localhost:8000/ai/agent/chat', { message: text }, { timeout: 3000 })
           responseData = directRes.data
         } catch (mlErr) {
           responseData = generateClientFallback(text)
@@ -535,5 +538,5 @@ Vous pouvez consulter les rendements machines, le taux de rebut ou les stocks cr
 }
 
 export const NexoraDrawer = IndustrialNexoraDrawer
-export const IndustrialCopilotDrawer = IndustrialNexoraDrawer
+export const IndustrialAgentDrawer = IndustrialNexoraDrawer
 export default IndustrialNexoraDrawer

@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/ai/copilot")
+@RequestMapping("/api/ai/agent")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @Slf4j
-public class AiCopilotController {
+public class AiAgentController {
 
     private final WebClient.Builder webClientBuilder;
 
@@ -35,7 +35,7 @@ public class AiCopilotController {
 
         try {
             Object response = client().post()
-                    .uri("/ai/copilot/chat")
+                    .uri("/ai/agent/chat")
                     .bodyValue(payload)
                     .retrieve()
                     .bodyToMono(Object.class)
@@ -44,7 +44,7 @@ public class AiCopilotController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.warn("FastAPI ML service copilot unavailable or timed out ({}), providing resilient fallback", e.getMessage());
+            log.warn("FastAPI ML service agent unavailable or timed out ({}), providing resilient fallback", e.getMessage());
             return ResponseEntity.ok(generateFallbackResponse(userMsg));
         }
     }

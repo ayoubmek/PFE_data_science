@@ -72,3 +72,8 @@ backend/target/
 
 # Word temp files
 ~$*.docx
+
+# Scratch & temporary scripts
+scratch/
+Rapport/scratch/
+rapport_pfe_20(2).pdf

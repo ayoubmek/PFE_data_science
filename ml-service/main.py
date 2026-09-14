@@ -413,7 +413,7 @@ def get_insights():
     except Exception as e:
         raise HTTPException(500, str(e))
 
-class CopilotChatRequest(BaseModel):
+class AgentChatRequest(BaseModel):
     message: str
     history: Optional[List[dict]] = None
 
@@ -448,8 +448,8 @@ def _call_groq_llm(user_msg: str) -> Optional[str]:
         print(f"Groq API call fallback to local semantic engine: {e}")
     return None
 
-@app.post("/ai/copilot/chat")
-def copilot_chat(req: CopilotChatRequest):
+@app.post("/ai/agent/chat")
+def agent_chat(req: AgentChatRequest):
     msg = (req.message or "").strip()
     msg_lower = msg.lower()
     engine = get_engine()

@@ -4,7 +4,7 @@ const { execSync } = require('child_process');
 const fs   = require('fs');
 const path = require('path');
 
-const RAPPORT_IN  = 'rapport_pfe_v76_raw.docx';
+const RAPPORT_IN  = process.env.RAPPORT_IN || (fs.existsSync('scratch/temp_raw.docx') ? 'scratch/temp_raw.docx' : 'rapport_pfe_v76_raw.docx');
 const GARDE_IN    = 'r.docx';
 const OUTPUT      = 'rapport_pfe_final_nexora_v4.docx';
 
@@ -30,7 +30,8 @@ extractDocx(RAPPORT_IN, RP_TMP);
 let gardeDocXml   = fs.readFileSync(`${R_TMP}/word/document.xml`,  'utf8');
 
 
-gardeDocXml = gardeDocXml.replace("Developpement d'une plateforme web logistique", "Conception et Développement d’une Plateforme de Suivi de Production et de Gestion des Stocks");
+gardeDocXml = gardeDocXml.replace(/Conception et D[^<]*?pour l[^<]*?Arkan/g, "Conception et Développement d’une Plateforme Intelligente de Gestion de Production et de Stock d’Atelier : Nexora");
+gardeDocXml = gardeDocXml.replace("Developpement d'une plateforme web logistique", "Conception et Développement d’une Plateforme Intelligente de Gestion de Production et de Stock d’Atelier : Nexora");
 gardeDocXml = gardeDocXml.replace(/<w:drawing>[\s\S]*?rIdArkan[\s\S]*?<\/w:drawing>/g, "");
 gardeDocXml = gardeDocXml.replace(/Arkan/g, "[..........]");
 gardeDocXml = gardeDocXml.replace("M. Ayoub Hammami", "[..........]");
@@ -135,13 +136,25 @@ fs.writeFileSync(`${RP_TMP}/word/document.xml`, newRapportDocXml, 'utf8');
 console.log('document.xml fusionné.');
 
 
-if (fs.existsSync(OUTPUT)) fs.unlinkSync(OUTPUT);
 const tmpZip = OUTPUT.replace('.docx', '_tmp.zip');
+if (fs.existsSync(tmpZip)) fs.unlinkSync(tmpZip);
 execSync(
   `powershell -Command "Compress-Archive -Path '${RP_TMP}\\*' -DestinationPath '${tmpZip}' -Force"`,
   { stdio: 'pipe' }
 );
-fs.renameSync(tmpZip, OUTPUT);
+
+let retries = 5;
+while (retries > 0) {
+  try {
+    fs.copyFileSync(tmpZip, OUTPUT);
+    fs.unlinkSync(tmpZip);
+    break;
+  } catch (err) {
+    retries--;
+    if (retries === 0) throw err;
+    execSync('powershell -Command "Start-Sleep -Milliseconds 800"');
+  }
+}
 console.log(`\n✓ Rapport final généré : ${OUTPUT}`);
 
 
