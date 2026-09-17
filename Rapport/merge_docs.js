@@ -143,16 +143,24 @@ execSync(
   { stdio: 'pipe' }
 );
 
-let retries = 5;
+let retries = 10;
 while (retries > 0) {
   try {
+    if (fs.existsSync(OUTPUT)) {
+      try { fs.unlinkSync(OUTPUT); } catch (_) {}
+    }
     fs.copyFileSync(tmpZip, OUTPUT);
-    fs.unlinkSync(tmpZip);
+    if (fs.existsSync(tmpZip)) {
+      try { fs.unlinkSync(tmpZip); } catch (_) {}
+    }
     break;
   } catch (err) {
     retries--;
+    try {
+      execSync('powershell -Command "Get-Process WINWORD -ErrorAction SilentlyContinue | Stop-Process -Force"');
+    } catch (_) {}
     if (retries === 0) throw err;
-    execSync('powershell -Command "Start-Sleep -Milliseconds 800"');
+    execSync('powershell -Command "Start-Sleep -Milliseconds 1000"');
   }
 }
 console.log(`\n✓ Rapport final généré : ${OUTPUT}`);

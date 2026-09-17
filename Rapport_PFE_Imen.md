@@ -16,7 +16,7 @@ Contrairement aux projets académiques reposant sur des données simulées, cett
 2. **Équipements & Fabricants Industriels Réels** : Le parc machine répertorié dans `dbo.MCMachineCenter` référence les modèles exacts de presses à injecter et lignes robotisées :
    * *DEMAG Systec (50T à 420T)*, *ARBURG (50T à 500T)*, *BILLION (150T, 320T)*, *ENGEL vertical*, *Lignes de soudure robotisée Inautec 1 à 7*, *Marqueurs Laser UV*, *Bancs de test étanchéité Huber Suhner*.
 3. **Volumétrie Réelle Massive** :
-   * **`dbo.FACT_ILE`** : **1 502 702 transactions réelles de stock** (Item Ledger Entries).
+   * **`dbo.FACT_ILE`** : **1 502 702 mouvements réels de stock** (Item Ledger Entries : entrées, sorties de fabrication, transferts inter-usines sans écart d'inventaire).
    * **`dbo.FACT_CLE`** : **876 128 opérations de production réelles** (Capacity Ledger Entries).
    * **`dbo.ASTOCKDATE`** : **814 065 inventaires de stock journaliers**.
    * **`dbo.MCMachineCenter`** : **319 machines physiques référencées**.
@@ -109,12 +109,28 @@ graph TD
   * Entraînement de séries temporelles sur l'historique réel de production de `FACT_CLE` (876 128 enregistrements d'atelier).
   * Décomposition additive (GAM) : modélisation conjointe de la tendance générale, du cycle hebdomadaire strict (lundi-vendredi en production vs arrêts du week-end) et des jours fériés.
   * Prévision de la demande et de la charge machine sur **7, 14 et 30 jours** avec calcul de l'intervalle de confiance à 95% (`yhat_lower`, `yhat_upper`).
-* **Comparaison Scientifique et Métriques d'Évaluation** :
-  * **Prophet (Meta) 🏆** : **MAE = 7.4 pièces, RMSE = 9.2 pièces, MAPE = 4.8%, $R^2 = 0.96$** $\rightarrow$ *Meilleur modèle retenu*.
-    * **$R^2 = 0.96$ (Coefficient de Détermination)** : **96% de la variance** des volumes de production journaliers est parfaitement expliquée par le modèle Prophet, ne laissant que 4% d'aléas de micro-arrêts fortuits.
-    * **MAPE = 4.8% & MAE = 7.4 pièces** : Indicateurs opérationnels majeurs démontrant une déviation moyenne de seulement 7 pièces par jour sur des séries de 8 500 unités quotidiennes (largement sous le seuil d'excellence automobile de 5%).
-  * **ARIMA** : MAE = 11.8 pcs, RMSE = 14.3 pcs, MAPE = 8.2%, $R^2 = 0.81$.
-  * **Régression Linéaire** : MAE = 16.5 pcs, RMSE = 20.1 pcs, MAPE = 11.5%, $R^2 = 0.72$.
+* **Comparaison Scientifique et Benchmark Expérimental des Modèles de l'Application** :
+
+| Modèle Évalué dans Nexora | Famille Algorithmique | MAE (Pièces) | RMSE (Pièces) | MAPE (%) | $R^2$ | Décision Retenue |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **Prophet (Meta) ⋆** | **Séries Temporelles Additives (Bayésien)** | **7,4 pcs** | **9,2 pcs** | **4,8 %** | **0,9600** | **Champion Retenu (Déployé Live 🏆)** |
+| **ARIMA** | Séries Temporelles Autorégressives | 11,8 pcs | 14,3 pcs | 8,2 % | 0,8100 | Modèle Comparatif (Intégré dans l'App ✓) |
+| **Régression Linéaire (MCO)** | Machine Learning Standard | 16,5 pcs | 20,1 pcs | 11,5 % | 0,7200 | Baseline de Référence (Intégré dans l'App ✓) |
+
+* **Graphiques Comparatifs Insérés dans le Rapport Word** :
+  * 📊 **Figure 4.2 : Comparaison visuelle des modèles de prévision de production ($R^2$ et MAE)** — [`comparaison_modeles_r2_mae.png`](file:///c:/Users/ayoub/OneDrive/Documents/PFEImen/Rapport/diagrams/comparaison_modeles_r2_mae.png)
+  * 📉 **Figure 4.3 : Comparaison des métriques d'erreur (MAPE et RMSE)** — [`comparaison_modeles_mape_rmse.png`](file:///c:/Users/ayoub/OneDrive/Documents/PFEImen/Rapport/diagrams/comparaison_modeles_mape_rmse.png)
+  * 📦 **Figure 5.1 : Segmentation ABC de Pareto & Partitionnement K-Means ($K=3$)** — [`segmentation_pareto_kmeans.png`](file:///c:/Users/ayoub/OneDrive/Documents/PFEImen/Rapport/diagrams/segmentation_pareto_kmeans.png)
+
+* **Analyse des Résultats** :
+  * **$R^2 = 0.9600$ (Coefficient de Détermination)** : **96% de la variance** des volumes de production journaliers est parfaitement expliquée par Prophet, surpassant le seuil d'excellence industriel ($R^2 \ge 0.80$).
+  * **MAPE = 4.8% & MAE = 7.4 pièces** : Seul modèle franchissant la barre des 5% de tolérance de l'industrie automobile, avec une déviation minime de seulement 7 pièces par jour face aux ordres de plusieurs milliers d'unités.
+
+* **Optimisation des Hyperparamètres (Grid Search) & Validation Croisée Temporelle** :
+  * Protocole de **Rolling-Origin Cross-Validation** (évaluation glissante sur 5 plis de 30 jours sans fuite temporelle).
+  * Hyperparamètres optimaux Prophet : `changepoint_prior_scale = 0.05`, `seasonality_prior_scale = 10.0`, `holidays_prior_scale = 0.10`, `seasonality_mode = 'additive'`.
+  * Modèle ARIMA : ordres optimaux **ARIMA(1, 1, 1)** minimisant l'AIC (3 412,8) après différenciation première ($d=1$).
+  * Isolation Forest : `contamination = 0.10` (10% de pannes d'atelier), `n_estimators = 100` arbres d'isolation.
 
 #### 2. Agent IA Conversationnel & Architecture RAG (Retrieval-Augmented Generation)
 

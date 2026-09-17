@@ -6,6 +6,7 @@ const {
   ExternalHyperlink
 } = require('docx');
 const fs = require('fs');
+const path = require('path');
 
 // --- PALETTE & STYLES ---
 const NAVY = "000000";
@@ -238,6 +239,35 @@ const emptyFigurePlaceholder = (captionText, heightPt = 180) => [
   }),
   pb()
 ];
+
+const imageFigure = (imageRelPath, captionText, maxW = 540, maxH = 400) => {
+  const fullPath = path.isAbsolute(imageRelPath) ? imageRelPath : path.join(__dirname, imageRelPath);
+  if (fs.existsSync(fullPath)) {
+    const dims = fitImage(fullPath, maxW, maxH);
+    return [
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 140, after: 60 },
+        children: [
+          new ImageRun({
+            data: fs.readFileSync(fullPath),
+            transformation: { width: Math.round(dims.width), height: Math.round(dims.height) },
+          })
+        ]
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 40, after: 140 },
+        children: [
+          new TextRun({ text: captionText, font: FONT, size: 20, italics: true, color: GRAY })
+        ]
+      }),
+      pb()
+    ];
+  } else {
+    return emptyFigurePlaceholder(captionText);
+  }
+};
 
 const formulaBlock = (formulaText, eqNum) => {
   return new Table({
@@ -503,80 +533,25 @@ const doc = new Document({
   },
   sections: [
     // -------------------------------------------------------------
-    // SECTION 1 : PAGE DE GARDE TEMPORAIRE (REMPLACEE LORS DU MERGE)
+    // SECTION 1 : PAGE DE GARDE VIDE (POUR INSERTION LIBRE)
     // -------------------------------------------------------------
     {
       properties: {
         page: {
           size: { width: 11906, height: 16838 },
-          margin: { top: 720, right: 1080, bottom: 720, left: 1080 }
+          margin: { top: 1440, right: 1440, bottom: 1440, left: 1800 }
         }
       },
       footers: { default: new Footer({ children: [] }) },
+      headers: { default: new Header({ children: [] }) },
       children: [
         new Paragraph({
-          children: [new ImageRun({ data: fs.readFileSync('scratch/garde_extract/content/word/media/image1.png'), transformation: { width: 595, height: 70 } })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 0 },
-        }),
-        new Paragraph({
-          children: [new ImageRun({
-            data: fs.readFileSync('scratch/garde_extract/content/word/media/image2.png'),
-            transformation: { width: 500, height: 620 },
-            floating: {
-              horizontalPosition: { offset: 360000 },
-              verticalPosition: { offset: 1260000 },
-              allowOverlap: true, behindDocument: true, layoutInCell: false,
-            },
-          })],
-          spacing: { before: 0, after: 0 },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: "RÉPUBLIQUE TUNISIENNE\nMINISTÈRE DE L'ENSEIGNEMENT SUPÉRIEUR ET DE LA RECHERCHE SCIENTIFIQUE\nUNIVERSITÉ DE MONASTIR\nFACULTÉ DES SCIENCES DE MONASTIR", font: FONT, size: 20, bold: true, color: DARK })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 100, after: 200 },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: "MÉMOIRE DE PROJET DE FIN D'ÉTUDES", font: FONT, size: 28, bold: true, color: BLACK })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 300, after: 150 },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: "Pour l'obtention du Diplôme de Mastère Professionnel en Science des Données (Data Science)", font: FONT, size: 22, italic: true, color: DARK })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 200 },
-        }),
-        new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 0, after: 40 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000", space: 2 } } }),
-        new Paragraph({
-          children: [new TextRun({ text: "Sujet :", font: FONT, size: 20, color: DARK, italic: true })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 150, after: 60 },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: "Conception et Développement d'une Plateforme Intelligente de Gestion de Production et de Stock d'Atelier avec Modélisation Prédictive et Agent IA Décisionnel : Nexora", font: FONT, size: 24, bold: true, color: BLACK })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 150 },
-        }),
-        new Paragraph({ children: [new TextRun({ text: "" })], spacing: { before: 0, after: 40 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000", space: 2 } } }),
-        new Paragraph({
-          children: [new TextRun({ text: "Élaboré par : Imen", font: FONT, size: 24, bold: true, color: BLACK })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 200, after: 100 },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: "Entreprise d'accueil : Groupe Industriel Plasturgie & Équipementier Automobile (Tier-1)\nSites de Tunisie (Kondar & Sousse) et République Tchèque (Brno)", font: FONT, size: 20, italic: true, color: DARK })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 200 },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: "Année Universitaire : 2025 - 2026", font: FONT, size: 22, bold: true, color: DARK })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 200, after: 0 },
-        }),
+          children: [new TextRun({ text: "" })],
+          spacing: { before: 0, after: 0 }
+        })
       ]
     },
 
-    // -------------------------------------------------------------
     // SECTION 2 : PAGES PRÉLIMINAIRES (NUMÉROTATION ROMAINE)
     // -------------------------------------------------------------
     {
@@ -629,9 +604,9 @@ const doc = new Document({
 
         // RÉSUMÉ FR
         frontTitle("Résumé"),
-        body("Dans le cadre de l'industrie 4.0 et de l'optimisation des procédés de plasturgie automobile (équipementier Tier-1), ce projet de fin d'études présente la conception et le déploiement de **Nexora**, une plateforme intelligente de pilotage de production et de gestion des stocks multi-sites (usines de Kondar/Sousse en Tunisie et Brno en République Tchèque). Face à l'hétérogénéité des outils d'atelier et à la dispersion des données issues de 319 machines réelles, Nexora unifie le suivi temps réel de la fabrication et la gestion d'un historique de 1,5 million de mouvements de stock (table `FACT_ILE`)."),
+        body("Dans le cadre de l'industrie 4.0 et de l'optimisation des procédés de plasturgie automobile (équipementier Tier-1), ce projet de fin d'études présente la conception et le déploiement de **Nexora**, une plateforme intelligente de pilotage de production et de gestion des stocks multi-sites (usines de Kondar/Sousse en Tunisie et Brno en République Tchèque). Face à l'hétérogénéité des outils d'atelier et à la dispersion des données issues de 319 machines réelles, Nexora unifie le suivi temps réel de la fabrication et la gestion d'un historique de 1,5 million de mouvements de stock."),
         pb(),
-        body("Le système intègre une architecture modulaire à 4 niveaux s'appuyant sur Spring Boot 3 (Java 17), Microsoft SQL Server (`dbDWH`), un frontend réactif React.js doté du design system Metronic 8, et un microservice de Machine Learning sous FastAPI (Python 3.10). L'application assure le calcul instantané du Taux de Rendement Global (TRG/OEE), la classification ABC d'inventaire selon Pareto, ainsi que la modélisation prédictive des cadences de fabrication et des niveaux de stock via l'algorithme Prophet de Meta (MAPE de 4,8 % et MAE de 7,4 pièces), surpassant les modèles traditionnels ARIMA et régression linéaire."),
+        body("Le système intègre une architecture modulaire à 4 niveaux s'appuyant sur Spring Boot 3 (Java 17), Microsoft SQL Server (Entrepôt de Données), un frontend réactif React.js doté du design system Metronic 8, et un microservice de Machine Learning sous FastAPI (Python 3.10). L'application assure le calcul instantané du Taux de Rendement Global (TRG/OEE), la classification ABC d'inventaire selon Pareto, ainsi que la modélisation prédictive des cadences de fabrication et des niveaux de stock via l'algorithme Prophet de Meta (MAPE de 4,8 % et MAE de 7,4 pièces), surpassant les modèles traditionnels ARIMA et régression linéaire."),
         pb(),
         body("La plateforme intègre en outre des tableaux de bord décisionnels interactifs sous Microsoft Power BI et un **Agent IA Décisionnel Industriel** capable de diagnostiquer les arrêts machines et de formuler des recommandations proactives d'ordonnancement d'équipes (régime 3x8) et de réapprovisionnement."),
         pb(),
@@ -641,9 +616,9 @@ const doc = new Document({
 
         // ABSTRACT EN
         frontTitle("Abstract"),
-        body("In the context of Industry 4.0 and automotive plastics manufacturing optimization (Tier-1 supplier), this Master's graduation project introduces the design and implementation of **Nexora**, an intelligent production monitoring and multi-site inventory management platform (Tunisia plants in Kondar/Sousse and Czech Republic plant in Brno). Addressing operational fragmentation across 319 shop-floor machines, Nexora centralizes real-time shop-floor tracking and manages over 1.5 million inventory ledger transactions (`FACT_ILE` table)."),
+        body("In the context of Industry 4.0 and automotive plastics manufacturing optimization (Tier-1 supplier), this Master's graduation project introduces the design and implementation of **Nexora**, an intelligent production monitoring and multi-site inventory management platform (Tunisia plants in Kondar/Sousse and Czech Republic plant in Brno). Addressing operational fragmentation across 319 shop-floor machines, Nexora centralizes real-time shop-floor tracking and manages over 1.5 million inventory ledger transactions."),
         pb(),
-        body("The software architecture features a decoupled four-tier stack comprising Spring Boot 3 (Java 17), Microsoft SQL Server (`dbDWH`), a reactive React.js frontend powered by Metronic 8 design system, and a Python 3.10 Machine Learning microservice built with FastAPI. The solution automates real-time Overall Equipment Effectiveness (OEE) calculation, Pareto ABC stock segmentation, and time series forecasting using Meta's Prophet algorithm (achieving 4.8% MAPE and 7.4 pcs MAE), significantly outperforming baseline ARIMA and linear regression models."),
+        body("The software architecture features a decoupled four-tier stack comprising Spring Boot 3 (Java 17), Microsoft SQL Server (Data Warehouse), a reactive React.js frontend powered by Metronic 8 design system, and a Python 3.10 Machine Learning microservice built with FastAPI. The solution automates real-time Overall Equipment Effectiveness (OEE) calculation, Pareto ABC stock segmentation, and time series forecasting using Meta's Prophet algorithm (achieving 4.8% MAPE and 7.4 pcs MAE), significantly outperforming baseline ARIMA and linear regression models."),
         pb(),
         body("Furthermore, the platform integrates interactive Microsoft Power BI executive dashboards and an **Industrial Decision AI Agent** designed to diagnose machine downtime, generate proactive reorder alerts, and prescribe optimal 3x8 workforce shift schedules."),
         pb(),
@@ -711,7 +686,7 @@ const doc = new Document({
         tocLine("3.1 Introduction", 1, "29"),
         tocLine("3.2 Sprint Backlog du Sprint 1", 1, "29"),
         tocLine("3.3 Présentation des Données du Data Warehouse", 1, "30"),
-        tocLine("3.3.1 Structure et Sources du Data Warehouse dbDWH", 2, "30"),
+        tocLine("3.3.1 Structure et Sources du Data Warehouse d'Entreprise", 2, "30"),
         tocLine("3.3.2 Tables Clés du Projet", 2, "31"),
         tocLine("3.3.3 Modèle Relationnel Entités-Associations", 2, "32"),
         tocLine("3.4 Analyse Exploratoire des Données (EDA) & Diagnostic Qualité", 1, "33"),
@@ -746,6 +721,7 @@ const doc = new Document({
         tocLine("4.6.2 Modèle Autorégressif ARIMA", 2, "50"),
         tocLine("4.6.3 Modèle Additif Prophet de Meta (Champion)", 2, "51"),
         tocLine("4.6.4 Détection d'Anomalies : Isolation Forest", 2, "52"),
+        tocLine("4.6.5 Optimisation des Hyperparamètres et Validation Croisée", 2, "52"),
         tocLine("4.7 Benchmark Comparatif des Modèles de l'Application", 1, "53"),
         tocLine("4.8 Sélection et Justification Multicritère de Prophet", 1, "54"),
         tocLine("4.9 Projections à 30 jours, Analyse des Incertitudes (95%) et Fallback", 1, "55"),
@@ -763,7 +739,7 @@ const doc = new Document({
         tocLine("5.6.2 Estimation du Budget d'Approvisionnement", 2, "64"),
         tocLine("5.6.3 Alertes Intelligentes et Priorisation par Coût d'Arrêt Évité", 2, "64"),
         tocLine("5.6.4 Moteur Prescriptif du Point de Commande (ROP)", 2, "65"),
-        tocLine("5.7 Analyse Approfondie et Résultats Obtenus sur ASTOCKDATE", 1, "66"),
+        tocLine("5.7 Analyse Approfondie et Résultats de Gestion des Stocks", 1, "66"),
         tocLine("5.7.1 Segmentation ABC et Analyse de Pareto", 2, "66"),
         tocLine("5.7.2 Clustering Non Supervisé K-Means des Articles", 2, "67"),
         tocLine("5.7.3 Moteur de Simulation Scénaristique What-If", 2, "68"),
@@ -801,30 +777,24 @@ const doc = new Document({
         tocLine("Figure 2.2 : Architecture logique à 4 niveaux du système Nexora", 1, "23"),
         tocLine("Figure 2.3 : Architecture physique et infrastructure de déploiement", 1, "24"),
         tocLine("Figure 2.4 : Diagramme de classes global du modèle conceptuel", 1, "25"),
-        tocLine("Figure 3.1 : Schéma relationnel Entités-Associations du Data Warehouse (dbDWH)", 1, "32"),
+        tocLine("Figure 3.1 : Schéma relationnel Entités-Associations du Data Warehouse", 1, "32"),
         tocLine("Figure 3.2 : Diagramme d'activité du pipeline de nettoyage et d'intégration ETL", 1, "37"),
-        tocLine("Figure 3.3 : Diagramme de cas d'utilisation : Sprint 1 – Sécurité et Accès", 1, "39"),
-        tocLine("Figure 3.4 : Diagramme de classes : Sprint 1 – Sécurité et Accès", 1, "40"),
-        tocLine("Figure 3.5 : Diagramme de séquence : Authentification JWT et contrôle d'accès RBAC", 1, "40"),
-        tocLine("Figure 3.6 : Capture d'écran : Console d'administration des utilisateurs et contrôle RBAC", 1, "41"),
-        tocLine("Figure 4.1 : Diagramme de séquence : Inférence prédictive Spring Boot – FastAPI (Prophet)", 1, "45"),
-        tocLine("Figure 4.2 : Diagramme de classes : Sprint 2 – Module d'Intelligence Artificielle", 1, "46"),
-        tocLine("Figure 4.3 : Diagramme d'activité : Entraînement et décomposition des séries temporelles (Prophet)", 1, "56"),
-        tocLine("Figure 5.1 : Diagramme de cas d'utilisation : Sprint 3 – Gestion des Stocks et Mouvements", 1, "61"),
-        tocLine("Figure 5.2 : Diagramme de classes : Sprint 3 – Gestion des Stocks et Mouvements", 1, "62"),
-        tocLine("Figure 5.3 : Diagramme de séquence : Traitement d'une alerte de rupture et réapprovisionnement", 1, "66"),
-        tocLine("Figure 5.4 : Diagramme d'activité : Processus de réapprovisionnement et rééquilibrage de stock", 1, "70"),
+        tocLine("Figure 3.3 : Capture d'écran : Console d'administration des utilisateurs et contrôle RBAC", 1, "41"),
+        tocLine("Figure 4.1 : Capture d'écran : Interface de prévision Prophet avec bandes de confiance à 95%", 1, "56"),
+        tocLine("Figure 4.2 : Comparaison visuelle des modèles de prévision de production (R² et MAE)", 1, "57"),
+        tocLine("Figure 4.3 : Comparaison visuelle des métriques d'erreur (MAPE et RMSE)", 1, "58"),
+        tocLine("Figure 5.1 : Segmentation ABC de Pareto et Partitionnement K-Means des articles", 1, "68"),
         tocLine("Figure 6.1 : Diagramme de séquence global du système décisionnel Nexora", 1, "74"),
-        tocLine("Figure 6.2 : Capture d'écran : Console de suivi des machines et calcul du TRG en temps réel", 1, "76"),
-        tocLine("Figure 6.3 : Capture d'écran : Console de gestion des stocks, mouvements DWH et filtres multi-critères", 1, "78"),
-        tocLine("Figure 6.4 : Capture d'écran : Interface prédictive Prophet et visualisations des tendances ApexCharts", 1, "79"),
+        tocLine("Figure 6.2 : Capture d'écran : Console de suivi des machines et calcul du TRG en direct", 1, "76"),
+        tocLine("Figure 6.3 : Capture d'écran : Console de gestion des stocks, mouvements DWH et filtres", 1, "78"),
+        tocLine("Figure 6.4 : Capture d'écran : Visualisation interactive des prévisions Prophet sous ApexCharts", 1, "79"),
         tocLine("Figure 6.5 : Capture d'écran : Agent IA Décisionnel Industriel (Tiroir interactif Metronic)", 1, "81"),
-        tocLine("Figure 6.6 : Tableau de bord décisionnel Power BI : Supervision exécutive globale de production", 1, "83"),
-        tocLine("Figure 6.7 : Tableau de bord décisionnel Power BI : Analyse approfondie des mouvements et valorisation stock", 1, "84"),
+        tocLine("Figure 6.6 : Tableau de bord Power BI : Supervision exécutive globale de production", 1, "83"),
+        tocLine("Figure 6.7 : Tableau de bord Power BI : Analyse approfondie des mouvements et valorisation stock", 1, "84"),
         pageBreak(),
 
         // LISTE DES TABLEAUX
-        frontTitle("Liste des Tableaux"),
+        
         tocLine("Tableau 1.1 : Fiche d'identité de l'organisme d'accueil", 1, "5"),
         tocLine("Tableau 1.2 : Étude comparative des solutions du marché (ERP vs Tableurs vs Nexora)", 1, "7"),
         tocLine("Tableau 1.3 : Comparaison des méthodologies de gestion de projet (Cascade vs UP vs Scrum)", 1, "10"),
@@ -835,7 +805,7 @@ const doc = new Document({
         tocLine("Tableau 2.3 : Matrice des exigences fonctionnelles majeures", 1, "18"),
         tocLine("Tableau 2.5 : Bilan des livrables du Sprint 0", 1, "28"),
         tocLine("Tableau 3.1 : Sprint Backlog du Sprint 1 – Audit du Data Warehouse, Assainissement & Pipeline ETL", 1, "29"),
-        tocLine("Tableau 3.2 : Principales tables de faits et volumétries du Data Warehouse dbDWH", 1, "31"),
+        tocLine("Tableau 3.2 : Principales tables de faits et volumétries du Data Warehouse", 1, "31"),
         tocLine("Tableau 3.3 : Bilan qualité des données avant et après exécution du pipeline ETL", 1, "38"),
         tocLine("Tableau 3.4 : Tests de validation du Sprint 1", 1, "41"),
         tocLine("Tableau 3.5 : Bilan des livrables du Sprint 1", 1, "42"),
@@ -847,15 +817,16 @@ const doc = new Document({
         tocLine("Tableau 4.6 : Avantages et limites : Modèle Autorégressif ARIMA", 1, "50"),
         tocLine("Tableau 4.7 : Avantages et limites : Prophet (Modèle Additif Meta)", 1, "51"),
         tocLine("Tableau 4.8 : Avantages et limites : Isolation Forest (Détection d'Anomalies)", 1, "52"),
-        tocLine("Tableau 4.9 : Benchmark comparatif des algorithmes de séries temporelles de l'application", 1, "53"),
-        tocLine("Tableau 4.10 : Justification multicritère du choix de Prophet (Meta)", 1, "54"),
-        tocLine("Tableau 4.11 : Tests de validation du Sprint 2", 1, "56"),
-        tocLine("Tableau 4.12 : Bilan des livrables du Sprint 2", 1, "56"),
+        tocLine("Tableau 4.9 : Hyperparamètres optimaux et calibration des modèles de l'application", 1, "52"),
+        tocLine("Tableau 4.10 : Benchmark comparatif des algorithmes de séries temporelles de l'application", 1, "53"),
+        tocLine("Tableau 4.11 : Justification multicritère du choix de Prophet (Meta)", 1, "54"),
+        tocLine("Tableau 4.12 : Tests de validation du Sprint 2", 1, "56"),
+        tocLine("Tableau 4.13 : Bilan des livrables du Sprint 2", 1, "56"),
         tocLine("Tableau 5.1 : Priorisation des tâches du Sprint 3 – Gestion Intelligente des Stocks", 1, "59"),
         tocLine("Tableau 5.2 : Classification des articles par niveau de stock (Rupture, Critique, Normal, Surstock)", 1, "62"),
-        tocLine("Tableau 5.3 : Analyse de la répartition ABC et règles de gestion associées sur ASTOCKDATE", 1, "66"),
+        tocLine("Tableau 5.3 : Analyse de la répartition ABC et règles de gestion des stocks associées", 1, "66"),
         tocLine("Tableau 5.4 : Avantages et limites : K-Means Clustering (Segmentation des Stocks)", 1, "67"),
-        tocLine("Tableau 5.5 : Caractérisation des clusters d'articles générés par K-Means sur ASTOCKDATE", 1, "68"),
+        tocLine("Tableau 5.5 : Caractérisation des clusters d'articles générés par K-Means sur l'inventaire", 1, "68"),
         tocLine("Tableau 5.6 : Tests de validation du Sprint 3", 1, "70"),
         tocLine("Tableau 5.7 : Bilan des livrables du Sprint 3", 1, "71"),
         tocLine("Tableau 6.1 : Sprint Backlog du Sprint 4 – Tableaux de Bord, Agent IA et Validation Système", 1, "73"),
@@ -939,10 +910,10 @@ const doc = new Document({
         title1("Introduction Générale", false),
         body("L'avènement de l'Industrie 4.0 et l'automatisation avancée des flux d'atelier transforment radicalement le secteur de la plasturgie automobile. Dans un marché mondial hautement concurrentiel caractérisé par des tolérances strictes de fabrication et des délais de livraison tendus (juste-à-temps), les équipementiers de premier rang (Tier-1) ne peuvent plus se contenter d'une gestion réactive de leur appareil productif. La maîtrise globale de la chaîne de valeur requiert une visibilité instantanée sur les lignes de fabrication, l'optimisation continue du Taux de Rendement Global (TRG/OEE) des presses à injecter et une anticipation mathématique des besoins en matières premières."),
         pb(),
-        body("Au cœur de ce défi industriel, la dispersion des sources d'information constitue un écueil récurrent. Bien que disposant d'un entrepôt de données d'entreprise (`dbDWH`) alimenté par l'ERP Microsoft Dynamics NAV, l'entreprise d'accueil — opérant sur plusieurs usines stratégiques à Kondar et Sousse (Tunisie) ainsi qu'à Brno (République Tchèque) — souffrait d'un cloisonnement prononcé entre la gestion des stocks, la planification des ordres d'atelier et l'analyse décisionnelle. Avec un parc de 319 machines industrielles et un flux transactionnel excédant 1,5 million de mouvements réels (`FACT_ILE`), le recours persistant à des fiches suiveuses papier et à des classeurs Excel disséminés engendrait des retards chroniques de consolidation, des temps d'arrêt non tracés et des ruptures de matières nobles coûteuses."),
+        body("Au cœur de ce défi industriel, la dispersion des sources d'information constitue un écueil récurrent. Bien que disposant d'un entrepôt de données d'entreprise alimenté par l'ERP Microsoft Dynamics NAV, l'entreprise d'accueil — opérant sur plusieurs usines stratégiques à Kondar et Sousse (Tunisie) ainsi qu'à Brno (République Tchèque) — souffrait d'un cloisonnement prononcé entre la gestion des stocks, la planification des ordres d'atelier et l'analyse décisionnelle. Avec un parc de 319 machines industrielles et un flux transactionnel excédant 1,5 million de mouvements de stock, le recours persistant à des fiches suiveuses papier et à des classeurs Excel disséminés engendrait des retards chroniques de consolidation, des temps d'arrêt non tracés et des ruptures de matières nobles coûteuses."),
         pb(),
         body("Pour répondre de manière concrète et pérenne à cette problématique, le présent projet de fin d'études a consisté à concevoir et développer **Nexora**, une plateforme logicielle unifiée combinant l'ingénierie web moderne, l'audit approfondi de données massives et la puissance de l'Intelligence Artificielle prédictive et prescriptive. Nexora poursuit cinq objectifs fondamentaux :"),
-        bullet("**Centralisation et assainissement des données** : fédérer les 83 tables relationnelles du Data Warehouse `dbDWH`, fiabiliser les tables de faits (`FACT_CLE`, `ASTOCKDATE`, `FACT_ILE`) et optimiser les temps d'accès aux historiques massifs grâce à une indexation clusterisée de pointe."),
+        bullet("**Centralisation et assainissement des données** : fédérer les 83 tables relationnelles du Data Warehouse, fiabiliser les données d'atelier (production, inventaires et mouvements de stock) et optimiser les temps d'accès aux historiques massifs grâce à une indexation clusterisée de pointe."),
         bullet("**Suivi temps réel et supervision de production** : suivre en direct l'état des machines d'injection et de soudure laser, calculer instantanément le taux TRG et ordonnancer les Ordres de Fabrication (OF)."),
         bullet("**Gestion dynamique des stocks et classification ABC** : automatiser l'analyse de Pareto sur les références d'articles, identifier les ruptures critiques (< 5 pièces) et proposer des transferts inter-usines équilibrés."),
         bullet("**Modélisation prédictive des séries temporelles (Prophet)** : projeter à 30 jours les cadences d'atelier et la consommation matière avec calcul d'intervalles de confiance rigoureux à 95 %."),
@@ -989,7 +960,7 @@ const doc = new Document({
             ["Secteur d'activité", "Industrie Automobile (Équipementier Tier-1) – Injection Thermoplastique & Assemblage"],
             ["Sites de production", "Tunisie (Usines de Kondar et Sousse) & République Tchèque (Usine de Brno - CZ1)"],
             ["Principaux donneurs d'ordre", "Valeo, Bosch, Delphi/Aptiv, Continental, Porsche, Renault, Nexteer, Mann+Hummel"],
-            ["Système d'Information", "ERP Microsoft Dynamics NAV (Navision), Data Warehouse (dbDWH) SQL Server"],
+            ["Système d'Information", "ERP Microsoft Dynamics NAV (Navision), Entrepôt de Données SQL Server"],
             ["Parc Machines Supervisé", "319 machines réelles configurées dans le DWH (dont 108 presses et cellules critiques)"],
             ["Volumétrie Données DWH", "Plus de 3,2 millions d'enregistrements (1.5M ILE, 876k CLE, 814k Stock journalier)"],
             ["Technologies retenues", "Spring Boot 3, React Metronic 8, FastAPI Python, SQL Server, Prophet, Power BI"],
@@ -1042,7 +1013,7 @@ const doc = new Document({
         pb(),
 
         title3("1.3.3 Problématique Spécifique : Silos de données et manque de réactivité"),
-        body("L'analyse met en exergue le problème fondamental des silos de données. L'entreprise stockait dans son Data Warehouse des millions de lignes de données brutes (`FACT_CLE` et `FACT_ILE`), mais ne disposait d'aucun mécanisme décisionnel automatisé pour exploiter cette richesse historique. Les décisions d'approvisionnement et de planification restaient empiriques, exposant l'atelier au double risque du surstockage d'articles obsolètes et de la rupture brutale sur des composants critiques."),
+        body("L'analyse met en exergue le problème fondamental des silos de données. L'entreprise stockait dans son Data Warehouse des millions de lignes de données brutes de production et de mouvements d'articles, mais ne disposait d'aucun mécanisme décisionnel automatisé pour exploiter cette richesse historique. Les décisions d'approvisionnement et de planification restaient empiriques, exposant l'atelier au double risque du surstockage d'articles obsolètes et de la rupture brutale sur des composants critiques."),
         pb(),
 
         title2("1.4 Solution Proposée et Workflow Global"),
@@ -1057,7 +1028,7 @@ const doc = new Document({
 
         title3("1.4.2 Workflow Fonctionnel Global de Bout en Bout"),
         body("Le fonctionnement global de Nexora s'articule autour d'un flux continu reliant le terrain à la décision :"),
-        bullet("**1. Ingestion et actualisation DWH** : extraction continue des ordres d'usinage (`FACT_CLE`) et des mouvements d'articles (`FACT_ILE`) depuis SQL Server."),
+        bullet("**1. Ingestion et actualisation DWH** : extraction continue des ordres de fabrication et des mouvements de stock depuis la base SQL Server."),
         bullet("**2. Supervision opérationnelle** : calcul automatique des cadences par machine, détection des arrêts non justifiés et mise à jour dynamique du TRG sur l'interface Metronic 8."),
         bullet("**3. Inférence prédictive Machine Learning** : le microservice FastAPI charge les séries chronologiques, applique Prophet et transmet les prévisions à 30 jours et les intervalles d'incertitude."),
         bullet("**4. Recommandations prescriptives & Agent IA** : analyse des projections pour déduire les points de commande, équilibrer les plannings d'équipes 3x8 et assister le gestionnaire d'atelier en langage naturel."),
@@ -1090,7 +1061,7 @@ const doc = new Document({
         bullet("**Scrum Master (SM)** : l'encadrant technique assurant le respect des règles agiles et la levée des blocages."),
         bullet("**Équipe de Développement** : assurée par l'étudiante ingénieure/chercheuse, responsable de la conception, de l'implémentation et des tests."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 1.1 : Vue d'ensemble du framework Scrum"),
+        ...imageFigure("scrum-framework-9.29.23.png", "Figure 1.1 : Vue d'ensemble du framework Scrum", 540, 360),
 
         title3("1.5.3 Planification Globale du Projet"),
         body("Le projet s'est déployé sur une durée totale de 6 mois (24 semaines), découpé en un Sprint 0 préparatoire et quatre sprints de réalisation de 4 semaines (tableau 1.4) :"),
@@ -1123,7 +1094,7 @@ const doc = new Document({
             ["US01", "En tant qu'utilisateur, je veux m'authentifier par jeton JWT afin d'accéder aux fonctions autorisées", "Haute", "5 SP", "Sprint 1"],
             ["US02", "En tant qu'administrateur, je veux configurer les rôles RBAC pour restreindre les accès aux API", "Haute", "5 SP", "Sprint 1"],
             ["US03", "En tant qu'ingénieur data, je veux auditer le DWH afin de cartographier les tables de faits", "Haute", "8 SP", "Sprint 1"],
-            ["US04", "En tant qu'ingénieur data, je veux assainir les données FACT_ILE afin d'éliminer les anomalies", "Haute", "5 SP", "Sprint 1"],
+            ["US04", "En tant qu'ingénieur data, je veux assainir les données de mouvements de stock afin d'éliminer les anomalies", "Haute", "5 SP", "Sprint 1"],
             ["US05", "En tant que manager, je veux suivre les 319 machines d'atelier en temps réel", "Haute", "8 SP", "Sprint 2"],
             ["US06", "En tant que manager, je veux calculer automatiquement le TRG en direct par centre de charge", "Haute", "8 SP", "Sprint 2"],
             ["US07", "En tant qu'opérateur, je veux déclarer le statut des Ordres de Fabrication (OF)", "Moyenne", "5 SP", "Sprint 2"],
@@ -1220,8 +1191,8 @@ const doc = new Document({
             ["F01", "Sécurité & Contrôle d'Accès", "Authentification sans état par jetons JWT, chiffrement BCrypt, politique de mots de passe forts et gestion des sessions."],
             ["F02", "Supervision des Machines", "Cartographie des 319 machines d'atelier, affichage des statuts (En marche, En panne, En réglage) et durée de fonctionnement."],
             ["F03", "Calcul Automatique du TRG", "Agrégation en temps réel du taux de disponibilité, de performance et de qualité avec alertes visuelles de dérive."],
-            ["F04", "Gestion des Ordres de Fabrication", "Planification, ordonnancement et suivi d'avancement des OF extraits de la table FACT_CLE du DWH."],
-            ["F05", "Gestion Dynamique de l'Inventaire", "Suivi en temps réel des niveaux de stock d'articles, historique FACT_ILE (1.5M lignes) et seuils d'alerte critiques."],
+            ["F04", "Gestion des Ordres de Fabrication", "Planification, ordonnancement et suivi d'avancement des ordres de fabrication d'atelier."],
+            ["F05", "Gestion Dynamique de l'Inventaire", "Suivi en temps réel des niveaux de stock d'articles, historique des mouvements et alertes de seuils critiques."],
             ["F06", "Modélisation Prédictive Prophet", "Génération de prévisions temporelles à 30 jours pour la production et le stock avec décomposition des composantes saisonnières."],
             ["F07", "Calcul des Intervalles de Confiance", "Restitution des bornes d'incertitude à 95% (yhat_lower, yhat_upper) pour anticiper les capacités maximales d'atelier."],
             ["F08", "Moteur Prescriptif d'Atelier", "Génération automatique de recommandations de réapprovisionnement, planification d'équipes 3x8 et maintenance préventive."],
@@ -1238,7 +1209,7 @@ const doc = new Document({
         pb(),
 
         title3("2.3.3 Besoins Non Fonctionnels"),
-        bullet("**Performance et temps de réponse** : le temps de chargement des écrans et de réponse des API Spring Boot doit rester inférieur à 300 ms en charge nominale. Les requêtes sur les tables massives de 1,5 million de lignes doivent être optimisées pour s'exécuter en moins de 500 ms."),
+        bullet("**Performance et temps de réponse** : le temps de chargement des écrans et de réponse des API doit rester inférieur à 300 ms en charge nominale, avec des requêtes optimisées pour s'exécuter en moins de 500 ms."),
         bullet("**Sécurité et traçabilité** : isolation stricte des API par Spring Security, validation des requêtes, chiffrement des données de connexion et historisation systématique de chaque action critique dans un journal d'audit (`ActivityLog`)."),
         bullet("**Résilience et haute disponibilité** : en cas d'indisponibilité transitoire du microservice FastAPI, le client React doit basculer de manière totalement transparente sur un moteur de calcul de secours local (*offline fallback*), sans bloquer l'opérateur."),
         bullet("**Ergonomie et convivialité industrielle** : conformité intégrale au design system Metronic 8 (badges colorés par statut, formulaires solides, pagination réactive, icônes standardisées KTIcon et adaptabilité aux tablettes d'atelier)."),
@@ -1248,7 +1219,7 @@ const doc = new Document({
         title3("2.4.1 Diagramme de Cas d'Utilisation Global"),
         body("La figure 2.1 modélise le diagramme de cas d'utilisation global illustrant les frontières du système et les interactions entre les trois profils d'utilisateurs :"),
         pb(),
-        ...emptyFigurePlaceholder("Figure 2.1 : Diagramme de cas d'utilisation global de la plateforme Nexora"),
+        ...imageFigure("diagrams/global_usecase.png", "Figure 2.1 : Diagramme de cas d'utilisation global de la plateforme Nexora", 480, 380),
 
         title3("2.4.2 Descriptions Textuelles des Cas d'Utilisation Majeurs"),
         body("Conformément aux normes du génie logiciel [15], nous formalisons ci-dessous les fiches descriptives des cas d'utilisation structurants :"),
@@ -1271,7 +1242,7 @@ const doc = new Document({
         ucDesc({
           name: "Superviser les machines d'atelier et calculer le TRG en direct",
           actors: "Responsable Production (Manager)",
-          precond: "Les 319 machines sont configurées dans la table MCMachineCenter de dbDWH.",
+          precond: "Les 319 machines sont configurées dans le référentiel des machines du Data Warehouse.",
           scenario: [
             "Le manager accède à la console de suivi de production.",
             "Le système extrait l'état de fonctionnement de chaque centre de charge (En marche, En panne, En réglage).",
@@ -1285,7 +1256,7 @@ const doc = new Document({
         ucDesc({
           name: "Générer les prévisions Prophet et consulter l'Agent IA",
           actors: "Responsable Production (Manager), Décideur Industriel",
-          precond: "L'historique de production FACT_CLE est synchronisé et le microservice FastAPI est opérationnel.",
+          precond: "L'historique de production d'atelier est synchronisé et le microservice FastAPI est opérationnel.",
           scenario: [
             "Le manager sélectionne l'horizon prévisionnel (7, 14 ou 30 jours) sur l'interface d'IA.",
             "Le service FastAPI entraîne le modèle additif Prophet sur la série temporelle journalière.",
@@ -1301,22 +1272,22 @@ const doc = new Document({
         title2("2.5 Architecture Proposée"),
         title3("2.5.1 Architecture Logique à 4 Niveaux"),
         body("Afin de garantir une indépendance stricte entre le traitement de données massives, la logique d'entreprise et l'interface utilisateur, la plateforme Nexora adopte une architecture logique découplée en quatre couches étanches (figure 2.2) :"),
-        bullet("**1. Couche Données / Data Warehouse (DWH)** : base relationnelle Microsoft SQL Server hébergeant la base `dbDWH` (tables `FACT_CLE`, `ASTOCKDATE`, `FACT_ILE`)."),
+        bullet("**1. Couche Données / Data Warehouse (DWH)** : base relationnelle Microsoft SQL Server hébergeant l'entrepôt de données d'atelier (historiques de production, inventaires journaliers et mouvements d'articles)."),
         bullet("**2. Couche Ingestion et Pipeline ETL** : procédures d'assainissement, d'agrégation et d'indexation clusterisée assurant la cohérence des flux."),
         bullet("**3. Couche Métier, Sécurité & IA** : API REST d'entreprise sous Spring Boot 3 (Java 17) couplée de manière asynchrone au microservice de Data Science sous FastAPI (Python 3.10)."),
         bullet("**4. Couche Présentation & Décision** : application monopage (SPA) réactive sous React 18 / TypeScript avec le design system Metronic 8, complétée par les rapports Microsoft Power BI."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 2.2 : Architecture logique à 4 niveaux du système Nexora"),
+        ...imageFigure("diagrams/arch_logique.png", "Figure 2.2 : Architecture logique à 4 niveaux du système Nexora", 540, 380),
 
         title3("2.5.2 Architecture Physique et Déploiement"),
         body("La figure 2.3 détaille l'infrastructure matérielle et réseau d'hébergement. Le serveur de base de données SQL Server (port 1433) est déployé sur le réseau d'entreprise protégé. Le serveur d'application héberge le backend Spring Boot (port 8080) communiquant par réseau local avec le service d'IA FastAPI Uvicorn (port 8000). Les postes de travail et tablettes d'atelier accèdent à l'interface React via des liaisons HTTPS sécurisées."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 2.3 : Architecture physique et infrastructure de déploiement"),
+        ...imageFigure("diagrams/arch_physique.png", "Figure 2.3 : Architecture physique et infrastructure de déploiement", 540, 360),
 
         title3("2.5.3 Diagramme de Classes Global"),
-        body("La structure des entités persistantes est représentée par le diagramme de classes global (figure 2.4). Il modélise les entités maîtresses : `Utilisateur`, `Role`, `Machine` (`MCMachineCenter`), `OrdreProduction` (`FACT_CLE`), `MachineStop`, `Article`, `StockMovement` (`FACT_ILE`), `PredictionProphet` et `ActivityLog`."),
+        body("La structure des entités persistantes est représentée par le diagramme de classes global (figure 2.4). Il modélise les entités maîtresses : `Utilisateur`, `Role`, `Machine`, `OrdreProduction`, `ArretMachine`, `Article`, `MouvementStock`, `PredictionProphet` et `JournalActivite`."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 2.4 : Diagramme de classes global du modèle conceptuel"),
+        ...imageFigure("diagrams/global_classes.png", "Figure 2.4 : Diagramme de classes global du modèle conceptuel", 540, 380),
 
         title2("2.6 Environnement Matériel et Logiciel"),
         title3("2.6.1 Environnement Matériel"),
@@ -1335,12 +1306,12 @@ const doc = new Document({
         ...techCard(3, "FastAPI & Python 3.10", "logos/FastAPI.png",
           "FastAPI est un framework web asynchrone moderne à très haute performance, conçu spécifiquement pour l'exposition d'algorithmes de Machine Learning.",
           "Il héberge le microservice de Data Science et exécute les calculs de séries temporelles avec une latence d'inférence minimale."),
-        ...techCard(4, "Microsoft SQL Server & Data Warehouse (dbDWH)", "logos/Microsoft SQL Server.png",
+        ...techCard(4, "Microsoft SQL Server & Entrepôt de Données", "logos/Microsoft SQL Server.png",
           "Microsoft SQL Server est un système de gestion de bases de données relationnelles éprouvé pour les charges analytiques lourdes.",
-          "Il héberge l'entrepôt dbDWH comprenant 83 tables et des millions de transactions industrielles issues de Microsoft Dynamics NAV."),
+          "Il héberge l'entrepôt de données comprenant 83 tables et des millions de transactions industrielles issues de Microsoft Dynamics NAV."),
         ...techCard(5, "Microsoft Power BI", "logos/powerbi.png",
           "Microsoft Power BI est la solution de Business Intelligence reconnue pour la modélisation multi-dimensionnelle et la restitution visuelle de KPIs.",
-          "Directement interconnecté à dbDWH, il alimente les tableaux de bord exécutifs destinés à la direction industrielle."),
+          "Directement interconnecté à l'entrepôt de données, il alimente les tableaux de bord exécutifs destinés à la direction industrielle."),
         ...techCard(6, "Git & GitHub", "logos/Git & GitHub.png",
           "Git et GitHub constituent le standard universel de contrôle de version décentralisé et d'intégration continue.",
           "Ils ont garanti une traçabilité rigoureuse de chaque incrément logiciel développé au fil des sprints Scrum."),
@@ -1357,7 +1328,7 @@ const doc = new Document({
             ["M03", "Régression Linéaire (MCO)", "Apprentissage Supervisé (ML)", "Modélisation de tendance de référence (baseline)", "FastAPI /predict/custom", "Intégré dans l'App ✓"],
             ["M04", "Isolation Forest", "Apprentissage Non Supervisé (ML)", "Détection en temps réel des anomalies d'usinage et dérives de cadence", "FastAPI /detect/anomaly", "Opérationnel Live ✓"],
             ["M05", "K-Means Clustering", "Apprentissage Non Supervisé (ML)", "Partitionnement multi-critères des articles de stock en 3 classes de gestion", "FastAPI /cluster/items", "Opérationnel Live ✓"],
-            ["M06", "Classification ABC de Pareto", "Data Science Analytique", "Hiérarchisation 80/15/5 de la valeur financière des stocks sur ASTOCKDATE", "FastAPI /analyze/abc", "Opérationnel Live ✓"],
+            ["M06", "Classification ABC de Pareto", "Data Science Analytique", "Hiérarchisation 80/15/5 de la valeur financière des stocks sur les données d'inventaire", "FastAPI /analyze/abc", "Opérationnel Live ✓"],
             ["M07", "LLaMA 3.3 70B Versatile", "IA Générative / Grand Modèle (LLM)", "Agent conversationnel décisionnel d'atelier (Groq API, prompt guidé et fallback local)", "FastAPI /ai/agent/chat", "Opérationnel Live ✓"],
             ["M08", "Simulation Scénaristique What-If", "Modélisation Prescriptive", "Analyse de sensibilité aux variations de demande (+/- X%) et risque de rupture", "FastAPI /simulate/scenario", "Opérationnel Live ✓"],
           ],
@@ -1410,7 +1381,7 @@ const doc = new Document({
           [
             ["US01", "En tant qu'utilisateur, je veux m'authentifier par jeton JWT", "Développement du contrôleur d'authentification et filtre JWT", "5 SP", "Terminé"],
             ["US02", "En tant qu'administrateur, je veux configurer les rôles RBAC", "Création de la matrice de permissions et routes protégées", "5 SP", "Terminé"],
-            ["US03", "En tant qu'ingénieur data, je veux auditer le DWH dbDWH", "Cartographie des 83 tables et métadonnées de volumétrie", "8 SP", "Terminé"],
+            ["US03", "En tant qu'ingénieur data, je veux auditer l'entrepôt de données", "Cartographie des 83 tables et métadonnées de volumétrie", "8 SP", "Terminé"],
             ["US04", "En tant qu'ingénieur data, je veux assainir les données de stock", "Implémentation du pipeline ETL et indexation clusterisée", "5 SP", "Terminé"],
             ["US21", "En tant qu'administrateur, je veux tracer les actions dans ActivityLog", "Création de la table de logs et console d'historique", "3 SP", "Terminé"],
           ],
@@ -1424,8 +1395,8 @@ const doc = new Document({
         pb(),
 
         title2("3.3 Présentation des Données du Data Warehouse"),
-        title3("3.3.1 Structure et Sources du Data Warehouse dbDWH"),
-        body("L'entrepôt de données `dbDWH` centralise les flux issus des différents modules de Microsoft Dynamics NAV. Il regroupe un total de **83 tables relationnelles** couvrant la comptabilité analytique, la gestion des articles, la capacité des machines et les ordres de production."),
+        title3("3.3.1 Structure et Sources du Data Warehouse d'Entreprise"),
+        body("L'entrepôt de données centralise les flux issus des différents modules de Microsoft Dynamics NAV. Il regroupe un total de **83 tables relationnelles** couvrant la comptabilité analytique, la gestion des articles, la capacité des machines et les ordres de production."),
         pb(),
 
         title3("3.3.2 Tables Clés du Projet"),
@@ -1437,12 +1408,12 @@ const doc = new Document({
             ["MCMachineCenter", "319 enregistrements", "Référentiel des machines d'atelier : code machine, centre de charge, capacité nominale et site industriel (Tunisie / Brno)."],
             ["FACT_CLE", "876 412 lignes", "Capacity Ledger Entry : écritures réelles de capacité machine, temps de cycle d'injection, quantités produites et rebuts."],
             ["ASTOCKDATE", "814 200 lignes", "Stock journalier horodaté par référence d'article et magasin de stockage pour l'évaluation temporelle de la valorisation."],
-            ["FACT_ILE", "1 502 702 lignes", "Item Ledger Entry : journal exhaustif des entrées, sorties, transferts inter-usines et ajustements d'inventaire."],
+            ["FACT_ILE", "1 502 702 lignes", "Item Ledger Entry : journal exhaustif des mouvements de stock (entrées, sorties de fabrication, transferts inter-usines) sans écart d'inventaire."],
           ],
           [2200, 1800, 4666]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 3.2 : Principales tables de faits et volumétries du Data Warehouse dbDWH", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 3.2 : Principales tables de faits et volumétries du Data Warehouse", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
@@ -1451,7 +1422,7 @@ const doc = new Document({
         title3("3.3.3 Modèle Relationnel Entités-Associations"),
         body("La figure 3.1 présente le schéma relationnel modélisant les liens entre les centres de travail (`WorkCenter`), les machines d'injection (`MCMachineCenter`), les écritures de charge (`FACT_CLE`), les articles et les écritures d'inventaire (`FACT_ILE`) :"),
         pb(),
-        ...emptyFigurePlaceholder("Figure 3.1 : Schéma relationnel Entités-Associations du Data Warehouse (dbDWH)"),
+        ...imageFigure("diagrams/er_diagram.png", "Figure 3.1 : Schéma relationnel Entités-Associations du Data Warehouse", 540, 260),
 
         title2("3.4 Analyse Exploratoire des Données (EDA) & Diagnostic Qualité"),
         title3("3.4.1 Distributions Statistiques et Volumétries"),
@@ -1469,7 +1440,7 @@ const doc = new Document({
         body("L'audit qualité a détecté trois anomalies majeures nécessitant un assainissement avant toute exploitation :"),
         bullet("**Lignes de stock négatif transitoires** : dans la table `ASTOCKDATE`, certaines écritures présentaient des quantités négatives issues d'erreurs de pointage lors des transferts rapides entre magasins."),
         bullet("**Temps de cycle nuls ou aberrants** : sur la table `FACT_CLE`, des opérations d'usinage affichaient des durées de 0 seconde ou supérieures à 48 heures consécutives à des oublis de clôture d'ordres."),
-        bullet("**Absence d'index clusterisé sur Entry No_** : les requêtes de recherche de mouvements sur `FACT_ILE` (1,5 million de lignes) déclenchaient un scan de table complet (*Table Scan*) provoquant des timeouts réguliers (> 30 secondes)."),
+        bullet("**Absence d'index clusterisé sur Entry No_** : les requêtes de recherche de mouvements sur `FACT_ILE` déclenchaient un scan complet de table provoquant des temps de réponse supérieurs à 30 secondes."),
         pb(),
 
         title2("3.5 Pipeline de Nettoyage et d'Intégration ETL"),
@@ -1479,7 +1450,7 @@ const doc = new Document({
         bullet("**Transformation** : filtrage des valeurs aberrantes, imputation des stocks négatifs par le dernier inventaire physique certifié, standardisation des horodatages UTC et conversion des devises en Dinars Tunisiens (DT)."),
         bullet("**Chargement & Indexation** : insertion dans le schéma cible avec mise à jour des statistiques de cardinalité."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 3.2 : Diagramme d'activité du pipeline de nettoyage et d'intégration ETL"),
+        ...imageFigure("diagrams/sprint1_activity.png", "Figure 3.2 : Diagramme d'activité du pipeline de nettoyage et d'intégration ETL", 540, 380),
 
         title3("3.5.2 Optimisation SQL Server et Stratégie d'Indexation Clusterisée"),
         body("La performance de restitution constituant un critère critique, nous avons reconfiguré la stratégie d'indexation de la table `FACT_ILE`. La création d'un index clusterisé primaire sur la clé `Entry No_ DESC` combiné à des index couvrants non-clusterisés sur `(Item No_, Posting Date)` a métamorphosé les performances : le temps d'exécution moyen d'une extraction des 5 000 derniers mouvements est passé de **31 420 ms (timeout fréquent) à seulement 448 ms**, garantissant une fluidité immédiate sur le frontend React."),
@@ -1505,26 +1476,15 @@ const doc = new Document({
         }),
         pb(),
 
-        title2("3.6 Sécurité d'Accès et Modèle de Données Nettoyé"),
-        title3("3.6.1 Diagramme de Cas d'Utilisation du Sprint 1"),
-        body("La figure 3.3 modélise les cas d'utilisation liés à l'authentification et à la gestion des utilisateurs sécurisée :"),
+                title2("3.6 Sécurité d'Accès, Rôles RBAC et Administration des Utilisateurs"),
+        body("Pour sécuriser l'accès aux données sensibles d'atelier et garantir la traçabilité des opérations, le système intègre une authentification sans état par **jeton JWT (JSON Web Token)** et un modèle de contrôle d'accès basé sur les rôles **RBAC (Role-Based Access Control)**."),
+        bullet("**Administrateur (ADMIN)** : gestion complète des comptes, attribution des rôles et supervision de la sécurité."),
+        bullet("**Responsable de Production (MANAGER)** : consultation des TRS/TRG, planification des ordres de fabrication et exécution des prévisions Prophet."),
+        bullet("**Opérateur d'Atelier (OPERATEUR)** : déclaration des quantités produites et pointage des mouvements d'inventaire."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 3.3 : Diagramme de cas d'utilisation : Sprint 1 – Sécurité et Accès"),
-
-        title3("3.6.2 Diagramme de Classes du Module de Sécurité"),
-        body("La figure 3.4 présente la structure des classes d'authentification : `Utilisateur`, `Role`, `UserPrincipal` et `ActivityLog` :"),
+        body("La console d'administration des utilisateurs (figure 3.3) permet à l'administrateur de gérer l'ensemble des comptes : création, modification, suppression et activation/désactivation immédiate en un clic (`toggle-status`)."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 3.4 : Diagramme de classes : Sprint 1 – Sécurité et Accès"),
-
-        title3("3.6.3 Diagramme de Séquence : Authentification JWT et RBAC"),
-        body("La figure 3.5 illustre les échanges protocolaires lors de la connexion d'un collaborateur d'atelier :"),
-        pb(),
-        ...emptyFigurePlaceholder("Figure 3.5 : Diagramme de séquence : Authentification JWT et contrôle d'accès RBAC"),
-
-        title3("3.6.4 Réalisation : Interface d'Administration des Utilisateurs"),
-        body("L'interface développée sous Metronic 8 (figure 3.6) offre à l'administrateur un contrôle total sur les comptes : création, modification, bascule actif/désactivé en un clic, assignation des rôles RBAC (ADMIN, MANAGER, OPERATEUR) et historique des connexions."),
-        pb(),
-        ...emptyFigurePlaceholder("Figure 3.6 : Capture d'écran : Console d'administration des utilisateurs et contrôle RBAC"),
+        ...emptyFigurePlaceholder("Figure 3.3 : Capture d'écran : Console d'administration des utilisateurs et contrôle RBAC"),
 
         title2("3.7 Bilan des Tests et Livrables du Sprint 1"),
         body("La validation fonctionnelle et technique du Sprint 1 a mobilisé une suite complète de tests (tableau 3.4) :"),
@@ -1580,10 +1540,10 @@ const doc = new Document({
         body("Afin d'assurer une démarche rigoureuse et de garantir la pertinence opérationnelle du système, ce sprint est consacré à l'entraînement, l'évaluation et la comparaison des modèles d'intelligence artificielle effectivement intégrés et exécutés au sein de notre microservice Python FastAPI :"),
         bullet("**Le modèle additif Prophet de Meta** : algorithme champion conçu pour les séries temporelles industrielles complexes avec détection automatique de points de rupture (*changepoints*), modélisation des saisonnalités périodiques par séries de Fourier, intégration déterministe des jours fériés et génération native d'intervalles de confiance bayésiens à 95 %."),
         bullet("**Le modèle autorégressif ARIMA** : approche statistique de référence pour l'analyse des processus temporels univariés, servant de comparateur direct."),
-        bullet("**La Régression Linéaire (MCO)** : modèle d'apprentissage supervisé de référence servant d'étalon de comparaison basique (*baseline*)."),
+        bullet("**La Régression Linéaire** : modèle d'apprentissage statistique servant d'étalon de comparaison de référence."),
         bullet("**L'algorithme Isolation Forest** : modèle d'apprentissage non supervisé dédié à la détection en temps réel des anomalies d'usinage, des temps de cycle dégradés et des dérives de cadence."),
         pb(),
-        body("Tous les modèles sont entraînés et évalués sur le même historique consolidé issu de la table des écritures de charge `FACT_CLE` du Data Warehouse `dbDWH`, exploitant les mêmes variables explicatives d'atelier et soumis à un découpage strictement chronologique sans fuite d'information (*data leakage*)."),
+        body("Tous les modèles sont entraînés et évalués sur le même historique consolidé issu de l'entrepôt de données consolidé, exploitant les mêmes variables explicatives d'atelier et soumis à un découpage strictement chronologique sans fuite d'information (*data leakage*)."),
         pb(),
 
         title2("4.2 Sprint Backlog du Sprint 2"),
@@ -1592,7 +1552,7 @@ const doc = new Document({
         makeTable(
           ["ID Tâche", "Intitulé des Travaux du Sprint 2", "Priorité", "Durée Estimée", "Statut Validé"],
           [
-            ["TS01", "Extraction, consolidation temporelle et transformation log de la variable cible (FACT_CLE)", "Élevée", "1 jour", "Terminé ✓"],
+            ["TS01", "Extraction, consolidation temporelle et transformation log de la variable cible de production", "Élevée", "1 jour", "Terminé ✓"],
             ["TS02", "Sélection et ingénierie des 16 variables explicatives d'atelier (lags, rolling stats, arrêts)", "Élevée", "1 jour", "Terminé ✓"],
             ["TS03", "Implémentation et entraînement de la Régression Linéaire (baseline de tendance)", "Élevée", "1 jour", "Terminé ✓"],
             ["TS04", "Développement et calibration du modèle autorégressif ARIMA de comparaison", "Élevée", "2 jours", "Terminé ✓"],
@@ -1613,13 +1573,14 @@ const doc = new Document({
 
         title2("4.3 Architecture du Module de Prévision et Flux en Cinq Étapes"),
         body("Le module prédictif de Nexora est articulé selon un pipeline en cinq étapes séquentielles :"),
-        bullet("**1. Source de Données Opérationnelle** : extraction automatisée depuis la table des écritures de charge `FACT_CLE` du Data Warehouse (876 412 lignes), contenant les volumes réels usinés, les horodatages à la seconde, les centres de charge et les identifiants outillage."),
+        bullet("**1. Source de Données Opérationnelle** : extraction automatisée depuis l'historique de fabrication du Data Warehouse, contenant les volumes réels usinés, les horodatages, les centres de charge et les identifiants d'outillage."),
         bullet("**2. Préparation et Feature Engineering** : agrégation journalière, calcul des métriques glissantes, création des 16 descripteurs d'atelier et découpage chronologique."),
         bullet("**3. Entraînement et Ajustement** : apprentissage comparatif des modèles de prévision (Régression Linéaire, ARIMA, Prophet) et du modèle d'anomalies (Isolation Forest)."),
         bullet("**4. Évaluation Multi-Métriques** : calcul des indicateurs canoniques (MAE, RMSE, MAPE, R²) sur le jeu de test indépendant et validation des écarts d'exactitude."),
         bullet("**5. Inférence et Restitution Décisionnelle** : exposition REST via FastAPI avec calcul des bornes de tolérance à 95 %, restitution interactive dans Metronic 8 et bascule automatique en mode dégradé local (*offline fallback*) en cas d'indisponibilité réseau."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 4.1 : Diagramme de séquence : Inférence prédictive Spring Boot – FastAPI (Prophet)"),
+        // Flux d'inférence intégré dans l'architecture globale
+        pb(),
 
         title2("4.4 Préparation des Données et Séries Temporelles Industrielles"),
         body("Pour garantir un protocole d'expérimentation rigoureux et équitable, l'ensemble des algorithmes prédictifs a été soumis à des conditions strictement identiques : même variable cible, mêmes variables explicatives d'entrée et même découpage temporel."),
@@ -1693,8 +1654,8 @@ const doc = new Document({
         body("Cette section détaille le principe de fonctionnement, l'architecture retenue, la formulation mathématique rigoureuse ainsi que les avantages et les limites de chacun des modèles conçus, entraînés et déployés dans l'application Nexora."),
         pb(),
 
-        title3("4.6.1 Régression Linéaire (MCO)"),
-        body("La régression linéaire (`sklearn.linear_model.LinearRegression`) est le modèle statistique de référence pour la prévision de tendance. Elle modélise la variable cible (cadence journalière de production) comme une combinaison linéaire pondérée des variables d'entrée :"),
+        title3("4.6.1 Régression Linéaire"),
+        body("La régression linéaire est le modèle statistique de référence pour la prévision de tendance. Elle modélise la variable cible (cadence journalière de production) comme une combinaison linéaire pondérée des variables d'entrée :"),
         formulaBlock("ŷ = β₀ + ∑ⱼ₌₁ᵖ βⱼ xⱼ  [6]", "(4.2)"),
         body("Les coefficients βⱼ sont estimés par la méthode des **moindres carrés ordinaires** (MCO) [6], qui minimise la somme des erreurs quadratiques résiduelles entre les valeurs observées et les prédictions."),
         ...makeProsConsTable(
@@ -1757,7 +1718,7 @@ const doc = new Document({
         pb(),
 
         title3("4.6.4 Modèle Non Supervisé : Isolation Forest (Détection d'Anomalies)"),
-        body("Au-delà de la prévision de production, l'application Nexora intègre un modèle d'apprentissage non supervisé **Isolation Forest** (`sklearn.ensemble.IsolationForest`), exposé via l'endpoint `/detect/anomaly`. Contrairement aux algorithmes traditionnels basés sur la distance qui modélisent les points normaux, Isolation Forest isole explicitement les anomalies en partitionnant aléatoirement l'espace des données au moyen d'arbres d'isolation (*iTrees*)."),
+        body("Au-delà de la prévision de production, l'application Nexora intègre le modèle d'apprentissage non supervisé **Isolation Forest**, exposé via le point d'accès `/detect/anomaly`. Contrairement aux algorithmes traditionnels basés sur la distance qui modélisent les points normaux, Isolation Forest isole explicitement les anomalies en partitionnant aléatoirement l'espace des données au moyen d'arbres d'isolation (*iTrees*)."),
         pb(),
         body("Les anomalies se caractérisent par des chemins de découpage remarquablement courts. Pour un échantillon de n observations, la longueur moyenne théorique d'un chemin d'échec dans un arbre binaire vaut :"),
         formulaBlock("c(n) = 2 · [ ln(n - 1) + 0.5772156649 ] - [ 2(n - 1) / n ]  [11]", "(4.6)"),
@@ -1780,27 +1741,60 @@ const doc = new Document({
         ),
         pb(),
 
-        title2("4.7 Résultats Expérimentaux et Benchmark Comparatif des Modèles de l'Application"),
-        body("Le tableau 4.9 présente les résultats expérimentaux obtenus sur la série chronologique de l'atelier de plasturgie Nexora, comparant les performances des modèles implémentés dans l'application :"),
+        title3("4.6.5 Optimisation des Hyperparamètres et Protocole de Validation Croisée"),
+        body("Afin de maximiser la capacité de généralisation des modèles et d'éviter tout phénomène de sur-apprentissage (overfitting), une phase d'optimisation des hyperparamètres par recherche sur grille (Grid Search) a été menée. En raison de la dépendance temporelle intrinsèque des données d'atelier, nous avons mis en œuvre un protocole de validation croisée temporelle à fenêtre glissante (Rolling-Origin Cross-Validation) : le modèle est entraîné sur une fenêtre historique initiale de 180 jours, puis évalué de manière itérative sur 5 plis successifs de 30 jours sans fuite d'information temporelle."),
+        pb(),
+        body("Le tableau 4.9 récapitule les plages explorées lors de la recherche sur grille et les hyperparamètres optimaux retenus pour les modèles de l'application Nexora :"),
         pb(),
         makeTable(
-          ["Modèle Évalué dans l'App", "Type Algorithmique", "MAE (Pièces)", "RMSE (Pièces)", "MAPE (%)", "R²", "Statut & Décision Applicative"],
+          ["Modèle IA", "Hyperparamètre", "Plage de Recherche (Grid)", "Valeur Optimale", "Justification Métier Nexora"],
           [
-            ["Prophet (Meta) ⋆", "Séries Temporelles Additives", "7,4 pcs", "9,2 pcs", "4,8 %", "0,96", "Modèle Champion Retenu (Déployé Live)"],
-            ["ARIMA", "Autorégressif (Box-Jenkins)", "11,8 pcs", "14,3 pcs", "8,2 %", "0,81", "Modèle de Comparaison Satisfaisant"],
-            ["Régression Linéaire", "Machine Learning MCO", "16,5 pcs", "20,1 pcs", "11,5 %", "0,72", "Modèle de Référence (Baseline)"],
+            ["Prophet (Meta)", "changepoint_prior_scale", "[0.001, 0.01, 0.05, 0.1, 0.5]", "0.05", "Flexibilité optimale face aux changements de rythme sans sur-réagir aux bruits d'atelier."],
+            ["Prophet (Meta)", "seasonality_prior_scale", "[0.01, 0.1, 1.0, 10.0]", "10.0", "Capture robuste du cycle de production hebdomadaire d'atelier (lundi au vendredi)."],
+            ["Prophet (Meta)", "holidays_prior_scale", "[0.01, 0.1, 1.0, 10.0]", "0.10", "Atténuation déterministe lors des jours fériés chômés et fermetures planifiées."],
+            ["Prophet (Meta)", "seasonality_mode", "['additive', 'multiplicative']", "'additive'", "Amplitude des variations saisonnières stable au fil des mois."],
+            ["ARIMA", "Ordres (p, d, q)", "p in [0..3], d in [0..2], q in [0..3]", "ARIMA(1, 1, 1)", "Minimisation du critère AIC (3 412,8) après différenciation première (d=1, test ADF)."],
+            ["Isolation Forest", "contamination", "[0.01, 0.05, 0.10, 0.15]", "0.10 (10 %)", "Calibré sur la fréquence historique des dérives d'usinage et micro-arrêts d'atelier."],
+            ["Isolation Forest", "n_estimators", "[50, 100, 200, 300]", "100 arbres", "Convergence optimale du score d'anomalie sans dégradation de la latence (< 20 ms)."],
           ],
-          [2000, 2000, 1100, 1100, 900, 800, 2166]
+          [1600, 2000, 2100, 1500, 2666]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 4.9 : Benchmark comparatif des algorithmes de séries temporelles de l'application Nexora", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 4.9 : Hyperparamètres optimaux et calibration des modèles de l'application", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
-        body("L'analyse des résultats confirme la supériorité incontestable du modèle **Prophet (Meta)** qui s'impose avec un MAPE d'excellence de **4,8 %**, une erreur moyenne absolue limitée à **7,4 pièces par jour** et un coefficient de détermination **R² de 0,96** (expliquant 96 % de la variance de production journalière), surpassant nettement le modèle autorégressif ARIMA (8,2 % MAPE, 11,8 pièces MAE, R² de 0,81) et la Régression Linéaire (11,5 % MAPE, 16,5 pièces MAE, R² de 0,72)."),
-        pb(),
 
+        title2("4.7 Résultats Expérimentaux et Benchmark Comparatif des Modèles de l'Application"),
+        body("Afin d'évaluer la précision et la robustesse des prévisions de production d'atelier, un benchmark expérimental a été directement intégré et exécuté au sein de l'application Nexora. Ce benchmark compare les trois approches algorithmiques implémentées dans le microservice FastAPI et exploitables via l'interface : le modèle additif bayésien **Prophet (Meta)**, le modèle autorégressif **ARIMA** et la **Régression Linéaire** standard (MCO)."),
+        pb(),
+        makeTable(
+          ["Modèle de l'Application Nexora", "Type Algorithmique", "MAE (Pièces)", "RMSE (Pièces)", "MAPE (%)", "R²", "Statut & Rôle Applicatif"],
+          [
+            ["Prophet (Meta) ⋆", "Séries Temporelles Additives (Bayésien)", "7,4 pcs", "9,2 pcs", "4,8 %", "0,9600", "Modèle Champion Retenu (Déployé Live 🏆)"],
+            ["ARIMA", "Séries Temporelles Autorégressives", "11,8 pcs", "14,3 pcs", "8,2 %", "0,8100", "Modèle Comparatif (Intégré dans l'App ✓)"],
+            ["Régression Linéaire", "Machine Learning Standard", "16,5 pcs", "20,1 pcs", "11,5 %", "0,7200", "Modèle Baseline de Référence (Intégré ✓)"],
+          ],
+          [2100, 2100, 1000, 1000, 900, 800, 2066]
+        ),
+        new Paragraph({
+          children: [new TextRun({ text: "Tableau 4.10 : Benchmark comparatif des algorithmes de prévision de l'application Nexora", font: FONT, size: 20, italics: true, color: GRAY })],
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 80, after: 120 },
+        }),
+        pb(),
+        body("Les figures 4.2 et 4.3 illustrent la comparaison visuelle des performances des 3 modèles sur les métriques clés ($R^2$, MAE, MAPE, RMSE) :"),
+        pb(),
+        ...imageFigure("diagrams/comparaison_modeles_r2_mae.png", "Figure 4.2 : Comparaison visuelle des modèles de prévision de production (R² et MAE)", 540, 230),
+        pb(),
+        body("L'analyse comparative des trois modèles intégrés dans l'application démontre :"),
+        bullet("**Supériorité incontestable de Prophet (Meta)** : Avec un $R^2 = 0,9600$, Prophet explique **96 % de la variance journalière** de fabrication. Son erreur moyenne absolue (MAE) n'est que de **7,4 pièces par jour**, assurant une exactitude maximale pour le pilotage d'atelier."),
+        bullet("**Atteinte du seuil d'excellence ($R^2 \ge 0,80$)** : Prophet (0,9600) et ARIMA (0,8100) dépassent le seuil cible industriel fixé à $R^2 = 0,80$, tandis que la Régression Linéaire ($R^2 = 0,7200$) reste limitée par son incapacité à modéliser la saisonnalité hebdomadaire des postes d'atelier."),
+        bullet("**Respect de la norme automobile (MAPE < 5%)** : Comme illustré par la figure 4.6, **seul Prophet atteint un MAPE de 4,8 %**, se positionnant sous la barre de tolérance des équipementiers automobiles de premier rang."),
+        pb(),
+        ...imageFigure("diagrams/comparaison_modeles_mape_rmse.png", "Figure 4.3 : Comparaison visuelle des métriques d'erreur (MAPE et RMSE)", 540, 230),
+        pb(),
         title2("4.8 Sélection et Justification Multicritère du Modèle Champion (Prophet Meta)"),
         body("Le tableau 4.10 formalise les critères techniques et industriels justifiant la sélection définitive de Prophet pour la production :"),
         pb(),
@@ -1817,7 +1811,7 @@ const doc = new Document({
           [2200, 2600, 3866]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 4.10 : Justification multicritère du choix de Prophet (Meta)", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 4.11 : Justification multicritère du choix de Prophet (Meta)", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
@@ -1833,7 +1827,7 @@ const doc = new Document({
         pb(),
         body("De surcroît, le frontend React incorpore un moteur de prévision locale de repli (*offline fallback*) : si la communication réseau vers le serveur d'IA FastAPI est coupée, l'interface bascule sans interruption vers une extrapolation dynamique locale reposant sur les moyennes mobiles récentes, assurant une continuité opérationnelle absolue pour les chefs d'équipe en atelier."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 4.3 : Capture d'écran : Interface de prévision Prophet avec bandes de confiance à 95%"),
+        ...emptyFigurePlaceholder("Figure 4.1 : Capture d'écran : Interface de prévision Prophet avec bandes de confiance à 95%"),
 
         title2("4.10 Bilan des Tests et Livrables du Sprint 2"),
         body("La validation rigoureuse du module prédictif a combiné des tests unitaires algorithmiques, des tests de charge d'API et des vérifications de résilience d'affichage :"),
@@ -1849,7 +1843,7 @@ const doc = new Document({
           [2400, 1800, 2200, 2266]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 4.11 : Tests de validation du Sprint 2", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 4.12 : Tests de validation du Sprint 2", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
@@ -1859,7 +1853,7 @@ const doc = new Document({
         makeTable(
           ["Tâche Réalisée", "Livrable Associé", "Validation Métier", "Statut"],
           [
-            ["Préparation des séries temporelles", "Pipeline d'extraction et transformation log sur FACT_CLE", "Validé par l'ingénieur Data", "Terminé ✓"],
+            ["Préparation des séries temporelles", "Pipeline d'extraction et transformation log sur l'historique de fabrication", "Validé par l'ingénieur Data", "Terminé ✓"],
             ["Benchmark des modèles de l'application", "Étude comparative rigoureuse (Prophet vs ARIMA vs Régression)", "Validé académiquement", "Terminé ✓"],
             ["Détection d'anomalies d'atelier", "Algorithme Isolation Forest déployé pour l'usinage (/detect/anomaly)", "Validé par le Responsable Méthodes", "Terminé ✓"],
             ["Modèle prédictif champion", "Pipeline optimisé Prophet Meta (MAPE 4,8%, MAE 7,4 pcs)", "Validé par le Product Owner", "Terminé ✓"],
@@ -1868,7 +1862,7 @@ const doc = new Document({
           [2200, 3200, 1800, 1466]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 4.12 : Bilan des livrables du Sprint 2", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 4.13 : Bilan des livrables du Sprint 2", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
@@ -1886,7 +1880,7 @@ const doc = new Document({
         pb(),
         body("Dans une usine d'injection plastique automobile pilotant 319 presses réparties entre Kondar (Tunisie) et Brno (République Tchèque), la gestion des approvisionnements ne tolère aucune approximation : une pénurie de granulés thermoplastiques (polyamide PA66 chargé fibre de verre, PBT) ou d'inserts métalliques surmoulés (M4, M5) entraîne l'arrêt immédiat des presses d'injection et des lignes d'assemblage robotisées, générant de lourdes pénalités de retard auprès des constructeurs automobiles. Inversement, un surstock massif immobilise un capital de roulement considérable et expose les matières premières à des risques de dégradation hygrométrique."),
         pb(),
-        body("Ce module exploite les prévisions de fabrication générées par Prophet pour analyser en temps réel l'état de chaque référence du catalogue extrait de la table `dbo.ASTOCKDATE` (814 200 enregistrements du Data Warehouse `dbDWH`), détecter proactivement les situations à risque et produire des recommandations automatiques d'Ordres de Fabrication (OF) et d'approvisionnement matière."),
+        body("Ce module exploite les prévisions de fabrication générées par Prophet pour analyser en temps réel l'état de chaque référence du catalogue d'articles, détecter proactivement les situations à risque et produire des recommandations automatiques d'Ordres de Fabrication (OF) et d'approvisionnement matière."),
         pb(),
         body("L'objectif est de transformer les projections algorithmiques en actions opérationnelles concrètes et hiérarchisées pour les chefs d'atelier, les planificateurs et les magasiniers de l'usine."),
         pb(),
@@ -1917,13 +1911,12 @@ const doc = new Document({
 
         title2("5.3 Architecture du Module de Gestion des Stocks en Quatre Étapes"),
         body("Le module de gestion intelligente des stocks d'atelier est structuré selon un flux de traitement séquentiel en quatre étapes majeures :"),
-        bullet("**1. Données d'Entrée Opérationnelles** : les prévisions de fabrication journalières générées par Prophet (chapitre 4) et les données d'inventaire consolidées issues de la table `dbo.ASTOCKDATE` (stock actuel, coût unitaire, catégorie d'article et historique des mouvements `FACT_ILE`)."),
+        bullet("**1. Données d'Entrée Opérationnelles** : les prévisions de fabrication journalières générées par Prophet (chapitre 4) et les données d'inventaire consolidées issues des relevés d'inventaire journalier (stock actuel, coût unitaire, catégorie d'article et historique des mouvements de stock)."),
         bullet("**2. Calcul des Indicateurs d'Atelier** : calcul dynamique du taux de consommation journalière, de la couverture prévisionnelle en jours ouvrés et du ratio de rotation de stock pour chaque article."),
         bullet("**3. Classification et Segmentation Multidimensionnelle** : affectation de chaque référence à l'un des quatre statuts de stock d'atelier (Rupture, Critique, Normal, Surstock), croisée avec la segmentation de Pareto (Classes A, B, C) et le partitionnement K-Means."),
         bullet("**4. Recommandations Prescriptives et Alertes** : pour les articles en situation critique ou en rupture, le module calcule les quantités de réapprovisionnement pour une couverture de 45 jours, chiffre le budget nécessaire, ordonnance les Ordres de Fabrication (OF), propose des transferts inter-sites et alerte les opérateurs."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 5.1 : Diagramme de cas d'utilisation : Sprint 3 – Gestion des Stocks et Mouvements"),
-        ...emptyFigurePlaceholder("Figure 5.2 : Diagramme de classes : Sprint 3 – Gestion des Stocks et Mouvements"),
+pb(),
 
         title2("5.4 Intégration des Prévisions dans la Gestion des Stocks de Fabrication"),
         body("Les prévisions journalières de pièces usinées issues de Prophet sont converties en besoins bruts de matières premières et composants. Pour chaque article de fabrication i (granulé polymère, insert métallique ou colorant), le taux de consommation journalière est calculé à partir de la consommation historique annualisée consolidée sur les 365 derniers jours de charge d'atelier :"),
@@ -1992,11 +1985,11 @@ const doc = new Document({
         body("Lorsque les projections de fabrication indiquent une charge saturant la capacité en régime 2x8 sur les presses clés (Demag 420T), le module préconise l'ouverture temporaire d'un poste de nuit (régime 3x8). De même, il recommande d'intercaler les révisions de moules lors des créneaux creux de consommation détectés."),
         pb(),
 
-        title2("5.7 Analyse Approfondie et Résultats Obtenus sur ASTOCKDATE"),
-        body("Le module a été exécuté sur l'intégralité des 814 200 enregistrements d'inventaire de la table `dbo.ASTOCKDATE` de l'entrepôt `dbDWH`."),
+        title2("5.7 Analyse Approfondie et Résultats de Gestion des Stocks"),
+        body("Le module a été exécuté sur l'ensemble des données d'inventaire de l'entrepôt."),
         pb(),
 
-        title3("5.7.1 Segmentation ABC et Analyse de Pareto sur ASTOCKDATE"),
+        title3("5.7.1 Segmentation ABC et Analyse de Pareto"),
         body("L'analyse de Pareto appliquée à l'inventaire classe les articles selon leur valeur financière totale consommée (tableau 5.3) :"),
         pb(),
         makeTable(
@@ -2009,14 +2002,14 @@ const doc = new Document({
           [1800, 1600, 1800, 3466]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 5.3 : Analyse de la répartition ABC et règles de gestion associées sur ASTOCKDATE", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 5.3 : Analyse de la répartition ABC et règles de gestion des stocks associées", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
         title3("5.7.2 Partitionnement et Clustering Non Supervisé K-Means des Articles"),
-        body("En complément de l'analyse ABC, le modèle non supervisé **K-Means** (`sklearn.cluster.KMeans` et `StandardScaler`), exposé sur `/cluster/items`, partitionne les articles en K = 3 grappes homogènes sur l'espace bidimensionnel `(quantité, valeur)` en minimisant l'inertie intra-classe :"),
+        body("En complément de l'analyse ABC, le modèle non supervisé **K-Means**, exposé sur le point d'accès `/cluster/items`, partitionne les articles en 3 grappes homogènes sur l'espace bidimensionnel quantité-valeur en minimisant l'inertie intra-classe :"),
         formulaBlock("J = ∑ₖ₌₁ᴷ ∑_{xᵢ ∈ Cₖ} ‖ xᵢ - μₖ ‖²", "(5.9)"),
         formulaBlock("μₖ = (1 / |Cₖ|) ∑_{xᵢ ∈ Cₖ} xᵢ", "(5.10)"),
         ...makeProsConsTable(
@@ -2034,7 +2027,7 @@ const doc = new Document({
           ]
         ),
         pb(),
-        body("Le tableau 5.5 caractérise les trois clusters opérationnels identifiés sur `ASTOCKDATE` :"),
+        body("Le tableau 5.5 caractérise les trois clusters opérationnels identifiés sur l'inventaire d'atelier :"),
         pb(),
         makeTable(
           ["Grappe K-Means", "Nombre Références", "Quantité Moyenne", "Valeur Moyenne", "Part Valeur Totale", "Action Prescriptive d'Atelier"],
@@ -2046,12 +2039,16 @@ const doc = new Document({
           [1600, 1200, 1200, 1300, 1400, 1966]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 5.5 : Caractérisation des clusters d'articles générés par K-Means sur ASTOCKDATE", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 5.5 : Caractérisation des clusters d'articles générés par K-Means sur l'inventaire", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
+        
+        pb(),
+        ...imageFigure("diagrams/segmentation_pareto_kmeans.png", "Figure 5.1 : Segmentation ABC de Pareto et Partitionnement K-Means des articles", 540, 230),
+        pb(),
         title3("5.7.3 Moteur de Simulation Scénaristique What-If"),
         body("Pour permettre au management d'évaluer la robustesse des stocks face à des chocs opérationnels (hausse soudaine de commandes constructeur, retard logistique ou panne machine), le microservice intègre l'endpoint `/simulate/scenario`. L'algorithme simule une variation de charge (+/- 10 %, +/- 20 %) sur 30 jours et calcule instantanément la nouvelle date de rupture prévisionnelle, alertant si le stock de sécurité est franchi."),
         pb(),
@@ -2059,7 +2056,7 @@ const doc = new Document({
         title3("5.7.4 Analyse Multi-Sites et Transferts Inter-Usines (Kondar - Brno)"),
         body("L'implantation bi-sites de l'entreprise d'accueil engendre parfois des situations asymétriques : un lot d'inserts peut être en rupture imminente à Kondar (Tunisie) tout en étant excédentaire à Brno (République Tchèque). Le module multi-sites de Nexora compare les couvertures des deux usines et formule des propositions de transferts inter-sites prioritaires avant toute commande fournisseur externe, réduisant les délais d'acheminement et les coûts d'achat."),
         pb(),
-        ...emptyFigurePlaceholder("Figure 5.3 : Diagramme de séquence : Traitement d'une alerte de rupture et réapprovisionnement"),
+        pb(),
 
         title2("5.8 Bilan des Tests et Livrables du Sprint 3"),
         body("La conformité du module de stock a été validée par une batterie complète de tests unitaires, d'intégration et de robustesse (tableau 5.6) :"),
@@ -2067,7 +2064,7 @@ const doc = new Document({
         makeTable(
           ["Fonctionnalité Validée", "Méthode de Test", "Outil de Test", "Résultat Obtenu"],
           [
-            ["Calcul de la couverture et rotation", "Tests Unitaires algorithmiques", "JUnit 5 / PyTest", "✓ Formules conformes, ratios validés sur ASTOCKDATE"],
+            ["Calcul de la couverture et rotation", "Tests Unitaires algorithmiques", "JUnit 5 / PyTest", "✓ Formules conformes, ratios validés sur les données d'inventaire"],
             ["Classification en 4 statuts d'atelier", "Tests Fonctionnels automatisés", "FastAPI TestClient", "✓ Affectation correcte Rupture / Critique / Normal / Surstock"],
             ["Calcul des quantités (couverture 45j)", "Tests de validation métier", "Scénarios réels", "✓ Quantités Q_commander conformes au lot minimal Q_min"],
             ["Clustering K-Means (K = 3)", "Tests de convergence", "scikit-learn / PyTest", "✓ Partitionnement stable en 3 grappes et centroïdes vérifiés"],
@@ -2102,13 +2099,13 @@ const doc = new Document({
         pb(),
 
         title2("5.9 Conclusion"),
-        conclusionBox("Le Sprint 3 a doté la plateforme Nexora d'un module complet de gestion intelligente et proactive des stocks d'atelier. En reliant intimement les prévisions de fabrication issues de Prophet aux données réelles de stock d'ASTOCKDATE, le système classe l'intégralité du catalogue selon quatre statuts opérationnels, génère des recommandations de commande quantifiées pour 45 jours de couverture et optimise les flux entre les usines de Kondar et Brno. Ce module supprime les arrêts de presse imprévus par manque de matière première tout en évitant les surstocks coûteux. Le chapitre 6 présente le Sprint 4, consacré à la réalisation des tableaux de bord Metronic 8, au déploiement de l'Agent IA Décisionnel Industriel et à la validation globale du système."),
+        conclusionBox("Le Sprint 3 a doté la plateforme Nexora d'un module complet de gestion intelligente et proactive des stocks d'atelier. En reliant intimement les prévisions de fabrication issues de Prophet aux données réelles d'inventaire, le système classe l'intégralité du catalogue selon quatre statuts opérationnels, génère des recommandations de commande quantifiées pour 45 jours de couverture et optimise les flux entre les usines de Kondar et Brno. Ce module supprime les arrêts de presse imprévus par manque de matière première tout en évitant les surstocks coûteux. Le chapitre 6 présente le Sprint 4, consacré à la réalisation des tableaux de bord Metronic 8, au déploiement de l'Agent IA Décisionnel Industriel et à la validation globale du système."),
         pageBreak(),
 // CHAPITRE 6 : SPRINT 4 – DASHBOARDS, AGENT IA & VALIDATION
         // =========================================================
         title1("Chapitre 6 : Sprint 4 – Tableaux de Bord Décisionnels, Agent IA et Validation Système"),
         title2("6.1 Introduction"),
-        body("Ce dernier chapitre de réalisation est dédié au Sprint 4, qui unifie l'ensemble des modules logiciels au sein d'une expérience utilisateur industrielle de premier ordre sous le design system Metronic 8. Nous y présentons la conception des interfaces de production et d'inventaire, le module d'exportation Excel haute performance, l'intégration des rapports décisionnels Microsoft Power BI connectés à `dbDWH`, ainsi que le déploiement de l'**Agent IA Décisionnel Industriel**, accessible via un tiroir interactif (*Drawer*) pour assister les managers d'atelier. Enfin, nous dressons le bilan exhaustif de la recette fonctionnelle et des tests de charge du système."),
+        body("Ce dernier chapitre de réalisation est dédié au Sprint 4, qui unifie l'ensemble des modules logiciels au sein d'une expérience utilisateur industrielle de premier ordre sous le design system Metronic 8. Nous y présentons la conception des interfaces de production et d'inventaire, le module d'exportation Excel haute performance, l'intégration des rapports décisionnels Microsoft Power BI connectés à l'entrepôt de données, ainsi que le déploiement de l'**Agent IA Décisionnel Industriel**, accessible via un tiroir interactif (*Drawer*) pour assister les managers d'atelier. Enfin, nous dressons le bilan exhaustif de la recette fonctionnelle et des tests de charge du système."),
         pb(),
 
         title2("6.2 Sprint Backlog du Sprint 4"),
@@ -2120,7 +2117,7 @@ const doc = new Document({
             ["US17", "En tant que manager, je veux une console Metronic 8 avec filtres", "Refonte UI Metronic 8, cartes flush et filtres multi-critères", "5 SP", "Terminé"],
             ["US18", "En tant que gestionnaire, je veux exporter les données filtrées en XLSX", "Intégration de la bibliothèque XLSX avec en-têtes explicites", "3 SP", "Terminé"],
             ["US19", "En tant qu'utilisateur, je veux dialoguer avec l'Agent IA Décisionnel", "Développement du Drawer interactif et contrôleur /api/ai/agent", "8 SP", "Terminé"],
-            ["US20", "En tant que directeur, je veux consulter des dashboards Power BI", "Conception et publication des rapports décisionnels dbDWH", "5 SP", "Terminé"],
+            ["US20", "En tant que directeur, je veux consulter des dashboards Power BI", "Conception et publication des rapports décisionnels connectés au DWH", "5 SP", "Terminé"],
             ["US22", "En tant qu'utilisateur, je veux un fallback local offline résilient", "Gestion des déconnexions réseau et calcul de repli React", "5 SP", "Terminé"],
           ],
           [700, 3200, 3100, 800, 866]
@@ -2135,7 +2132,7 @@ const doc = new Document({
         title2("6.3 Architecture Globale et Diagramme de Séquence du Système Décisionnel"),
         body("La figure 6.1 modélise le diagramme de séquence global du système décisionnel complet, illustrant l'orchestration fluide entre le client React Metronic 8, l'API Spring Boot 3, le microservice FastAPI (Prophet), l'Agent IA Décisionnel et la base SQL Server :"),
         pb(),
-        ...emptyFigurePlaceholder("Figure 6.1 : Diagramme de séquence global du système décisionnel Nexora"),
+        ...imageFigure("diagrams/sprint4_seq.png", "Figure 6.1 : Diagramme de séquence global du système décisionnel Nexora", 540, 200),
 
         title2("6.4 Conception et Réalisation des Interfaces Utilisateur (Metronic 8)"),
         title3("6.4.1 Console de Suivi de Production et TRG Temps Réel"),
@@ -2144,7 +2141,7 @@ const doc = new Document({
         ...emptyFigurePlaceholder("Figure 6.2 : Capture d'écran : Console de suivi des machines et calcul du TRG en direct"),
 
         title3("6.4.2 Console d'Inventaire, Mouvements DWH et Export XLSX"),
-        body("La console d'inventaire (figure 6.3) exploite les tables `ASTOCKDATE` et `FACT_ILE`. Elle intègre un panneau de filtres multi-critères escamotable permettant d'isoler instantanément des articles par référence, famille de polymère, magasin ou statut de stock. Un bouton d'exportation Excel (.xlsx) dédié permet d'extraire fidèlement en une fraction de seconde la vue actuellement filtrée avec mise en forme automatique."),
+        body("La console d'inventaire (figure 6.3) exploite les données d'inventaire et l'historique des mouvements de stock. Elle intègre un panneau de filtres multi-critères escamotable permettant d'isoler instantanément des articles par référence, famille de polymère, magasin ou statut de stock. Un bouton d'exportation Excel (.xlsx) dédié permet d'extraire fidèlement en une fraction de seconde la vue actuellement filtrée avec mise en forme automatique."),
         pb(),
         ...emptyFigurePlaceholder("Figure 6.3 : Capture d'écran : Console de gestion des stocks, mouvements DWH et filtres"),
 
@@ -2159,7 +2156,7 @@ const doc = new Document({
 
         bold_body("A. Définition et Fondements Scientifiques du Paradigme RAG :"),
         body("Introduit par Patrick Lewis et ses pairs de Meta AI Research (NeurIPS 2020), le paradigme **RAG (Retrieval-Augmented Generation)** propose une symbiose élégante entre deux systèmes d'information aux forces complémentaires : un **module de récupération de connaissances (Retriever)** et un **modèle génératif de langage naturel (Generator)**."),
-        bullet("**Le Retriever (Composant de Récupération Factuelle)** : agit comme un filtre d'accès direct au référentiel d'entreprise (`dbDWH` sous Microsoft SQL Server). À chaque interrogation émise par l'utilisateur, ce composant formule et exécute des requêtes SQL paramétrées ciblées afin d'extraire les faits bruts, métriques quantitatives et états machine en temps réel."),
+        bullet("**Le Retriever (Composant de Récupération Factuelle)** : agit comme un filtre d'accès direct au référentiel d'entreprise sous Microsoft SQL Server. À chaque interrogation émise par l'utilisateur, ce composant formule et exécute des requêtes SQL paramétrées ciblées afin d'extraire les faits bruts, métriques quantitatives et états machine en temps réel."),
         bullet("**Le Generator (Composant de Synthèse Linguistique)** : alimenté par le grand modèle de langage **LLaMA 3.3 70B Versatile** (Meta AI), il reçoit simultanément la requête de l'opérateur et les tuples de données renvoyés par le Retriever. Il a pour mandat exclusif d'articuler une réponse en français technique naturel, claire, contextualisée et orientée vers la prise de décision opérationnelle."),
         pb(),
 
@@ -2170,9 +2167,9 @@ const doc = new Document({
         makeTable(
           ["Critère Évalué", "LLM Standard en Boîte Noire", "Fine-Tuning Supervisé (Spécialisation)", "Architecture RAG (Solution Nexora Retenue)"],
           [
-            ["Fraîcheur temporelle des données", "Statique et figée à la date d'entraînement (incapable de connaître l'état du jour)", "Nécessite des cycles de ré-entraînement réguliers très lourds", "Temps réel absolu : interrogation SQL synchrone de dbDWH à la seconde"],
+            ["Fraîcheur temporelle des données", "Statique et figée à la date d'entraînement (incapable de connaître l'état du jour)", "Nécessite des cycles de ré-entraînement réguliers très lourds", "Temps réel absolu : interrogation SQL synchrone de l'entrepôt de données à la seconde"],
             ["Fiabilité factuelle & hallucinations", "Risque critique d'affabulation (chiffres inventés mais syntaxiquement convaincants)", "Réduit mais persistant (extrapolation statistique incontrôlée)", "Vérité terrain 100 % garantie : données chiffrées issues du SQL certifié"],
-            ["Confidentialité du patrimoine industriel", "Données d'atelier envoyées vers des serveurs tiers non souverains", "Nécessite d'exposer les données propriétaires pour ajuster les poids", "Données d'entreprise confinées dans dbDWH ; seul le prompt transite"],
+            ["Confidentialité du patrimoine industriel", "Données d'atelier envoyées vers des serveurs tiers non souverains", "Nécessite d'exposer les données propriétaires pour ajuster les poids", "Données d'entreprise confinées dans l'entrepôt SQL Server sécurisé ; seul le prompt transite"],
             ["Coût et infrastructure matérielle", "Abonnements récurrents sans maîtrise du modèle sous-jacent", "Cluster de GPU massifs (Nvidia H100/A100) très onéreux pour l'atelier", "Inférence ultra-légère, coût d'infrastructure nul, évolutivité immédiate"],
             ["Vitesse d'inférence et latence", "Variable et tributaire de files d'attente de serveurs mutualisés", "Rapide mais dépend de la taille du serveur interne dédié", "Ultra-faible (< 450 ms) propulsée par le moteur Groq LPU matériel"],
             ["Agilité face aux changements de référentiel", "Aucune adaptation possible aux nouveaux articles ou machines", "Nécessite un ré-entraînement complet à chaque nouvel atelier", "Instantanée : tout ajout de ligne ou table dans SQL Server est aussitôt lu"]
@@ -2188,7 +2185,7 @@ const doc = new Document({
 
         body("Cette analyse met en lumière cinq impératifs industriels déterminants :"),
         bullet("**1. Zéro Hallucination et Vérité Factuelle Absolue** : dans une ligne de plasturgie automobile livrant en juste-à-temps des constructeurs comme Valeo, Bosch ou Porsche, une fausse déclaration de stock critique ou de cadence machine peut causer un arrêt de chaîne chiffré à plusieurs dizaines de milliers d'euros par heure. Les LLM purs génèrent des données probables mais non attestées. Avec le RAG, 100 % des nombres (stocks restants, TRS, cadences, temps d'arrêt) sont issus de requêtes SQL certifiées. Le LLM ne fait qu'habiller linguistiquement une réalité mathématique inviolable."),
-        bullet("**2. Synchronisation Dynamique avec la Vie d'Atelier** : le parc de 319 machines et les 982 références d'articles thermoplastiques connaissent des variations continues (saisies de production `FACT_CLE`, ajustements d'inventaires `ASTOCKDATE`, mouvements de stock `FACT_ILE`). Le RAG extrait l'état exact de l'usine au moment où l'utilisateur pose sa question, sans décalage temporel."),
+        bullet("**2. Synchronisation Dynamique avec la Vie d'Atelier** : le parc de 319 machines et les 982 références d'articles thermoplastiques connaissent des variations continues (saisies d'atelier, inventaires journaliers, mouvements de stock). Le RAG extrait l'état exact de l'usine au moment où l'utilisateur pose sa question, sans décalage temporel."),
         bullet("**3. Souveraineté, Confidentialité et Secret Industriel** : les recettes de fabrication (matières PA66, PP chargé talc), les temps de cycle et les volumes contractuels des équipementiers constituent un secret industriel hautement sensible. Avec l'architecture RAG, aucune donnée privée n'est utilisée pour ré-entraîner des modèles publics, garantissant une étanchéité totale du système d'information."),
         bullet("**4. Pragmatisme Économique et Sobriété Opérationnelle** : adapter un modèle de 70 milliards de paramètres par fine-tuning réclamerait des investissements en matériel de pointe et en ingénieurs spécialisés disproportionnés. L'architecture RAG s'affranchit de cette contrainte : l'ajout d'une nouvelle ligne de soudure laser ou d'un nouvel atelier de moulage dans la base de données est assimilé de facto par l'agent sans aucune recompilation."),
         bullet("**5. Vitesse d'Inférence Industrielle (< 450 ms) via Groq LPU** : pour être adopté par les chefs d'équipe sur le terrain, l'agent conversationnel ne doit souffrir d'aucun temps mort. L'exécution du modèle **LLaMA 3.3 70B Versatile** sur les processeurs de traitement tensoriel **Groq LPU (Language Processing Unit)** offre un débit exceptionnel supérieur à 800 tokens/seconde, permettant de clore l'ensemble du cycle de réponse en moins de 450 millisecondes."),
@@ -2197,9 +2194,9 @@ const doc = new Document({
         bold_body("C. Fonctionnement Détaillé du Pipeline RAG en Trois Piliers (R-A-G) :"),
         body("L'orchestration des flux entre l'interface utilisateur, le backend applicatif et le moteur cognitif se décompose en trois phases indissociables :"),
         bullet("**1. R (Retrieval - Extraction Contextuelle Sélective)** : l'agent analyse la formulation sémantique de l'utilisateur pour en déduire l'intention métier (*Intent Detection*). Selon l'intention identifiée, le système déclenche une requête SQL ciblée :"),
-        bullet("   • *Ruptures critiques de matières premières* : interrogation de `dbo.ASTOCKDATE` (`Quantity <= 5`) pour détecter les pénuries immédiates."),
-        bullet("   • *Rendements et disponibilités du parc machines* : jointure relationnelle entre `dbo.FACT_CLE` et `dbo.MCMachineCenter` (`f.[No_] = mc.[No_]`) pour calculer le TRG et la cadence effective."),
-        bullet("   • *Ordres de fabrication et historiques d'arrêts* : filtrage de `dbo.FACT_CLE` par code atelier (`Work_Center_No_`) pour identifier les micro-pannes récurrentes."),
+        bullet("   • *Ruptures critiques de matières premières* : interrogation des stocks journaliers (`Quantité <= 5`) pour détecter les pénuries immédiates."),
+        bullet("   • *Rendements et disponibilités du parc machines* : calcul croisé entre les écritures de charge et les fiches machines pour calculer le TRG et la cadence effective."),
+        bullet("   • *Ordres de fabrication et historiques d'arrêts* : filtrage des écritures d'atelier par centre de charge pour identifier les micro-pannes récurrentes."),
         bullet("**2. A (Augmentation - Construction du Prompt Industriel Contraint)** : les enregistrements SQL extraits sont sérialisés en JSON structuré et fusionnés avec le prompt système. Ce dernier impose un cadre déterministe strict : attribution du rôle d'expert en plasturgie industrielle, température d'échantillonnage bridée à T = 0.2 pour éliminer toute dérive créative, et obligation d'appuyer chaque recommandation sur les identifiants exacts des machines et des articles."),
         bullet("**3. G (Generation - Synthèse Décisionnelle et Recommandations Prescriptives)** : LLaMA 3.3 génère une synthèse articulée combinant trois volets : un constat quantitatif précis, une explication causale, et des préconisations d'action correctives d'atelier (réallocation de charge sur une presse Demag disponible, bascule d'équipes en 3x8 lors des pics de demande, relance fournisseur sur le polyamide)."),
         pb(),
@@ -2232,14 +2229,14 @@ const doc = new Document({
 
         bold_body("E. Cas d'Usage Opérationnels d'Atelier Restitués par l'Agent :"),
         bullet("**Supervision interactive en langage naturel** : le responsable de production interroge directement l'agent sans rédiger de requête SQL (« Quel est le rendement moyen des presses Demag cette semaine ? », « Avons-nous assez de granulés PA66 pour honorer la commande Valeo ? »)."),
-        bullet("**Diagnostic assisté des anomalies de cadence** : l'agent croise les durées d'arrêt enregistrées dans `FACT_CLE` avec les historiques de maintenance et suggère des causes probables (défaut de régulation thermique du moule, buse d'injection encrassée)."),
+        bullet("**Diagnostic assisté des anomalies de cadence** : l'agent croise les durées d'arrêt enregistrées dans l'historique de production avec les plannings de maintenance et suggère des causes probables (défaut de régulation thermique du moule, buse d'injection encrassée)."),
         bullet("**Recommandations prescriptives synchronisées avec Prophet** : lorsqu'une projection Prophet signale un dépassement de capacité sur une ligne d'assemblage, l'agent IA suggère immédiatement un arbitrage opérationnel (ouverture d'une équipe supplémentaire en horaire de nuit ou délestage vers une presse équivalente)."),
         pb(),
         ...emptyFigurePlaceholder("Figure 6.5 : Capture d'écran : Agent IA Décisionnel Industriel (Tiroir interactif Metronic)"),
         pb(),
 
         title3("6.4.5 Tableaux de Bord et Reporting Décisionnel Microsoft Power BI"),
-        body("En complément de la plateforme web opérationnelle, une suite de rapports décisionnels Microsoft Power BI a été modélisée et publiée (figures 6.6 et 6.7). Directement connectés aux tables du Data Warehouse SQL Server (`FACT_CLE`, `ASTOCKDATE`, `FACT_ILE`), ces tableaux de bord offrent à la direction industrielle une synthèse macroscopique : valorisation globale du stock en Dinars Tunisiens (DT), ventilation des coûts par centre de charge, analyse de l'évolution du TRG mensuel et taux de service client."),
+        body("En complément de la plateforme web opérationnelle, une suite de rapports décisionnels Microsoft Power BI a été modélisée et publiée (figures 6.6 et 6.7). Directement connectés aux données consolidées du Data Warehouse SQL Server (production, inventaires, mouvements de stock), ces tableaux de bord offrent à la direction industrielle une synthèse macroscopique : valorisation globale du stock en Dinars Tunisiens (DT), ventilation des coûts par centre de charge, analyse de l'évolution du TRG mensuel et taux de service client."),
         pb(),
         ...emptyFigurePlaceholder("Figure 6.6 : Tableau de bord Power BI : Supervision exécutive globale de production"),
         ...emptyFigurePlaceholder("Figure 6.7 : Tableau de bord Power BI : Analyse approfondie des mouvements et valorisation stock"),
@@ -2296,7 +2293,7 @@ const doc = new Document({
             ["Interfaces Metronic 8", "Console de production et inventaire avec filtres dynamiques", "Validé par les utilisateurs", "Terminé"],
             ["Module export Excel", "Exportateur XLSX automatique des données filtrées", "Validé par les gestionnaires", "Terminé"],
             ["Agent IA Décisionnel", "Tiroir Metronic interactif connecté à /api/ai/agent", "Validé par la direction d'atelier", "Terminé"],
-            ["Tableaux Power BI", "Rapports décisionnels exécutifs connectés à dbDWH", "Validé par la direction industrielle", "Terminé"],
+            ["Tableaux Power BI", "Rapports décisionnels exécutifs connectés au Data Warehouse", "Validé par la direction industrielle", "Terminé"],
             ["Recette globale", "Rapport de tests de conformité 100% sur 175 épreuves", "Approuvé par le PO et SM", "Terminé"],
           ],
           [2000, 3200, 2200, 1266]
@@ -2320,7 +2317,7 @@ const doc = new Document({
         body("Ce projet de fin d'études a permis de concevoir, développer et déployer avec succès **Nexora**, une plateforme intelligente de pilotage de production et de gestion des stocks d'atelier destinée à un équipementier automobile de premier rang (Tier-1). En réponse à la fragmentation historique des données et aux limites des saisies manuelles sur fiches papier, Nexora apporte une réponse technologique complète, rigoureuse et pérenne."),
         pb(),
         body("L'ensemble des objectifs fixés au lancement du projet ont été intégralement atteints :"),
-        bullet("**Unification du Data Warehouse** : les 83 tables de `dbDWH` ont été auditées, assainies et optimisées. L'indexation clusterisée sur `FACT_ILE` a réduit les temps de réponse de plus de 30 secondes à seulement 448 ms pour 5 000 lignes."),
+        bullet("**Unification du Data Warehouse** : les 83 tables de l'entrepôt ont été auditées, assainies et optimisées. L'optimisation par indexation clusterisée a réduit les temps de réponse de plus de 30 secondes à seulement 448 ms pour 5 000 lignes de mouvements."),
         bullet("**Supervision temps réel des machines** : les 319 machines d'atelier font l'objet d'un suivi continu avec calcul dynamique du TRG et détection immédiate des arrêts de ligne."),
         bullet("**Modélisation prédictive par IA** : le modèle additif Prophet (Meta) a démontré sa supériorité sur les méthodes classiques avec un taux d'erreur exceptionnel de 4,8 % (MAPE) et 7,4 pièces (MAE), fournissant des projections fiables à 30 jours."),
         bullet("**Gestion proactive des stocks** : la segmentation ABC de Pareto et le calcul automatique du point de commande ont fiabilisé les approvisionnements et permis l'équilibrage multi-sites Tunisie-Brno."),
@@ -2332,7 +2329,7 @@ const doc = new Document({
         bullet("**Gain de temps administratif de 75 %** : suppression totale des ressaisies manuelles des fiches suiveuses sur les 108 cellules principales."),
         bullet("**Réduction de 35 % des ruptures de matière critique** : grâce aux alertes de seuil < 5 pièces et aux projections de consommation Prophet."),
         bullet("**Amélioration de 6,2 points du TRG moyen d'atelier** : rendue possible par la visibilité instantanée des micro-arrêts et la réactivité accrue des équipes de maintenance."),
-        bullet("**Fiabilisation à 100 % de la traçabilité des stocks** : synchronisation immédiate des mouvements `FACT_ILE` sans écart d'inventaire."),
+        bullet("**Fiabilisation à 100 % de la traçabilité des stocks** : synchronisation immédiate des mouvements de stock sans écart d'inventaire."),
         pb(),
 
         title2("Difficultés Rencontrées et Solutions Apportées"),
@@ -2341,8 +2338,8 @@ const doc = new Document({
         makeTable(
           ["Défi Technique / Méthodologique", "Impact Initial", "Solution Appliquée & Justification"],
           [
-            ["Temps de réponse > 30s sur FACT_ILE (1.5M lignes)", "Timeouts et blocage des écrans", "Création d'un index clusterisé primaire sur Entry No_ DESC et index couvrants (temps ramené à 448 ms)."],
-            ["Stocks négatifs dans ASTOCKDATE", "Distorsion des indicateurs financiers", "Pipeline ETL de recalage automatique par le dernier inventaire certifié."],
+            ["Temps de réponse > 30s sur mouvements de stock (1,5M lignes)", "Timeouts et blocage des écrans", "Création d'un index clusterisé primaire sur Entry No_ DESC et index couvrants (temps ramené à 448 ms)."],
+            ["Stocks négatifs transitoires dans l'inventaire", "Distorsion des indicateurs financiers", "Pipeline ETL de recalage automatique par le dernier inventaire physique certifié."],
             ["Sur-apprentissage sur les séries d'atelier", "Erreurs sur les variations atypiques", "Régularisation bayésienne des changepoints dans Prophet et séries de Fourier calibrées."],
             ["Risque de coupure réseau vers FastAPI", "Perte d'affichage des prévisions", "Moteur de calcul de repli offline en local sur le frontend React."],
             ["Complexité ergonomique pour les opérateurs", "Frein à l'adoption utilisateur", "Refonte sous Metronic 8 avec boutons d'action simplifiés, badges clairs et Drawer interactif."],
@@ -2417,37 +2414,27 @@ const doc = new Document({
 });
 
 // ==========================================
-// GENERATION OF DOCX FILE & DIRECT MERGE
-// ==========================================
-const { execSync } = require('child_process');
-const path = require('path');
-
+// GENERATION OF DOCX FILE DIRECTLY (PAGE DE GARDE VIDE)
+// =======================================================
 Packer.toBuffer(doc).then(buffer => {
-  const scratchDir = path.join(__dirname, 'scratch');
-  if (!fs.existsSync(scratchDir)) {
-    fs.mkdirSync(scratchDir, { recursive: true });
-  }
-  const tempRaw = path.join(scratchDir, 'temp_raw.docx');
-  fs.writeFileSync(tempRaw, buffer);
-
-  try {
-    // Run merge directly to generate rapport_pfe_final_nexora_v4.docx
-    execSync('node merge_docs.js', {
-      cwd: __dirname,
-      stdio: 'inherit',
-      env: { ...process.env, RAPPORT_IN: tempRaw }
-    });
-    console.log("✓ Rapport final généré avec succès : rapport_pfe_final_nexora_v4.docx (aucun fichier raw conservé)");
-  } catch (err) {
-    console.error("Erreur lors de la fusion du rapport :", err);
-  } finally {
-    // Clean up temporary file
-    if (fs.existsSync(tempRaw)) {
-      try { fs.unlinkSync(tempRaw); } catch (_) {}
-    }
-    const legacyRaw = path.join(__dirname, 'rapport_pfe_v76_raw.docx');
-    if (fs.existsSync(legacyRaw)) {
-      try { fs.unlinkSync(legacyRaw); } catch (_) {}
+  const outputPath = path.join(__dirname, 'rapport_pfe_final_nexora_v4.docx');
+  let saved = false;
+  let retries = 5;
+  while (retries > 0 && !saved) {
+    try {
+      fs.writeFileSync(outputPath, buffer);
+      saved = true;
+      console.log("✓ Rapport final généré avec succès : rapport_pfe_final_nexora_v4.docx (Page de garde 100% vide)");
+    } catch (err) {
+      retries--;
+      if (retries === 0) {
+        // Fallback to separate file name if Word has it open
+        const fallbackPath = path.join(__dirname, 'rapport_pfe_final_nexora_v4_ready.docx');
+        fs.writeFileSync(fallbackPath, buffer);
+        console.log("✓ Rapport final généré dans : rapport_pfe_final_nexora_v4_ready.docx (Word verrouillait le fichier principal)");
+      }
     }
   }
+}).catch(err => {
+  console.error("Erreur génération docx :", err);
 });
