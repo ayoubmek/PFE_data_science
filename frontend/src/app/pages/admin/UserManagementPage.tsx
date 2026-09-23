@@ -86,7 +86,7 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bg: string; 
     color: '#8950FC',
     bg: '#EEE5FF',
     icon: 'shield-tick',
-    desc: 'Accès total système, gestion des utilisateurs, permissions et logs de sécurité.',
+    desc: 'Accès total système, gestion des utilisateurs, habilitations RBAC et sécurité.',
   },
   MANAGER: {
     label: 'Manager',

@@ -150,7 +150,7 @@ La sélection du RAG comme architecture centrale de l'agent conversationnel n'es
 | **Fiabilité factuelle** | ❌ Hallucinations fréquentes | ⚠️ Partielle selon le corpus | ✅ 100% ancré dans SQL Server |
 | **Coût d'exploitation** | ⚠️ Abonnement API | ❌ Très élevé (GPU cluster) | ✅ Quasi nul (inférence légère) |
 | **Confidentialité** | ❌ Données envoyées à tiers | ❌ Corpus propriétaire exposé | ✅ Données restent dans `dbDWH` |
-| **Latence de réponse** | ⚠️ Variable (réseau) | ✅ Rapide si local | ✅ < 450 ms (Groq Engine) |
+| **Latence de réponse** | ⚠️ Variable (réseau) | ✅ Rapide si local | ✅ Ultra-faible (Groq LPU) |
 
 Les justifications détaillées sont les suivantes :
 
@@ -162,7 +162,7 @@ Les justifications détaillées sont les suivantes :
 
 4. **💰 Pragmatisme Économique** : Le fine-tuning d'un modèle de type LLaMA sur un corpus industriel nécessiterait des clusters GPU dédiés (coût estimé à plusieurs dizaines de milliers d'euros) et devrait être répété à chaque mise à jour significative du référentiel. Le RAG offre une **mise à jour instantanée et gratuite** : toute nouvelle table ou colonne ajoutée à `dbDWH` devient immédiatement exploitable par l'agent.
 
-5. **⚡ Latence Ultra-faible via Groq** : Le LLM **LLaMA 3.3 70B** est inféré via le moteur **Groq LPU (Language Processing Unit)**, une architecture matérielle dédiée à l'inférence de LLM atteignant des vitesses de génération de **plus de 800 tokens/seconde**. La latence end-to-end du pipeline RAG complet (récupération SQL → construction du prompt → génération → retour JSON) est maintenue **sous 450 millisecondes**.
+5. **⚡ Vitesse d'Inférence Industrielle via Groq LPU** : Le LLM **LLaMA 3.3 70B** est inféré via le moteur **Groq LPU (Language Processing Unit)**, une architecture matérielle dédiée à l'accélération d'inférence des LLM. Cette accélération garantit une réponse quasi-instantanée pour les équipes de production, éliminant les temps d'attente lors des prises de décision d'atelier.
 
 ##### 2.3 Architecture Technique du Pipeline RAG
 

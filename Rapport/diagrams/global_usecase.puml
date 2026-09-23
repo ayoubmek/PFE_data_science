@@ -37,7 +37,6 @@ rectangle "Plateforme Nexora" {
     usecase "Consulter les prévisions d'IA" as UC6
     usecase "Gérer les comptes utilisateurs" as UC7
     usecase "Gérer les permissions (RBAC)" as UC8
-    usecase "Consulter les journaux d'activité" as UC9
 }
 
 OPE --> UC0
@@ -54,7 +53,6 @@ MGR --> UC6
 ADM --> UC0
 ADM --> UC7
 ADM --> UC8
-ADM --> UC9
 
 UC1 ..> UC0 : <<include>>
 UC2 ..> UC0 : <<include>>
@@ -64,5 +62,4 @@ UC5 ..> UC0 : <<include>>
 UC6 ..> UC0 : <<include>>
 UC7 ..> UC0 : <<include>>
 UC8 ..> UC0 : <<include>>
-UC9 ..> UC0 : <<include>>
 @enduml
