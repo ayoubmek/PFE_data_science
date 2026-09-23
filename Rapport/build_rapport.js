@@ -814,9 +814,11 @@ const doc = new Document({
         tocLine("Tableau 5.4 : Avantages et limites du clustering K-Means", 1, "67"),
         tocLine("Tableau 5.5 : Caractérisation des clusters d'articles générés par K-Means sur l'inventaire", 1, "68"),
         tocLine("Tableau 5.6 : Bilan des livrables et validation du Sprint 3", 1, "71"),
-        tocLine("Tableau 6.1 : Sprint Backlog du Sprint 4 – Tableaux de Bord, Agent IA et Validation Système", 1, "73"),
-        tocLine("Tableau 6.3 : Matrice de recette et conformité des User Stories validées par le Product Owner", 1, "85"),
-        tocLine("Tableau 6.4 : Bilan des livrables du Sprint 4", 1, "87"),
+        tocLine("Tableau 6.1 : Sprint Backlog du Sprint 4 – Interfaces, Agent IA et Validation Système", 1, "73"),
+        tocLine("Tableau 6.2 : Évaluation comparative des approches d'IA : LLM standard vs Fine-Tuning vs RAG", 1, "80"),
+        tocLine("Tableau 6.3 : Avantages et limites : Grand Modèle de Langage LLaMA 3.3 70B en architecture RAG", 1, "81"),
+        tocLine("Tableau 6.4 : Matrice de recette et conformité des User Stories validées par le Product Owner", 1, "85"),
+        tocLine("Tableau 6.5 : Bilan des livrables du Sprint 4", 1, "87"),
         tocLine("Tableau 7.1 : Synthèse des difficultés rencontrées et solutions apportées", 1, "90"),
         pageBreak(),
 
@@ -831,7 +833,7 @@ const doc = new Document({
             ["CRUD", "Create, Read, Update, Delete", "Ensemble des quatre opérations fondamentales de gestion des données"],
             ["DWH", "Data Warehouse", "Entrepôt de données d'entreprise consolidé multi-sources"],
             ["EDA", "Exploratory Data Analysis", "Analyse exploratoire et statistique des données d'atelier"],
-            ["ERP", "Enterprise Resource Planning", "Progiciel de gestion intégré d'entreprise (Microsoft Dynamics NAV)"],
+            ["ERP", "Enterprise Resource Planning", "Progiciel de gestion intégré d'entreprise Microsoft Dynamics NAV"],
             ["ETL", "Extract, Transform, Load", "Pipeline d'extraction, transformation et chargement des données"],
             ["FSM", "Faculté des Sciences de Monastir", "Établissement académique universitaire de rattachement"],
             ["ILE", "Item Ledger Entry", "Table DWH comptabilisant les écritures réelles des mouvements de stock"],
@@ -841,10 +843,10 @@ const doc = new Document({
             ["MAE", "Mean Absolute Error", "Erreur absolue moyenne mesurée sur les prévisions"],
             ["MAPE", "Mean Absolute Percentage Error", "Pourcentage d'erreur absolue moyen évaluant l'exactitude"],
             ["MES", "Manufacturing Execution System", "Système de pilotage et d'exécution de la fabrication"],
-            ["OEE", "Overall Equipment Effectiveness", "Taux de Rendement Synthétique / Taux de Rendement Global (TRG)"],
+            ["OEE", "Overall Equipment Effectiveness", "Taux de Rendement Synthétique ou Taux de Rendement Global - TRG"],
             ["OF", "Ordre de Fabrication", "Ordre de production planifié pour l'usinage d'une pièce"],
             ["PO", "Product Owner", "Responsable du produit et de la valeur métier en méthodologie Scrum"],
-            ["RBAC", "Role-Based Access Control", "Contrôle d'accès basé sur les rôles (ADMIN, MANAGER, OPERATEUR)"],
+            ["RBAC", "Role-Based Access Control", "Contrôle d'accès basé sur les rôles : Administrateur, Manager, Opérateur"],
             ["REST", "Representational State Transfer", "Style d'architecture logicielle pour les services web distribués"],
             ["RMSE", "Root Mean Squared Error", "Racine carrée de l'erreur quadratique moyenne"],
             ["SM", "Scrum Master", "Facilitateur et garant du cadre méthodologique agile Scrum"],
@@ -2162,11 +2164,6 @@ pb(),
             "Coût computationnel élevé si l'on souhaitait héberger un modèle de 70B en local sur serveurs internes",
           ]
         ),
-        new Paragraph({
-          children: [new TextRun({ text: "Tableau 6.3 : Bilan des atouts et contraintes : Grand Modèle de Langage LLaMA 3.3 70B en architecture RAG", font: FONT, size: 20, italics: true })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 80, after: 120 }
-        }),
         pb(),
 
         bold_body("E. Cas d'Usage Opérationnels d'Atelier Restitués par l'Agent :"),
@@ -2184,7 +2181,7 @@ pb(),
         ...emptyFigurePlaceholder("Figure 6.7 : Tableau de bord Power BI : Analyse approfondie des mouvements et valorisation stock"),
 
         title2("6.5 Recette Utilisateur et Validation Métier du Système"),
-        body("La recette finale de la plateforme Nexora a été effectuée conjointement avec le Product Owner et les utilisateurs métiers. Le tableau 6.3 dresse la matrice de validation et de conformité des 20 User Stories du projet :"),
+        body("La recette finale de la plateforme Nexora a été effectuée conjointement avec le Product Owner et les utilisateurs métiers. Le tableau 6.4 dresse la matrice de validation et de conformité des 20 User Stories du projet :"),
         pb(),
         makeTable(
           ["ID US", "Récit Utilisateur", "Critère d'Acceptation & Validation Métier", "Conformité", "Statut Recette"],
@@ -2201,14 +2198,14 @@ pb(),
           [1000, 2400, 3200, 900, 1166]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 6.3 : Matrice de recette et conformité des User Stories validées par le Product Owner", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 6.4 : Matrice de recette et conformité des User Stories validées par le Product Owner", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
         title2("6.6 Bilan des Livrables du Sprint 4"),
-        body("Le tableau 6.4 résume les livrables validés au terme de ce quatrième et dernier sprint :"),
+        body("Le tableau 6.5 résume les livrables validés au terme de ce quatrième et dernier sprint :"),
         pb(),
         makeTable(
           ["Tâche Réalisée", "Livrable Associé", "Validation Métier & Technique", "Statut"],
@@ -2222,7 +2219,7 @@ pb(),
           [2000, 3200, 2200, 1266]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 6.4 : Bilan des livrables du Sprint 4", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 6.5 : Bilan des livrables du Sprint 4", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
