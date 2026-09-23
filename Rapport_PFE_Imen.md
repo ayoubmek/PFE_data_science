@@ -237,7 +237,7 @@ Afin de garantir la gouvernance des accès, la traçabilité des opérations ind
 #### 3. Attribution des Permissions & Modèle RBAC (Role-Based Access Control) :
 La plateforme implémente une matrice de contrôle d'accès stricte différenciant trois acteurs majeurs :
 * 🛡️ **ADMIN (Administrateur)** : Accès total au système, gestion complète des comptes et des rôles utilisateurs, sécurisation des API, supervision des configurations système.
-* 👔 **MANAGER (Responsable Production & Stock)** : Pilotage des performances industrielles (TRS/TRG), suivi en direct des machines d'atelier, planification des Ordres de Fabrication (OF), gestion de l'inventaire, exécution des prévisions d'IA Prophet et exports Excel.
+* 👔 **MANAGER (Responsable Production & Stock)** : Pilotage des performances industrielles (TRS/TRG), suivi en direct des machines d'atelier, planification des Ordres de Fabrication, gestion de l'inventaire, exécution des prévisions d'IA Prophet et exports Excel.
 * ⚙️ **OPERATEUR (Opérateur d'Atelier)** : Déclaration de production aux postes d'injection/assemblage, mise à jour des statuts d'ordres d'usinage, pointage des entrées/sorties de stock et réception des alertes machine.
 
 #### 4. Architecture Technique & Persistance Full-Stack :
