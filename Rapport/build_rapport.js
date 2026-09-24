@@ -608,10 +608,10 @@ const doc = new Document({
         pb(),
         body("Le système intègre une architecture modulaire à 4 niveaux s'appuyant sur Spring Boot 3 (Java 17), Microsoft SQL Server (Entrepôt de Données), un frontend réactif React.js doté du design system Metronic 8, et un microservice de Machine Learning sous FastAPI (Python 3.10). L'application assure le calcul instantané du Taux de Rendement Global (TRG/OEE), la classification ABC d'inventaire selon Pareto, ainsi que la modélisation prédictive des cadences de fabrication et des niveaux de stock via l'algorithme Prophet de Meta (MAPE de 4,8 % et MAE de 7,4 pièces), surpassant les modèles traditionnels ARIMA et régression linéaire."),
         pb(),
-        body("La plateforme intègre en outre des tableaux de bord décisionnels interactifs sous Microsoft Power BI et un **Agent IA Décisionnel Industriel** capable de diagnostiquer les arrêts machines et de formuler des recommandations proactives d'ordonnancement d'équipes (régime 3x8) et de réapprovisionnement."),
+        body("La plateforme intègre en outre des tableaux de bord décisionnels interactifs sous Microsoft Power BI permettant aux gestionnaires d'analyser la performance de l'atelier, de diagnostiquer les arrêts machines et de piloter les indicateurs financiers et de réapprovisionnement."),
         pb(),
         bold_body("Mots-clés :"),
-        body("Industrie 4.0, Plasturgie Automobile, Data Warehouse, Machine Learning, Séries Temporelles, Prophet (Meta), Agent IA Décisionnel, TRG/OEE, Spring Boot, React Metronic, Power BI."),
+        body("Industrie 4.0, Plasturgie Automobile, Data Warehouse, Machine Learning, Séries Temporelles, Prophet (Meta), Analyse Prédictive, TRG/OEE, Spring Boot, React Metronic, Power BI."),
         pageBreak(),
 
         // SOMMAIRE / TOC
@@ -735,7 +735,7 @@ const doc = new Document({
         tocLine("5.8 Bilan des Livrables et Validation Métier du Sprint 3", 1, "70"),
         tocLine("5.9 Conclusion", 1, "71"),
         pb(),
-        tocLine("Chapitre 6 : Sprint 4 – Tableaux de Bord Décisionnels, Agent IA et Validation Système", 0, "73"),
+        tocLine("Chapitre 6 : Sprint 4 – Tableaux de Bord Décisionnels et Validation Système", 0, "73"),
         tocLine("6.1 Introduction", 1, "73"),
         tocLine("6.2 Sprint Backlog du Sprint 4", 1, "73"),
         tocLine("6.3 Architecture Globale et Diagramme de Séquence du Système Décisionnel", 1, "74"),
@@ -743,19 +743,18 @@ const doc = new Document({
         tocLine("6.4.1 Console de Suivi de Production et TRG Temps Réel", 2, "75"),
         tocLine("6.4.2 Console d'Inventaire, Mouvements DWH et Export XLSX", 2, "77"),
         tocLine("6.4.3 Module de Visualisation Prédictive Prophet", 2, "78"),
-        tocLine("6.4.4 Agent IA Décisionnel Industriel — Architecture RAG et LLaMA 3.3 70B", 2, "80"),
-        tocLine("6.4.5 Tableaux de Bord et Reporting Décisionnel Microsoft Power BI", 2, "82"),
-        tocLine("6.5 Recette Utilisateur et Validation Métier du Système", 1, "84"),
-        tocLine("6.6 Bilan des Livrables du Sprint 4", 1, "87"),
-        tocLine("6.7 Conclusion", 1, "88"),
+        tocLine("6.4.4 Tableaux de Bord et Reporting Décisionnel Microsoft Power BI", 2, "80"),
+        tocLine("6.5 Recette Utilisateur et Validation Métier du Système", 1, "83"),
+        tocLine("6.6 Bilan des Livrables du Sprint 4", 1, "85"),
+        tocLine("6.7 Conclusion", 1, "86"),
         pb(),
-        tocLine("Conclusion Générale et Perspectives", 0, "89"),
-        tocLine("Bilan des Objectifs Atteints", 1, "89"),
-        tocLine("Bilan Opérationnel et Chiffré pour l'Atelier", 1, "90"),
-        tocLine("Difficultés Rencontrées et Solutions Apportées", 1, "90"),
-        tocLine("Perspectives d'Évolution Technologique", 1, "91"),
+        tocLine("Conclusion Générale et Perspectives", 0, "87"),
+        tocLine("Bilan des Objectifs Atteints", 1, "87"),
+        tocLine("Bilan Opérationnel et Chiffré pour l'Atelier", 1, "88"),
+        tocLine("Difficultés Rencontrées et Solutions Apportées", 1, "88"),
+        tocLine("Perspectives d'Évolution Technologique", 1, "89"),
         pb(),
-        tocLine("Bibliographie et Webographie", 0, "92"),
+        tocLine("Bibliographie et Webographie", 0, "90"),
         pageBreak(),
 
         // LISTE DES FIGURES
@@ -776,9 +775,8 @@ const doc = new Document({
         tocLine("Figure 6.2 : Capture d'écran : Console de suivi des machines et calcul du TRG en direct", 1, "76"),
         tocLine("Figure 6.3 : Capture d'écran : Console de gestion des stocks, mouvements DWH et filtres", 1, "78"),
         tocLine("Figure 6.4 : Capture d'écran : Visualisation interactive des prévisions Prophet sous ApexCharts", 1, "79"),
-        tocLine("Figure 6.5 : Capture d'écran : Agent IA Décisionnel Industriel dans le tiroir interactif", 1, "81"),
-        tocLine("Figure 6.6 : Tableau de bord Power BI : Supervision exécutive globale de production", 1, "83"),
-        tocLine("Figure 6.7 : Tableau de bord Power BI : Analyse approfondie des mouvements et valorisation stock", 1, "84"),
+        tocLine("Figure 6.5 : Tableau de bord Power BI : Supervision exécutive globale de production", 1, "81"),
+        tocLine("Figure 6.6 : Tableau de bord Power BI : Analyse approfondie des mouvements et valorisation stock", 1, "82"),
         pageBreak(),
 
         // LISTE DES TABLEAUX
@@ -814,12 +812,10 @@ const doc = new Document({
         tocLine("Tableau 5.4 : Avantages et limites du clustering K-Means", 1, "67"),
         tocLine("Tableau 5.5 : Caractérisation des clusters d'articles générés par K-Means sur l'inventaire", 1, "68"),
         tocLine("Tableau 5.6 : Bilan des livrables et validation du Sprint 3", 1, "71"),
-        tocLine("Tableau 6.1 : Sprint Backlog du Sprint 4 – Interfaces, Agent IA et Validation Système", 1, "73"),
-        tocLine("Tableau 6.2 : Évaluation comparative des approches d'IA : LLM standard vs Fine-Tuning vs RAG", 1, "80"),
-        tocLine("Tableau 6.3 : Avantages et limites : Grand Modèle de Langage LLaMA 3.3 70B en architecture RAG", 1, "81"),
-        tocLine("Tableau 6.4 : Matrice de recette et conformité des User Stories validées par le Product Owner", 1, "85"),
-        tocLine("Tableau 6.5 : Bilan des livrables du Sprint 4", 1, "87"),
-        tocLine("Tableau 7.1 : Synthèse des difficultés rencontrées et solutions apportées", 1, "90"),
+        tocLine("Tableau 6.1 : Sprint Backlog du Sprint 4 – Interfaces Décisionnelles et Validation Système", 1, "73"),
+        tocLine("Tableau 6.2 : Matrice de recette et conformité des User Stories validées par le Product Owner", 1, "83"),
+        tocLine("Tableau 6.3 : Bilan des livrables du Sprint 4", 1, "85"),
+        tocLine("Tableau 7.1 : Synthèse des difficultés rencontrées et solutions apportées", 1, "88"),
         pageBreak(),
 
         // LISTE DES ABRÉVIATIONS
@@ -903,7 +899,7 @@ const doc = new Document({
         bullet("**Suivi temps réel et supervision de production** : suivre en direct l'état des machines d'injection et de soudure laser, calculer instantanément le taux TRG et ordonnancer les Ordres de Fabrication."),
         bullet("**Gestion dynamique des stocks et classification ABC** : automatiser l'analyse de Pareto sur les références d'articles, identifier les ruptures critiques (< 5 pièces) et proposer des transferts inter-usines équilibrés."),
         bullet("**Modélisation prédictive des séries temporelles (Prophet)** : projeter à 30 jours les cadences d'atelier et la consommation matière avec calcul d'intervalles de confiance rigoureux à 95 %."),
-        bullet("**Aide à la décision prescriptive et Agent IA** : déployer des tableaux de bord interactifs sous Microsoft Power BI ainsi qu'un **Agent IA Décisionnel Industriel** capable de formuler des recommandations actionnables pour le calibrage des équipes (régime 3x8) et la maintenance préventive."),
+        bullet("**Aide à la décision et Business Intelligence** : déployer des tableaux de bord interactifs sous Microsoft Power BI permettant aux décideurs d'analyser la performance d'atelier, de calibrer les équipes (régime 3x8) et d'optimiser la gestion des approvisionnements."),
         pb(),
         body("Pour mener à bien ce projet d'envergure, nous avons adopté la méthodologie Agile Scrum, organisée en un Sprint 0 préparatoire suivi de quatre sprints de développement d'une durée de 4 semaines chacun. Conformément à la démarche de recherche appliquée, ce mémoire est structuré en six chapitres canoniques :"),
         bullet("**Chapitre 1 : Contexte et Cadre Général du Projet** – Présente l'organisme d'accueil, le diagnostic de l'existant d'atelier, l'étude comparative des solutions du marché, la méthodologie Scrum adoptée et le backlog produit initial."),
@@ -911,7 +907,7 @@ const doc = new Document({
         bullet("**Chapitre 3 : Sprint 1 – Audit du Data Warehouse, Assainissement & Pipeline ETL** – Expose l'analyse exploratoire des données (EDA), la mise en place du pipeline ETL, l'optimisation des index SQL Server et la couche de sécurité RBAC / JWT."),
         bullet("**Chapitre 4 : Sprint 2 – Modélisation Prédictive de Production et Détection d'Anomalies par Intelligence Artificielle** – Développe l'étude théorique comparative des séries temporelles, le benchmark expérimental (Régression Linéaire, ARIMA, Prophet), la détection d'anomalies par Isolation Forest et le microservice d'inférence sous FastAPI."),
         bullet("**Chapitre 5 : Sprint 3 – Développement du Module de Gestion Intelligente des Stocks d'Atelier** – Détaille l'intégration des prévisions Prophet, la classification des articles en 4 statuts de stock, la segmentation ABC/Pareto, le clustering K-Means et le moteur prescriptif de réapprovisionnement d'atelier."),
-        bullet("**Chapitre 6 : Sprint 4 – Tableaux de Bord Décisionnels, Agent IA et Validation Système** – Présente la conception des interfaces utilisateur Metronic 8, l'intégration de l'Agent IA Décisionnel, les rapports décisionnels Power BI et la recette globale du système."),
+        bullet("**Chapitre 6 : Sprint 4 – Tableaux de Bord Décisionnels et Validation Système** – Présente la conception des interfaces utilisateur Metronic 8, la mise en œuvre des rapports décisionnels Microsoft Power BI et la recette globale du système."),
         pb(),
         body("Enfin, une conclusion générale dresse le bilan chiffré des résultats obtenus, analyse les difficultés surmontées et esquisse les perspectives d'évolution vers l'Internet des Objets (IoT) et le Deep Learning industriel."),
         pageBreak(),
@@ -984,7 +980,7 @@ const doc = new Document({
           [
             ["Suivi TRG en temps réel", "Oui (Très complet mais complexe)", "Non (Saisies manuelles après coup)", "Oui (Calcul dynamique automatique par machine)"],
             ["Modélisation prédictive IA", "En option très onéreuse", "Non (Aucune capacité de Machine Learning)", "Oui (Intégration native du modèle Prophet)"],
-            ["Agent IA Décisionnel", "Non présent nativement", "Non existant", "Oui (Agent d'atelier conversationnel et prescriptif)"],
+            ["Tableaux de bord BI intégrés", "En option payante et complexe", "Limité à des graphiques statiques", "Oui (Tableaux de bord interactifs Power BI et métriques en temps réel)"],
             ["Ergonomie et convivialité", "Faible (Interface lourde et austère)", "Rudimentaire et propice aux erreurs", "Excellente (Design system réactif Metronic 8)"],
             ["Connexion directe DWH", "Nécessite des connecteurs propriétaires", "Connexion instable (ODBC limité)", "Native (Spring Boot JPA + SQL Server)"],
             ["Coût global de possession", "Prohibitif (Licences annuelles + intégrateurs)", "Faible mais coût caché élevé en pannes", "Maîtrisé (Socle open-source d'entreprise)"],
@@ -1008,7 +1004,7 @@ const doc = new Document({
         bullet("Unifier l'accès aux données de production et de stock sous un socle applicatif moderne et hautement sécurisé."),
         bullet("Fournir aux managers une visibilité en direct sur les 319 machines avec calcul instantané du TRG et alertes d'arrêt."),
         bullet("Exploiter l'historique DWH par un pipeline d'IA prédictive anticipant la charge d'atelier et les besoins de composants."),
-        bullet("Intégrer un Agent IA capable d'analyser en continu les anomalies et de proposer des plans d'action d'atelier."),
+        bullet("Fournir un système prescriptif automatisant les recommandations d'approvisionnement et le rééquilibrage de stock inter-usines."),
         bullet("Offrir une suite de tableaux de bord décisionnels Power BI pour le pilotage exécutif de la direction industrielle."),
         pb(),
 
@@ -1017,7 +1013,7 @@ const doc = new Document({
         bullet("**1. Ingestion et actualisation DWH** : extraction continue des ordres de fabrication et des mouvements de stock depuis la base SQL Server."),
         bullet("**2. Supervision opérationnelle** : calcul automatique des cadences par machine, détection des arrêts non justifiés et mise à jour dynamique du TRG sur l'interface Metronic 8."),
         bullet("**3. Inférence prédictive Machine Learning** : le microservice FastAPI charge les séries chronologiques, applique Prophet et transmet les prévisions à 30 jours et les intervalles d'incertitude."),
-        bullet("**4. Recommandations prescriptives & Agent IA** : analyse des projections pour déduire les points de commande, équilibrer les plannings d'équipes 3x8 et assister le gestionnaire d'atelier en langage naturel."),
+        bullet("**4. Recommandations prescriptives & Reporting décisionnel** : analyse des projections pour déduire les points de commande, équilibrer les plannings d'équipes 3x8 et alimenter les tableaux de bord Power BI."),
         pb(),
 
         title2("1.5 Méthodologie de Développement Adoptée"),
@@ -1043,8 +1039,8 @@ const doc = new Document({
 
         title3("1.5.2 Principes de la Méthodologie Scrum"),
         body("La méthodologie Agile Scrum [1] a été retenue pour sa capacité à délivrer régulièrement des incréments logiciels testés et exploitables. L'équipe projet est structurée comme suit :"),
-        bullet("**Product Owner (PO)** : le responsable industriel de l'entreprise d'accueil, garant de la vision métier et de la priorisation du backlog."),
-        bullet("**Scrum Master (SM)** : l'encadrant technique assurant le respect des règles agiles et la levée des blocages."),
+        bullet("**Product Owner** : le responsable industriel de l'entreprise d'accueil, garant de la vision métier et de la priorisation du backlog."),
+        bullet("**Scrum Master** : l'encadrant technique assurant le respect des règles agiles et la levée des blocages."),
         bullet("**Équipe de Développement** : assurée par l'étudiante ingénieure/chercheuse, responsable de la conception, de l'implémentation et des tests."),
         pb(),
         ...imageFigure("scrum-framework-9.29.23.png", "Figure 1.1 : Vue d'ensemble du framework Scrum", 540, 360),
@@ -1059,7 +1055,7 @@ const doc = new Document({
             ["Sprint 1", "Audit Data Warehouse, assainissement ETL & sécurité RBAC", "Semaines 5 à 8", "4 semaines", "22 Story Points (SP)"],
             ["Sprint 2", "Modélisation prédictive de production par IA (Prophet)", "Semaines 9 à 12", "4 semaines", "25 Story Points (SP)"],
             ["Sprint 3", "Gestion intelligente des stocks & moteur prescriptif", "Semaines 13 à 16", "4 semaines", "24 Story Points (SP)"],
-            ["Sprint 4", "Tableaux de bord Metronic, Agent IA & recette globale", "Semaines 17 à 20", "4 semaines", "27 Story Points (SP)"],
+            ["Sprint 4", "Tableaux de bord Metronic, Power BI & recette globale", "Semaines 17 à 20", "4 semaines", "27 Story Points (SP)"],
             ["Phase Finale", "Recette industrielle multi-sites & rédaction du mémoire", "Semaines 21 à 24", "4 semaines", "Validation finale"],
           ],
           [1600, 3200, 1400, 1100, 1366]
@@ -1095,8 +1091,8 @@ const doc = new Document({
             ["US16", "En tant que manager, je veux planifier des transferts inter-usines Tunisie-Brno", "Basse", "3 SP", "Sprint 3"],
             ["US17", "En tant que manager, je veux disposer d'une console Metronic 8 avec filtres multi-critères", "Haute", "5 SP", "Sprint 4"],
             ["US18", "En tant que manager, je veux exporter les données filtrées sous format Excel (.xlsx)", "Moyenne", "3 SP", "Sprint 4"],
-            ["US19", "En tant que manager, je veux dialoguer avec un Agent IA Décisionnel pour diagnostiquer les pannes", "Haute", "8 SP", "Sprint 4"],
-            ["US20", "En tant que manager, je veux consulter des tableaux de bord interactifs Power BI reliés au DWH", "Haute", "5 SP", "Sprint 4"],
+            ["US19", "En tant que manager, je veux superviser la production globale sur un tableau de bord exécutif Power BI", "Haute", "8 SP", "Sprint 4"],
+            ["US20", "En tant que manager, je veux analyser la valorisation et les mouvements de stock sur Power BI", "Haute", "5 SP", "Sprint 4"],
           ],
           [600, 5200, 1000, 900, 966]
         ),
@@ -1154,7 +1150,7 @@ const doc = new Document({
           ["Acteur / Profil", "Rôle Applicatif", "Périmètre de responsabilités et droits d'accès"],
           [
             ["Administrateur Système", "ROLE_ADMIN", "Gestion globale des comptes, attribution des habilitations RBAC et garantie de la sécurité et de l'intégrité de la plateforme."],
-            ["Responsable Production / Manager", "ROLE_MANAGER", "Supervision des 319 machines, suivi temps réel du TRG, affectation des ordres de fabrication, paramétrage des seuils de stock, consultation des prévisions Prophet et exploitation de l'Agent IA."],
+            ["Responsable Production / Manager", "ROLE_MANAGER", "Supervision des 319 machines, suivi temps réel du TRG, affectation des ordres de fabrication, paramétrage des seuils de stock, consultation des prévisions Prophet et reporting décisionnel Power BI."],
             ["Opérateur d'Atelier / Magasinier", "ROLE_OPERATEUR", "Pointage des ordres de fabrication (début, fin, rebuts), déclaration des arrêts machines, saisie des mouvements d'entrée/sortie d'inventaire et consultation des alertes critiques."],
           ],
           [2200, 1800, 4666]
@@ -1180,8 +1176,8 @@ const doc = new Document({
             ["F06", "Modélisation Prédictive Prophet", "Génération de prévisions temporelles à 30 jours pour la production et le stock avec décomposition des composantes saisonnières."],
             ["F07", "Calcul des Intervalles de Confiance", "Restitution des bornes d'incertitude à 95% (yhat_lower, yhat_upper) pour anticiper les capacités maximales d'atelier."],
             ["F08", "Moteur Prescriptif d'Atelier", "Génération automatique de recommandations de réapprovisionnement, planification d'équipes 3x8 et maintenance préventive."],
-            ["F09", "Agent IA Décisionnel Industriel", "Assistant d'atelier conversationnel interactif capable de diagnostiquer les arrêts et de suggérer des arbitrages."],
-            ["F10", "Tableaux de Bord Power BI", "Intégration de rapports décisionnels multi-dimensionnels connectés directement au Data Warehouse SQL Server."],
+            ["F09", "Tableaux de Bord Power BI", "Intégration de rapports décisionnels multi-dimensionnels connectés directement au Data Warehouse SQL Server."],
+            ["F10", "Reporting et Export Analytique XLSX", "Filtrage multicritères avancé et génération automatique de rapports tabulaires Excel formatés."],
           ],
           [700, 2500, 5466]
         ),
@@ -1238,15 +1234,15 @@ const doc = new Document({
         }),
         pb(),
         ucDesc({
-          name: "Générer les prévisions Prophet et consulter l'Agent IA",
+          name: "Générer les prévisions Prophet et analyser les tendances d'atelier",
           actors: "Responsable Production (Manager), Décideur Industriel",
           precond: "L'historique de production d'atelier est synchronisé et le microservice FastAPI est opérationnel.",
           scenario: [
             "Le manager sélectionne l'horizon prévisionnel (7, 14 ou 30 jours) sur l'interface d'IA.",
             "Le service FastAPI entraîne le modèle additif Prophet sur la série temporelle journalière.",
             "Le modèle génère la courbe tendancielle, les cycles hebdomadaires et l'intervalle de confiance à 95%.",
-            "Le manager ouvre le tiroir (Drawer) de l'Agent IA Décisionnel pour obtenir un diagnostic sur les cadences.",
-            "L'Agent IA formule des préconisations d'ordonnancement d'équipes (régime 3x8) et de maintenance."
+            "L'interface ApexCharts affiche les projections de cadences et met en évidence les points de retournement.",
+            "Le système formule des préconisations d'ordonnancement d'équipes (régime 3x8) et de maintenance préventive."
           ],
           postcond: "Les prévisions sont visualisées sur ApexCharts et les recommandations d'atelier sont exploitables.",
           exceptions: "Indisponibilité temporaire du microservice Python : bascule automatique vers le moteur de calcul local React."
@@ -1302,7 +1298,7 @@ const doc = new Document({
 
 
         title3("2.6.3 Cartographie Exhaustive des Modèles d'Intelligence Artificielle et de Data Science de Nexora"),
-        body("L'innovation majeure de la plateforme Nexora réside dans son écosystème algorithmique unifié, articulant huit modèles et méthodes d'intelligence artificielle et de science des données complémentaires répartis entre les microservices FastAPI et Spring Boot (tableau 2.4) :"),
+        body("L'innovation majeure de la plateforme Nexora réside dans son écosystème algorithmique unifié, articulant sept modèles et méthodes d'intelligence artificielle et de science des données complémentaires répartis entre les microservices FastAPI et Spring Boot (tableau 2.4) :"),
         pb(),
         makeTable(
           ["ID", "Modèle / Algorithme", "Type d'IA", "Rôle Opérationnel dans Nexora", "Module / Endpoint", "Statut Applicatif"],
@@ -1313,8 +1309,7 @@ const doc = new Document({
             ["M04", "Isolation Forest", "Apprentissage Non Supervisé (ML)", "Détection en temps réel des anomalies d'usinage et dérives de cadence", "FastAPI /detect/anomaly", "Opérationnel Live ✓"],
             ["M05", "K-Means Clustering", "Apprentissage Non Supervisé (ML)", "Partitionnement multi-critères des articles de stock en 3 classes de gestion", "FastAPI /cluster/items", "Opérationnel Live ✓"],
             ["M06", "Classification ABC de Pareto", "Data Science Analytique", "Hiérarchisation 80/15/5 de la valeur financière des stocks sur les données d'inventaire", "FastAPI /analyze/abc", "Opérationnel Live ✓"],
-            ["M07", "LLaMA 3.3 70B Versatile", "IA Générative / Grand Modèle (LLM)", "Agent conversationnel décisionnel d'atelier (Groq API, prompt guidé et fallback local)", "FastAPI /ai/agent/chat", "Opérationnel Live ✓"],
-            ["M08", "Simulation Scénaristique What-If", "Modélisation Prescriptive", "Analyse de sensibilité aux variations de demande (+/- X%) et risque de rupture", "FastAPI /simulate/scenario", "Opérationnel Live ✓"],
+            ["M07", "Simulation Scénaristique What-If", "Modélisation Prescriptive", "Analyse de sensibilité aux variations de demande (+/- X%) et risque de rupture", "FastAPI /simulate/scenario", "Opérationnel Live ✓"],
           ],
           [600, 1800, 1600, 2300, 1300, 1066]
         ),
@@ -1471,7 +1466,7 @@ const doc = new Document({
         title2("3.6 Sécurité d'Accès, Gouvernance des Données et Rôles RBAC"),
         body("Pour sécuriser l'accès aux données industrielles stratégiques du Data Warehouse et garantir une traçabilité rigoureuse des opérations, le système intègre une authentification sans état par **jeton JWT (JSON Web Token)** et une politique de gouvernance des accès basée sur les rôles **RBAC (Role-Based Access Control)** :"),
         bullet("**Administrateur (ADMIN)** : gouvernance globale de la plateforme, gestion des comptes utilisateurs, attribution des habilitations d'accès aux données et contrôle de conformité."),
-        bullet("**Responsable de Production (MANAGER)** : accès complet aux indicateurs décisionnels (TRG/OEE), supervision du parc de 319 machines, exécution des prévisions Prophet, analyse des anomalies et consultation de l'Agent IA."),
+        bullet("**Responsable de Production (MANAGER)** : accès complet aux indicateurs décisionnels (TRG/OEE), supervision du parc de 319 machines, exécution des prévisions Prophet, analyse des anomalies et consultation des tableaux de bord Power BI."),
         bullet("**Opérateur d'Atelier (OPERATEUR)** : saisie et consultation opérationnelle ciblée (déclaration des pièces produites, validation des mouvements d'inventaire et suivi des alertes locales)."),
         pb(),
         body("La console d'administration (figure 3.3) offre à l'administrateur une vue unifiée pour la gestion des utilisateurs, l'activation des privilèges et le monitoring de la sécurité des accès aux données."),
@@ -2044,13 +2039,13 @@ pb(),
         pb(),
 
         title2("5.9 Conclusion"),
-        conclusionBox("Le Sprint 3 a doté la plateforme Nexora d'un module complet de gestion intelligente et proactive des stocks d'atelier. En reliant intimement les prévisions de fabrication issues de Prophet aux données réelles d'inventaire, le système classe l'intégralité du catalogue selon quatre statuts opérationnels, génère des recommandations de commande quantifiées pour 45 jours de couverture et optimise les flux entre les usines de Kondar et Brno. Ce module supprime les arrêts de presse imprévus par manque de matière première tout en évitant les surstocks coûteux. Le chapitre 6 présente le Sprint 4, consacré à la réalisation des tableaux de bord Metronic 8, au déploiement de l'Agent IA Décisionnel Industriel et à la validation globale du système."),
+        conclusionBox("Le Sprint 3 a doté la plateforme Nexora d'un module complet de gestion intelligente et proactive des stocks d'atelier. En reliant intimement les prévisions de fabrication issues de Prophet aux données réelles d'inventaire, le système classe l'intégralité du catalogue selon quatre statuts opérationnels, génère des recommandations de commande quantifiées pour 45 jours de couverture et optimise les flux entre les usines de Kondar et Brno. Ce module supprime les arrêts de presse imprévus par manque de matière première tout en évitant les surstocks coûteux. Le chapitre 6 présente le Sprint 4, consacré à la réalisation des interfaces décisionnelles Metronic 8, à la mise en œuvre des rapports décisionnels Microsoft Power BI et à la validation globale du système."),
         pageBreak(),
-// CHAPITRE 6 : SPRINT 4 – DASHBOARDS, AGENT IA & VALIDATION
+// CHAPITRE 6 : SPRINT 4 – DASHBOARDS & VALIDATION
         // =========================================================
-        title1("Chapitre 6 : Sprint 4 – Tableaux de Bord Décisionnels, Agent IA et Validation Système"),
+        title1("Chapitre 6 : Sprint 4 – Tableaux de Bord Décisionnels et Validation Système"),
         title2("6.1 Introduction"),
-        body("Ce dernier chapitre de réalisation est dédié au Sprint 4, qui unifie l'ensemble des modules logiciels au sein d'une expérience utilisateur industrielle de premier ordre sous le design system Metronic 8. Nous y présentons la conception des interfaces de production et d'inventaire, le module d'exportation Excel haute performance, l'intégration des rapports décisionnels Microsoft Power BI connectés à l'entrepôt de données, ainsi que le déploiement de l'**Agent IA Décisionnel Industriel**, accessible via un tiroir interactif (*Drawer*) pour assister les managers d'atelier. Enfin, nous dressons le bilan exhaustif de la recette fonctionnelle et des tests de charge du système."),
+        body("Ce dernier chapitre de réalisation est dédié au Sprint 4, qui unifie l'ensemble des modules logiciels au sein d'une expérience utilisateur industrielle de premier ordre sous le design system Metronic 8. Nous y présentons la conception des interfaces de production et d'inventaire, le module d'exportation Excel haute performance, ainsi que l'intégration et la publication des rapports décisionnels Microsoft Power BI directement connectés à l'entrepôt de données pour le pilotage exécutif d'atelier. Enfin, nous dressons le bilan exhaustif de la recette fonctionnelle et de la validation métier de l'ensemble du système."),
         pb(),
 
         title2("6.2 Sprint Backlog du Sprint 4"),
@@ -2061,20 +2056,20 @@ pb(),
           [
             ["US17", "En tant que manager, je veux une console Metronic 8 avec filtres", "Refonte UI Metronic 8, cartes flush et filtres multi-critères", "5 SP", "Terminé"],
             ["US18", "En tant que gestionnaire, je veux exporter les données filtrées en XLSX", "Intégration de la bibliothèque XLSX avec en-têtes explicites", "3 SP", "Terminé"],
-            ["US19", "En tant qu'utilisateur, je veux dialoguer avec l'Agent IA Décisionnel", "Développement du Drawer interactif et contrôleur /api/ai/agent", "8 SP", "Terminé"],
-            ["US20", "En tant que directeur, je veux consulter des dashboards Power BI", "Conception et publication des rapports décisionnels connectés au DWH", "5 SP", "Terminé"],
+            ["US19", "En tant que manager, je veux superviser la production globale sur Power BI", "Conception et publication du tableau de bord de production connecté au DWH", "8 SP", "Terminé"],
+            ["US20", "En tant que directeur, je veux analyser les mouvements et la valorisation du stock sur Power BI", "Modélisation du rapport de valorisation et rotation de stock multi-sites", "5 SP", "Terminé"],
           ],
           [700, 3200, 3100, 800, 866]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 6.1 : Sprint Backlog du Sprint 4 – Interfaces, Agent IA et Validation", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 6.1 : Sprint Backlog du Sprint 4 – Interfaces Décisionnelles et Validation Système", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
         title2("6.3 Architecture Globale et Diagramme de Séquence du Système Décisionnel"),
-        body("La figure 6.1 modélise le diagramme de séquence global du système décisionnel complet, illustrant l'orchestration fluide entre le client React Metronic 8, l'API Spring Boot 3, le microservice FastAPI (Prophet), l'Agent IA Décisionnel et la base SQL Server :"),
+        body("La figure 6.1 modélise le diagramme de séquence global du système décisionnel complet, illustrant l'orchestration fluide entre le client React Metronic 8, l'API Spring Boot 3, le microservice FastAPI (Prophet) et la base SQL Server :"),
         pb(),
         ...imageFigure("diagrams/sprint4_seq.png", "Figure 6.1 : Diagramme de séquence global du système décisionnel Nexora", 540, 200),
 
@@ -2094,94 +2089,14 @@ pb(),
         pb(),
         ...emptyFigurePlaceholder("Figure 6.4 : Capture d'écran : Visualisation interactive des prévisions Prophet sous ApexCharts"),
 
-        title3("6.4.4 Agent IA Décisionnel Industriel — Architecture RAG et LLaMA 3.3 70B"),
-        body("L'une des innovations technologiques les plus significatives de la plateforme Nexora réside dans son **Agent IA Décisionnel Industriel** (figure 6.5). Conçu selon le paradigme architectural **RAG (Retrieval-Augmented Generation)**, cet agent conversationnel d'atelier comble le fossé entre la richesse brute des données transactionnelles du Data Warehouse et les besoins de réactivité immédiate des gestionnaires de production, chefs d'atelier et ordonnanceurs."),
+        title3("6.4.4 Tableaux de Bord et Reporting Décisionnel Microsoft Power BI"),
+        body("En complément de la plateforme web opérationnelle, une suite de rapports décisionnels Microsoft Power BI a été modélisée et publiée (figures 6.5 et 6.6). Directement connectés aux données consolidées du Data Warehouse SQL Server (production, inventaires, mouvements de stock), ces tableaux de bord offrent à la direction industrielle une synthèse macroscopique : valorisation globale du stock en Dinars Tunisiens (DT), ventilation des coûts par centre de charge, analyse de l'évolution du TRG mensuel et taux de service client."),
         pb(),
-
-        bold_body("A. Définition et Fondements Scientifiques du Paradigme RAG :"),
-        body("Introduit par Patrick Lewis et ses pairs de Meta AI Research (NeurIPS 2020), le paradigme **RAG (Retrieval-Augmented Generation)** propose une symbiose élégante entre deux systèmes d'information aux forces complémentaires : un **module de récupération de connaissances (Retriever)** et un **modèle génératif de langage naturel (Generator)**."),
-        bullet("**Le Retriever (Composant de Récupération Factuelle)** : agit comme un filtre d'accès direct au référentiel d'entreprise sous Microsoft SQL Server. À chaque interrogation émise par l'utilisateur, ce composant formule et exécute des requêtes SQL paramétrées ciblées afin d'extraire les faits bruts, métriques quantitatives et états machine en temps réel."),
-        bullet("**Le Generator (Composant de Synthèse Linguistique)** : alimenté par le grand modèle de langage **LLaMA 3.3 70B Versatile** (Meta AI), il reçoit simultanément la requête de l'opérateur et les tuples de données renvoyés par le Retriever. Il a pour mandat exclusif d'articuler une réponse en français technique naturel, claire, contextualisée et orientée vers la prise de décision opérationnelle."),
-        pb(),
-
-        bold_body("B. Justification Industrielle et Multicritère du Choix du RAG face aux Alternatives :"),
-        body("Dans un environnement industriel automobile régi par des cadences serrées et des exigences qualité drastiques (zéro défaut, normes IATF 16949), l'adoption d'une architecture RAG s'est imposée face à l'utilisation d'un LLM générique en boîte noire ou à un ré-entraînement supervisé lourd (*Fine-Tuning*). Le tableau 6.2 résume cette évaluation multicritère :"),
-        pb(),
-
-        makeTable(
-          ["Critère Évalué", "LLM Standard en Boîte Noire", "Fine-Tuning Supervisé (Spécialisation)", "Architecture RAG (Solution Nexora Retenue)"],
-          [
-            ["Fraîcheur temporelle des données", "Statique et figée à la date d'entraînement (incapable de connaître l'état du jour)", "Nécessite des cycles de ré-entraînement réguliers très lourds", "Temps réel absolu : interrogation SQL synchrone de l'entrepôt de données à la seconde"],
-            ["Fiabilité factuelle & hallucinations", "Risque critique d'affabulation (chiffres inventés mais syntaxiquement convaincants)", "Réduit mais persistant (extrapolation statistique incontrôlée)", "Vérité terrain 100 % garantie : données chiffrées issues du SQL certifié"],
-            ["Confidentialité du patrimoine industriel", "Données d'atelier envoyées vers des serveurs tiers non souverains", "Nécessite d'exposer les données propriétaires pour ajuster les poids", "Données d'entreprise confinées dans l'entrepôt SQL Server sécurisé ; seul le prompt transite"],
-            ["Coût et infrastructure matérielle", "Abonnements récurrents sans maîtrise du modèle sous-jacent", "Cluster de GPU massifs (Nvidia H100/A100) très onéreux pour l'atelier", "Inférence ultra-légère, coût d'infrastructure nul, évolutivité immédiate"],
-            ["Vitesse d'inférence et latence", "Variable et tributaire de files d'attente de serveurs mutualisés", "Rapide mais dépend de la taille du serveur interne dédié", "Ultra-rapide et quasi-instantanée grâce au moteur Groq LPU matériel"],
-            ["Agilité face aux changements de référentiel", "Aucune adaptation possible aux nouveaux articles ou machines", "Nécessite un ré-entraînement complet à chaque nouvel atelier", "Instantanée : tout ajout de ligne ou table dans SQL Server est aussitôt lu"]
-          ],
-          [1600, 2300, 2300, 2466]
-        ),
-        new Paragraph({
-          children: [new TextRun({ text: "Tableau 6.2 : Évaluation comparative des approches d'IA : LLM standard vs Fine-Tuning vs RAG industriel", font: FONT, size: 20, italics: true })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 80, after: 120 }
-        }),
-        pb(),
-
-        body("Cette analyse met en lumière cinq impératifs industriels déterminants :"),
-        bullet("**1. Zéro Hallucination et Vérité Factuelle Absolue** : dans une ligne de plasturgie automobile livrant en juste-à-temps des constructeurs comme Valeo, Bosch ou Porsche, une fausse déclaration de stock critique ou de cadence machine peut causer un arrêt de chaîne chiffré à plusieurs dizaines de milliers d'euros par heure. Les LLM purs génèrent des données probables mais non attestées. Avec le RAG, 100 % des nombres (stocks restants, TRS, cadences, temps d'arrêt) sont issus de requêtes SQL certifiées. Le LLM ne fait qu'habiller linguistiquement une réalité mathématique inviolable."),
-        bullet("**2. Synchronisation Dynamique avec la Vie d'Atelier** : le parc de 319 machines et les 982 références d'articles thermoplastiques connaissent des variations continues (saisies d'atelier, inventaires journaliers, mouvements de stock). Le RAG extrait l'état exact de l'usine au moment où l'utilisateur pose sa question, sans décalage temporel."),
-        bullet("**3. Souveraineté, Confidentialité et Secret Industriel** : les recettes de fabrication (matières PA66, PP chargé talc), les temps de cycle et les volumes contractuels des équipementiers constituent un secret industriel hautement sensible. Avec l'architecture RAG, aucune donnée privée n'est utilisée pour ré-entraîner des modèles publics, garantissant une étanchéité totale du système d'information."),
-        bullet("**4. Pragmatisme Économique et Sobriété Opérationnelle** : adapter un modèle de 70 milliards de paramètres par fine-tuning réclamerait des investissements en matériel de pointe et en ingénieurs spécialisés disproportionnés. L'architecture RAG s'affranchit de cette contrainte : l'ajout d'une nouvelle ligne de soudure laser ou d'un nouvel atelier de moulage dans la base de données est assimilé de facto par l'agent sans aucune recompilation."),
-        bullet("**5. Vitesse d'Inférence Industrielle via Groq LPU** : pour garantir une adoption fluide en atelier, l'agent conversationnel offre une réactivité instantanée. L'exécution du modèle **LLaMA 3.3 70B Versatile** sur l'architecture matérielle **Groq LPU (Language Processing Unit)** assure une génération quasi-immédiate sans temps d'attente pour les équipes de production."),
-        pb(),
-
-        bold_body("C. Fonctionnement Détaillé du Pipeline RAG en Trois Piliers (R-A-G) :"),
-        body("L'orchestration des flux entre l'interface utilisateur, le backend applicatif et le moteur cognitif se décompose en trois phases indissociables :"),
-        bullet("**1. R (Retrieval - Extraction Contextuelle Sélective)** : l'agent analyse la formulation sémantique de l'utilisateur pour en déduire l'intention métier (*Intent Detection*). Selon l'intention identifiée, le système déclenche une requête SQL ciblée :"),
-        bullet("   • *Ruptures critiques de matières premières* : interrogation des stocks journaliers (`Quantité <= 5`) pour détecter les pénuries immédiates."),
-        bullet("   • *Rendements et disponibilités du parc machines* : calcul croisé entre les écritures de charge et les fiches machines pour calculer le TRG et la cadence effective."),
-        bullet("   • *Ordres de fabrication et historiques d'arrêts* : filtrage des écritures d'atelier par centre de charge pour identifier les micro-pannes récurrentes."),
-        bullet("**2. A (Augmentation - Construction du Prompt Industriel Contraint)** : les enregistrements SQL extraits sont sérialisés en JSON structuré et fusionnés avec le prompt système. Ce dernier impose un cadre déterministe strict : attribution du rôle d'expert en plasturgie industrielle, température d'échantillonnage bridée à T = 0.2 pour éliminer toute dérive créative, et obligation d'appuyer chaque recommandation sur les identifiants exacts des machines et des articles."),
-        bullet("**3. G (Generation - Synthèse Décisionnelle et Recommandations Prescriptives)** : LLaMA 3.3 génère une synthèse articulée combinant trois volets : un constat quantitatif précis, une explication causale, et des préconisations d'action correctives d'atelier (réallocation de charge sur une presse Demag disponible, bascule d'équipes en 3x8 lors des pics de demande, relance fournisseur sur le polyamide)."),
-        pb(),
-
-        bold_body("D. Continuité d'Activité et Résilience par Fallback Local (< 5 ms) :"),
-        body("Conformément aux normes de disponibilité de l'industrie manufacturière, la chaîne de production ne saurait être dépendante d'une connexion Internet externe. Si une coupure réseau ou une indisponibilité temporaire de l'API LLM survient, le contrôleur backend Spring Boot commute instantanément (en moins de 5 millisecondes) vers un **moteur sémantique déterministe local**. Ce sous-système de secours analyse les mots-clés de la requête et restitue les données analytiques calculées en local (`BEST_MACHINE`, `STOCK_URGENT`, `TRS_KPI`, `MACHINE_PARK`), assurant un taux de service de 99,9 %."),
-        pb(),
-
-        ...makeProsConsTable(
-          "6.3", "Grand Modèle de Langage LLaMA 3.3 70B Versatile couplé au RAG",
-          [
-            "Compréhension remarquable du langage technique et du jargon de plasturgie automobile",
-            "Capacité d'analyse multidimensionnelle croisant alertes stock, TRG machines et prévisions Prophet",
-            "Inférence ultra-rapide sur puces matérielles Groq LPU sans temps d'attente opérateur",
-            "Garantie totale d'exactitude factuelle ancrée dans les données certifiées du Data Warehouse",
-            "Secours local déterministe (< 5 ms) garantissant une continuité de service 24h/24 en atelier",
-          ],
-          [
-            "Nécessite une liaison Internet active pour le mode génératif étendu LLaMA 3.3",
-            "Exige un prompt engineering très rigoureux pour maintenir le format de restitution standard",
-            "Coût computationnel élevé si l'on souhaitait héberger un modèle de 70B en local sur serveurs internes",
-          ]
-        ),
-        pb(),
-
-        bold_body("E. Cas d'Usage Opérationnels d'Atelier Restitués par l'Agent :"),
-        bullet("**Supervision interactive en langage naturel** : le responsable de production interroge directement l'agent sans rédiger de requête SQL (« Quel est le rendement moyen des presses Demag cette semaine ? », « Avons-nous assez de granulés PA66 pour honorer la commande Valeo ? »)."),
-        bullet("**Diagnostic assisté des anomalies de cadence** : l'agent croise les durées d'arrêt enregistrées dans l'historique de production avec les plannings de maintenance et suggère des causes probables (défaut de régulation thermique du moule, buse d'injection encrassée)."),
-        bullet("**Recommandations prescriptives synchronisées avec Prophet** : lorsqu'une projection Prophet signale un dépassement de capacité sur une ligne d'assemblage, l'agent IA suggère immédiatement un arbitrage opérationnel (ouverture d'une équipe supplémentaire en horaire de nuit ou délestage vers une presse équivalente)."),
-        pb(),
-        ...emptyFigurePlaceholder("Figure 6.5 : Capture d'écran : Agent IA Décisionnel Industriel dans le tiroir interactif Metronic"),
-        pb(),
-
-        title3("6.4.5 Tableaux de Bord et Reporting Décisionnel Microsoft Power BI"),
-        body("En complément de la plateforme web opérationnelle, une suite de rapports décisionnels Microsoft Power BI a été modélisée et publiée (figures 6.6 et 6.7). Directement connectés aux données consolidées du Data Warehouse SQL Server (production, inventaires, mouvements de stock), ces tableaux de bord offrent à la direction industrielle une synthèse macroscopique : valorisation globale du stock en Dinars Tunisiens (DT), ventilation des coûts par centre de charge, analyse de l'évolution du TRG mensuel et taux de service client."),
-        pb(),
-        ...emptyFigurePlaceholder("Figure 6.6 : Tableau de bord Power BI : Supervision exécutive globale de production"),
-        ...emptyFigurePlaceholder("Figure 6.7 : Tableau de bord Power BI : Analyse approfondie des mouvements et valorisation stock"),
+        ...emptyFigurePlaceholder("Figure 6.5 : Tableau de bord Power BI : Supervision exécutive globale de production"),
+        ...emptyFigurePlaceholder("Figure 6.6 : Tableau de bord Power BI : Analyse approfondie des mouvements et valorisation stock"),
 
         title2("6.5 Recette Utilisateur et Validation Métier du Système"),
-        body("La recette finale de la plateforme Nexora a été effectuée conjointement avec le Product Owner et les utilisateurs métiers. Le tableau 6.4 dresse la matrice de validation et de conformité des 20 User Stories du projet :"),
+        body("La recette finale de la plateforme Nexora a été effectuée conjointement avec le Product Owner et les utilisateurs métiers. Le tableau 6.2 dresse la matrice de validation et de conformité des 20 User Stories du projet :"),
         pb(),
         makeTable(
           ["ID US", "Récit Utilisateur", "Critère d'Acceptation & Validation Métier", "Conformité", "Statut Recette"],
@@ -2193,40 +2108,39 @@ pb(),
             ["US11-US13", "Stock ABC & Mouvements DWH", "Calcul Pareto 80/20, alertes < 5 pcs et saisie mouvements", "100 %", "Validé sans réserve ✓"],
             ["US14-US16", "Moteur Prescriptif & Multi-sites", "Génération des ROP, planning 3x8 et transferts Tunisie-Brno", "100 %", "Validé sans réserve ✓"],
             ["US17-US18", "UI Metronic 8 & Export XLSX", "Filtrage dynamique multi-critères et téléchargement Excel", "100 %", "Validé sans réserve ✓"],
-            ["US19-US20", "Agent IA & Power BI", "Interrogation en langage naturel RAG et rapports décisionnels exécutifs", "100 %", "Validé sans réserve ✓"],
+            ["US19-US20", "Tableaux de Bord Power BI", "Supervision globale de production et analyse de la valorisation du stock", "100 %", "Validé sans réserve ✓"],
           ],
           [1000, 2400, 3200, 900, 1166]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 6.4 : Matrice de recette et conformité des User Stories validées par le Product Owner", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 6.2 : Matrice de recette et conformité des User Stories validées par le Product Owner", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
         title2("6.6 Bilan des Livrables du Sprint 4"),
-        body("Le tableau 6.5 résume les livrables validés au terme de ce quatrième et dernier sprint :"),
+        body("Le tableau 6.3 résume les livrables validés au terme de ce quatrième et dernier sprint :"),
         pb(),
         makeTable(
           ["Tâche Réalisée", "Livrable Associé", "Validation Métier & Technique", "Statut"],
           [
             ["Interfaces Metronic 8", "Console de production et inventaire avec filtres dynamiques", "Validé par les utilisateurs", "Terminé ✓"],
             ["Module export Excel", "Exportateur XLSX automatique des données filtrées", "Validé par les gestionnaires", "Terminé ✓"],
-            ["Agent IA Décisionnel", "Module conversationnel d'atelier en architecture RAG (LLaMA 3.3)", "Validé par la direction d'atelier", "Terminé ✓"],
             ["Tableaux Power BI", "Rapports décisionnels exécutifs connectés au Data Warehouse", "Validé par la direction industrielle", "Terminé ✓"],
             ["Recette globale", "Validation complète de bout en bout des 20 User Stories", "Approuvé par le PO et tuteur d'entreprise", "Terminé ✓"],
           ],
           [2000, 3200, 2200, 1266]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 6.5 : Bilan des livrables du Sprint 4", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 6.3 : Bilan des livrables du Sprint 4", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
         title2("6.7 Conclusion"),
-        conclusionBox("Le Sprint 4 a couronné la réalisation de Nexora en fournissant une interface moderne, réactive et complète. L'intégration harmonieuse du modèle prédictif Prophet, des rapports décisionnels Power BI et de l'Agent IA Décisionnel confère à l'entreprise un avantage compétitif décisif dans le pilotage de ses usines de plasturgie. La section suivante présente la conclusion générale et les perspectives d'évolution de ce projet de fin d'études."),
+        conclusionBox("Le Sprint 4 a couronné la réalisation de Nexora en fournissant une interface moderne, réactive et complète. L'intégration harmonieuse du modèle prédictif Prophet et des rapports décisionnels Power BI confère à l'entreprise un avantage compétitif décisif dans le pilotage de ses usines de plasturgie. La section suivante présente la conclusion générale et les perspectives d'évolution de ce projet de fin d'études."),
         pageBreak(),
 
         // =========================================================
@@ -2241,7 +2155,7 @@ pb(),
         bullet("**Supervision temps réel des machines** : les 319 machines d'atelier font l'objet d'un suivi continu avec calcul dynamique du TRG et détection immédiate des arrêts de ligne."),
         bullet("**Modélisation prédictive par IA** : le modèle additif Prophet (Meta) a démontré sa supériorité sur les méthodes classiques avec un taux d'erreur exceptionnel de 4,8 % (MAPE) et 7,4 pièces (MAE), fournissant des projections fiables à 30 jours."),
         bullet("**Gestion proactive des stocks** : la segmentation ABC de Pareto et le calcul automatique du point de commande ont fiabilisé les approvisionnements et permis l'équilibrage multi-sites Tunisie-Brno."),
-        bullet("**Agent IA Décisionnel et Power BI** : les décideurs disposent d'un assistant conversationnel d'atelier pour diagnostiquer les défaillances et de tableaux de bord exécutifs pour la gouvernance industrielle."),
+        bullet("**Tableaux de bord décisionnels Power BI** : les décideurs disposent d'une suite de rapports visuels interactifs directement connectés au Data Warehouse pour la gouvernance industrielle, le suivi du TRG et la valorisation financière des stocks."),
         pb(),
 
         title2("Bilan Opérationnel et Chiffré pour l'Atelier"),
@@ -2321,9 +2235,6 @@ pb(),
         linkBullet("[22] SheetJS LLC, « SheetJS Community Edition: Spreadsheet Data Processing Engine (XLSX) », 2024. ", "https://sheetjs.com", ""),
         linkBullet("[23] ApexCharts, « Interactive JavaScript Charting Library Documentation », 2024. ", "https://apexcharts.com", ""),
         pb(),
-
-        linkBullet("[27] P. Lewis et al., « Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks », Advances in Neural Information Processing Systems (NeurIPS), vol. 33, p. 9459-9474, 2020. ", "https://arxiv.org/abs/2005.11401", ""),
-        linkBullet("[28] Groq Inc., « Groq LPU Inference Engine: Ultra-Fast Language Processing Unit Architecture », Groq Whitepaper, 2024. ", "https://groq.com", ""),
         title2("Industrie 4.0, Plasturgie et Taux de Rendement Global"),
         bullet("[24] S. Nakajima, Introduction to TPM: Total Productive Maintenance. Cambridge, MA, USA : Productivity Press, 1988."),
         bullet("[25] C. Roser, « All About Overall Equipment Effectiveness (OEE) and How to Use It », AllAboutLean, 2021."),
