@@ -782,7 +782,7 @@ const doc = new Document({
         // LISTE DES TABLEAUX
         
         tocLine("Tableau 1.1 : Fiche d'identité de l'organisme d'accueil", 1, "5"),
-        tocLine("Tableau 1.2 : Étude comparative des solutions du marché", 1, "7"),
+        tocLine("TABLEAU 1.2 : Comparaison des solutions existantes avec notre système", 1, "7"),
         tocLine("Tableau 1.3 : Comparaison des méthodologies de gestion de projet", 1, "10"),
         tocLine("Tableau 1.4 : Planification des Sprints Scrum sur les 6 mois de stage PFE", 1, "12"),
         tocLine("Tableau 1.5 : Product Backlog complet et priorisé du projet Nexora", 1, "13"),
@@ -973,22 +973,27 @@ const doc = new Document({
         pb(),
 
         title3("1.3.2 Étude Comparative des Solutions du Marché"),
-        body("Afin de cadrer la valeur ajoutée du développement interne d'une plateforme dédiée par rapport aux offres logicielles commerciales, nous avons réalisé une étude comparative approfondie synthétisée dans le tableau 1.2 :"),
+        body("Afin de justifier le développement d'une plateforme dédiée, nous avons réalisé une étude comparative des solutions disponibles sur le marché :"),
         pb(),
         makeTable(
-          ["Critère d'évaluation", "Progiciels MES / ERP Lourds (SAP, Siemens Opcenter)", "Solutions Maison Tableurs (Excel / Access)", "Plateforme Cible Nexora"],
+          ["Critère", "SAP MES / Siemens Opcenter", "Microsoft Dynamics NAV", "Excel / Access", "Nexora"],
           [
-            ["Suivi TRG en temps réel", "Oui (Très complet mais complexe)", "Non (Saisies manuelles après coup)", "Oui (Calcul dynamique automatique par machine)"],
-            ["Modélisation prédictive IA", "En option très onéreuse", "Non (Aucune capacité de Machine Learning)", "Oui (Intégration native du modèle Prophet)"],
-            ["Tableaux de bord BI intégrés", "En option payante et complexe", "Limité à des graphiques statiques", "Oui (Tableaux de bord interactifs Power BI et métriques en temps réel)"],
-            ["Ergonomie et convivialité", "Faible (Interface lourde et austère)", "Rudimentaire et propice aux erreurs", "Excellente (Design system réactif Metronic 8)"],
-            ["Connexion directe DWH", "Nécessite des connecteurs propriétaires", "Connexion instable (ODBC limité)", "Native (Spring Boot JPA + SQL Server)"],
-            ["Coût global de possession", "Prohibitif (Licences annuelles + intégrateurs)", "Faible mais coût caché élevé en pannes", "Maîtrisé (Socle open-source d'entreprise)"],
+            ["Suivi TRG en temps réel",         "✓", "✗", "✗",        "✓"],
+            ["Modélisation prédictive IA",       "✗", "✗", "✗",        "✓"],
+            ["Tableaux de bord BI intégrés",     "✓", "Limité", "✗",   "✓"],
+            ["Connexion directe DWH SQL Server", "✓", "✓", "Instable", "✓"],
+            ["Gestion intelligente des stocks",  "✓", "✗", "✗",        "✓"],
+            ["Alertes et recommandations IA",    "✗", "✗", "✗",        "✓"],
+            ["Ergonomie adaptée atelier",        "✗", "✗", "✗",        "✓"],
+            ["Coût maîtrisé",                    "✗", "✗", "✓",        "✓"],
           ],
-          [2200, 2400, 2000, 2066]
+          [2600, 1700, 1700, 1200, 1466]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 1.2 : Étude comparative des solutions du marché", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [
+            new TextRun({ text: "TABLEAU 1.2 : ", font: FONT, size: 20, bold: true, color: "333333" }),
+            new TextRun({ text: "Comparaison des solutions existantes avec notre système", font: FONT, size: 20, italics: true, color: GRAY })
+          ],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
@@ -1104,9 +1109,11 @@ const doc = new Document({
         pb(),
 
         title2("1.6 Langage de Modélisation UML"),
-        body("Pour formaliser rigoureusement l'analyse et la conception, le langage de modélisation unifié **UML** [15] a été retenu. Nous exploitons ses deux grandes familles de diagrammes :"),
-        bullet("**Diagrammes structurels** : diagrammes de classes pour concevoir les modèles d'entités, diagramme relationnel Entités-Associations pour le Data Warehouse, et diagramme de déploiement pour l'architecture physique."),
-        bullet("**Diagrammes comportementaux** : diagrammes de cas d'utilisation pour exprimer les interactions fonctionnelles, diagrammes de séquence pour orchestrer les échanges asynchrones entre microservices, et diagrammes d'activité pour détailler les règles métiers et le pipeline ETL."),
+        body("Pour modéliser les aspects structurels et comportementaux du système, le langage **UML 2.5 (Unified Modeling Language)** [4] a été utilisé. Étant donné que notre projet est principalement axé sur la Data Science et l'intelligence artificielle, nous avons utilisé quatre diagrammes essentiels :"),
+        bullet("**Diagramme des cas d'utilisation (Chapitre 2)** : représentation des interactions entre les acteurs et les fonctionnalités du système."),
+        bullet("**Diagramme de classes (Chapitre 2)** : modélisation de la structure des données et des entités métier du système Nexora et du Data Warehouse SQL Server."),
+        bullet("**Diagramme d'activité (Chapitre 3)** : montre les étapes du pipeline ETL."),
+        bullet("**Diagramme de séquence (Chapitre 6)** : modélisation de l'interaction entre l'utilisateur, le tableau de bord décisionnel et le modèle prédictif Prophet."),
         pb(),
 
         title2("1.7 Conclusion"),

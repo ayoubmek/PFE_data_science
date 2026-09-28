@@ -5,7 +5,6 @@ import { KTIcon, toAbsoluteUrl } from '../../../helpers'
 import { HeaderUserMenu, ThemeModeSwitcher, Search, HeaderNotificationsMenu } from '../../../partials'
 import { useLayout } from '../../core'
 
-import { toggleNexoraDrawer } from '../../../../app/modules/apps/nexora/IndustrialNexoraDrawer'
 
 const itemClass = 'ms-1 ms-md-4'
 const userAvatarClass = 'symbol-35px'
@@ -98,34 +97,6 @@ const Navbar = () => {
       {}
       <Search />
 
-      {/* Assistant Décisionnel Trigger */}
-      <div className={clsx('app-navbar-item', itemClass)}>
-        <button
-          type='button'
-          className='btn btn-sm btn-light-primary d-flex align-items-center gap-2 px-3 py-2 shadow-xs rounded-pill border'
-          onClick={() => toggleNexoraDrawer()}
-          title='Assistant Décisionnel'
-          style={{
-            cursor: 'pointer'
-          }}
-        >
-          <span
-            className='rounded-circle bg-white d-flex align-items-center justify-content-center shadow-xs'
-            style={{ width: '22px', height: '22px', padding: '2px' }}
-          >
-            <img
-              src={toAbsoluteUrl('/media/pfe/logo.png')}
-              alt='Logo'
-              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-              onError={(e: any) => {
-                e.target.style.display = 'none'
-                e.target.parentElement.innerHTML = '<i class="bi bi-chat-left-text text-primary fs-7"></i>'
-              }}
-            />
-          </span>
-          <span className='fw-bold fs-7 text-gray-800 d-none d-md-inline'>Assistant</span>
-        </button>
-      </div>
 
       {}
       <div className={clsx('app-navbar-item', itemClass)}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { HeaderWrapper } from './components/header'
 import { ScrollTop } from './components/scroll-top'
@@ -6,40 +6,15 @@ import { Content } from './components/content'
 import { FooterWrapper } from './components/footer'
 import { Sidebar } from './components/sidebar'
 import { PageDataProvider } from './core'
-import { reInitMenu, toAbsoluteUrl } from '../helpers'
+import { reInitMenu } from '../helpers'
 import { ToolbarWrapper } from './components/toolbar'
-import { IndustrialNexoraDrawer } from '../../app/modules/apps/nexora/IndustrialNexoraDrawer'
 
 const MasterLayout = () => {
   const location = useLocation()
-  const [isHovered, setIsHovered] = useState(false)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
     reInitMenu()
   }, [location.key])
-
-  useEffect(() => {
-    const handleOpen = () => setIsDrawerOpen(true)
-    const handleClose = () => setIsDrawerOpen(false)
-    const handleToggle = () => setIsDrawerOpen((prev) => !prev)
-
-    window.addEventListener('open-nexora-drawer', handleOpen)
-    window.addEventListener('close-nexora-drawer', handleClose)
-    window.addEventListener('toggle-nexora-drawer', handleToggle)
-    window.addEventListener('open-agent-drawer', handleOpen)
-    window.addEventListener('close-agent-drawer', handleClose)
-    window.addEventListener('toggle-agent-drawer', handleToggle)
-
-    return () => {
-      window.removeEventListener('open-nexora-drawer', handleOpen)
-      window.removeEventListener('close-nexora-drawer', handleClose)
-      window.removeEventListener('toggle-nexora-drawer', handleToggle)
-      window.removeEventListener('open-agent-drawer', handleOpen)
-      window.removeEventListener('close-agent-drawer', handleClose)
-      window.removeEventListener('toggle-agent-drawer', handleToggle)
-    }
-  }, [])
 
   return (
     <PageDataProvider>
@@ -62,76 +37,6 @@ const MasterLayout = () => {
       </div>
 
       <ScrollTop />
-
-      {/* Floating Action Button (FAB) for Agent IA */}
-      <div
-        id='kt_agent_fab_wrapper'
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 1045
-        }}
-      >
-        <button
-          type='button'
-          id='kt_agent_fab_button'
-          className='btn btn-icon rounded-circle d-flex align-items-center justify-content-center border-0 position-relative'
-          onClick={() => setIsDrawerOpen((prev) => !prev)}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          title='Agent IA - Assistant Décisionnel'
-          style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #1B84FF 0%, #0052CC 100%)',
-            boxShadow: isHovered
-              ? '0 8px 20px rgba(27, 132, 255, 0.45)'
-              : '0 4px 14px rgba(27, 132, 255, 0.3)',
-            transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-            transition: 'all 0.2s ease',
-            cursor: 'pointer'
-          }}
-        >
-          {/* Circular inner badge with App Logo */}
-          <div
-            className='rounded-circle bg-white d-flex align-items-center justify-content-center shadow-xs'
-            style={{
-              width: '38px',
-              height: '38px',
-              padding: '3px',
-              overflow: 'hidden'
-            }}
-          >
-            <img
-              src={toAbsoluteUrl('/media/pfe/logo.png')}
-              alt='Logo'
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain'
-              }}
-              onError={(e: any) => {
-                e.target.style.display = 'none'
-                e.target.parentElement.innerHTML = '<i class="bi bi-chat-left-text text-primary fs-4"></i>'
-              }}
-            />
-          </div>
-        </button>
-      </div>
-
-      {/* Adjust ScrollTop position so it floats cleanly above Agent button */}
-      <style>{`
-        #kt_scrolltop {
-          bottom: 96px !important;
-          right: 28px !important;
-          transition: all 0.3s ease;
-        }
-      `}</style>
-
-      {/* Nexora IA Sliding Drawer */}
-      <IndustrialNexoraDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
     </PageDataProvider>
   )
 }

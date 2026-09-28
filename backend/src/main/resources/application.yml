@@ -12,9 +12,6 @@ spring:
     url: jdbc:sqlserver://LAPTOP-M7HILU4Q;databaseName=dbDWH;integratedSecurity=true;encrypt=false;trustServerCertificate=true
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
-  flyway:
-    enabled: false
-
   jpa:
     database-platform: org.hibernate.dialect.SQLServerDialect
     hibernate:
@@ -30,19 +27,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,flyway
+        include: health,info,metrics
   endpoint:
     health:
       show-details: always
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME:your-email@gmail.com}
-    password: ${MAIL_PASSWORD:your-password}
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
 
 app:
   jwt:
@@ -53,10 +42,6 @@ app:
   ml-service:
     url: ${ML_SERVICE_URL:http://localhost:8000}
 
-  cors:
-    allowed-origins:
-      - http://localhost:4200
-      - http://localhost:3000
 
 logging:
   level:
