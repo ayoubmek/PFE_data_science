@@ -12,7 +12,7 @@ def get_chapter6():
         title1("Chapitre 6 : Sprint 4 : Développement du tableau de bord décisionnel et validation"),
 
         title2("6.1 Introduction"),
-        body("Ce chapitre correspond au Sprint 4, ultime itération de développement de notre projet. Après avoir mis en place le pipeline ETL, entraîné les modèles d'intelligence artificielle et développé le moteur prescriptif de stock, l'enjeu de ce sprint est de regrouper l'ensemble de ces briques au sein d'un portail décisionnel unifié, ergonomique et directement exploitable par les opérationnels d'atelier et la direction industrielle. Ces rapports Power BI Desktop / Power BI Service, connectés en mode DirectQuery au Data Warehouse SQL Server, centralisent les indicateurs de production, les prévisions de cadence et le pilotage des stocks, concrétisant la valeur ajoutée du système Nexora."),
+        body("Ce chapitre correspond au Sprint 4, ultime itération de développement de notre projet. Après avoir mis en place le pipeline ETL (Sprint 1), développé le module de gestion des stocks (Sprint 2) et entraîné les modèles d'intelligence artificielle (Sprint 3), l'enjeu de ce sprint est de regrouper l'ensemble de ces briques au sein d'un portail décisionnel unifié, ergonomique et directement exploitable par les opérationnels d'atelier et la direction industrielle. Ces rapports Power BI Desktop / Power BI Service, connectés en mode DirectQuery au Data Warehouse SQL Server, centralisent les indicateurs de production, les prévisions de cadence et le pilotage des stocks, concrétisant la valeur ajoutée du système Nexora."),
         pb(),
 
         title2("6.2 Backlog du Sprint 4"),

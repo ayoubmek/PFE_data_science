@@ -23,39 +23,34 @@ def get_chapter1():
 
         title2("1.3 Présentation de l'organisme d'accueil"),
         title3("1.3.1 Présentation de l'entreprise"),
-        body("L'organisme d'accueil est un groupe industriel international de premier plan, équipementier automobile de rang 1 (Tier-1) spécialisé dans la plasturgie technique et l'injection plastique de haute précision. Fondé pour répondre aux standards de qualité les plus rigoureux de l'industrie automobile mondiale, le groupe opère à travers plusieurs unités de production modernes situées en Tunisie (usines de Kondar et Sousse) et au cœur de l'Europe centrale en République Tchèque (site industriel de Brno)."),
-        pb(),
-        ...imageFigure("image/logo.png", "Figure 1.1 : Logo de l'entreprise industrielle d'accueil", 240, 100),
-        body("Le parc industriel consolidé de l'entreprise compte **319 presses à injecter automatisées**, de tonnages variés (de 50 à 1 500 tonnes), issues des constructeurs d'équipements industriels les plus réputés : Demag, Arburg, KraussMaffei et Engel. Ces machines fonctionnent selon un régime continu en trois-huit (3x8), assurant la production quotidienne de plusieurs centaines de milliers de sous-ensembles plastiques."),
+        body("L'organisme d'accueil est **Maps-IT**, une société de services informatiques et d'ingénierie logicielle basée à Monastir en Tunisie. Fondée en 2021, Maps-IT accompagne ses clients dans la mise en œuvre de solutions technologiques sur mesure, le développement d'architectures web et cloud, l'intégration de systèmes décisionnels (Business Intelligence) et la valorisation industrielle des données par la Data Science et l'Intelligence Artificielle."),
         pb(),
         body("Le tableau 1.1 synthétise la fiche d'identité de l'entreprise d'accueil :"),
         pb(),
         makeTable(
-          ["Champ", "Information / Détails de l'Entreprise"],
+          ["Champ", "Information"],
           [
-            ["Raison sociale", "Équipementier Automobile International — Division Plasturgie Technique"],
-            ["Secteur d'activité", "Industrie Automobile Tier-1 / Injection Plastique de Précision"],
-            ["Sites de production", "Kondar (Tunisie), Sousse (Tunisie), Brno (République Tchèque)"],
-            ["Parc machines", "319 presses à injecter (Demag, Arburg, KraussMaffei, Engel)"],
-            ["Système ERP / DWH", "Microsoft Dynamics NAV & Microsoft SQL Server Enterprise"],
-            ["Clients principaux", "Grands constructeurs automobiles européens (Stellantis, Renault, VAG)"],
-            ["Normes et certifications", "IATF 16949, ISO 9001, ISO 14001, ISO 45001"],
-            ["Effectif global", "Plus de 2 500 collaborateurs à l'échelle internationale"]
+            ["Raison sociale", "Maps-IT"],
+            ["Date de création", "2021"],
+            ["Secteur", "Services informatiques et logiciels"],
+            ["Localisation", "Monastir, Tunisie"],
+            ["Contact", "mapsit.info@gmail.com"],
+            ["Site web", "https://maps-it.com"]
           ],
-          [2800, 5866]
+          [3000, 5666]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 1.1 : Fiche d'identité de l'entreprise industrielle d'accueil", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 1.1 : Fiche d'identité de Maps-IT", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
         title3("1.3.2 Domaines d'activité"),
-        body("L'entreprise conçoit, développe et industrialise des composants plastiques injectés à forte valeur ajoutée technologique pour l'automobile :"),
-        bullet("**Connectique et boîtiers sous-capot moteur** : pièces techniques résistantes aux hautes températures, aux vibrations sévères et aux hydrocarbures (matières PA66, PBT renforcées de fibres de verre)."),
-        bullet("**Pièces d'aspect et d'habillage intérieur** : planches de bord, grilles de ventilation, consoles centrales et panneaux de porte nécessitant une finition esthétique irréprochable sans défaut d'aspect (matières ABS, PP, PC-ABS)."),
-        bullet("**Modules mécatroniques et éclairage** : supports de capteurs d'aide à la conduite (ADAS), optiques de phares et boîtiers électroniques embarqués."),
+        body("Maps-IT déploie son expertise autour de plusieurs pôles de compétences complémentaires :"),
+        bullet("**Ingénierie logicielle et développement sur mesure** : conception d'applications web, mobiles et de portails métiers performants et sécurisés."),
+        bullet("**Business Intelligence et architectures décisionnelles** : conception d'entrepôts de données (Data Warehouse), pipelines d'intégration ETL et modélisation de tableaux de bord de pilotage exécutif."),
+        bullet("**Data Science et Intelligence Artificielle** : développement de modèles prédictifs pour les séries temporelles, analyse exploratoire de données volumineuses et optimisation des processus opérationnels."),
         pb(),
 
         title2("1.4 Présentation de la plateforme Nexora"),
@@ -90,7 +85,18 @@ def get_chapter1():
         pb(),
 
         title3("1.5.2 Étude de l'existant"),
-        body("Afin de justifier le développement d'une plateforme dédiée, nous avons réalisé une étude comparative approfondie des solutions du marché face aux besoins de l'entreprise :"),
+        body("L'analyse des solutions existantes sur le marché et des pratiques industrielles met en lumière trois approches principales : les progiciels MES industriels lourds (ex. SAP MES, Siemens), les modules standards des ERP d'entreprise (Microsoft Dynamics NAV) et les feuilles de calcul manuelles (Excel). Si chacune répond à des besoins spécifiques, aucune ne combine le calcul du TRG en temps réel, l'inférence prédictive par intelligence artificielle et une ergonomie fluide adaptée aux opérateurs d'atelier."),
+        pb(),
+
+        title3("1.5.3 Solution proposée"),
+        body("Pour répondre à ces limites, la solution développée, nommée **Nexora**, est un système décisionnel modulaire articulé autour de trois composantes principales :"),
+        bullet("**1. Un pipeline ETL robuste et performant** : assurant l'extraction depuis Microsoft SQL Server, le nettoyage des anomalies de stock, le recalage des inventaires et le calcul de 16 variables explicatives industrielles."),
+        bullet("**2. Un module d'intelligence artificielle prédictive** : s'appuyant sur l'entraînement de 9 modèles d'IA pour projeter les cadences de fabrication et la charge d'atelier sur des horizons temporels de 7, 15 et 30 jours."),
+        bullet("**3. Un module de gestion intelligente des stocks** : classant les 6 875 articles du catalogue et générant des alertes automatiques priorisées pour sécuriser 45 jours de couverture de stock."),
+        pb(),
+        body("L'ensemble de ces fonctionnalités est intégré au sein d'une interface web réactive développée avec React 18, pilotée par Spring Boot 3 et enrichie de rapports décisionnels Microsoft Power BI."),
+        pb(),
+        body("Le tableau 1.2 synthétise la comparaison entre les solutions existantes du marché et notre solution Nexora :"),
         pb(),
         makeTable(
           ["Critère d'évaluation", "Progiciels MES Lourds (SAP MES, Siemens)", "ERP Classique (Microsoft NAV)", "Méthodes Tableurs (Excel)", "Notre solution : Nexora"],
@@ -108,27 +114,17 @@ def get_chapter1():
         ),
         new Paragraph({
           children: [
-            new TextRun({ text: "TABLEAU 1.2 : ", font: FONT, size: 20, bold: true, color: "333333" }),
-            new TextRun({ text: "Comparaison des solutions existantes avec notre système", font: FONT, size: 20, italics: true, color: GRAY })
+            new TextRun({ text: "Tableau 1.2 : Comparaison des solutions existantes avec notre système", font: FONT, size: 20, italics: true, color: GRAY })
           ],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
-        title3("1.5.3 Solution proposée"),
-        body("La solution développée, baptisée **Nexora**, est un système décisionnel modulaire articulé autour de trois composantes principales :"),
-        bullet("**1. Un pipeline ETL robuste et performant** : assurant l'extraction depuis Microsoft SQL Server, le nettoyage des anomalies de stock, le recalage des inventaires et le calcul de 16 variables explicatives industrielles."),
-        bullet("**2. Un module d'intelligence artificielle prédictive** : s'appuyant sur l'entraînement de 9 modèles d'IA pour projeter les cadences de fabrication et la charge d'atelier sur des horizons temporels de 7, 15 et 30 jours."),
-        bullet("**3. Un module de gestion intelligente des stocks** : classant les 6 875 articles du catalogue et générant des alertes automatiques priorisées pour sécuriser 45 jours de couverture de stock."),
-        pb(),
-        body("L'ensemble de ces fonctionnalités est intégré au sein d'une interface web réactive développée avec React 18, stylisée par le design system Metronic 8, pilotée par Spring Boot 3 et enrichie de rapports décisionnels Microsoft Power BI."),
-        pb(),
-
         title2("1.6 Workflow complet du projet"),
         body("Le système décisionnel suit un pipeline continu structuré en huit étapes successives, illustré dans la figure 1.3 :"),
         pb(),
-        ...imageFigure("diagrams/architecture.png", "Figure 1.3 : Workflow complet du système décisionnel Nexora", 540, 240),
+        ...imageFigure("diagrams/architecture.png", "Figure 1.3 : Workflow complet du système décisionnel Nexora", 460, 460),
         bullet("**1. Collecte continue** : extraction automatisée des données depuis les tables de faits du Data Warehouse SQL Server (CLE, ILE, Item, Machine Center)."),
         bullet("**2. Nettoyage (ETL)** : détection des stocks négatifs, traitement des valeurs manquantes et filtrage des doublons opérationnels."),
         bullet("**3. Feature Engineering** : création de 16 variables explicatives temporelles (lags de cadences à J-1, J-7, J-14, moyennes mobiles, saisonnalités des constructeurs)."),
@@ -136,7 +132,7 @@ def get_chapter1():
         bullet("**5. Entraînement** : apprentissage comparatif des modèles de prévision temporelle (Prophet, Random Forest, ARIMA, Régression Linéaire) et de détection d'anomalies (Isolation Forest)."),
         bullet("**6. Validation & Optimisation** : optimisation des hyperparamètres par validation croisée temporelle TimeSeriesSplit à 5 plis."),
         bullet("**7. Évaluation multi-critères** : calcul rigoureux des métriques MAE, RMSE, MAPE et R² pour chaque modèle testé."),
-        bullet("**8. Restitution applicative** : injection des prédictions dans le tableau de bord interactif React Metronic et les rapports Power BI."),
+        bullet("**8. Restitution applicative** : injection des prédictions dans le tableau de bord interactif React.js et les rapports Power BI."),
         pb(),
 
         title2("1.7 Méthodologie de développement"),
@@ -144,16 +140,16 @@ def get_chapter1():
         body("Avant d'engager les développements, nous avons confronté l'approche traditionnelle en cascade (cycle en V) à l'approche Agile afin de retenir le cadre le plus efficient pour un projet couplant recherche en Data Science et génie logiciel :"),
         pb(),
         makeTable(
-          ["Critère de comparaison", "Approche classique (Cycle en V)", "Approche Agile (Scrum)"],
+          ["Critère", "Approche classique", "Approche agile"],
           [
-            ["Cycle de vie", "Linéaire, séquentiel et prédictif", "Itératif, incrémental et adaptatif"],
-            ["Spécification des besoins", "Exhaustive et figée dès le départ", "Évolutive par User Stories priorisées"],
-            ["Livraisons logicielles", "Unique à la fin du projet", "Fréquentes et testables à chaque sprint"],
-            ["Gestion du changement", "Difficile et coûteuse après validation", "Intégrée naturellement au rythme des sprints"],
-            ["Implication des utilisateurs", "Limitée aux recettes initiales et finales", "Continue avec feedback à chaque fin de sprint"],
-            ["Mesure du succès", "Conformité stricte au cahier des charges initial", "Valeur métier opérationnelle livrée en atelier"]
+            ["Cycle de vie", "Linéaire et en cascade", "Itératif et incrémental"],
+            ["Planification", "Déterministe, besoins figés", "Flexible, ajustements continus"],
+            ["Livraisons", "Unique en fin de projet", "Fréquentes à chaque sprint"],
+            ["Gestion du changement", "Difficiles à intégrer", "Facilement acceptés"],
+            ["Feedback", "En fin de cycle", "Continu et régulier"],
+            ["Indicateur de succès", "Respect du plan initial", "Valeur livrée et satisfaction"]
           ],
-          [2600, 3000, 3066]
+          [2400, 3100, 3166]
         ),
         new Paragraph({
           children: [new TextRun({ text: "Tableau 1.3 : Comparaison entre approche classique et approche agile", font: FONT, size: 20, italics: true, color: GRAY })],
@@ -179,7 +175,20 @@ def get_chapter1():
         pb(),
 
         title3("1.7.2 Choix méthodologique : Scrum"),
-        body("La méthodologie Agile Scrum [1, 2] a été adoptée. Sa flexibilité itérative convient parfaitement aux projets de Data Science où les expérimentations algorithmiques nécessitent des boucles d'ajustement rapides et régulières :"),
+        body("La réussite d’un projet dépend en grande partie de la méthodologie de développement adoptée, notamment de sa capacité à s’adapter aux évolutions des besoins et à assurer une livraison progressive des fonctionnalités."),
+        pb(),
+        body("Dans le cadre de ce projet, nous avons choisi la méthodologie Agile Scrum [1, 2], car elle est particulièrement adaptée au développement d’une solution intégrant plusieurs modules, tels que le pipeline ETL, la prévision des ventes, la gestion intelligente des stocks et le tableau de bord décisionnel."),
+        pb(),
+        body("Cette approche permet de réaliser et de valider progressivement chaque module, tout en facilitant les échanges avec les encadrants et l’intégration des améliorations au fil des sprints."),
+        pb(),
+        body("Le déroulement de notre projet Scrum suit les étapes suivantes [2] :"),
+        body("1. Élaboration du Product Backlog.", { indent: 400 }),
+        body("2. Planification des sprints.", { indent: 400 }),
+        body("3. Développement et tests des fonctionnalités.", { indent: 400 }),
+        body("4. Livraison d’un incrément fonctionnel à la fin de chaque sprint.", { indent: 400 }),
+        body("5. Revue du sprint et amélioration continue.", { indent: 400 }),
+        pb(),
+        body("La figure suivante illustre le cycle de vie de la méthodologie Scrum :"),
         pb(),
         ...imageFigure("scrum-framework-9.29.23.png", "Figure 1.4 : Cycle de la méthodologie Scrum", 520, 320),
         pb(),
@@ -192,33 +201,33 @@ def get_chapter1():
         pb(),
 
         title3("1.7.4 Product Backlog"),
-        body("Le Product Backlog répertorie l'ensemble des 20 exigences du système formulées sous forme de User Stories, priorisées et estimées en Story Points (SP) selon les sprints de réalisation :"),
+        body("Le Product Backlog répertorie l'ensemble des 20 exigences du système formulées sous forme de User Stories, priorisées et estimées en jours selon les sprints de réalisation :"),
         pb(),
         makeTable(
-          ["ID", "Récit Utilisateur (User Story)", "Priorité", "Estimation", "Sprint Associé"],
+          ["ID", "Récit Utilisateur (User Story)", "Priorité", "Estimation (jours)", "Sprint Associé"],
           [
-            ["US01", "En tant qu'utilisateur, je veux m'authentifier par jeton JWT afin d'accéder aux fonctions autorisées", "Haute", "5 SP", "Sprint 1"],
-            ["US02", "En tant qu'administrateur, je veux configurer les rôles RBAC pour restreindre les accès aux API", "Haute", "5 SP", "Sprint 1"],
-            ["US03", "En tant qu'administrateur, je veux auditer le DWH afin de cartographier les tables de faits", "Haute", "8 SP", "Sprint 1"],
-            ["US04", "En tant qu'administrateur, je veux assainir les données de mouvements de stock afin d'éliminer les anomalies", "Haute", "5 SP", "Sprint 1"],
-            ["US05", "En tant que manager, je veux suivre les 319 machines d'atelier en temps réel", "Haute", "8 SP", "Sprint 2"],
-            ["US06", "En tant que manager, je veux calculer automatiquement le TRG en direct par centre de charge", "Haute", "8 SP", "Sprint 2"],
-            ["US07", "En tant qu'opérateur, je veux déclarer le statut des Ordres de Fabrication", "Moyenne", "5 SP", "Sprint 2"],
-            ["US08", "En tant que manager, je veux extraire et agréger l'historique de production afin d'alimenter les modèles d'IA", "Haute", "5 SP", "Sprint 2"],
-            ["US09", "En tant que manager, je veux entraîner le modèle Prophet et comparer avec ARIMA pour fiabiliser les prévisions", "Haute", "8 SP", "Sprint 2"],
-            ["US10", "En tant que manager, je veux visualiser les prévisions de production à 30 jours et bornes à 95%", "Haute", "5 SP", "Sprint 2"],
-            ["US11", "En tant que manager, je veux classer les articles selon la méthode ABC de Pareto afin d'optimiser le stockage", "Haute", "8 SP", "Sprint 3"],
-            ["US12", "En tant que manager, je veux recevoir des alertes automatiques de rupture critique (< 5 pcs)", "Haute", "5 SP", "Sprint 3"],
-            ["US13", "En tant qu'opérateur, je veux enregistrer des entrées/sorties de stock conformes au DWH", "Moyenne", "5 SP", "Sprint 3"],
-            ["US14", "En tant que manager, je veux obtenir des recommandations de commande d'approvisionnement", "Haute", "5 SP", "Sprint 3"],
-            ["US15", "En tant que manager, je veux adapter les équipes (3x8) selon les prévisions de cadence", "Moyenne", "5 SP", "Sprint 3"],
-            ["US16", "En tant que manager, je veux planifier des transferts inter-usines Tunisie-Brno", "Basse", "3 SP", "Sprint 3"],
-            ["US17", "En tant que manager, je veux disposer d'une console avec filtres multi-critères", "Haute", "5 SP", "Sprint 4"],
-            ["US18", "En tant que manager, je veux exporter les données filtrées sous format Excel (.xlsx)", "Moyenne", "3 SP", "Sprint 4"],
-            ["US19", "En tant que manager, je veux superviser la production globale sur un tableau de bord exécutif Power BI", "Haute", "8 SP", "Sprint 4"],
-            ["US20", "En tant que manager, je veux analyser la valorisation et les mouvements de stock sur Power BI", "Haute", "5 SP", "Sprint 4"]
+            ["US01", "En tant qu'utilisateur, je veux m'authentifier par jeton JWT afin d'accéder aux fonctions autorisées", "Haute", "5 jours", "Sprint 1"],
+            ["US02", "En tant qu'administrateur, je veux configurer les rôles RBAC pour restreindre les accès aux API", "Haute", "5 jours", "Sprint 1"],
+            ["US03", "En tant qu'administrateur, je veux auditer le DWH afin de cartographier les tables de faits", "Haute", "8 jours", "Sprint 1"],
+            ["US04", "En tant qu'administrateur, je veux assainir les données de mouvements de stock afin d'éliminer les anomalies", "Haute", "5 jours", "Sprint 1"],
+            ["US05", "En tant que manager, je veux classer les articles selon la méthode ABC de Pareto afin d'optimiser le stockage", "Haute", "8 jours", "Sprint 2"],
+            ["US06", "En tant que manager, je veux recevoir des alertes automatiques de rupture critique (< 5 pcs)", "Haute", "5 jours", "Sprint 2"],
+            ["US07", "En tant qu'opérateur, je veux enregistrer des entrées/sorties de stock conformes au DWH", "Moyenne", "5 jours", "Sprint 2"],
+            ["US08", "En tant que manager, je veux obtenir des recommandations de commande d'approvisionnement", "Haute", "5 jours", "Sprint 2"],
+            ["US09", "En tant que manager, je veux adapter les équipes (3x8) selon les besoins d'approvisionnement", "Moyenne", "5 jours", "Sprint 2"],
+            ["US10", "En tant que manager, je veux planifier des transferts inter-usines Tunisie-Brno", "Basse", "3 jours", "Sprint 2"],
+            ["US11", "En tant que manager, je veux suivre les 319 machines d'atelier en temps réel", "Haute", "8 jours", "Sprint 3"],
+            ["US12", "En tant que manager, je veux calculer automatiquement le TRG en direct par centre de charge", "Haute", "8 jours", "Sprint 3"],
+            ["US13", "En tant qu'opérateur, je veux déclarer le statut des Ordres de Fabrication", "Moyenne", "5 jours", "Sprint 3"],
+            ["US14", "En tant que manager, je veux extraire et agréger l'historique de production afin d'alimenter les modèles d'IA", "Haute", "5 jours", "Sprint 3"],
+            ["US15", "En tant que manager, je veux entraîner 4 modèles d'IA (Prophet, RF, ARIMA, Régression) pour fiabiliser les prévisions", "Haute", "8 jours", "Sprint 3"],
+            ["US16", "En tant que manager, je veux visualiser les prévisions de cadence à 30 jours et bornes à 95%", "Haute", "5 jours", "Sprint 3"],
+            ["US17", "En tant que manager, je veux disposer d'une console avec filtres multi-critères", "Haute", "5 jours", "Sprint 4"],
+            ["US18", "En tant que manager, je veux exporter les données filtrées sous format Excel (.xlsx)", "Moyenne", "3 jours", "Sprint 4"],
+            ["US19", "En tant que manager, je veux superviser la production globale sur un tableau de bord exécutif Power BI", "Haute", "8 jours", "Sprint 4"],
+            ["US20", "En tant que manager, je veux analyser la valorisation et les mouvements de stock sur Power BI", "Haute", "5 jours", "Sprint 4"]
           ],
-          [700, 5300, 1000, 1000, 1000]
+          [700, 4966, 1000, 1100, 900]
         ),
         new Paragraph({
           children: [new TextRun({ text: "Tableau 1.5 : Product Backlog priorisé du projet", font: FONT, size: 20, italics: true, color: GRAY })],
@@ -233,11 +242,11 @@ def get_chapter1():
         makeTable(
           ["Sprint", "Objectif", "Livrable principal"],
           [
-            ["Sprint 0", "Analyse des besoins et conception", "Spécifications et architecture globale"],
-            ["Sprint 1", "Prétraitement des données et ETL", "Data Warehouse SQL Server et tables de faits"],
-            ["Sprint 2", "Prévision des cadences par IA", "Modèle Prophet sélectionné"],
-            ["Sprint 3", "Gestion intelligente des stocks", "Module de classification et recommandations"],
-            ["Sprint 4", "Dashboard et validation", "Tableaux de bord Power BI connectés au DWH"]
+            ["Sprint 0", "Analyse des besoins et conception globale", "Spécifications fonctionnelles et architecture globale"],
+            ["Sprint 1", "Analyse, nettoyage des données et pipeline ETL", "Data Warehouse assaini et table analytique consolidée"],
+            ["Sprint 2", "Conception du module de gestion des stocks", "Classification ABC, alertes et recommandations d'approvisionnement"],
+            ["Sprint 3", "Modélisation prédictive par IA (4 modèles)", "Modèles comparés (Prophet, RF, ARIMA, Régression) et Isolation Forest"],
+            ["Sprint 4", "Développement des tableaux de bord et validation", "Rapports Power BI / Web d'atelier et recette fonctionnelle"]
           ],
           [2000, 3500, 3500]
         ),

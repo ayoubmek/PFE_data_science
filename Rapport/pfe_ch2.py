@@ -39,7 +39,7 @@ def get_chapter2():
             ["Fiabilité et Intégrité", "Disponibilité du système garantie à 99,5 %, intégrité transactionnelle ACID sur la base de données, et mécanisme de repli (fallback) hors-ligne en cas de coupure réseau."],
             ["Maintenabilité", "Architecture modulaire hautement découplée (API REST Spring Boot, microservice FastAPI indépendant), code documenté et versionné sous Git/GitHub."],
             ["Évolutivité / Scalabilité", "Capacité d'absorber l'ajout de nouvelles unités industrielles sans réécriture du socle logiciel, et scalabilité horizontale des microservices sous conteneurs Docker."],
-            ["Ergonomie Industrielle", "Interface réactive (design system Metronic 8), navigation intuitive sans formation complexe préalable, visualisations interactives adaptées aux écrans d'atelier."]
+            ["Ergonomie Industrielle", "Interface réactive et moderne sous React.js, navigation intuitive sans formation complexe préalable, visualisations interactives adaptées aux écrans d'atelier."]
           ],
           [2400, 6266]
         ),
@@ -74,7 +74,7 @@ def get_chapter2():
         bullet("**1. Couche Données (Data Layer)** : constituée de l'entrepôt de données d'entreprise Microsoft SQL Server 2022. Elle centralise les tables opérationnelles de l'ERP Microsoft Dynamics NAV, notamment les 250 000 opérations de la table *Capacity Ledger Entry* et les 1,5 million de mouvements de stock de la table *Item Ledger Entry*."),
         bullet("**2. Couche Traitement & ETL (Processing Layer)** : assure l'extraction continue des flux SQL Server, l'assainissement des anomalies de stocks négatifs, le feature engineering des 16 variables explicatives industrielles et l'alimentation de la table analytique optimisée."),
         bullet("**3. Couche Métier & IA (Business & AI Layer)** : cœur décisionnel combinant le backend Spring Boot 3 (API RESTful, gestion des règles métiers, calcul du TRG et sécurité RBAC) et le microservice de Data Science sous FastAPI en Python 3.10 (chargement des modèles Prophet, Random Forest, ARIMA, Isolation Forest et K-Means)."),
-        bullet("**4. Couche Présentation (Presentation Layer)** : interface utilisateur accessible par navigateur web, développée avec React 18 et le design system Metronic 8, enrichie de graphiques dynamiques ApexCharts et de tableaux de bord décisionnels Microsoft Power BI Embedded pour le reporting exécutif."),
+        bullet("**4. Couche Présentation (Presentation Layer)** : interface utilisateur accessible par navigateur web, développée avec React 18, enrichie de graphiques dynamiques ApexCharts et de tableaux de bord décisionnels Microsoft Power BI Embedded pour le reporting exécutif."),
         pb(),
 
         title2("2.5 Environnement de travail"),
@@ -105,13 +105,13 @@ def get_chapter2():
             ["Langage de programmation"],
             ["Python", "3.10.11", "Langage principal : ETL, modélisation de séries temporelles et microservice API."],
             ["Java (JDK)", "17 LTS", "Socle d'exécution robuste et performant pour le serveur applicatif Spring Boot 3."],
-            ["TypeScript / JavaScript", "ES2022", "Développement de l'interface web réactive sous React.js et Metronic 8."],
+            ["TypeScript / JavaScript", "ES2022", "Développement de l'interface web réactive sous React.js."],
 
             ["Frameworks et Bibliothèques Web"],
             ["Spring Boot", "3.2.4", "Framework backend : exposition des API RESTful, Spring Data JPA et sécurité JWT."],
             ["FastAPI", "0.110.0", "Microservice web asynchrone ultra-rapide dédié au service des prédictions d'IA."],
             ["React.js", "18.2.0", "Bibliothèque frontend pour la construction de l'interface web réactive d'atelier."],
-            ["Metronic 8", "8.2.0", "Design system et suite de composants UI industriels pour l'application Nexora."],
+            ["Axios / CSS3", "1.6.0", "Client HTTP pour la communication avec les API REST et stylisation responsive de l'interface."],
 
             ["Bibliothèques Python"],
             ["Pandas", "2.1.0", "Manipulation et analyse des données tabulaires (DataFrame)."],
@@ -137,7 +137,7 @@ def get_chapter2():
         pb(),
 
         title2("2.6 Conclusion"),
-        conclusionBox("Ce chapitre a présenté le Sprint 0, posant les fondations conceptuelles, fonctionnelles et architecturales de la plateforme Nexora. La spécification détaillée des besoins par profil métier a permis de cerner avec précision les services attendus en atelier. L'architecture en quatre couches assure une séparation rigoureuse des responsabilités, garantissant la fluidité des requêtes DWH et l'évolutivité du moteur prédictif. Le choix d'une stack éprouvée (Spring Boot 3, FastAPI, Prophet, React Metronic 8, Power BI) garantit la pérennité de la solution. Le chapitre suivant détaille le Sprint 1, consacré au prétraitement des données du Data Warehouse et à la construction du pipeline ETL."),
+        conclusionBox("Ce chapitre a présenté le Sprint 0, posant les fondations conceptuelles, fonctionnelles et architecturales de la plateforme Nexora. La spécification détaillée des besoins par profil métier a permis de cerner avec précision les services attendus en atelier. L'architecture en quatre couches assure une séparation rigoureuse des responsabilités, garantissant la fluidité des requêtes DWH et l'évolutivité du moteur prédictif. Le choix d'une stack éprouvée (Spring Boot 3, FastAPI, Prophet, React.js, Power BI) garantit la pérennité de la solution. Le chapitre suivant détaille le Sprint 1, consacré au prétraitement des données du Data Warehouse et à la construction du pipeline ETL."),
         pageBreak(),
     '''
 
