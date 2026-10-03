@@ -64,17 +64,6 @@ const HeaderUserMenu: FC = () => {
 
       <div className='separator my-2'></div>
 
-      <div className='menu-item px-5'>
-        <a href='#' className='menu-link px-5'>
-          <span className='menu-icon'>
-            <KTIcon iconName='profile-circle' className='fs-2 me-3' />
-          </span>
-          My Profile
-        </a>
-      </div>
-
-      <div className='separator my-2'></div>
-
       <Languages />
 
       <div className='separator my-2'></div>
