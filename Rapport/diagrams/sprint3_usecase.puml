@@ -1,34 +1,51 @@
 @startuml sprint3_usecase
 left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
 skinparam usecase {
     BackgroundColor White
-    BorderColor Black
+    BorderColor #2B3A4A
+    ArrowColor #2B3A4A
+    FontSize 12
+    FontName Arial
 }
 skinparam actor {
     BackgroundColor White
-    BorderColor Black
+    BorderColor #2B3A4A
+    FontColor #1E1E2D
+    FontSize 12
+    FontName Arial
+    FontStyle bold
+}
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor #2B3A4A
+    FontSize 14
+    FontName Arial
+    FontStyle bold
+    FontColor #1E1E2D
 }
 
 actor "Opérateur" as OPE
-actor "Manager" as MGR
+actor "Administrateur" as ADM
 
 rectangle "Gestion des Stocks, Mouvements DWH & Export" {
     usecase "S'authentifier" as UC_Auth
-    usecase "Consulter les mouvements DWH" as UC31
     usecase "Enregistrer un mouvement d'atelier" as UC32
+    usecase "Consulter les mouvements DWH" as UC31
     usecase "Appliquer les filtres multi-critères" as UC33
     usecase "Exporter les données filtrées au format Excel" as UC34
     usecase "Configurer les seuils d'alerte" as UC35
 }
 
-OPE --> UC31
 OPE --> UC32
-OPE --> UC33
+OPE --> UC31
 
-MGR --> UC31
-MGR --> UC33
-MGR --> UC34
-MGR --> UC35
+ADM --> UC31
+ADM --> UC33
+ADM --> UC34
+ADM --> UC35
 
 UC31 ..> UC_Auth : <<include>>
 UC32 ..> UC_Auth : <<include>>

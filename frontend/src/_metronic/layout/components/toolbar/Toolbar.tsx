@@ -1,12 +1,6 @@
 import {useEffect} from 'react'
 import {ILayout, useLayout} from '../../core'
-import {
-  ToolbarAccounting,
-  ToolbarClassic,
-  ToolbarExtended,
-  ToolbarReports,
-  ToolbarSaas,
-} from './toolbars'
+import {ToolbarClassic} from './toolbars'
 
 const Toolbar = () => {
   const {config} = useLayout()
@@ -15,20 +9,7 @@ const Toolbar = () => {
     document.body.setAttribute('data-kt-app-toolbar-enabled', 'true')
   }, [config])
 
-  switch (config.app?.toolbar?.layout) {
-    case 'classic':
-      return <ToolbarClassic />
-    case 'accounting':
-      return <ToolbarAccounting />
-    case 'extended':
-      return <ToolbarExtended />
-    case 'reports':
-      return <ToolbarReports />
-    case 'saas':
-      return <ToolbarSaas />
-    default:
-      return <ToolbarClassic />
-  }
+  return <ToolbarClassic />
 }
 
 const updateDOM = (config: ILayout) => {

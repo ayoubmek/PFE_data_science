@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import axios from 'axios'
 import { KTIcon } from '../../../_metronic/helpers'
 
-export type UserRole = 'ADMIN' | 'MANAGER' | 'OPERATEUR'
+export type UserRole = 'ADMIN' | 'OPERATEUR'
 
 export interface UserItem {
   id: number
@@ -30,10 +30,10 @@ const DEFAULT_USERS: UserItem[] = [
   },
   {
     id: 2,
-    username: 'ayoub.mgr',
+    username: 'ayoub.ope',
     fullName: 'Ayoub Hammami',
     email: 'ayoub.hammami@nexora-industrial.com',
-    role: 'MANAGER',
+    role: 'OPERATEUR',
     enabled: true,
     createdAt: '2026-02-01',
     lastLogin: "Aujourd'hui, 08:30",
@@ -43,7 +43,7 @@ const DEFAULT_USERS: UserItem[] = [
     username: 'rihab.stock',
     fullName: 'Rihab Idoudi',
     email: 'rihab.idoudi@nexora-industrial.com',
-    role: 'MANAGER',
+    role: 'OPERATEUR',
     enabled: true,
     createdAt: '2026-02-10',
     lastLogin: 'Hier, 17:45',
@@ -88,19 +88,12 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bg: string; 
     icon: 'shield-tick',
     desc: 'Accès total système, gestion des utilisateurs, habilitations RBAC et sécurité.',
   },
-  MANAGER: {
-    label: 'Manager',
-    color: '#009EF7',
-    bg: '#E1F0FF',
-    icon: 'element-11',
-    desc: 'Supervision TRG, planification production, inventaire, IA Prophet et exports.',
-  },
   OPERATEUR: {
     label: 'Opérateur',
     color: '#50CD89',
     bg: '#E8FFF3',
     icon: 'gear',
-    desc: "Exécution des ordres d'atelier, saisie entrées/sorties et déclarations d'arrêts.",
+    desc: "Gestion de production, machines, suivi du TRG, mouvements de stock et prévisions d'IA.",
   },
 }
 
@@ -183,11 +176,10 @@ export default function UserManagementPage() {
   const stats = useMemo(() => {
     const total = users.length
     const admins = users.filter((u) => u.role === 'ADMIN').length
-    const managers = users.filter((u) => u.role === 'MANAGER').length
     const operateurs = users.filter((u) => u.role === 'OPERATEUR').length
     const active = users.filter((u) => u.enabled).length
     const activeRate = total > 0 ? Math.round((active / total) * 100) : 0
-    return { total, admins, managers, operateurs, active, activeRate }
+    return { total, admins, operateurs, active, activeRate }
   }, [users])
 
   // Toggle user active status
@@ -573,11 +565,11 @@ export default function UserManagementPage() {
                       Attribution du Rôle RBAC
                     </label>
                     <div className='row g-3'>
-                      {(['OPERATEUR', 'MANAGER', 'ADMIN'] as UserRole[]).map((r) => {
+                      {(['OPERATEUR', 'ADMIN'] as UserRole[]).map((r) => {
                         const isSelected = formData.role === r
                         const cfg = ROLE_CONFIG[r]
                         return (
-                          <div className='col-md-4' key={r}>
+                          <div className='col-md-6' key={r}>
                             <div
                               className={`card p-4 rounded-3 cursor-pointer border h-100 ${
                                 isSelected ? 'border-2' : 'border-gray-200'
@@ -712,11 +704,11 @@ export default function UserManagementPage() {
                       Modifier le Rôle RBAC
                     </label>
                     <div className='row g-3'>
-                      {(['OPERATEUR', 'MANAGER', 'ADMIN'] as UserRole[]).map((r) => {
+                      {(['OPERATEUR', 'ADMIN'] as UserRole[]).map((r) => {
                         const isSelected = formData.role === r
                         const cfg = ROLE_CONFIG[r]
                         return (
-                          <div className='col-md-4' key={r}>
+                          <div className='col-md-6' key={r}>
                             <div
                               className={`card p-4 rounded-3 cursor-pointer border h-100 ${
                                 isSelected ? 'border-2' : 'border-gray-200'

@@ -4,17 +4,20 @@ import {WithChildren} from '../helpers'
 const I18N_CONFIG_KEY = process.env.REACT_APP_I18N_CONFIG_KEY || 'i18nConfig'
 
 type Props = {
-  selectedLang: 'de' | 'en' | 'es' | 'fr' | 'ja' | 'zh'
+  selectedLang: 'en' | 'fr'
 }
 const initialState: Props = {
-  selectedLang: 'en',
+  selectedLang: 'fr',
 }
 
 function getConfig(): Props {
   const ls = localStorage.getItem(I18N_CONFIG_KEY)
   if (ls) {
     try {
-      return JSON.parse(ls) as Props
+      const parsed = JSON.parse(ls) as Props
+      if (parsed.selectedLang === 'en' || parsed.selectedLang === 'fr') {
+        return parsed
+      }
     } catch (er) {
       console.error(er)
     }

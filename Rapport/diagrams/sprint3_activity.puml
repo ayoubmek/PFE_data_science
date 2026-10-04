@@ -14,7 +14,7 @@ endif
 :Enregistrer le mouvement en base;
 if (Stock < Seuil d'alerte?) then (oui)
     :Générer une notification d'alerte de rupture;
-    :Envoyer alerte au Manager;
+    :Afficher l'alerte sur le tableau de bord;
 else (non)
 endif
 stop

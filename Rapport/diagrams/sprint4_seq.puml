@@ -1,11 +1,11 @@
 @startuml sprint4_seq
-actor "Manager" as MGR
+actor "Administrateur" as ADM
 participant "React App" as React
 participant "Spring Boot API" as Spring
 participant "FastAPI Service" as FastAPI
 database "SQL Server DB" as DB
 
-MGR -> React : Accéder aux Prévisions de Production (Prophet)
+ADM -> React : Accéder aux Prévisions de Production (Prophet)
 React -> Spring : GET /api/data-science/predictions
 activate Spring
 
@@ -24,5 +24,5 @@ deactivate FastAPI
 Spring --> React : Données prédictives structurées
 deactivate Spring
 
-React --> MGR : Afficher courbes interactives et recommandations opérationnelles
+React --> ADM : Afficher courbes interactives et recommandations opérationnelles
 @enduml

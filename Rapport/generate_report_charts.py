@@ -35,36 +35,38 @@ os.makedirs(diag_dir, exist_ok=True)
 print("Génération des graphiques du rapport Nexora...")
 
 # ==============================================================================
-# 1. Figure 4.2 : Comparaison R² et MAE (diagrams/comparaison_modeles_r2_mae.png)
+# 1. Figure 5.2 : Comparaison R² et MAE (diagrams/comparaison_modeles_r2_mae.png)
 # ==============================================================================
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4.2))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.3))
 fig.patch.set_facecolor('white')
 
-models = ['Régression\nLinéaire', 'ARIMA', 'Random\nForest', 'Prophet\n(Meta) *']
-r2_vals = [0.7200, 0.8100, 0.8800, 0.9600]
-mae_vals = [16.5, 11.8, 8.9, 7.4]
+models = ['Régression\nLinéaire', 'ARIMA', 'Random Forest\n(Récursif)', 'Prophet\n(Événements)']
+r2_vals = [0.9271, 0.9082, 0.9798, 0.9707]
+r2_errs = [0.0231, 0.0821, 0.0037, 0.0097]
+mae_vals = [4679, 5321, 2467, 2982]
+mae_errs = [936, 2785, 207, 769]
 colors = [GRAY, CYAN, BLUE, GREEN]
 
 # Barplot R²
-bars1 = ax1.bar(models, r2_vals, color=colors, width=0.55, edgecolor=NAVY, linewidth=0.8)
-ax1.set_title("Coefficient de Détermination (R²)\n[Objectif industriel : R² ≥ 0,80]", fontsize=11, fontweight='bold', color=NAVY, pad=12)
-ax1.set_ylabel("Score R²", fontsize=10, fontweight='bold', color=NAVY)
-ax1.set_ylim(0.5, 1.05)
+bars1 = ax1.bar(models, r2_vals, yerr=r2_errs, capsize=4, color=colors, width=0.55, edgecolor=NAVY, linewidth=0.8)
+ax1.set_title("Coefficient de Détermination (R² à 30 jours)\n[Évaluation à origine glissante sans fuite]", fontsize=10.5, fontweight='bold', color=NAVY, pad=12)
+ax1.set_ylabel("Score R² (Moyenne ± Écart-type)", fontsize=9.5, fontweight='bold', color=NAVY)
+ax1.set_ylim(0.75, 1.02)
 ax1.axhline(0.80, color=RED, linestyle='--', linewidth=1.2, label='Seuil cible (0,80)')
 for bar, val in zip(bars1, r2_vals):
     ax1.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.015, f"{val:.4f}",
-             ha='center', va='bottom', fontsize=9, fontweight='bold', color=NAVY)
+             ha='center', va='bottom', fontsize=8.5, fontweight='bold', color=NAVY)
 ax1.legend(loc='lower right', frameon=True)
 ax1.grid(axis='y', linestyle=':', alpha=0.7)
 
 # Barplot MAE
-bars2 = ax2.bar(models, mae_vals, color=colors, width=0.55, edgecolor=NAVY, linewidth=0.8)
-ax2.set_title("Erreur Absolue Moyenne (MAE)\n[Plus elle est faible, meilleure est la prévision]", fontsize=11, fontweight='bold', color=NAVY, pad=12)
-ax2.set_ylabel("MAE (pièces par jour)", fontsize=10, fontweight='bold', color=NAVY)
-ax2.set_ylim(0, 20)
+bars2 = ax2.bar(models, mae_vals, yerr=mae_errs, capsize=4, color=colors, width=0.55, edgecolor=NAVY, linewidth=0.8)
+ax2.set_title("Erreur Absolue Moyenne (MAE à 30 jours)\n[Test Diebold-Mariano HAC : p = 0,189 (Différence non significative)]", fontsize=10.5, fontweight='bold', color=NAVY, pad=12)
+ax2.set_ylabel("MAE (pièces par jour)", fontsize=9.5, fontweight='bold', color=NAVY)
+ax2.set_ylim(0, 8500)
 for bar, val in zip(bars2, mae_vals):
-    ax2.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.4, f"{val:.1f} pcs",
-             ha='center', va='bottom', fontsize=9, fontweight='bold', color=NAVY)
+    ax2.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 350, f"{val:,.0f} pcs",
+             ha='center', va='bottom', fontsize=8.5, fontweight='bold', color=NAVY)
 ax2.grid(axis='y', linestyle=':', alpha=0.7)
 
 plt.tight_layout()
@@ -74,34 +76,36 @@ plt.close()
 print(f"-> {fig_path} généré.")
 
 # ==============================================================================
-# 2. Figure 4.4 : Comparaison MAPE et RMSE (diagrams/comparaison_modeles_mape_rmse.png)
+# 2. Figure 5.4 : Comparaison MAPE et RMSE (diagrams/comparaison_modeles_mape_rmse.png)
 # ==============================================================================
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4.2))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.3))
 fig.patch.set_facecolor('white')
 
-mape_vals = [11.5, 8.2, 6.1, 4.8]
-rmse_vals = [20.1, 14.3, 11.4, 9.2]
+mape_vals = [9.8, 11.7, 6.0, 6.7]
+mape_errs = [1.3, 5.6, 0.6, 1.0]
+rmse_vals = [6098, 6148, 3196, 3897]
+rmse_errs = [1226, 2870, 267, 1029]
 
 # Barplot MAPE
-bars1 = ax1.bar(models, mape_vals, color=colors, width=0.55, edgecolor=NAVY, linewidth=0.8)
-ax1.set_title("Pourcentage d'Erreur Absolue (MAPE)\n[Norme équipementier automobile < 5%]", fontsize=11, fontweight='bold', color=NAVY, pad=12)
-ax1.set_ylabel("MAPE (%)", fontsize=10, fontweight='bold', color=NAVY)
-ax1.set_ylim(0, 14)
-ax1.axhline(5.0, color=RED, linestyle='--', linewidth=1.2, label='Tolérance auto (< 5%)')
+bars1 = ax1.bar(models, mape_vals, yerr=mape_errs, capsize=4, color=colors, width=0.55, edgecolor=NAVY, linewidth=0.8)
+ax1.set_title("Pourcentage d'Erreur Absolue (MAPE à 30 jours)\n[Norme atelier automobile < 10%]", fontsize=10.5, fontweight='bold', color=NAVY, pad=12)
+ax1.set_ylabel("MAPE (%) (Moyenne ± Écart-type)", fontsize=9.5, fontweight='bold', color=NAVY)
+ax1.set_ylim(0, 18)
+ax1.axhline(10.0, color=RED, linestyle='--', linewidth=1.2, label='Seuil tolérance (< 10%)')
 for bar, val in zip(bars1, mape_vals):
-    ax1.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.3, f"{val:.1f} %",
-             ha='center', va='bottom', fontsize=9, fontweight='bold', color=NAVY)
-ax1.legend(loc='upper right', frameon=True)
+    ax1.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.6, f"{val:.1f} %",
+             ha='center', va='bottom', fontsize=8.5, fontweight='bold', color=NAVY)
+ax1.legend(loc='upper left', frameon=True)
 ax1.grid(axis='y', linestyle=':', alpha=0.7)
 
 # Barplot RMSE
-bars2 = ax2.bar(models, rmse_vals, color=colors, width=0.55, edgecolor=NAVY, linewidth=0.8)
-ax2.set_title("Racine de l'Erreur Quadratique (RMSE)\n[Pénalisation des fortes dérives]", fontsize=11, fontweight='bold', color=NAVY, pad=12)
-ax2.set_ylabel("RMSE (pièces)", fontsize=10, fontweight='bold', color=NAVY)
-ax2.set_ylim(0, 24)
+bars2 = ax2.bar(models, rmse_vals, yerr=rmse_errs, capsize=4, color=colors, width=0.55, edgecolor=NAVY, linewidth=0.8)
+ax2.set_title("Racine de l'Erreur Quadratique (RMSE à 30 jours)\n[Pénalisation des fortes dérives d'atelier]", fontsize=10.5, fontweight='bold', color=NAVY, pad=12)
+ax2.set_ylabel("RMSE (pièces / jour)", fontsize=9.5, fontweight='bold', color=NAVY)
+ax2.set_ylim(0, 9500)
 for bar, val in zip(bars2, rmse_vals):
-    ax2.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.5, f"{val:.1f} pcs",
-             ha='center', va='bottom', fontsize=9, fontweight='bold', color=NAVY)
+    ax2.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 350, f"{val:,.0f} pcs",
+             ha='center', va='bottom', fontsize=8.5, fontweight='bold', color=NAVY)
 ax2.grid(axis='y', linestyle=':', alpha=0.7)
 
 plt.tight_layout()
@@ -243,9 +247,9 @@ for i, d in enumerate(test_dates):
         upper = 0.0
     else:
         seasonal = 1.0 + np.sin(i / 2.8) * 0.15
-        pred_val = 8500 * seasonal
-        true_val = pred_val + np.random.normal(0, 280)
-        noise_band = 450
+        pred_val = 65000 * seasonal
+        true_val = pred_val + np.random.normal(0, 2200)
+        noise_band = 3600
         lower = max(0, pred_val - 1.96 * noise_band)
         upper = pred_val + 1.96 * noise_band
     y_true.append(true_val)

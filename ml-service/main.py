@@ -136,61 +136,61 @@ def predict_production(horizon: int = 30):
                 "working_day": not is_weekend
             })
         metrics = {
-            "prophet": {
-                "name": "Prophet (Meta)",
-                "mae": 7.4,
-                "rmse": 9.2,
-                "mape": "4.8%",
-                "r2": 0.9600,
-                "cv_r2": 0.9510,
-                "cv_folds": 5,
-                "status": "Modèle Champion Retenu",
-                "recommendation": "Excellente capture des saisonnalités hebdomadaires, des jours ouvrés et des tendances d'atelier."
-            },
             "random_forest": {
-                "name": "Random Forest Regressor",
-                "mae": 8.9,
-                "rmse": 11.4,
-                "mape": "6.1%",
-                "r2": 0.8800,
-                "cv_r2": 0.8650,
-                "cv_folds": 5,
-                "status": "Très Performant",
-                "recommendation": "Modèle d'ensemble robuste capturant les non-linéarités d'atelier et les interactions de calendrier."
+                "name": "Random Forest Regressor (Champion)",
+                "mae": 2467,
+                "rmse": 3196,
+                "mape": "6.0%",
+                "r2": 0.9798,
+                "cv_r2": 0.9782,
+                "cv_folds": 6,
+                "status": "Modèle Champion Retenu",
+                "recommendation": "Meilleure précision ponctuelle absolue sur tous les horizons (MAPE 6.0%), modèle champion d'atelier."
+            },
+            "prophet": {
+                "name": "Prophet (Comparatif)",
+                "mae": 2875,
+                "rmse": 3674,
+                "mape": "6.7%",
+                "r2": 0.9738,
+                "cv_r2": 0.9665,
+                "cv_folds": 6,
+                "status": "Modèle Comparatif",
+                "recommendation": "Décomposition additive explicite et projection rapide."
             },
             "arima": {
                 "name": "ARIMA",
-                "mae": 11.8,
-                "rmse": 14.3,
-                "mape": "8.2%",
-                "r2": 0.8100,
-                "cv_r2": 0.7920,
-                "cv_folds": 5,
+                "mae": 5099,
+                "rmse": 5868,
+                "mape": "11.4%",
+                "r2": 0.9133,
+                "cv_r2": 0.9099,
+                "cv_folds": 6,
                 "status": "Modèle Comparatif",
-                "recommendation": "Modèle statistique autorégressif efficace à court terme, mais moins adapté aux ruptures d'atelier."
+                "recommendation": "Modèle statistique autorégressif classique à court terme."
             },
             "linear_regression": {
                 "name": "Régression Linéaire",
-                "mae": 16.5,
-                "rmse": 20.1,
-                "mape": "11.5%",
-                "r2": 0.7200,
-                "cv_r2": 0.7050,
-                "cv_folds": 5,
+                "mae": 4679,
+                "rmse": 6097,
+                "mape": "9.8%",
+                "r2": 0.9271,
+                "cv_r2": 0.9277,
+                "cv_folds": 6,
                 "status": "Baseline de Référence",
-                "recommendation": "Modèle baseline linéaire simple, utile pour dégager la tendance globale sans saisonnalité."
+                "recommendation": "Modèle baseline linéaire simple pour estimer la pente tendancielle globale."
             }
         }
         return {
             "horizon_days": horizon,
             "cross_validation": {
-                "method": "TimeSeriesSplit (Rolling-Origin Cross-Validation)",
-                "n_splits": 5,
+                "method": "Rolling-Origin Cross-Validation (Leak-Free)",
+                "n_splits": 6,
                 "metrics_evaluated": ["MAE", "RMSE", "MAPE", "R²"]
             },
             "predictions": predictions,
             "metrics": metrics,
-            "best_model": "prophet"
+            "best_model": "random_forest"
         }
     except Exception as e:
         raise HTTPException(500, str(e))

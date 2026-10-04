@@ -53,7 +53,7 @@ export function Login() {
           username: values.username || 'admin',
           email: values.username.includes('@') ? values.username : 'admin@optiprod.com',
           first_name: 'Admin',
-          last_name: 'Manager',
+          last_name: 'System',
           roles: ['admin', 'super admin'],
           api_token: 'mock-token-12345'
         }

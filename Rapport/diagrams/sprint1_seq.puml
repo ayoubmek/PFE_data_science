@@ -63,7 +63,7 @@ deactivate WEB
 
 note over U, DB
   Le rôle détermine les modules accessibles :
-  Administrateur | Manager | Opérateur
+  Administrateur | Opérateur
 end note
 
 @enduml

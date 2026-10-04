@@ -1,6 +1,6 @@
 @startuml sprint2_activity
 start
-:Manager planifie un Ordre de Production;
+:Administrateur planifie un Ordre de Production;
 :Statut = EN_ATTENTE;
 :Opérateur démarre la fabrication sur machine;
 :Statut = EN_COURS;

@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { KTIcon, toAbsoluteUrl } from '../../../helpers'
-import { HeaderUserMenu, ThemeModeSwitcher, Search, HeaderNotificationsMenu } from '../../../partials'
+import { HeaderUserMenu, ThemeModeSwitcher, HeaderNotificationsMenu } from '../../../partials'
 import { useLayout } from '../../core'
 
 
@@ -94,9 +94,6 @@ const Navbar = () => {
 
   return (
     <div className='app-navbar flex-shrink-0 d-flex align-items-center'>
-      {}
-      <Search />
-
 
       {}
       <div className={clsx('app-navbar-item', itemClass)}>

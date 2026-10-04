@@ -122,17 +122,4 @@ export const DefaultConfig: ILayout = {
     componentName: 'illustrations',
     set: 'sketchy-1',
   },
-  scrolltop: {
-    componentName: 'scrolltop',
-    display: true,
-  },
-  engage: {
-    componentName: 'engage',
-    demos: {
-      enabled: true,
-    },
-    purchase: {
-      enabled: false,
-    },
-  },
 }

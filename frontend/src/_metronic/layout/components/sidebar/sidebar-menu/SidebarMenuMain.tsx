@@ -104,9 +104,9 @@ const SidebarMenuMain = () => {
       <SidebarMenuItem
         to='/data-science'
         icon='technology'
-        title='Prévisions IA (Prophet)'
+        title='Prévisions IA (Random Forest)'
         fontIcon='bi-cpu'
-        iconColor='#50CD89'
+        iconColor='#3B82F6'
       />
 
       {/* Administration & Sécurité */}

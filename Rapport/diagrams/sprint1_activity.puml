@@ -47,11 +47,9 @@ endif
 :Charger les permissions selon le rôle;
 
 if (Rôle ?) then (Administrateur)
-  :Accès complet à tous les modules et administration;
-else if (Manager)
-  :Accès gestion production, machines, stocks et IA;
+  :Accès supervision globale, machines, ordres, TRG, IA et gestion RBAC;
 else (Opérateur)
-  :Accès exécution d'atelier et saisie des mouvements;
+  :Accès saisie d'atelier, avancement de production et mouvements de stock;
 endif
 
 :Rediriger vers le tableau de bord du rôle;

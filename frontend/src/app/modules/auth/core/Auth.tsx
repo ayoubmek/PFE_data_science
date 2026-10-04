@@ -78,7 +78,7 @@ const AuthInit: FC<WithChildren> = ({ children }) => {
               username: 'admin',
               email: 'admin@optiprod.com',
               first_name: 'Admin',
-              last_name: 'Manager',
+              last_name: 'System',
               roles: ['admin', 'super admin']
             } as any)
           } else {

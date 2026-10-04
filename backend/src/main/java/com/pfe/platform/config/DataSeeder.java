@@ -43,10 +43,6 @@ public class DataSeeder implements CommandLineRunner {
             .fullName("Administrateur Système").email("admin@pfe.com")
             .role(User.Role.ADMIN).build());
         userRepo.save(User.builder()
-            .username("manager").password(passwordEncoder.encode("manager123"))
-            .fullName("Chef de Production").email("manager@pfe.com")
-            .role(User.Role.MANAGER).build());
-        userRepo.save(User.builder()
             .username("operateur").password(passwordEncoder.encode("operateur123"))
             .fullName("Opérateur Atelier").email("operateur@pfe.com")
             .role(User.Role.OPERATEUR).build());

@@ -47,7 +47,7 @@ public class User implements UserDetails {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public enum Role {
-        ADMIN, MANAGER, OPERATEUR
+        ADMIN, OPERATEUR
     }
 
     @Override

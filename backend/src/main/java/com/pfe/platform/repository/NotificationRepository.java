@@ -12,8 +12,6 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    List<Notification> findByUsernameOrUsernameIsNullOrderByCreatedAtDesc(String username);
-
     List<Notification> findByLuFalseOrderByCreatedAtDesc();
 
     long countByLuFalse();

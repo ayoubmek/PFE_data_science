@@ -2,7 +2,7 @@
   "name": "rapport",
   "version": "1.0.0",
   "description": "",
-  "main": "build_rapport.js",
+  "main": "build_pfe.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

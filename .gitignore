@@ -72,6 +72,8 @@ backend/target/
 
 # Word temp files
 ~$*.docx
+*_pre_fix.docx
+*_mis_a_jour.docx
 
 # Scratch & temporary scripts
 scratch/

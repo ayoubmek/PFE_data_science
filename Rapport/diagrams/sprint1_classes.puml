@@ -16,7 +16,6 @@ class Utilisateur {
 enum RoleEnum {
     <<enumeration>>
     ADMIN
-    MANAGER
     OPERATEUR
 }
 

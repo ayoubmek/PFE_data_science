@@ -39,106 +39,10 @@ public class MLController {
         return client().get().uri(uri).retrieve().bodyToMono(Object.class).block();
     }
 
-    private Object postToMl(String uri, Object body) {
-        return client().post().uri(uri).bodyValue(body).retrieve().bodyToMono(Object.class).block();
-    }
-
-    @GetMapping("/predict/stock")
-    public ResponseEntity<Object> predictStock(
-            @RequestParam(defaultValue = "1") Long itemId,
-            @RequestParam(defaultValue = "30") int horizon) {
-        try {
-            return ResponseEntity.ok(getFromMl("/predict/stock?item_id=" + itemId + "&horizon=" + horizon));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
     @GetMapping("/predict/production")
     public ResponseEntity<Object> predictProduction(@RequestParam(defaultValue = "30") int horizon) {
         try {
             return ResponseEntity.ok(getFromMl("/predict/production?horizon=" + horizon));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
-    @PostMapping("/detect/anomaly")
-    public ResponseEntity<Object> detectAnomaly(@RequestBody Map<String, Object> payload) {
-        try {
-            return ResponseEntity.ok(postToMl("/detect/anomaly", payload));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
-    @PostMapping("/predict/custom")
-    public ResponseEntity<Object> predictCustom(@RequestBody Map<String, Object> payload) {
-        try {
-            return ResponseEntity.ok(postToMl("/predict/custom", payload));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
-    @PostMapping("/cluster/custom")
-    public ResponseEntity<Object> clusterCustom(@RequestBody Map<String, Object> payload) {
-        try {
-            return ResponseEntity.ok(postToMl("/cluster/custom", payload));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
-    @PostMapping("/simulate/scenario")
-    public ResponseEntity<Object> simulateScenario(@RequestBody Map<String, Object> payload) {
-        try {
-            return ResponseEntity.ok(postToMl("/simulate/scenario", payload));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
-    @GetMapping("/analyze/abc")
-    public ResponseEntity<Object> analyzeAbc() {
-        try {
-            return ResponseEntity.ok(getFromMl("/analyze/abc"));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
-    @GetMapping("/analyze/stats")
-    public ResponseEntity<Object> analyzeStats() {
-        try {
-            return ResponseEntity.ok(getFromMl("/analyze/stats"));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
-    @GetMapping("/cluster/items")
-    public ResponseEntity<Object> clusterItems() {
-        try {
-            return ResponseEntity.ok(getFromMl("/cluster/items"));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
-    @GetMapping("/insights")
-    public ResponseEntity<Object> getInsights() {
-        try {
-            return ResponseEntity.ok(getFromMl("/insights"));
-        } catch (Exception e) {
-            return unavailable();
-        }
-    }
-
-    @GetMapping("/health")
-    public ResponseEntity<Object> mlHealth() {
-        try {
-            return ResponseEntity.ok(getFromMl("/health"));
         } catch (Exception e) {
             return unavailable();
         }
@@ -222,26 +126,6 @@ public class MLController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Erreur lors de la sauvegarde des prévisions", "details", e.getMessage()));
-        }
-    }
-
-    @GetMapping("/predictions/stored")
-    public ResponseEntity<Object> getStoredPredictions(@RequestParam(required = false) Integer horizon) {
-        try {
-            List<ProductionPrediction> list;
-            if (horizon != null) {
-                list = productionPredictionRepository.findByHorizonDaysOrderByForecastDateAsc(horizon);
-            } else {
-                list = productionPredictionRepository.findTop30ByOrderByCreatedAtDescForecastDateAsc();
-            }
-            return ResponseEntity.ok(Map.of(
-                "success", true,
-                "count", list.size(),
-                "predictions", list
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Erreur lors de la récupération des prévisions stockées", "details", e.getMessage()));
         }
     }
 }

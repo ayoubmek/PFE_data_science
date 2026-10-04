@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Introduction Générale, Conclusion Générale et Perspectives, et Bibliographie
-pour Nexora (pfe.docx)
+pour Nexora (pfe_v3.docx)
 Style : Simple, académique, professionnel, sans jargon excessif.
 """
 
@@ -11,31 +11,31 @@ def get_intro():
         // INTRODUCTION GÉNÉRALE
         // =========================================================
         title1("Introduction générale"),
-        body("Dans le secteur manufacturier et la plasturgie automobile, l'amélioration de la performance industrielle repose de plus en plus sur l'exploitation des données générées au sein des ateliers. Le suivi des cadences de fabrication, l'évaluation du Taux de Rendement Global (TRG/OEE) et la gestion des approvisionnements constituent des leviers majeurs pour assurer la continuité de la production et maîtriser les coûts d'exploitation."),
+        body("Dans le secteur manufacturier et la plasturgie automobile, l'amélioration continue de la performance industrielle repose sur la valorisation méthodique des flux de données générés au sein des usines. Le suivi des cadences de fabrication, l'évaluation du Taux de Rendement Global (TRG/OEE) [25] et la gestion proactive des approvisionnements constituent des leviers déterminants pour garantir la continuité des lignes d'assemblage et maîtriser les coûts de revient."),
         pb(),
-        body("Ce projet de fin d'études s'inscrit dans ce cadre au sein d'un équipementier automobile exploitant plusieurs usines en Tunisie (sites de Kondar et Sousse) et en République Tchèque (site de Brno). Avec un parc de 319 presses à injecter de capacités variées, l'entreprise fabrique des pièces plastiques techniques destinées à l'industrie automobile."),
+        body("Ce projet de fin d'études est mené en collaboration avec la société de services numériques **Maps-IT**, accompagnant un équipementier automobile de rang 1 exploitant trois sites de production d'injection plastique situés en Tunisie (usines de Kondar et Sousse) et en République Tchèque (site de Brno). Avec un parc de 319 presses à injecter de capacités variées produisant en moyenne 64 890 pièces par jour, l'entreprise fabrique des pièces plastiques techniques soumises à des exigences strictes de qualité et de délais de livraison."),
         pb(),
-        body("Bien que l'entreprise dispose d'un entrepôt de données (Data Warehouse sous Microsoft SQL Server) regroupant l'historique des opérations, le pilotage quotidien restait en partie manuel. Le calcul du TRG était souvent réalisé a posteriori sur des feuilles de calcul, ce qui limitait la réactivité face aux aléas de production. De même, la gestion des stocks de matières premières et de composants manquait d'outils d'anticipation, provoquant ponctuellement des retards d'approvisionnement ou des stocks dormants."),
+        body("Bien que l'entreprise dispose d'un entrepôt de données (Data Warehouse sous Microsoft SQL Server [16]) centralisant l'historique des opérations, le pilotage quotidien demeurait fragmenté. Le calcul du TRG était souvent réalisé de façon différée sur des feuilles de calcul, ce qui limitait la réactivité opérationnelle face aux aléas de production. Parallèlement, la gestion des stocks de matières premières manquait d'outils d'anticipation, entraînant simultanément des situations de surstock sur certaines références et des risques de rupture critique sur des composants stratégiques."),
         pb(),
-        body("La problématique de ce projet peut ainsi se formuler :"),
-        body("*« Comment valoriser les données du Data Warehouse pour concevoir un système d'aide à la décision permettant de superviser les machines, de prévoir les cadences de production grâce à l'apprentissage automatique et d'optimiser la gestion des stocks ? »*", { align: AlignmentType.CENTER, italics: true }),
+        body("La problématique de ce travail s'énonce donc ainsi :"),
+        body("*« Comment exploiter les données centralisées du Data Warehouse industriel pour concevoir un système décisionnel automatisé, capable de superviser les machines d'atelier, de modéliser les cadences par apprentissage automatique et d'optimiser les politiques de réapprovisionnement de stock ? »*", { align: AlignmentType.CENTER, italics: true }),
         pb(),
-        body("Pour répondre à ce besoin, nous avons développé la solution **Nexora**, structurée autour de trois axes principaux :"),
-        bullet("**1. Un pipeline de traitement et d'assainissement des données** : extraction des données brutes, correction des anomalies de stock et chargement dans des tables adaptées à l'analyse."),
-        bullet("**2. Un module de prévision par apprentissage automatique** : comparaison de quatre modèles pour estimer les volumes de production futurs et détection d'anomalies sur les cadences."),
-        bullet("**3. Un module de gestion prévisionnelle des stocks** : classification des articles du catalogue et calcul des besoins de réapprovisionnement sur un horizon cible de 45 jours."),
+        body("Pour répondre à cette problématique, nous avons conçu et développé la solution **Nexora**, articulée autour de trois axes complémentaires :"),
+        bullet("**1. Un pipeline de traitement des données (ETL)** : extraction automatisée des sources brutes, application de 10 règles de nettoyage (dédoublonnage sur clé composite, rejet des dates erronées, redressement des anomalies numériques) et chargement de 32 043 lignes validées dans un schéma en étoile DWH."),
+        bullet("**2. Un module de prévision par apprentissage automatique** : évaluation comparative de modèles prédictifs (Régression Linéaire, ARIMA [3], Random Forest [7] et Prophet [12]) sur des horizons de 7, 15 et 30 jours. Les modèles Random Forest et Prophet atteignent tous deux des performances proches et satisfaisantes (erreurs MAPE de l'ordre de 6 % à 7 %), Random Forest offrant une précision ponctuelle légèrement supérieure et Prophet étant retenu pour le déploiement opérationnel grâce à son explicabilité et sa gestion native des saisonnalités industrielles. En complément, l'algorithme Isolation Forest [8] assure la détection précoce des dérives de cadence d'atelier."),
+        bullet("**3. Un module de gestion intelligente des stocks** : segmentation multicritère ABC de Pareto et clustering K-Means [9], analyse de la couverture en jours et calcul du plan de réapprovisionnement sur un horizon de 45 jours (évalué à environ 380 400 TND pour les 193 références prioritaires du catalogue) [14, 15]."),
         pb(),
-        body("Ces fonctionnalités sont accessibles à travers une application web développée avec React.js et un backend Spring Boot, complétée par des tableaux de bord Power BI pour le suivi décisionnel."),
+        body("La restitution s'appuie sur une double modalité adaptée aux profils d'utilisateurs : des tableaux de bord interactifs Microsoft Power BI [24] pour le pilotage managérial et une application web développée avec React.js [22], Spring Boot [17] et FastAPI [21] pour les équipes d'atelier."),
         pb(),
-        body("Le projet a été mené selon la méthodologie Agile Scrum, découpé en un Sprint 0 de cadrage et quatre sprints de réalisation. Le présent rapport s'organise en six chapitres :"),
-        bullet("**Le premier chapitre** présente le cadre général du projet, l'entreprise d'accueil, l'étude de l'existant, la méthodologie Scrum et la démarche de modélisation."),
-        bullet("**Le deuxième chapitre (Sprint 0)** est dédié à l'analyse des besoins fonctionnels et non fonctionnels, à la conception de l'architecture globale et au choix des technologies."),
-        bullet("**Le troisième chapitre (Sprint 1)** détaille l'exploration des données, le traitement de la qualité et la réalisation du pipeline ETL alimentant le Data Warehouse."),
-        bullet("**Le quatrième chapitre (Sprint 2)** présente la conception du module de gestion des stocks, la classification des articles et le calcul des recommandations de réapprovisionnement."),
-        bullet("**Le cinquième chapitre (Sprint 3)** expose le développement, l'entraînement et l'évaluation comparative des modèles de prévision ainsi que la détection d'anomalies."),
-        bullet("**Le sixième chapitre (Sprint 4)** décrit la conception des tableaux de bord Power BI, l'intégration des interfaces et les tests de validation du système."),
+        body("Le projet a été mené selon la méthodologie Agile Scrum [1, 2], découpé en un Sprint 0 de cadrage et quatre sprints de réalisation. Le présent rapport s'organise en six chapitres :"),
+        bullet("**Le premier chapitre** présente le cadre général du projet, les organismes partenaires, l'étude comparative de l'existant, la méthodologie Scrum et les diagrammes UML [26]."),
+        bullet("**Le deuxième chapitre (Sprint 0)** est dédié à l'analyse des besoins fonctionnels et non fonctionnels, à la conception de l'architecture en quatre couches et au choix de l'environnement technique."),
+        bullet("**Le troisième chapitre (Sprint 1)** détaille l'exploration des données, le bilan de qualité sous forme de waterfall et la réalisation du pipeline ETL alimentant le DWH."),
+        bullet("**Le quatrième chapitre (Sprint 2)** présente la conception du module de gestion des stocks, la double segmentation des articles et le calcul des commandes à horizon 45 jours."),
+        bullet("**Le cinquième chapitre (Sprint 3)** expose le protocole d'évaluation des modèles, la comparaison de leurs performances prédictives à court et moyen termes, le choix du modèle opérationnel et la détection d'anomalies de cadence."),
+        bullet("**Le sixième chapitre (Sprint 4)** décrit la conception des tableaux de bord Power BI, l'implémentation du portail web opérationnel et les résultats des tests fonctionnels."),
         pb(),
-        body("Le rapport se termine par une conclusion générale résumant les résultats obtenus et proposant des perspectives d'évolution pour le système."),
+        body("Le rapport se conclut par un bilan général des réalisations, une analyse objective des limites actuelles et la présentation de perspectives d'évolution concrètes."),
         pageBreak(),
     '''
 
@@ -45,36 +45,36 @@ def get_concl_biblio():
         // CONCLUSION GÉNÉRALE ET PERSPECTIVES
         // =========================================================
         title1("Conclusion générale et perspectives"),
-        body("Ce projet de fin d'études a permis de concevoir et de développer la plateforme décisionnelle **Nexora**, destinée à soutenir le pilotage de la production et la gestion des stocks dans un atelier d'injection plastique."),
+        body("Ce projet de fin d'études a permis de concevoir, développer et valider la plateforme d'aide à la décision **Nexora**, destinée à moderniser le pilotage de la production et la gestion logistique d'un parc de 319 presses à injecter réparties sur trois sites industriels."),
         pb(),
-        body("L'objectif initial était de transformer les données opérationnelles issues du Data Warehouse en informations directement exploitables par les équipes d'atelier, afin de remplacer les consolidations manuelles par un suivi automatisé et prédictif."),
+        body("L'objectif fondamental était de valoriser l'entrepôt de données opérationnel pour substituer aux calculs manuels et réactifs un système automatisé, prédictif et ergonomique."),
         pb(),
-        body("L'organisation du travail selon la méthodologie Scrum, découpée en cinq itérations successives, a permis d'avancer de manière structurée :"),
-        bullet("**Sprint 0** : identification précise des besoins des utilisateurs et définition d'une architecture modulaire en quatre couches facilitant l'intégration des composants."),
-        bullet("**Sprint 1** : développement d'un pipeline ETL en Python permettant d'assainir les données brutes, de résoudre les anomalies d'inventaire et d'alimenter les sept tables du Data Warehouse dbDWH1."),
-        bullet("**Sprint 2** : mise en place du module de gestion des stocks assurant la classification des articles selon leur niveau de risque et le calcul des quantités à commander pour sécuriser un horizon de 45 jours."),
-        bullet("**Sprint 3** : étude comparative de quatre modèles de prévision (Régression Linéaire, ARIMA, Random Forest et Prophet), complétée par une validation croisée temporelle (TimeSeriesSplit) et un modèle de détection d'anomalies (Isolation Forest). Le modèle Prophet a présenté la meilleure adéquation pour anticiper les volumes de production."),
-        bullet("**Sprint 4** : réalisation des tableaux de bord interactifs sous Microsoft Power BI et intégration des vues métiers pour la supervision des cadences et des stocks."),
+        body("L'adoption de la démarche itérative Agile Scrum a permis de rythmer le projet autour de jalons concrets et mesurables :"),
+        bullet("**Sprint 0 (Cadrage & Architecture)** : formalisation des besoins des deux acteurs d'atelier (Opérateur et Administrateur), modélisation des cas d'utilisation UML et conception de l'architecture découplée en quatre couches."),
+        bullet("**Sprint 1 (Ingénierie des données & ETL)** : conception d'un pipeline Python assurant le dédoublonnage de 18 337 lignes redondantes et le redressement de 10 types d'anomalies, aboutissant au chargement de 32 043 enregistrements validés dans les tables en étoile du DWH (taux de rétention de 62,22 %)."),
+        bullet("**Sprint 2 (Gestion intelligente des stocks)** : segmentation multicritère ABC de Pareto et clustering K-Means ($k=3$) sur le catalogue de 800 références (couvrant 14,31 M TND de valeur annuelle consommée), couplée à une formule de réapprovisionnement à 45 jours qui chiffre l'enveloppe prioritaire des 193 références en risque à environ 380 400 TND."),
+        bullet("**Sprint 3 (Modélisation prédictive par IA)** : comparaison de quatre modèles d'apprentissage automatique et de séries temporelles sur des horizons de 7, 15 et 30 jours. Random Forest et Prophet affichent des niveaux de précision comparables et satisfaisants (erreurs MAPE de l'ordre de 6 % à 7 %), Random Forest obtenant les plus faibles écarts moyens et Prophet assurant le déploiement opérationnel grâce à sa robustesse et sa gestion native des composantes calendaires. L'algorithme Isolation Forest permet quant à lui d'identifier automatiquement les baisses anormales de cadence."),
+        bullet("**Sprint 4 (Restitution & Validation)** : réalisation de tableaux de bord décisionnels Power BI pour le suivi managérial et d'un portail web opérationnel React / Spring Boot pour les équipes d'atelier, validés avec succès par des scénarios de test fonctionnels et d'intégration."),
         pb(),
-        body("Sur le plan pratique, la solution apporte des bénéfices concrets pour l'atelier :"),
-        bullet("Une visibilité immédiate sur l'état de fonctionnement des machines et le calcul du TRG."),
-        bullet("Une anticipation des ruptures potentielles sur les composants critiques grâce à des alertes automatiques."),
-        bullet("Une identification claire des articles en surstock permettant d'éviter des commandes inutiles."),
-        bullet("Un gain de temps appréciable pour les équipes en automatisant la collecte et la mise en forme des indicateurs."),
+        body("En dépit de ces résultats concluants, notre solution comporte certaines **limites méthodologiques et techniques** qu'il convient de souligner avec rigueur académique :"),
+        bullet("**Périmètre temporel d'observation** : l'historique disponible s'étend sur 851 jours (janvier 2024 à avril 2026), ce qui représente un recul précieux mais reste restreint pour appréhender les cycles économiques pluriannuels du secteur automobile."),
+        bullet("**Agrégation macroscopique de la prévision** : les modèles actuels prévoient la cadence globale au niveau de l'atelier ; ils ne modélisent pas encore individuellement le comportement de chacune des 319 presses ou de chaque moule spécifique."),
+        bullet("**Dépendance aux saisies manuelles résiduelles** : la précision de la détection des motifs de rebus ou des causes d'arrêt demeure tributaire de la rigueur de saisie des opérateurs d'atelier dans le système transactionnel d'origine."),
         pb(),
-        body("Plusieurs perspectives d'évolution peuvent enrichir ce travail à l'avenir :"),
-        bullet("**1. Collecte automatisée par capteurs industriels** : connecter directement les automates des presses au système d'information pour récupérer les données de fonctionnement en continu."),
-        bullet("**2. Maintenance prévisionnelle** : intégrer des modèles dédiés à l'usure mécanique et au suivi des cycles thermiques pour anticiper les interventions préventives."),
-        bullet("**3. Représentation graphique d'atelier** : développer une vue cartographique interactive permettant de visualiser l'état de chaque machine directement sur le plan de l'usine."),
+        body("Ces constats ouvrent la voie à plusieurs **perspectives d'évolution industrielle** à court et moyen termes :"),
+        bullet("**1. Modélisation hiérarchique par machine et famille de matière** : développer des modèles de séries temporelles hiérarchiques réconciliées (par site, atelier, presse et moule) afin de descendre au niveau de granularité le plus fin pour l'ordonnancement d'atelier."),
+        bullet("**2. Intégration bidirectionnelle avec le moteur MRP de l'ERP** : injecter automatiquement les recommandations de commande de stock calculées par Nexora dans le module d'achats de l'ERP pour générer des demandes d'achat pré-remplies."),
+        bullet("**3. Industrialisation MLOps et réentraînement continu** : mettre en œuvre un pipeline MLOps automatisé (avec MLflow ou Airflow) détectant la dérive des données (*data drift*) et déclenchant le réapprentissage périodique des modèles prédictifs."),
+        bullet("**4. Système d'alerte multicanal automatisé** : déployer un service d'alertes par courrier électronique et notifications push Web/SMS à destination de l'administrateur et des opérateurs dès qu'une couverture de référence descend sous le seuil critique des 15 jours."),
         pb(),
-        body("En conclusion, ce travail illustre l'intérêt d'associer l'ingénierie des données et l'apprentissage automatique pour répondre à des problématiques industrielles concrètes, tout en ouvrant la voie à des améliorations continues pour l'entreprise."),
+        body("En conclusion, ce projet de fin d'études démontre avec succès comment la convergence de l'ingénierie des données, de l'apprentissage automatique et du développement logiciel moderne peut apporter une réponse concrète, quantifiable et durable aux défis de la performance industrielle."),
         pageBreak(),
 
         // =========================================================
         // BIBLIOGRAPHIE ET WEBOGRAPHIE (NORME IEEE)
         // =========================================================
         title1("Bibliographie"),
-        body("Les références bibliographiques et sources techniques utilisées pour la réalisation de ce travail sont présentées ci-dessous :"),
+        body("Les références bibliographiques et sources techniques mobilisées dans le cadre de ce projet sont référencées ci-dessous conformément à la norme IEEE :"),
         pb(),
         linkBullet("[1] K. Schwaber et J. Sutherland, « The Scrum Guide: The Definitive Guide to Scrum: The Rules of the Game », Scrum.org, nov. 2020. ", "https://scrumguides.org", ""),
         bullet("[2] M. Cohn, User Stories Applied: For Agile Software Development. Boston, MA, USA : Addison-Wesley Professional, 2004."),
@@ -98,10 +98,9 @@ def get_concl_biblio():
         bullet("[20] C. R. Harris et al., « Array programming with NumPy », Nature, vol. 585, p. 357-362, 2020."),
         linkBullet("[21] S. Ramirez, « FastAPI: Modern, Fast Web Framework for Python », 2024. ", "https://fastapi.tiangolo.com", ""),
         linkBullet("[22] Meta Platforms Inc., « React.js 18 Documentation & Concurrent Features », 2024. ", "https://react.dev", ""),
-        linkBullet("[23] Microsoft Corporation, « TypeScript Documentation: Typed JavaScript at Any Scale », 2024. ", "https://www.typescriptlang.org", ""),
-        linkBullet("[24] Microsoft Corporation, « Microsoft Power BI Guidance Documentation & DAX Reference », 2024. ", "https://learn.microsoft.com/power-bi/", ""),
+        bullet("[23] C. J. Date, An Introduction to Database Systems, 8e éd. Boston, MA, USA : Addison-Wesley, 2003."),
+        bullet("[24] A. Ferrari et M. Russo, The Definitive Guide to DAX: Business Intelligence with Microsoft Power BI, SQL Server Analysis Services, and Excel, 2e éd. Redmond, WA, USA : Microsoft Press, 2019."),
         bullet("[25] S. Nakajima, Introduction to TPM: Total Productive Maintenance. Cambridge, MA, USA : Productivity Press, 1988."),
-        linkBullet("[26] Object Management Group (OMG), « Unified Modeling Language (UML) Specification, Version 2.5.1 », déc. 2017. ", "https://www.omg.org/spec/UML/2.5.1/", "")
+        bullet("[26] G. Booch, J. Rumbaugh, et I. Jacobson, The Unified Modeling Language User Guide, 2e éd. Boston, MA, USA : Addison-Wesley, 2005."),
+        pageBreak(),
     '''
-
-print("Intro and Concl modules defined.")

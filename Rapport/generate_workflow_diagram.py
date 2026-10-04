@@ -105,7 +105,7 @@ def generate_diagram(output_path):
         {
             "id": 4,
             "title": "FEATURE ENGINEERING",
-            "desc": "16 variables & lags temporels",
+            "desc": "14 variables explicatives",
             "icon": "modeling"
         },
         {

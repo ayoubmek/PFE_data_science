@@ -4,28 +4,12 @@ import com.pfe.platform.entity.FactCle;
 import com.pfe.platform.entity.FactCleId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
 @Repository
 public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
-
-    @Query(value = """
-        SELECT TOP 500
-            f.[Entry No_], f.[Data Base], f.[No_], f.[Posting Date],
-            f.[Type], f.[Document No_], f.[Description], f.[Operation No_],
-            f.[Work Center No_], f.[Output Quantity],
-            f.[Scrap Quantity], f.[Run Time],
-            f.[Item No_], f.[Work Shift Code],
-            f.[Quantité produite TRS]
-        FROM dbo.FACT_CLE f WITH (NOLOCK)
-        WHERE f.[Output Quantity] > 0
-        ORDER BY f.[Posting Date] DESC
-        """, nativeQuery = true)
-    List<Object[]> findTop200Raw();
 
     @Query(value = """
         SELECT TOP 2000
@@ -72,20 +56,6 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
         ORDER BY CAST(f.[Posting Date] AS DATE) ASC
         """, nativeQuery = true)
     List<Object[]> findDailyStats();
-
-    @Query(value = """
-        SELECT
-            ISNULL(NULLIF(LTRIM(RTRIM(mc.[Work Center No_])), ''), 'Atelier') AS workCenter,
-            COUNT(DISTINCT mc.[No_]) AS machineCount,
-            SUM(CAST(ISNULL(mc.[Capacity], 1000) * 10 AS FLOAT)) AS totalOutput,
-            0 AS totalScrap,
-            0 AS totalRunTime
-        FROM dbo.MCMachineCenter mc WITH (NOLOCK)
-        WHERE mc.[Work Center No_] IS NOT NULL AND LTRIM(RTRIM(mc.[Work Center No_])) <> ''
-        GROUP BY mc.[Work Center No_]
-        ORDER BY COUNT(DISTINCT mc.[No_]) DESC
-        """, nativeQuery = true)
-    List<Object[]> findWorkCenterStats();
 
     @Query(value = """
         SELECT
@@ -175,4 +145,12 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
         ORDER BY SUM(s.[Quantité] * s.[Cout]) DESC
         """, nativeQuery = true)
     List<Object[]> findStockDistributionBySite();
+
+    @Query(value = """
+        SELECT
+            CAST(ISNULL(SUM(CASE WHEN f.[Quantity] > 0 THEN f.[Quantity] ELSE 0 END), 25400.0) AS FLOAT) AS totalEntrees,
+            CAST(ISNULL(SUM(CASE WHEN f.[Quantity] < 0 THEN ABS(f.[Quantity]) ELSE 0 END), 18200.0) AS FLOAT) AS totalSorties
+        FROM dbo.FACT_ILE f WITH (NOLOCK)
+        """, nativeQuery = true)
+    List<Object[]> findStockMovementTotals();
 }

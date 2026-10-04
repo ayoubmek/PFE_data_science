@@ -23,18 +23,6 @@ export function getUserByToken(token: string) {
   })
 }
 
-export function refreshToken() {
-  return axios.post<AuthModel>(`${API_URL}/auth/refresh`)
-}
-
-export function logout() {
-  return axios.post(`${API_URL}/auth/logout`)
-}
-
-export function sellerLogin(username: string, password: string) {
-  return axios.post<AuthModel & { user: UserModel }>(`${API_URL}/seller/login`, { username, password })
-}
-
 export function register(
   email: string, firstname: string, lastname: string,
   password: string, password_confirmation: string

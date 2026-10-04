@@ -28,12 +28,12 @@ const HeaderUserMenu: FC = () => {
   let badgeColor = 'badge-light-primary'
   let displayRoleLabel = rawRole.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 
-  if (rawRole.includes('admin')) {
+  if (rawRole.toLowerCase().includes('admin')) {
     badgeColor = 'badge-light-danger'
-  } else if (rawRole.includes('seller')) {
+    displayRoleLabel = 'Administrateur'
+  } else {
     badgeColor = 'badge-light-success'
-  } else if (rawRole.includes('logistic')) {
-    badgeColor = 'badge-light-warning'
+    displayRoleLabel = 'Opérateur'
   }
 
   return (

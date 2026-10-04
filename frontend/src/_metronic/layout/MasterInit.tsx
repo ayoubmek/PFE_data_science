@@ -4,7 +4,6 @@ import {
   MenuComponent,
   DrawerComponent,
   ScrollComponent,
-  ScrollTopComponent,
   StickyComponent,
   ToggleComponent,
   SwapperComponent,
@@ -21,7 +20,6 @@ export function MasterInit() {
     ThemeModeComponent.init()
     setTimeout(() => {
       ToggleComponent.bootstrap()
-      ScrollTopComponent.bootstrap()
       DrawerComponent.bootstrap()
       StickyComponent.bootstrap()
       MenuComponent.bootstrap()

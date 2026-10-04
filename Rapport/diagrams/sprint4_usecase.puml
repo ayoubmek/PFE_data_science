@@ -1,11 +1,33 @@
 @startuml sprint4_usecase
 left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
 skinparam usecase {
     BackgroundColor White
-    BorderColor Black
+    BorderColor #2B3A4A
+    ArrowColor #2B3A4A
+    FontSize 12
+    FontName Arial
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor #2B3A4A
+    FontColor #1E1E2D
+    FontSize 12
+    FontName Arial
+    FontStyle bold
+}
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor #2B3A4A
+    FontSize 14
+    FontName Arial
+    FontStyle bold
+    FontColor #1E1E2D
 }
 
-actor "Manager" as MGR
+actor "Administrateur" as ADM
 
 rectangle "Module IA & Prévision Prophet" {
     usecase "S'authentifier" as UC_Auth
@@ -15,10 +37,10 @@ rectangle "Module IA & Prévision Prophet" {
     usecase "Consulter les recommandations opérationnelles" as UC44
 }
 
-MGR --> UC41
-MGR --> UC42
-MGR --> UC43
-MGR --> UC44
+ADM --> UC41
+ADM --> UC42
+ADM --> UC43
+ADM --> UC44
 
 UC41 ..> UC_Auth : <<include>>
 UC42 ..> UC_Auth : <<include>>

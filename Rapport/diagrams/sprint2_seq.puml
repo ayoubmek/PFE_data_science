@@ -1,10 +1,10 @@
 @startuml sprint2_seq
-actor "Manager" as MGR
+actor "Administrateur" as ADM
 participant "React App (SPA)" as React
 participant "Spring Boot API" as Spring
 database "SQL Server DB" as DB
 
-MGR -> React : Clic sur "Planifier Ordre"
+ADM -> React : Clic sur "Planifier Ordre"
 React -> Spring : POST /api/production-orders (JSON)
 activate Spring
 Spring -> Spring : Valider la disponibilité machine
@@ -15,5 +15,5 @@ deactivate DB
 Spring -> Spring : Déclencher recalcul TRG machine
 Spring --> React : HTTP 201 Created (JSON)
 deactivate Spring
-React --> MGR : Afficher confirmation et ordre planifié
+React --> ADM : Afficher confirmation et ordre planifié
 @enduml

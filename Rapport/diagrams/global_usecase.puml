@@ -1,30 +1,41 @@
 @startuml global_usecase
 left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
 skinparam usecase {
     BackgroundColor White
-    BorderColor Black
+    BorderColor #2B3A4A
+    ArrowColor #2B3A4A
     FontSize 12
     FontName Arial
 }
+
 skinparam actor {
     BackgroundColor White
-    BorderColor Black
-    FontColor Black
+    BorderColor #2B3A4A
+    FontColor #1E1E2D
     FontSize 12
     FontName Arial
     FontStyle bold
 }
+
 skinparam rectangle {
     BackgroundColor White
-    BorderColor Black
-    FontSize 16
+    BorderColor #2B3A4A
+    FontSize 15
     FontName Arial
     FontStyle bold
-    FontColor Black
+    FontColor #1E1E2D
+}
+
+skinparam arrow {
+    Color #2B3A4A
+    FontName Arial
+    FontSize 11
 }
 
 actor "Opérateur" as OPE
-actor "Manager" as MGR
 actor "Administrateur" as ADM
 
 rectangle "Plateforme Nexora" {
@@ -39,21 +50,19 @@ rectangle "Plateforme Nexora" {
     usecase "Gérer les permissions (RBAC)" as UC8
 }
 
-OPE --> UC0
+' Associations Opérateur
 OPE --> UC1
 OPE --> UC2
-OPE --> UC5
 
-MGR --> UC0
-MGR --> UC3
-MGR --> UC4
-MGR --> UC5
-MGR --> UC6
-
-ADM --> UC0
+' Associations Administrateur
+ADM --> UC3
+ADM --> UC4
+ADM --> UC5
+ADM --> UC6
 ADM --> UC7
 ADM --> UC8
 
+' Relations d'inclusion
 UC1 ..> UC0 : <<include>>
 UC2 ..> UC0 : <<include>>
 UC3 ..> UC0 : <<include>>
