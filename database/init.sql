@@ -60,21 +60,6 @@ CREATE TABLE stock_movements (
 );
 GO
 
-IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='notifications' AND xtype='U')
-CREATE TABLE notifications (
-    id          BIGINT IDENTITY(1,1) PRIMARY KEY,
-    titre       NVARCHAR(200)  NOT NULL,
-    message     NVARCHAR(1000) NOT NULL,
-    type        NVARCHAR(30)   NOT NULL DEFAULT 'INFO',
-    priorite    NVARCHAR(20)   NOT NULL DEFAULT 'NORMALE',
-    lu          BIT            NOT NULL DEFAULT 0,
-    module      NVARCHAR(50),
-    entity_id   NVARCHAR(50),
-    username    NVARCHAR(50),
-    created_at  DATETIME2      NOT NULL DEFAULT GETDATE()
-);
-GO
-
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='kpi_logs' AND xtype='U')
 CREATE TABLE kpi_logs (
     id          BIGINT IDENTITY(1,1) PRIMARY KEY,

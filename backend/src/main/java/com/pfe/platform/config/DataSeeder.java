@@ -2,7 +2,6 @@ package com.pfe.platform.config;
 
 import com.pfe.platform.entity.User;
 import com.pfe.platform.repository.UserRepository;
-import com.pfe.platform.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepo;
-    private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -25,15 +23,6 @@ public class DataSeeder implements CommandLineRunner {
             log.info("Initialisation des utilisateurs par défaut...");
             seedUsers();
             log.info("Utilisateurs initialisés avec succès.");
-        }
-
-        // Synchronisation des alertes dynamiques issues directement du Data Warehouse (DWH)
-        try {
-            log.info("Synchronisation des alertes dynamiques depuis dbDWH...");
-            notificationService.syncDynamicDwhAlerts();
-            log.info("Alertes dbDWH synchronisées.");
-        } catch (Exception e) {
-            log.warn("Notice synchronisation alertes DWH : {}", e.getMessage());
         }
     }
 

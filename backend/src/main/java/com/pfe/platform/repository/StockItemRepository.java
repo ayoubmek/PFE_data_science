@@ -21,14 +21,6 @@ public interface StockItemRepository extends JpaRepository<StockItem, StockItemI
         """, nativeQuery = true)
     List<StockItem> findAllLatestSnapshot();
 
-    @Query(value = """
-        SELECT TOP 5 *
-        FROM dbo.ASTOCKDATE WITH (NOLOCK)
-        WHERE datestock = '2026-03-28' AND [Quantité] <= 5
-        ORDER BY [Quantité] ASC
-        """, nativeQuery = true)
-    List<StockItem> findTopLowStockItems();
-
     @Query(value = "SELECT 5998", nativeQuery = true)
     long countFast();
 }
