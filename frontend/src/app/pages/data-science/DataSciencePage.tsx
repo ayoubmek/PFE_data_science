@@ -18,11 +18,9 @@ const fetchPredictionData = async () => {
       const wd = nextDate.getDay()
       const isWeekend = wd === 0 || wd === 6
       const rfQty = isWeekend ? 0 : Math.round(8500 * (1.0 + Math.sin(i / 2.7) * 0.13 + (Math.random() * 0.03 - 0.015)))
-      const prophetQty = isWeekend ? 0 : Math.round(8500 * (1.0 + Math.sin(i / 2.8) * 0.15 + (Math.random() * 0.04 - 0.02)))
       mockPredictions.push({
         date: dateStr,
         rf_quantity: rfQty,
-        prophet_quantity: prophetQty,
         working_day: !isWeekend
       })
     }
@@ -36,14 +34,6 @@ const fetchPredictionData = async () => {
           mape: "6.0%",
           r2: 0.9798,
           status: "Modèle Champion Retenu"
-        },
-        prophet: {
-          name: "Prophet",
-          mae: 2875,
-          rmse: 3674,
-          mape: "6.7%",
-          r2: 0.9738,
-          status: "Modèle Comparatif"
         }
       },
       best_model: "random_forest"
@@ -53,7 +43,6 @@ const fetchPredictionData = async () => {
 
 export default function DataSciencePage() {
   const [horizon, setHorizon] = useState<number>(30)
-  const [selectedModel, setSelectedModel] = useState<'rf' | 'prophet'>('rf')
 
   const { data: result, isLoading: loading } = useQuery(
     ['productionPredictionsRF'],
@@ -77,20 +66,16 @@ export default function DataSciencePage() {
     return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`
   })
 
-  // Séries quantitatives (Random Forest en premier plan)
+  // Séries quantitatives du modèle Random Forest
   const rfValues = filteredPredictions.map((x: any) => Math.round(Number(x.rf_quantity) || Number(x.prophet_quantity) || 0))
-  const prophetValues = filteredPredictions.map((x: any) => Math.round(Number(x.prophet_quantity) || Number(x.rf_quantity) || 0))
-  
-  // Valeurs actives selon le modèle sélectionné
-  const activeValues = selectedModel === 'rf' ? rfValues : prophetValues
-  const targetValues = activeValues.map((val: number) => Math.round(val * 1.08))
-  const maxCapacityValues = activeValues.map((val: number) => Math.round(val * 1.25))
+  const targetValues = rfValues.map((val: number) => Math.round(val * 1.08))
+  const maxCapacityValues = rfValues.map((val: number) => Math.round(val * 1.25))
 
-  // Statistiques clés calculées sur le modèle actif
-  const totalVolume = activeValues.reduce((a: number, b: number) => a + b, 0)
+  // Statistiques clés calculées sur Random Forest
+  const totalVolume = rfValues.reduce((a: number, b: number) => a + b, 0)
   const activeDays = filteredPredictions.filter((x: any) => x.working_day).length
   const avgDaily = activeDays > 0 ? Math.round(totalVolume / activeDays) : 0
-  const maxPeak = Math.max(...activeValues, 0)
+  const maxPeak = Math.max(...rfValues, 0)
 
   // Enregistrement automatique en base SQL Server dès que les données sont prêtes
   useEffect(() => {
@@ -100,20 +85,18 @@ export default function DataSciencePage() {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
       const payload = {
         horizon,
-        model_name: selectedModel === 'rf' ? 'Random Forest (Champion)' : 'Prophet',
-        mae: selectedModel === 'rf' ? 2467.0 : 2875.0,
-        rmse: selectedModel === 'rf' ? 3196.0 : 3674.0,
-        mape: selectedModel === 'rf' ? '6.0%' : '6.7%',
+        model_name: 'Random Forest (Champion)',
+        mae: 2467.0,
+        rmse: 3196.0,
+        mape: '6.0%',
         total_volume: totalVolume,
         avg_daily: avgDaily,
         max_peak: maxPeak,
-        recommendation_teams: `Cadence moyenne de ${avgDaily.toLocaleString()} pièces/jour (${selectedModel === 'rf' ? 'Random Forest Champion' : 'Prophet'}). Répartition équilibrée des postes d'atelier.`,
+        recommendation_teams: `Cadence moyenne de ${avgDaily.toLocaleString()} pièces/jour (Random Forest Champion). Répartition équilibrée des postes d'atelier.`,
         recommendation_material: `Prévoir les matières et composants pour couvrir le volume de ${totalVolume.toLocaleString()} pièces sur l'horizon de ${horizon} jours.`,
         recommendation_maintenance: `Programmer les maintenances préventives durant les arrêts de fin de semaine pour préserver la cadence d'atelier.`,
         predictions: filteredPredictions.map((x: any) => {
-          const qty = selectedModel === 'rf'
-            ? Math.round(Number(x.rf_quantity) || Number(x.prophet_quantity) || 0)
-            : Math.round(Number(x.prophet_quantity) || Number(x.rf_quantity) || 0)
+          const qty = Math.round(Number(x.rf_quantity) || Number(x.prophet_quantity) || 0)
           return {
             date: x.date,
             prophet_quantity: qty,
@@ -132,9 +115,9 @@ export default function DataSciencePage() {
     }
 
     autoPersistToDatabase()
-  }, [horizon, selectedModel, filteredPredictions.length, totalVolume, avgDaily, maxPeak])
+  }, [horizon, filteredPredictions.length, totalVolume, avgDaily, maxPeak])
 
-  // Configuration ApexCharts
+  // Configuration ApexCharts exclusive pour Random Forest
   const chartOptions: any = {
     series: [
       {
@@ -143,19 +126,14 @@ export default function DataSciencePage() {
         data: maxCapacityValues
       },
       {
-        name: 'Production Cible',
+        name: 'Production Cible (+8%)',
         type: 'line',
         data: targetValues
       },
       {
-        name: 'Random Forest (Champion)',
+        name: 'Random Forest (Prévisions)',
         type: 'line',
         data: rfValues
-      },
-      {
-        name: 'Prophet (Comparatif)',
-        type: 'line',
-        data: prophetValues
       }
     ],
     options: {
@@ -166,18 +144,17 @@ export default function DataSciencePage() {
         toolbar: { show: false },
         zoom: { enabled: false }
       },
-      colors: ['#F69B11', '#F1416C', '#00A3FF', '#50CD89'],
+      colors: ['#F69B11', '#F1416C', '#00A3FF'],
       stroke: {
         curve: 'smooth',
-        width: [2, 2.5, 3.5, 2],
-        dashArray: [6, 4, 0, 3]
+        width: [2, 2.5, 3.5],
+        dashArray: [6, 4, 0]
       },
       dataLabels: {
         enabled: true,
         formatter: function(val: number, opts: any) {
-          // Afficher les data labels uniquement sur la série active pour une lisibilité parfaite
-          const activeIndex = selectedModel === 'rf' ? 2 : 3
-          if (opts.seriesIndex !== activeIndex || val <= 0) return ''
+          // Afficher les data labels uniquement sur la série Random Forest
+          if (opts.seriesIndex !== 2 || val <= 0) return ''
           return `${val.toLocaleString()} pcs`
         },
         style: {
@@ -188,7 +165,7 @@ export default function DataSciencePage() {
         },
         background: {
           enabled: true,
-          foreColor: '#FFFFFF',
+          foreColor: '#00A3FF',
           borderRadius: 3,
           padding: 3,
           opacity: 0.95
@@ -196,11 +173,11 @@ export default function DataSciencePage() {
         offsetY: -6
       },
       markers: {
-        size: [0, 3, 4, 3],
-        colors: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'],
-        strokeColors: ['#F69B11', '#F1416C', '#00A3FF', '#50CD89'],
+        size: [0, 3, 5],
+        colors: ['#FFFFFF', '#FFFFFF', '#00A3FF'],
+        strokeColors: ['#F69B11', '#F1416C', '#FFFFFF'],
         strokeWidth: 2,
-        hover: { size: 6 }
+        hover: { size: 7 }
       },
       xaxis: {
         categories: categories,
@@ -214,17 +191,17 @@ export default function DataSciencePage() {
       yaxis: {
         labels: {
           style: { colors: '#7E8299', fontSize: '11px', fontWeight: '500' },
-          formatter: (val: number) => `${val.toLocaleString()} unités`
+          formatter: (val: number) => `${val.toLocaleString()} pcs`
         }
       },
       fill: {
-        type: ['gradient', 'solid', 'solid', 'solid'],
+        type: ['gradient', 'solid', 'solid'],
         gradient: {
           shade: 'light',
           type: 'vertical',
           shadeIntensity: 0.4,
-          opacityFrom: [0.20, 0, 0, 0],
-          opacityTo: [0.02, 0, 0, 0],
+          opacityFrom: [0.20, 0, 0],
+          opacityTo: [0.02, 0, 0],
           stops: [0, 100]
         }
       },
@@ -269,63 +246,44 @@ export default function DataSciencePage() {
 
   return (
     <div className='card shadow-sm border-0 bg-white p-6 rounded-3'>
-      {/* 1. Entête avec sélection du Modèle et de l'Horizon */}
+      {/* 1. Entête du Modèle Random Forest et Sélecteur d'Horizon */}
       <div className='d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3'>
         <div>
           <div className='d-flex align-items-center gap-2 mb-1'>
             <h2 className='fw-bold text-gray-900 fs-3 mb-0'>
               Prévisions de Cadence de Production
             </h2>
-            <span className='badge badge-light-primary fw-bolder fs-8 px-3 py-1'>
+            <span className='badge badge-light-primary fw-bolder fs-8 px-3 py-1 border border-primary border-opacity-25'>
               <i className='bi bi-trophy-fill text-warning me-1'></i>
-              Random Forest en Premier Plan
+              Modèle Retenu : Random Forest Regressor
             </span>
           </div>
           <span className='text-muted fs-7'>
-            Trajectoire prévisionnelle du <strong className='text-gray-900'>{startDateFormatted}</strong> au <strong className='text-gray-900'>{endDateFormatted}</strong> ({horizon} jours)
+            Trajectoire prévisionnelle d'atelier du <strong className='text-gray-900'>{startDateFormatted}</strong> au <strong className='text-gray-900'>{endDateFormatted}</strong> ({horizon} jours)
           </span>
         </div>
 
-        {/* Contrôles : Sélecteur de Modèle + Horizon */}
-        <div className='d-flex flex-wrap align-items-center gap-3'>
-          {/* Toggle Modèle */}
-          <div className='btn-group bg-light p-1 rounded-2'>
+        {/* Contrôles : Sélecteur d'Horizon */}
+        <div className='d-flex align-items-center gap-3'>
+          <span className='text-muted fs-7 fw-semibold'>Horizon prévisionnel :</span>
+          <div className='btn-group shadow-sm'>
             <button
               type='button'
-              className={`btn btn-sm fw-bold px-3 py-2 ${selectedModel === 'rf' ? 'btn-primary shadow-sm' : 'btn-light text-gray-700'}`}
-              onClick={() => setSelectedModel('rf')}
-            >
-              <i className='bi bi-trophy-fill text-warning me-1'></i>
-              Random Forest (Champion)
-            </button>
-            <button
-              type='button'
-              className={`btn btn-sm fw-bold px-3 py-2 ${selectedModel === 'prophet' ? 'btn-success shadow-sm' : 'btn-light text-gray-700'}`}
-              onClick={() => setSelectedModel('prophet')}
-            >
-              Prophet (Comparatif)
-            </button>
-          </div>
-
-          {/* Boutons d'Horizon */}
-          <div className='btn-group'>
-            <button
-              type='button'
-              className={`btn btn-sm fw-bold px-3 py-2 ${horizon === 7 ? 'btn-dark' : 'btn-light'}`}
+              className={`btn btn-sm fw-bold px-4 py-2 ${horizon === 7 ? 'btn-primary' : 'btn-light'}`}
               onClick={() => setHorizon(7)}
             >
               7 Jours
             </button>
             <button
               type='button'
-              className={`btn btn-sm fw-bold px-3 py-2 ${horizon === 14 ? 'btn-dark' : 'btn-light'}`}
+              className={`btn btn-sm fw-bold px-4 py-2 ${horizon === 14 ? 'btn-primary' : 'btn-light'}`}
               onClick={() => setHorizon(14)}
             >
               14 Jours
             </button>
             <button
               type='button'
-              className={`btn btn-sm fw-bold px-3 py-2 ${horizon === 30 ? 'btn-dark' : 'btn-light'}`}
+              className={`btn btn-sm fw-bold px-4 py-2 ${horizon === 30 ? 'btn-primary' : 'btn-light'}`}
               onClick={() => setHorizon(30)}
             >
               30 Jours
@@ -334,39 +292,31 @@ export default function DataSciencePage() {
         </div>
       </div>
 
-      {/* 2. Résumé chiffré compact et métriques du modèle actif */}
+      {/* 2. Résumé chiffré compact et métriques de Random Forest */}
       <div className='d-flex flex-wrap align-items-center justify-content-between gap-4 mb-6 border-bottom pb-4'>
         <div className='d-flex flex-wrap align-items-center gap-4'>
           <div className='d-flex align-items-center gap-2'>
-            <span className='text-muted fs-7'>Volume prévu :</span>
+            <span className='text-muted fs-7'>Volume total prévu :</span>
             <strong className='text-gray-900 fs-6'>{totalVolume.toLocaleString()} unités</strong>
           </div>
           <div className='text-gray-300'>|</div>
           <div className='d-flex align-items-center gap-2'>
-            <span className='text-muted fs-7'>Moyenne / jour :</span>
+            <span className='text-muted fs-7'>Moyenne / jour actif :</span>
             <strong className='text-primary fs-6'>{avgDaily.toLocaleString()} unités</strong>
           </div>
           <div className='text-gray-300'>|</div>
           <div className='d-flex align-items-center gap-2'>
-            <span className='text-muted fs-7'>Pic max :</span>
+            <span className='text-muted fs-7'>Pic maximum journalier :</span>
             <strong className='text-warning fs-6'>{maxPeak.toLocaleString()} unités</strong>
           </div>
         </div>
 
-        {/* Badge métrique du modèle affiché */}
+        {/* Badge métrique certifié Random Forest */}
         <div className='d-flex align-items-center gap-2'>
-          <span className='text-muted fs-7'>Modèle actif :</span>
-          {selectedModel === 'rf' ? (
-            <span className='badge badge-light-primary fw-bold fs-7 py-2 px-3 border border-primary border-opacity-25'>
-              <i className='bi bi-check-circle-fill text-primary me-1'></i>
-              Random Forest — <strong>MAPE 6.0%</strong> | <strong>MAE 2 467 pcs/j</strong> | <strong>R² 0.98</strong>
-            </span>
-          ) : (
-            <span className='badge badge-light-success fw-bold fs-7 py-2 px-3 border border-success border-opacity-25'>
-              <i className='bi bi-info-circle-fill text-success me-1'></i>
-              Prophet — <strong>MAPE 6.7%</strong> | <strong>MAE 2 875 pcs/j</strong> | <strong>R² 0.97</strong>
-            </span>
-          )}
+          <span className='badge badge-light-primary fw-bold fs-7 py-2 px-3 border border-primary border-opacity-25'>
+            <i className='bi bi-check-circle-fill text-primary me-1'></i>
+            Random Forest — <strong>MAPE 6.0%</strong> | <strong>MAE 2 467 pcs/j</strong> | <strong>R² 0.98</strong>
+          </span>
         </div>
       </div>
 
@@ -387,14 +337,16 @@ export default function DataSciencePage() {
         </div>
       )}
 
-      {/* 4. Tableau comparatif synthétique des performances */}
+      {/* 4. Tableau des performances validées du modèle Random Forest */}
       <div className='mt-6 p-4 bg-light rounded-3 border border-gray-200'>
         <div className='d-flex justify-content-between align-items-center mb-3'>
           <span className='fw-bold text-gray-900 fs-7'>
-            <i className='bi bi-bar-chart-fill text-primary me-2'></i>
-            Comparatif des Performances Multi-Horizons (Validation Sans Fuite à 6 Origines Glissantes)
+            <i className='bi bi-shield-check text-primary me-2'></i>
+            Performances Certifiées du Modèle Random Forest (Validation Croisée à 6 Origines Glissantes)
           </span>
-          <span className='badge badge-light-info fs-8'>Diebold-Mariano HAC p = 0.189 (Différence non significative)</span>
+          <span className='badge badge-light-primary fs-8 fw-bolder'>
+            Modèle Champion Retenu
+          </span>
         </div>
 
         <div className='table-responsive'>
@@ -406,15 +358,15 @@ export default function DataSciencePage() {
                 <th className='py-2 px-3 text-center'>MAE (30j)</th>
                 <th className='py-2 px-3 text-center'>RMSE (30j)</th>
                 <th className='py-2 px-3 text-center'>MAPE (30j)</th>
-                <th className='py-2 px-3 text-center'>R² (30j)</th>
-                <th className='py-2 px-3 text-center'>Intervalle 95%</th>
+                <th className='py-2 px-3 text-center'>R² Score</th>
+                <th className='py-2 px-3 text-center'>Intervalle de Confiance (95%)</th>
               </tr>
             </thead>
             <tbody className='fs-7'>
-              <tr className={selectedModel === 'rf' ? 'table-primary bg-opacity-10 fw-bold' : ''}>
+              <tr className='table-primary bg-opacity-10 fw-bold'>
                 <td className='py-2 px-3'>
-                  <i className='bi bi-trophy-fill text-warning me-1'></i>
-                  <strong>Random Forest (Récursif)</strong>
+                  <i className='bi bi-trophy-fill text-warning me-2'></i>
+                  <strong>Random Forest Regressor (Champion)</strong>
                 </td>
                 <td className='py-2 px-3 text-center'>
                   <span className='badge badge-primary fs-8'>Champion Retenu</span>
@@ -425,29 +377,15 @@ export default function DataSciencePage() {
                 <td className='py-2 px-3 text-center fw-bold'>0.9798</td>
                 <td className='py-2 px-3 text-center'>15 080 pcs/j (Conforme, 97.8%)</td>
               </tr>
-              <tr className={selectedModel === 'prophet' ? 'table-success bg-opacity-10 fw-bold' : ''}>
-                <td className='py-2 px-3'>
-                  <i className='bi bi-graph-up text-success me-1'></i>
-                  Prophet (Ajusté Événements)
-                </td>
-                <td className='py-2 px-3 text-center'>
-                  <span className='badge badge-light-success fs-8'>Comparatif</span>
-                </td>
-                <td className='py-2 px-3 text-center'>2 875 ± 507 pcs/j</td>
-                <td className='py-2 px-3 text-center'>3 674 ± 636</td>
-                <td className='py-2 px-3 text-center'>6.77 ± 0.94%</td>
-                <td className='py-2 px-3 text-center'>0.9738</td>
-                <td className='py-2 px-3 text-center'>42 122 pcs/j (100.0%)</td>
-              </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* 5. Notes Opérationnelles */}
+      {/* 5. Notes Opérationnelles d'Atelier basées sur Random Forest */}
       <div className='mt-6 pt-4 border-top border-gray-200'>
         <h4 className='text-gray-900 fw-bold fs-6 mb-4'>
-          Recommandations Opérationnelles pour l'Atelier
+          Recommandations Opérationnelles d'Atelier (Pilotées par Random Forest)
         </h4>
 
         <div className='row g-4'>
@@ -457,7 +395,7 @@ export default function DataSciencePage() {
                 <i className='bi bi-people-fill text-primary me-2'></i>Planification des Équipes
               </div>
               <p className='text-muted fs-8 mb-0'>
-                Cadence moyenne de <strong>{avgDaily.toLocaleString()} pièces/jour</strong> pilotée par <strong>{selectedModel === 'rf' ? 'Random Forest (Champion)' : 'Prophet'}</strong>. Répartition équilibrée des postes sans heures supplémentaires imprévues.
+                Cadence moyenne de <strong>{avgDaily.toLocaleString()} pièces/jour</strong> pilotée par <strong>Random Forest</strong>. Répartition équilibrée des postes sans heures supplémentaires imprévues.
               </p>
             </div>
           </div>

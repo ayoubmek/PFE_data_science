@@ -18,9 +18,4 @@ public class AuthController {
     public ResponseEntity<AuthDTO.AuthResponse> login(@Valid @RequestBody AuthDTO.LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
-
-    @PostMapping("/register")
-    public ResponseEntity<AuthDTO.AuthResponse> register(@Valid @RequestBody AuthDTO.RegisterRequest request) {
-        return ResponseEntity.ok(authService.register(request));
-    }
 }

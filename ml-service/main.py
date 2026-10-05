@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import random
 import os
 app = FastAPI(
-    title="PFE Platform - ML Service",
+    title="Nexora - ML Service",
     description="Service IA & Data Science: Prévisions, Clustering, Anomalies, Insights",
     version="2.0.0"
 )

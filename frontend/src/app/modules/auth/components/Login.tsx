@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import * as Yup from 'yup'
 import clsx from 'clsx'
-import { Link } from 'react-router-dom'
 import { useFormik } from 'formik'
 import { login } from '../core/_requests'
 import { useAuth } from '../core/Auth'
@@ -136,21 +135,7 @@ export function Login() {
           </div>
         )}
       </div>
-      {}
 
-      {}
-      <div className='d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-8'>
-        <div />
-
-        {}
-        <Link to='/auth/forgot-password' className='link-primary'>
-          Forgot Password ?
-        </Link>
-        {}
-      </div>
-      {}
-
-      {}
       <div className='d-grid mb-10'>
         <button
           type='submit'
@@ -166,14 +151,6 @@ export function Login() {
             </span>
           )}
         </button>
-      </div>
-      {}
-
-      <div className='text-gray-500 text-center fw-semibold fs-6'>
-        Not a Member yet?{' '}
-        <Link to='/auth/registration' className='link-primary'>
-          Sign up
-        </Link>
       </div>
     </form>
   )

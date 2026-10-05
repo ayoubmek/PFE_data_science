@@ -17,70 +17,17 @@ export interface UserItem {
 
 const STORAGE_KEY = 'nexora_users_db'
 
-const DEFAULT_USERS: UserItem[] = [
-  {
-    id: 1,
-    username: 'admin',
-    fullName: 'Imen Ben Salem',
-    email: 'imen.admin@nexora-industrial.com',
-    role: 'ADMIN',
-    enabled: true,
-    createdAt: '2026-01-15',
-    lastLogin: 'En ligne maintenant',
-  },
-  {
-    id: 2,
-    username: 'ayoub.ope',
-    fullName: 'Ayoub Hammami',
-    email: 'ayoub.hammami@nexora-industrial.com',
-    role: 'OPERATEUR',
-    enabled: true,
-    createdAt: '2026-02-01',
-    lastLogin: "Aujourd'hui, 08:30",
-  },
-  {
-    id: 3,
-    username: 'rihab.stock',
-    fullName: 'Rihab Idoudi',
-    email: 'rihab.idoudi@nexora-industrial.com',
-    role: 'OPERATEUR',
-    enabled: true,
-    createdAt: '2026-02-10',
-    lastLogin: 'Hier, 17:45',
-  },
-  {
-    id: 4,
-    username: 'salah.op1',
-    fullName: 'Salah Mejri',
-    email: 'salah.mejri@atelier-kondar.tn',
-    role: 'OPERATEUR',
-    enabled: true,
-    createdAt: '2026-02-20',
-    lastLogin: 'Il y a 2 heures',
-  },
-  {
-    id: 5,
-    username: 'fatma.op2',
-    fullName: 'Fatma Dridi',
-    email: 'fatma.dridi@atelier-kondar.tn',
-    role: 'OPERATEUR',
-    enabled: true,
-    createdAt: '2026-03-05',
-    lastLogin: 'Hier, 14:10',
-  },
-  {
-    id: 6,
-    username: 'kamel.tech',
-    fullName: 'Kamel Mansour',
-    email: 'kamel.mansour@atelier-brno.cz',
-    role: 'OPERATEUR',
-    enabled: false,
-    createdAt: '2026-03-12',
-    lastLogin: 'Compte suspendu',
-  },
-]
 
-const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bg: string; icon: string; desc: string }> = {
+
+export interface RoleConfigItem {
+  label: string
+  color: string
+  bg: string
+  icon: string
+  desc: string
+}
+
+const ROLE_CONFIG: Record<string, RoleConfigItem> = {
   ADMIN: {
     label: 'Administrateur',
     color: '#8950FC',
@@ -95,6 +42,26 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bg: string; 
     icon: 'gear',
     desc: "Gestion de production, machines, suivi du TRG, mouvements de stock et prévisions d'IA.",
   },
+}
+
+const DEFAULT_ROLE_CFG: RoleConfigItem = {
+  label: 'Opérateur',
+  color: '#50CD89',
+  bg: '#E8FFF3',
+  icon: 'gear',
+  desc: 'Gestion de production et suivi des opérations.',
+}
+
+export const getRoleConfig = (role?: string): RoleConfigItem => {
+  if (!role) return DEFAULT_ROLE_CFG
+  const key = String(role).toUpperCase().trim()
+  return ROLE_CONFIG[key] || DEFAULT_ROLE_CFG
+}
+
+const getInitials = (name?: string): string => {
+  if (!name) return 'U'
+  const parts = name.trim().split(/\s+/)
+  return parts.map((n) => n[0]).slice(0, 2).join('').toUpperCase() || 'U'
 }
 
 export default function UserManagementPage() {
@@ -128,10 +95,11 @@ export default function UserManagementPage() {
     setLoading(true)
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
     try {
-      const { data } = await axios.get(`${apiUrl}/users`, { timeout: 2500 })
-      if (Array.isArray(data) && data.length > 0) {
-        setUsers(data)
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+      const { data } = await axios.get(`${apiUrl}/users`, { timeout: 3500 })
+      if (Array.isArray(data)) {
+        const cleaned = data.filter((u: UserItem) => (u.role || '').toUpperCase() !== 'MANAGER' && u.username !== 'manager')
+        setUsers(cleaned)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned))
       } else {
         fallbackToStorage()
       }
@@ -146,12 +114,20 @@ export default function UserManagementPage() {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
-        setUsers(JSON.parse(saved))
-        return
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const cleaned = parsed.filter(
+            (u: UserItem) =>
+              (u.role || '').toUpperCase() !== 'MANAGER' &&
+              u.username !== 'manager' &&
+              !['imen.admin@nexora-industrial.com', 'ayoub.hammami@nexora-industrial.com', 'rihab.idoudi@nexora-industrial.com', 'salah.mejri@atelier-kondar.tn', 'fatma.dridi@atelier-kondar.tn', 'kamel.mansour@atelier-brno.cz'].includes(u.email)
+          )
+          setUsers(cleaned)
+          return
+        }
       } catch (e) {}
     }
-    setUsers(DEFAULT_USERS)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_USERS))
+    setUsers([])
   }
 
   const showAlert = (type: 'success' | 'danger' | 'info', text: string) => {
@@ -175,8 +151,8 @@ export default function UserManagementPage() {
   // Statistics
   const stats = useMemo(() => {
     const total = users.length
-    const admins = users.filter((u) => u.role === 'ADMIN').length
-    const operateurs = users.filter((u) => u.role === 'OPERATEUR').length
+    const admins = users.filter((u) => (u.role || '').toUpperCase() === 'ADMIN').length
+    const operateurs = users.filter((u) => (u.role || '').toUpperCase() === 'OPERATEUR').length
     const active = users.filter((u) => u.enabled).length
     const activeRate = total > 0 ? Math.round((active / total) * 100) : 0
     return { total, admins, operateurs, active, activeRate }
@@ -292,7 +268,7 @@ export default function UserManagementPage() {
     setUsers(updated)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     setShowCreateModal(false)
-    showAlert('success', `Compte « ${newUser.fullName} » créé avec le rôle ${ROLE_CONFIG[newUser.role].label}.`)
+    showAlert('success', `Compte « ${newUser.fullName} » créé avec le rôle ${getRoleConfig(newUser.role).label}.`)
   }
 
   // Submit Edit User
@@ -402,13 +378,8 @@ export default function UserManagementPage() {
                 </thead>
                 <tbody>
                   {filteredUsers.map((u) => {
-                    const roleCfg = ROLE_CONFIG[u.role]
-                    const initials = u.fullName
-                      .split(' ')
-                      .map((n) => n[0])
-                      .slice(0, 2)
-                      .join('')
-                      .toUpperCase()
+                    const roleCfg = getRoleConfig(u.role)
+                    const initials = getInitials(u.fullName || u.username)
 
                     return (
                       <tr key={u.id}>
@@ -422,8 +393,8 @@ export default function UserManagementPage() {
                               {initials}
                             </div>
                             <div>
-                              <div className='fw-bolder text-gray-900 fs-6'>{u.fullName}</div>
-                              <span className='text-muted fs-8'>Créé le {u.createdAt}</span>
+                              <div className='fw-bolder text-gray-900 fs-6'>{u.fullName || u.username}</div>
+                              <span className='text-muted fs-8'>Créé le {u.createdAt || '-'}</span>
                             </div>
                           </div>
                         </td>
@@ -567,7 +538,7 @@ export default function UserManagementPage() {
                     <div className='row g-3'>
                       {(['OPERATEUR', 'ADMIN'] as UserRole[]).map((r) => {
                         const isSelected = formData.role === r
-                        const cfg = ROLE_CONFIG[r]
+                        const cfg = getRoleConfig(r)
                         return (
                           <div className='col-md-6' key={r}>
                             <div
@@ -706,7 +677,7 @@ export default function UserManagementPage() {
                     <div className='row g-3'>
                       {(['OPERATEUR', 'ADMIN'] as UserRole[]).map((r) => {
                         const isSelected = formData.role === r
-                        const cfg = ROLE_CONFIG[r]
+                        const cfg = getRoleConfig(r)
                         return (
                           <div className='col-md-6' key={r}>
                             <div

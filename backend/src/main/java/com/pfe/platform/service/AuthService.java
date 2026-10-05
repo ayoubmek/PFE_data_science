@@ -50,23 +50,4 @@ public class AuthService implements UserDetailsService {
         String token = jwtUtil.generateToken(user);
         return new AuthDTO.AuthResponse(token, user);
     }
-
-    public AuthDTO.AuthResponse register(AuthDTO.RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Nom d'utilisateur déjà utilisé");
-        }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email déjà utilisé");
-        }
-        User user = User.builder()
-            .username(request.getUsername())
-            .password(passwordEncoder.encode(request.getPassword()))
-            .fullName(request.getFullName())
-            .email(request.getEmail())
-            .role(request.getRole())
-            .build();
-        userRepository.save(user);
-        String token = jwtUtil.generateToken(user);
-        return new AuthDTO.AuthResponse(token, user);
-    }
 }

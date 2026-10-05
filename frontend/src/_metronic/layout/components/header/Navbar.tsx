@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { toAbsoluteUrl } from '../../../helpers'
-import { HeaderUserMenu, ThemeModeSwitcher } from '../../../partials'
+import { HeaderUserMenu } from '../../../partials'
 import { useLayout } from '../../core'
 
 
@@ -12,11 +12,6 @@ const Navbar = () => {
 
   return (
     <div className='app-navbar flex-shrink-0 d-flex align-items-center'>
-
-      {}
-      <div className={clsx('app-navbar-item', itemClass)}>
-        <ThemeModeSwitcher toggleBtnClass={clsx('btn-active-light-primary btn-custom')} />
-      </div>
 
       {}
       <div className={clsx('app-navbar-item', itemClass)}>

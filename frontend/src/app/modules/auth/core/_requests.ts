@@ -21,17 +21,4 @@ export function getUserByToken(token: string) {
       api_token: token
     } as any
   })
-}
-
-export function register(
-  email: string, firstname: string, lastname: string,
-  password: string, password_confirmation: string
-) {
-  return axios.post(`${API_URL}/register`, {
-    email, first_name: firstname, last_name: lastname, password, password_confirmation,
-  })
-}
-
-export function requestPassword(email: string) {
-  return axios.post<{ result: boolean }>(`${API_URL}/forgot_password`, { email })
-}
+}

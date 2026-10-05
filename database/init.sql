@@ -98,5 +98,5 @@ CREATE NONCLUSTERED INDEX IX_ml_predictions_date_horizon
 ON ml_production_predictions (forecast_date ASC, horizon_days ASC);
 GO
 
-PRINT 'PFE Platform schema created successfully in dbDWH.';
+PRINT 'Nexora schema created successfully in dbDWH.';
 GO

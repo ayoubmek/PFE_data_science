@@ -58,36 +58,21 @@ const ThemeModeContext = createContext<ThemeModeContextType>({
 const useThemeMode = () => useContext(ThemeModeContext)
 
 const ThemeModeProvider = ({children}: {children: React.ReactNode}) => {
-  const [mode, setMode] = useState<ThemeModeType>(defaultThemeMode.mode)
-  const [menuMode, setMenuMode] = useState<ThemeModeType>(defaultThemeMode.menuMode)
-
-  const updateMode = (_mode: ThemeModeType, saveInLocalStorage: boolean = true) => {
-    setMode(_mode)
-    if (saveInLocalStorage && localStorage) {
-      localStorage.setItem(themeModelSKey, _mode)
-    }
-
-    if (saveInLocalStorage) {
-      const updatedMode = _mode === 'system' ? systemMode : _mode
-      document.documentElement.setAttribute('data-bs-theme', updatedMode)
-    }
-    ThemeModeComponent.init()
-  }
-
-  const updateMenuMode = (_menuMode: ThemeModeType, saveInLocalStorage: boolean = true) => {
-    setMenuMode(_menuMode)
-    if (saveInLocalStorage && localStorage) {
-      localStorage.setItem(themeMenuModeLSKey, _menuMode)
-    }
-  }
-
   useEffect(() => {
-    updateMode(mode, false)
-    updateMenuMode(menuMode, false)
+    document.documentElement.setAttribute('data-bs-theme', 'light')
+    if (localStorage) {
+      localStorage.removeItem(themeModelSKey)
+      localStorage.removeItem(themeMenuModeLSKey)
+    }
   }, [])
 
   return (
-    <ThemeModeContext.Provider value={{mode, menuMode, updateMode, updateMenuMode}}>
+    <ThemeModeContext.Provider value={{
+      mode: 'light',
+      menuMode: 'light',
+      updateMode: () => {},
+      updateMenuMode: () => {}
+    }}>
       {children}
     </ThemeModeContext.Provider>
   )
