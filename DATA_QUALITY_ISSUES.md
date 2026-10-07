@@ -1,17 +1,22 @@
-# Rapport sur la Qualité des Données — `ASTOCKDATE_RAW.csv` (Grand Volume)
+# Rapport sur la Qualité des Données — `ASTOCKDATE_RAW.csv` & `PRODUCTION_RAW.csv` (Plein Volume Industriel)
 
-## 📌 Présentation du Jeu de Données Brut
-Ce document récapitule l'ensemble des problèmes de qualité de données introduits volontairement dans le fichier grand volume **`ASTOCKDATE_RAW.csv`** (51,500 lignes).
+## 📌 Présentation des Jeux de Données Bruts
+Ce document récapitule l'ensemble des problèmes de qualité de données introduits dans les fichiers grands volumes :
+- **`ASTOCKDATE_RAW.csv`** : **862 065 lignes** (stocks d'inventaire bruts couvrant l'ensemble de l'historique de l'ERP).
+- **`PRODUCTION_RAW.csv`** : **108 105 lignes** (déclarations de fabrication et rebuts des 4 ateliers d'injection).
 
-Ce jeu de données simule une extraction brute ("Raw Export") grand volume directement issue du système d'information client **Microsoft SQL Server / ERP Navision** avant tout nettoyage ou transformation dans **Power Query**.
+Ces jeux de données simulent l'extraction brute ("Raw Export") directement issue du système d'information client **Microsoft SQL Server / ERP Navision** avant tout nettoyage par le pipeline ETL.
 
 ---
 
-## 📊 Synthèse de la Qualité des Données
+## 📊 Synthèse de la Qualité des Données d'Inventaire
 
-* **Nombre total de lignes** : `51,500`
-* **Proportion de données conformes** : `~75% - 80%`
-* **Proportion de données avec anomalies** : `~20% - 25%`
+* **Nombre total de lignes brutes** : `862 065`
+* **Lignes certifiées validées dans le DWH** : `836 319` (adossées aux 814 065 relevés de `dbDWH.dbo.ASTOCKDATE`)
+* **Taux de rétention qualité** : `97,01 %`
+* **Doublons éliminés** : `22 912`
+* **Identifiants manquants purgés** : `1 200`
+* **Dates invalides rejetées** : `1 634`
 
 ---
 

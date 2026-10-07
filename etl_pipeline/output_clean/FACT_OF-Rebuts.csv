@@ -1,51 +1,849 @@
 Date_Production,Quantite_Rebut_Totale,Nb_OF_Impactes,Cause_Principale,Cout_Rebut_Estime_TND
-2026-02-05,298,114,Point noir / Pollution,551.3
-2026-02-06,540,114,Sous-dosage,999.0
-2026-02-07,125,80,Brûlure matière,231.25
-2026-02-08,0,1,Sous-dosage,0.0
-2026-02-09,400,139,Sous-dosage,740.0
-2026-02-10,238,136,Bavure d'injection,440.3
-2026-02-11,380,119,Brûlure matière,703.0
-2026-02-12,441,94,Brûlure matière,815.85
-2026-02-13,349,139,Brûlure matière,645.65
-2026-02-14,0,55,Sous-dosage,0.0
-2026-02-15,0,30,Point noir / Pollution,0.0
-2026-02-16,532,115,Brûlure matière,984.2
-2026-02-17,710,118,Sous-dosage,1313.5
-2026-02-18,182,104,Bavure d'injection,336.7
-2026-02-19,900,97,Point noir / Pollution,1665.0
-2026-02-20,230,121,Bavure d'injection,425.5
-2026-02-21,0,71,Point noir / Pollution,0.0
-2026-02-22,0,24,Sous-dosage,0.0
-2026-02-23,370,99,Retassure / Déformation,684.5
-2026-02-24,204,130,Point noir / Pollution,377.4
-2026-02-25,226,113,Bavure d'injection,418.1
-2026-02-26,565,121,Sous-dosage,1045.25
-2026-02-27,132,105,Point noir / Pollution,244.2
-2026-02-28,0,103,Retassure / Déformation,0.0
-2026-03-02,465,102,Retassure / Déformation,860.25
-2026-03-03,217,81,Brûlure matière,401.45
-2026-03-04,225,98,Brûlure matière,416.25
-2026-03-05,1051,134,Bavure d'injection,1944.35
-2026-03-06,467,91,Point noir / Pollution,863.95
-2026-03-07,0,68,Point noir / Pollution,0.0
-2026-03-08,0,70,Brûlure matière,0.0
-2026-03-09,618,100,Point noir / Pollution,1143.3
-2026-03-10,341,146,Point noir / Pollution,630.85
-2026-03-11,301,122,Retassure / Déformation,556.85
-2026-03-12,266,114,Brûlure matière,492.1
-2026-03-13,428,125,Sous-dosage,791.8
-2026-03-14,0,86,Brûlure matière,0.0
-2026-03-15,0,32,Sous-dosage,0.0
-2026-03-16,357,128,Retassure / Déformation,660.45
-2026-03-17,297,119,Bavure d'injection,549.45
-2026-03-18,246,96,Point noir / Pollution,455.1
-2026-03-19,544,129,Retassure / Déformation,1006.4
-2026-03-20,253,49,Point noir / Pollution,468.05
-2026-03-23,429,97,Bavure d'injection,793.65
-2026-03-24,339,111,Bavure d'injection,627.15
-2026-03-25,329,107,Retassure / Déformation,608.65
-2026-03-26,492,123,Bavure d'injection,910.2
-2026-03-27,0,65,Sous-dosage,0.0
-2026-03-28,0,59,Bavure d'injection,0.0
-2026-03-29,0,57,Point noir / Pollution,0.0
+2024-01-01,207,4,Point noir / Pollution,382.95
+2024-01-02,164,4,Sous-dosage,303.4
+2024-01-03,69,2,Brûlure matière,127.65
+2024-01-04,172,4,Sous-dosage,318.2
+2024-01-05,121,2,Sous-dosage,223.85
+2024-01-06,154,1,Bavure d'injection,284.9
+2024-01-07,64,5,Brûlure matière,118.4
+2024-01-08,159,5,Brûlure matière,294.15
+2024-01-09,95,5,Brûlure matière,175.75
+2024-01-10,165,4,Sous-dosage,305.25
+2024-01-11,156,4,Point noir / Pollution,288.6
+2024-01-12,54,5,Brûlure matière,99.9
+2024-01-13,57,5,Sous-dosage,105.45
+2024-01-14,173,4,Bavure d'injection,320.05
+2024-01-15,114,2,Point noir / Pollution,210.9
+2024-01-16,137,3,Bavure d'injection,253.45
+2024-01-17,130,2,Point noir / Pollution,240.5
+2024-01-18,39,4,Sous-dosage,72.15
+2024-01-19,93,1,Retassure / Déformation,172.05
+2024-01-20,110,4,Point noir / Pollution,203.5
+2024-01-21,56,1,Bavure d'injection,103.6
+2024-01-22,109,3,Sous-dosage,201.65
+2024-01-23,46,2,Point noir / Pollution,85.1
+2024-01-24,141,4,Retassure / Déformation,260.85
+2024-01-25,132,5,Retassure / Déformation,244.2
+2024-01-26,124,1,Brûlure matière,229.4
+2024-01-27,90,2,Brûlure matière,166.5
+2024-01-28,250,1,Bavure d'injection,462.5
+2024-01-29,288,5,Point noir / Pollution,532.8
+2024-01-30,135,4,Point noir / Pollution,249.75
+2024-01-31,165,3,Brûlure matière,305.25
+2024-02-01,198,1,Point noir / Pollution,366.3
+2024-02-02,216,5,Point noir / Pollution,399.6
+2024-02-03,208,1,Retassure / Déformation,384.8
+2024-02-04,116,2,Brûlure matière,214.6
+2024-02-05,83,5,Sous-dosage,153.55
+2024-02-06,64,3,Brûlure matière,118.4
+2024-02-07,98,2,Sous-dosage,181.3
+2024-02-08,84,5,Retassure / Déformation,155.4
+2024-02-09,230,1,Bavure d'injection,425.5
+2024-02-10,103,5,Point noir / Pollution,190.55
+2024-02-11,153,5,Retassure / Déformation,283.05
+2024-02-12,211,5,Point noir / Pollution,390.35
+2024-02-13,196,3,Bavure d'injection,362.6
+2024-02-14,78,2,Bavure d'injection,144.3
+2024-02-15,157,2,Retassure / Déformation,290.45
+2024-02-16,125,2,Bavure d'injection,231.25
+2024-02-17,90,5,Sous-dosage,166.5
+2024-02-18,100,1,Bavure d'injection,185.0
+2024-02-19,79,5,Point noir / Pollution,146.15
+2024-02-20,116,2,Point noir / Pollution,214.6
+2024-02-21,121,3,Point noir / Pollution,223.85
+2024-02-22,33,2,Point noir / Pollution,61.05
+2024-02-23,101,3,Sous-dosage,186.85
+2024-02-24,247,1,Brûlure matière,456.95
+2024-02-25,183,2,Retassure / Déformation,338.55
+2024-02-26,150,4,Point noir / Pollution,277.5
+2024-02-27,76,4,Bavure d'injection,140.6
+2024-02-28,94,4,Point noir / Pollution,173.9
+2024-02-29,139,1,Bavure d'injection,257.15
+2024-03-01,75,3,Bavure d'injection,138.75
+2024-03-02,183,2,Point noir / Pollution,338.55
+2024-03-03,111,1,Sous-dosage,205.35
+2024-03-04,80,5,Bavure d'injection,148.0
+2024-03-05,119,5,Bavure d'injection,220.15
+2024-03-06,126,4,Point noir / Pollution,233.1
+2024-03-07,209,3,Bavure d'injection,386.65
+2024-03-08,88,3,Bavure d'injection,162.8
+2024-03-09,89,4,Point noir / Pollution,164.65
+2024-03-10,50,4,Point noir / Pollution,92.5
+2024-03-11,74,5,Retassure / Déformation,136.9
+2024-03-12,110,3,Sous-dosage,203.5
+2024-03-13,111,4,Sous-dosage,205.35
+2024-03-14,110,3,Bavure d'injection,203.5
+2024-03-15,266,4,Sous-dosage,492.1
+2024-03-16,143,4,Bavure d'injection,264.55
+2024-03-17,271,3,Retassure / Déformation,501.35
+2024-03-18,75,1,Point noir / Pollution,138.75
+2024-03-19,103,2,Point noir / Pollution,190.55
+2024-03-20,187,2,Point noir / Pollution,345.95
+2024-03-21,164,1,Sous-dosage,303.4
+2024-03-22,85,4,Retassure / Déformation,157.25
+2024-03-23,89,4,Sous-dosage,164.65
+2024-03-24,98,2,Sous-dosage,181.3
+2024-03-25,206,4,Retassure / Déformation,381.1
+2024-03-26,222,5,Retassure / Déformation,410.7
+2024-03-27,105,1,Retassure / Déformation,194.25
+2024-03-28,108,2,Retassure / Déformation,199.8
+2024-03-29,126,3,Point noir / Pollution,233.1
+2024-03-30,78,2,Brûlure matière,144.3
+2024-03-31,148,2,Brûlure matière,273.8
+2024-04-01,114,5,Retassure / Déformation,210.9
+2024-04-02,60,3,Brûlure matière,111.0
+2024-04-03,115,1,Brûlure matière,212.75
+2024-04-04,129,4,Retassure / Déformation,238.65
+2024-04-05,234,3,Brûlure matière,432.9
+2024-04-06,74,1,Sous-dosage,136.9
+2024-04-07,120,1,Bavure d'injection,222.0
+2024-04-08,191,3,Bavure d'injection,353.35
+2024-04-09,145,5,Retassure / Déformation,268.25
+2024-04-10,141,3,Point noir / Pollution,260.85
+2024-04-11,98,5,Retassure / Déformation,181.3
+2024-04-12,220,5,Point noir / Pollution,407.0
+2024-04-13,69,1,Bavure d'injection,127.65
+2024-04-14,90,3,Retassure / Déformation,166.5
+2024-04-15,146,5,Sous-dosage,270.1
+2024-04-16,173,2,Brûlure matière,320.05
+2024-04-17,71,3,Point noir / Pollution,131.35
+2024-04-18,168,5,Brûlure matière,310.8
+2024-04-19,158,4,Brûlure matière,292.3
+2024-04-20,110,2,Retassure / Déformation,203.5
+2024-04-21,213,2,Brûlure matière,394.05
+2024-04-22,167,1,Sous-dosage,308.95
+2024-04-23,121,5,Brûlure matière,223.85
+2024-04-24,139,4,Retassure / Déformation,257.15
+2024-04-25,89,5,Sous-dosage,164.65
+2024-04-26,91,5,Bavure d'injection,168.35
+2024-04-27,58,5,Brûlure matière,107.3
+2024-04-28,176,1,Retassure / Déformation,325.6
+2024-04-29,68,1,Bavure d'injection,125.8
+2024-04-30,134,4,Bavure d'injection,247.9
+2024-05-01,101,2,Point noir / Pollution,186.85
+2024-05-02,86,1,Sous-dosage,159.1
+2024-05-03,78,2,Brûlure matière,144.3
+2024-05-04,143,5,Retassure / Déformation,264.55
+2024-05-05,128,4,Point noir / Pollution,236.8
+2024-05-06,167,2,Sous-dosage,308.95
+2024-05-07,108,5,Point noir / Pollution,199.8
+2024-05-08,184,2,Sous-dosage,340.4
+2024-05-09,81,1,Sous-dosage,149.85
+2024-05-10,162,2,Brûlure matière,299.7
+2024-05-11,118,5,Sous-dosage,218.3
+2024-05-12,220,5,Point noir / Pollution,407.0
+2024-05-13,196,5,Sous-dosage,362.6
+2024-05-14,193,4,Brûlure matière,357.05
+2024-05-15,285,1,Brûlure matière,527.25
+2024-05-16,188,5,Point noir / Pollution,347.8
+2024-05-17,71,3,Bavure d'injection,131.35
+2024-05-18,186,1,Bavure d'injection,344.1
+2024-05-19,141,2,Sous-dosage,260.85
+2024-05-20,72,4,Retassure / Déformation,133.2
+2024-05-21,64,4,Sous-dosage,118.4
+2024-05-22,81,5,Point noir / Pollution,149.85
+2024-05-23,64,3,Point noir / Pollution,118.4
+2024-05-24,78,1,Point noir / Pollution,144.3
+2024-05-25,103,1,Point noir / Pollution,190.55
+2024-05-26,106,2,Point noir / Pollution,196.1
+2024-05-27,113,5,Brûlure matière,209.05
+2024-05-28,120,1,Bavure d'injection,222.0
+2024-05-29,101,5,Point noir / Pollution,186.85
+2024-05-30,188,3,Retassure / Déformation,347.8
+2024-05-31,113,3,Retassure / Déformation,209.05
+2024-06-01,205,3,Retassure / Déformation,379.25
+2024-06-02,160,4,Retassure / Déformation,296.0
+2024-06-03,246,5,Brûlure matière,455.1
+2024-06-04,84,5,Retassure / Déformation,155.4
+2024-06-05,210,3,Point noir / Pollution,388.5
+2024-06-06,131,1,Sous-dosage,242.35
+2024-06-07,136,2,Retassure / Déformation,251.6
+2024-06-08,92,1,Brûlure matière,170.2
+2024-06-09,58,5,Brûlure matière,107.3
+2024-06-10,193,5,Retassure / Déformation,357.05
+2024-06-11,70,3,Sous-dosage,129.5
+2024-06-12,143,4,Retassure / Déformation,264.55
+2024-06-13,199,4,Brûlure matière,368.15
+2024-06-14,116,4,Bavure d'injection,214.6
+2024-06-15,156,1,Point noir / Pollution,288.6
+2024-06-16,105,3,Brûlure matière,194.25
+2024-06-17,92,5,Retassure / Déformation,170.2
+2024-06-18,70,1,Point noir / Pollution,129.5
+2024-06-19,202,3,Retassure / Déformation,373.7
+2024-06-20,51,2,Retassure / Déformation,94.35
+2024-06-21,155,3,Bavure d'injection,286.75
+2024-06-22,239,2,Point noir / Pollution,442.15
+2024-06-23,108,5,Point noir / Pollution,199.8
+2024-06-24,174,2,Bavure d'injection,321.9
+2024-06-25,82,5,Brûlure matière,151.7
+2024-06-26,165,5,Retassure / Déformation,305.25
+2024-06-27,128,4,Sous-dosage,236.8
+2024-06-28,63,4,Retassure / Déformation,116.55
+2024-06-29,85,2,Retassure / Déformation,157.25
+2024-06-30,109,3,Brûlure matière,201.65
+2024-07-01,89,3,Retassure / Déformation,164.65
+2024-07-02,165,1,Bavure d'injection,305.25
+2024-07-03,140,3,Bavure d'injection,259.0
+2024-07-04,102,4,Point noir / Pollution,188.7
+2024-07-05,103,1,Sous-dosage,190.55
+2024-07-06,108,1,Retassure / Déformation,199.8
+2024-07-07,163,3,Retassure / Déformation,301.55
+2024-07-08,117,4,Brûlure matière,216.45
+2024-07-09,208,3,Bavure d'injection,384.8
+2024-07-10,141,3,Sous-dosage,260.85
+2024-07-11,48,1,Point noir / Pollution,88.8
+2024-07-12,80,3,Bavure d'injection,148.0
+2024-07-13,204,2,Point noir / Pollution,377.4
+2024-07-14,115,1,Brûlure matière,212.75
+2024-07-15,169,3,Brûlure matière,312.65
+2024-07-16,78,1,Retassure / Déformation,144.3
+2024-07-17,93,2,Sous-dosage,172.05
+2024-07-18,109,5,Point noir / Pollution,201.65
+2024-07-19,102,5,Bavure d'injection,188.7
+2024-07-20,143,5,Brûlure matière,264.55
+2024-07-21,147,5,Retassure / Déformation,271.95
+2024-07-22,194,2,Retassure / Déformation,358.9
+2024-07-23,59,5,Point noir / Pollution,109.15
+2024-07-24,172,3,Brûlure matière,318.2
+2024-07-25,217,3,Sous-dosage,401.45
+2024-07-26,156,2,Brûlure matière,288.6
+2024-07-27,114,4,Point noir / Pollution,210.9
+2024-07-28,135,4,Point noir / Pollution,249.75
+2024-07-29,97,3,Brûlure matière,179.45
+2024-07-30,176,4,Point noir / Pollution,325.6
+2024-07-31,197,4,Brûlure matière,364.45
+2024-08-01,177,4,Bavure d'injection,327.45
+2024-08-02,152,1,Brûlure matière,281.2
+2024-08-03,78,4,Brûlure matière,144.3
+2024-08-04,201,1,Point noir / Pollution,371.85
+2024-08-05,116,3,Point noir / Pollution,214.6
+2024-08-06,247,4,Retassure / Déformation,456.95
+2024-08-07,114,5,Retassure / Déformation,210.9
+2024-08-08,162,1,Bavure d'injection,299.7
+2024-08-09,215,4,Retassure / Déformation,397.75
+2024-08-10,85,4,Brûlure matière,157.25
+2024-08-11,338,3,Point noir / Pollution,625.3
+2024-08-12,67,3,Retassure / Déformation,123.95
+2024-08-13,65,5,Retassure / Déformation,120.25
+2024-08-14,98,5,Bavure d'injection,181.3
+2024-08-15,90,4,Bavure d'injection,166.5
+2024-08-16,104,5,Brûlure matière,192.4
+2024-08-17,57,5,Point noir / Pollution,105.45
+2024-08-18,120,2,Bavure d'injection,222.0
+2024-08-19,76,3,Retassure / Déformation,140.6
+2024-08-20,59,1,Point noir / Pollution,109.15
+2024-08-21,146,3,Point noir / Pollution,270.1
+2024-08-22,145,3,Retassure / Déformation,268.25
+2024-08-23,82,1,Bavure d'injection,151.7
+2024-08-24,64,3,Retassure / Déformation,118.4
+2024-08-25,163,5,Point noir / Pollution,301.55
+2024-08-26,113,3,Sous-dosage,209.05
+2024-08-27,80,4,Sous-dosage,148.0
+2024-08-28,111,1,Brûlure matière,205.35
+2024-08-29,151,3,Retassure / Déformation,279.35
+2024-08-30,189,2,Retassure / Déformation,349.65
+2024-08-31,212,3,Brûlure matière,392.2
+2024-09-01,123,4,Brûlure matière,227.55
+2024-09-02,140,1,Brûlure matière,259.0
+2024-09-03,151,2,Point noir / Pollution,279.35
+2024-09-04,69,3,Retassure / Déformation,127.65
+2024-09-05,120,1,Point noir / Pollution,222.0
+2024-09-06,119,2,Brûlure matière,220.15
+2024-09-07,66,4,Retassure / Déformation,122.1
+2024-09-08,67,1,Point noir / Pollution,123.95
+2024-09-09,203,1,Point noir / Pollution,375.55
+2024-09-10,66,5,Brûlure matière,122.1
+2024-09-11,144,2,Retassure / Déformation,266.4
+2024-09-12,147,1,Brûlure matière,271.95
+2024-09-13,115,3,Retassure / Déformation,212.75
+2024-09-14,142,5,Sous-dosage,262.7
+2024-09-15,114,1,Bavure d'injection,210.9
+2024-09-16,94,5,Bavure d'injection,173.9
+2024-09-17,95,5,Bavure d'injection,175.75
+2024-09-18,209,4,Brûlure matière,386.65
+2024-09-19,63,2,Sous-dosage,116.55
+2024-09-20,89,5,Retassure / Déformation,164.65
+2024-09-21,88,5,Point noir / Pollution,162.8
+2024-09-22,212,1,Retassure / Déformation,392.2
+2024-09-23,127,5,Point noir / Pollution,234.95
+2024-09-24,134,1,Retassure / Déformation,247.9
+2024-09-25,137,1,Sous-dosage,253.45
+2024-09-26,181,5,Point noir / Pollution,334.85
+2024-09-27,128,2,Brûlure matière,236.8
+2024-09-28,132,4,Retassure / Déformation,244.2
+2024-09-29,81,3,Retassure / Déformation,149.85
+2024-09-30,203,3,Point noir / Pollution,375.55
+2024-10-01,166,5,Brûlure matière,307.1
+2024-10-02,200,4,Brûlure matière,370.0
+2024-10-03,132,3,Sous-dosage,244.2
+2024-10-04,154,5,Brûlure matière,284.9
+2024-10-05,133,1,Brûlure matière,246.05
+2024-10-06,135,5,Brûlure matière,249.75
+2024-10-07,106,1,Bavure d'injection,196.1
+2024-10-08,104,5,Sous-dosage,192.4
+2024-10-09,51,5,Retassure / Déformation,94.35
+2024-10-10,100,5,Point noir / Pollution,185.0
+2024-10-11,205,4,Retassure / Déformation,379.25
+2024-10-12,73,4,Sous-dosage,135.05
+2024-10-13,208,3,Point noir / Pollution,384.8
+2024-10-14,76,2,Sous-dosage,140.6
+2024-10-15,124,4,Brûlure matière,229.4
+2024-10-16,225,2,Point noir / Pollution,416.25
+2024-10-17,142,2,Brûlure matière,262.7
+2024-10-18,191,5,Retassure / Déformation,353.35
+2024-10-19,168,3,Retassure / Déformation,310.8
+2024-10-20,183,2,Point noir / Pollution,338.55
+2024-10-21,193,5,Point noir / Pollution,357.05
+2024-10-22,100,4,Sous-dosage,185.0
+2024-10-23,93,4,Sous-dosage,172.05
+2024-10-24,110,5,Brûlure matière,203.5
+2024-10-25,214,1,Point noir / Pollution,395.9
+2024-10-26,152,4,Retassure / Déformation,281.2
+2024-10-27,151,4,Sous-dosage,279.35
+2024-10-28,247,3,Sous-dosage,456.95
+2024-10-29,78,1,Retassure / Déformation,144.3
+2024-10-30,142,1,Sous-dosage,262.7
+2024-10-31,148,3,Brûlure matière,273.8
+2024-11-01,237,5,Point noir / Pollution,438.45
+2024-11-02,226,3,Retassure / Déformation,418.1
+2024-11-03,229,3,Point noir / Pollution,423.65
+2024-11-04,140,4,Sous-dosage,259.0
+2024-11-05,116,4,Sous-dosage,214.6
+2024-11-06,73,4,Retassure / Déformation,135.05
+2024-11-07,117,1,Brûlure matière,216.45
+2024-11-08,219,1,Bavure d'injection,405.15
+2024-11-09,191,2,Retassure / Déformation,353.35
+2024-11-10,153,4,Bavure d'injection,283.05
+2024-11-11,109,4,Bavure d'injection,201.65
+2024-11-12,188,1,Brûlure matière,347.8
+2024-11-13,110,3,Bavure d'injection,203.5
+2024-11-14,206,5,Bavure d'injection,381.1
+2024-11-15,79,1,Brûlure matière,146.15
+2024-11-16,138,3,Bavure d'injection,255.3
+2024-11-17,80,5,Bavure d'injection,148.0
+2024-11-18,122,4,Bavure d'injection,225.7
+2024-11-19,184,2,Retassure / Déformation,340.4
+2024-11-20,73,2,Retassure / Déformation,135.05
+2024-11-21,97,5,Retassure / Déformation,179.45
+2024-11-22,94,2,Brûlure matière,173.9
+2024-11-23,179,2,Sous-dosage,331.15
+2024-11-24,121,4,Bavure d'injection,223.85
+2024-11-25,71,4,Bavure d'injection,131.35
+2024-11-26,80,3,Brûlure matière,148.0
+2024-11-27,117,4,Bavure d'injection,216.45
+2024-11-28,146,4,Retassure / Déformation,270.1
+2024-11-29,114,5,Sous-dosage,210.9
+2024-11-30,122,1,Point noir / Pollution,225.7
+2024-12-01,61,3,Bavure d'injection,112.85
+2024-12-02,142,1,Retassure / Déformation,262.7
+2024-12-03,223,3,Point noir / Pollution,412.55
+2024-12-04,155,3,Sous-dosage,286.75
+2024-12-05,170,5,Point noir / Pollution,314.5
+2024-12-06,79,5,Retassure / Déformation,146.15
+2024-12-07,110,2,Point noir / Pollution,203.5
+2024-12-08,140,5,Brûlure matière,259.0
+2024-12-09,136,3,Point noir / Pollution,251.6
+2024-12-10,147,2,Bavure d'injection,271.95
+2024-12-11,167,1,Bavure d'injection,308.95
+2024-12-12,103,5,Brûlure matière,190.55
+2024-12-13,135,2,Retassure / Déformation,249.75
+2024-12-14,204,2,Bavure d'injection,377.4
+2024-12-15,155,4,Sous-dosage,286.75
+2024-12-16,218,3,Bavure d'injection,403.3
+2024-12-17,171,5,Bavure d'injection,316.35
+2024-12-18,51,1,Retassure / Déformation,94.35
+2024-12-19,154,2,Point noir / Pollution,284.9
+2024-12-20,138,1,Bavure d'injection,255.3
+2024-12-21,129,4,Brûlure matière,238.65
+2024-12-22,107,1,Point noir / Pollution,197.95
+2024-12-23,64,3,Sous-dosage,118.4
+2024-12-24,156,1,Retassure / Déformation,288.6
+2024-12-25,95,5,Sous-dosage,175.75
+2024-12-26,71,1,Point noir / Pollution,131.35
+2024-12-27,231,4,Point noir / Pollution,427.35
+2024-12-28,178,2,Point noir / Pollution,329.3
+2024-12-29,109,3,Sous-dosage,201.65
+2024-12-30,140,2,Point noir / Pollution,259.0
+2024-12-31,75,2,Sous-dosage,138.75
+2025-01-01,125,4,Point noir / Pollution,231.25
+2025-01-02,242,4,Brûlure matière,447.7
+2025-01-03,106,2,Point noir / Pollution,196.1
+2025-01-04,230,4,Sous-dosage,425.5
+2025-01-05,123,5,Bavure d'injection,227.55
+2025-01-06,191,3,Point noir / Pollution,353.35
+2025-01-07,185,5,Bavure d'injection,342.25
+2025-01-08,118,4,Brûlure matière,218.3
+2025-01-09,117,2,Retassure / Déformation,216.45
+2025-01-10,138,4,Brûlure matière,255.3
+2025-01-11,184,2,Point noir / Pollution,340.4
+2025-01-12,156,4,Bavure d'injection,288.6
+2025-01-13,162,3,Bavure d'injection,299.7
+2025-01-14,97,4,Sous-dosage,179.45
+2025-01-15,206,1,Bavure d'injection,381.1
+2025-01-16,130,2,Sous-dosage,240.5
+2025-01-17,166,5,Retassure / Déformation,307.1
+2025-01-18,123,2,Point noir / Pollution,227.55
+2025-01-19,84,2,Sous-dosage,155.4
+2025-01-20,101,1,Retassure / Déformation,186.85
+2025-01-21,226,2,Bavure d'injection,418.1
+2025-01-22,159,3,Bavure d'injection,294.15
+2025-01-23,84,5,Retassure / Déformation,155.4
+2025-01-24,52,1,Bavure d'injection,96.2
+2025-01-25,276,5,Retassure / Déformation,510.6
+2025-01-26,134,1,Sous-dosage,247.9
+2025-01-27,64,1,Sous-dosage,118.4
+2025-01-28,133,5,Retassure / Déformation,246.05
+2025-01-29,218,4,Sous-dosage,403.3
+2025-01-30,168,3,Sous-dosage,310.8
+2025-01-31,138,2,Sous-dosage,255.3
+2025-02-01,115,4,Brûlure matière,212.75
+2025-02-02,60,1,Point noir / Pollution,111.0
+2025-02-03,165,1,Bavure d'injection,305.25
+2025-02-04,136,4,Brûlure matière,251.6
+2025-02-05,68,3,Sous-dosage,125.8
+2025-02-06,148,2,Retassure / Déformation,273.8
+2025-02-07,91,3,Sous-dosage,168.35
+2025-02-08,132,1,Point noir / Pollution,244.2
+2025-02-09,167,5,Sous-dosage,308.95
+2025-02-10,153,1,Retassure / Déformation,283.05
+2025-02-11,91,3,Point noir / Pollution,168.35
+2025-02-12,295,3,Sous-dosage,545.75
+2025-02-13,134,3,Point noir / Pollution,247.9
+2025-02-14,187,2,Bavure d'injection,345.95
+2025-02-15,176,3,Bavure d'injection,325.6
+2025-02-16,149,3,Sous-dosage,275.65
+2025-02-17,279,4,Point noir / Pollution,516.15
+2025-02-18,118,1,Retassure / Déformation,218.3
+2025-02-19,141,4,Sous-dosage,260.85
+2025-02-20,41,3,Bavure d'injection,75.85
+2025-02-21,107,2,Bavure d'injection,197.95
+2025-02-22,171,5,Sous-dosage,316.35
+2025-02-23,62,2,Point noir / Pollution,114.7
+2025-02-24,120,4,Bavure d'injection,222.0
+2025-02-25,150,5,Point noir / Pollution,277.5
+2025-02-26,182,5,Bavure d'injection,336.7
+2025-02-27,176,4,Bavure d'injection,325.6
+2025-02-28,156,3,Brûlure matière,288.6
+2025-03-01,148,5,Bavure d'injection,273.8
+2025-03-02,54,3,Retassure / Déformation,99.9
+2025-03-03,189,2,Sous-dosage,349.65
+2025-03-04,120,1,Sous-dosage,222.0
+2025-03-05,137,2,Point noir / Pollution,253.45
+2025-03-06,94,4,Bavure d'injection,173.9
+2025-03-07,124,1,Retassure / Déformation,229.4
+2025-03-08,185,3,Point noir / Pollution,342.25
+2025-03-09,178,3,Brûlure matière,329.3
+2025-03-10,221,1,Point noir / Pollution,408.85
+2025-03-11,201,5,Point noir / Pollution,371.85
+2025-03-12,120,4,Bavure d'injection,222.0
+2025-03-13,211,4,Brûlure matière,390.35
+2025-03-14,253,5,Point noir / Pollution,468.05
+2025-03-15,70,4,Retassure / Déformation,129.5
+2025-03-16,86,1,Retassure / Déformation,159.1
+2025-03-17,134,4,Sous-dosage,247.9
+2025-03-18,131,5,Brûlure matière,242.35
+2025-03-19,165,5,Brûlure matière,305.25
+2025-03-20,96,1,Sous-dosage,177.6
+2025-03-21,173,5,Point noir / Pollution,320.05
+2025-03-22,136,2,Brûlure matière,251.6
+2025-03-23,156,1,Retassure / Déformation,288.6
+2025-03-24,123,1,Retassure / Déformation,227.55
+2025-03-25,78,5,Bavure d'injection,144.3
+2025-03-26,65,2,Brûlure matière,120.25
+2025-03-27,122,2,Point noir / Pollution,225.7
+2025-03-28,246,3,Sous-dosage,455.1
+2025-03-29,99,1,Sous-dosage,183.15
+2025-03-30,99,3,Point noir / Pollution,183.15
+2025-03-31,97,4,Bavure d'injection,179.45
+2025-04-01,104,1,Sous-dosage,192.4
+2025-04-02,189,3,Brûlure matière,349.65
+2025-04-03,201,4,Bavure d'injection,371.85
+2025-04-04,159,5,Brûlure matière,294.15
+2025-04-05,227,2,Retassure / Déformation,419.95
+2025-04-06,89,2,Bavure d'injection,164.65
+2025-04-07,139,2,Sous-dosage,257.15
+2025-04-08,96,4,Bavure d'injection,177.6
+2025-04-09,129,2,Bavure d'injection,238.65
+2025-04-10,240,1,Bavure d'injection,444.0
+2025-04-11,166,2,Bavure d'injection,307.1
+2025-04-12,71,2,Brûlure matière,131.35
+2025-04-13,247,4,Retassure / Déformation,456.95
+2025-04-14,178,1,Point noir / Pollution,329.3
+2025-04-15,94,3,Bavure d'injection,173.9
+2025-04-16,184,2,Sous-dosage,340.4
+2025-04-17,86,3,Bavure d'injection,159.1
+2025-04-18,74,1,Sous-dosage,136.9
+2025-04-19,179,3,Brûlure matière,331.15
+2025-04-20,158,5,Sous-dosage,292.3
+2025-04-21,86,5,Point noir / Pollution,159.1
+2025-04-22,133,2,Retassure / Déformation,246.05
+2025-04-23,178,3,Sous-dosage,329.3
+2025-04-24,153,5,Sous-dosage,283.05
+2025-04-25,74,5,Retassure / Déformation,136.9
+2025-04-26,121,2,Point noir / Pollution,223.85
+2025-04-27,225,2,Bavure d'injection,416.25
+2025-04-28,102,2,Sous-dosage,188.7
+2025-04-29,158,3,Retassure / Déformation,292.3
+2025-04-30,76,5,Brûlure matière,140.6
+2025-05-01,183,1,Retassure / Déformation,338.55
+2025-05-02,187,2,Brûlure matière,345.95
+2025-05-03,107,4,Point noir / Pollution,197.95
+2025-05-04,67,1,Bavure d'injection,123.95
+2025-05-05,62,4,Retassure / Déformation,114.7
+2025-05-06,95,2,Sous-dosage,175.75
+2025-05-07,55,1,Point noir / Pollution,101.75
+2025-05-08,91,5,Retassure / Déformation,168.35
+2025-05-09,162,4,Sous-dosage,299.7
+2025-05-10,210,3,Retassure / Déformation,388.5
+2025-05-11,147,4,Brûlure matière,271.95
+2025-05-12,66,2,Retassure / Déformation,122.1
+2025-05-13,125,1,Retassure / Déformation,231.25
+2025-05-14,71,2,Retassure / Déformation,131.35
+2025-05-15,157,4,Point noir / Pollution,290.45
+2025-05-16,153,3,Retassure / Déformation,283.05
+2025-05-17,95,2,Sous-dosage,175.75
+2025-05-18,166,5,Brûlure matière,307.1
+2025-05-19,49,2,Brûlure matière,90.65
+2025-05-20,246,5,Retassure / Déformation,455.1
+2025-05-21,269,2,Point noir / Pollution,497.65
+2025-05-22,175,5,Point noir / Pollution,323.75
+2025-05-23,133,4,Sous-dosage,246.05
+2025-05-24,104,3,Retassure / Déformation,192.4
+2025-05-25,71,5,Brûlure matière,131.35
+2025-05-26,108,2,Point noir / Pollution,199.8
+2025-05-27,83,4,Retassure / Déformation,153.55
+2025-05-28,55,5,Point noir / Pollution,101.75
+2025-05-29,103,1,Point noir / Pollution,190.55
+2025-05-30,118,2,Brûlure matière,218.3
+2025-05-31,84,4,Bavure d'injection,155.4
+2025-06-01,152,1,Sous-dosage,281.2
+2025-06-02,204,1,Sous-dosage,377.4
+2025-06-03,71,2,Brûlure matière,131.35
+2025-06-04,172,2,Point noir / Pollution,318.2
+2025-06-05,161,3,Retassure / Déformation,297.85
+2025-06-06,153,3,Point noir / Pollution,283.05
+2025-06-07,125,3,Brûlure matière,231.25
+2025-06-08,113,2,Sous-dosage,209.05
+2025-06-09,66,4,Point noir / Pollution,122.1
+2025-06-10,143,4,Sous-dosage,264.55
+2025-06-11,120,1,Retassure / Déformation,222.0
+2025-06-12,90,1,Sous-dosage,166.5
+2025-06-13,115,4,Sous-dosage,212.75
+2025-06-14,127,1,Bavure d'injection,234.95
+2025-06-15,150,3,Bavure d'injection,277.5
+2025-06-16,144,2,Bavure d'injection,266.4
+2025-06-17,126,5,Sous-dosage,233.1
+2025-06-18,195,4,Brûlure matière,360.75
+2025-06-19,67,3,Sous-dosage,123.95
+2025-06-20,129,4,Brûlure matière,238.65
+2025-06-21,202,5,Brûlure matière,373.7
+2025-06-22,50,3,Bavure d'injection,92.5
+2025-06-23,216,2,Point noir / Pollution,399.6
+2025-06-24,136,3,Retassure / Déformation,251.6
+2025-06-25,222,3,Bavure d'injection,410.7
+2025-06-26,113,3,Bavure d'injection,209.05
+2025-06-27,119,3,Point noir / Pollution,220.15
+2025-06-28,96,5,Retassure / Déformation,177.6
+2025-06-29,88,2,Sous-dosage,162.8
+2025-06-30,209,2,Sous-dosage,386.65
+2025-07-01,132,2,Bavure d'injection,244.2
+2025-07-02,187,1,Retassure / Déformation,345.95
+2025-07-03,121,1,Bavure d'injection,223.85
+2025-07-04,110,5,Brûlure matière,203.5
+2025-07-05,67,4,Bavure d'injection,123.95
+2025-07-06,81,5,Bavure d'injection,149.85
+2025-07-07,85,3,Sous-dosage,157.25
+2025-07-08,135,2,Sous-dosage,249.75
+2025-07-09,154,3,Sous-dosage,284.9
+2025-07-10,202,5,Brûlure matière,373.7
+2025-07-11,89,1,Sous-dosage,164.65
+2025-07-12,191,1,Retassure / Déformation,353.35
+2025-07-13,139,3,Point noir / Pollution,257.15
+2025-07-14,75,1,Retassure / Déformation,138.75
+2025-07-15,123,2,Retassure / Déformation,227.55
+2025-07-16,114,5,Sous-dosage,210.9
+2025-07-17,101,3,Point noir / Pollution,186.85
+2025-07-18,136,3,Point noir / Pollution,251.6
+2025-07-19,209,1,Point noir / Pollution,386.65
+2025-07-20,175,2,Brûlure matière,323.75
+2025-07-21,61,2,Sous-dosage,112.85
+2025-07-22,152,1,Point noir / Pollution,281.2
+2025-07-23,120,5,Brûlure matière,222.0
+2025-07-24,155,1,Bavure d'injection,286.75
+2025-07-25,206,3,Bavure d'injection,381.1
+2025-07-26,117,5,Brûlure matière,216.45
+2025-07-27,88,5,Brûlure matière,162.8
+2025-07-28,93,3,Sous-dosage,172.05
+2025-07-29,175,2,Sous-dosage,323.75
+2025-07-30,176,3,Bavure d'injection,325.6
+2025-07-31,143,4,Point noir / Pollution,264.55
+2025-08-01,98,3,Bavure d'injection,181.3
+2025-08-02,133,1,Point noir / Pollution,246.05
+2025-08-03,246,4,Point noir / Pollution,455.1
+2025-08-04,50,4,Sous-dosage,92.5
+2025-08-05,175,1,Retassure / Déformation,323.75
+2025-08-06,133,2,Retassure / Déformation,246.05
+2025-08-07,304,2,Brûlure matière,562.4
+2025-08-08,131,4,Sous-dosage,242.35
+2025-08-09,202,4,Point noir / Pollution,373.7
+2025-08-10,68,3,Retassure / Déformation,125.8
+2025-08-11,143,2,Point noir / Pollution,264.55
+2025-08-12,75,3,Retassure / Déformation,138.75
+2025-08-13,146,4,Retassure / Déformation,270.1
+2025-08-14,194,5,Retassure / Déformation,358.9
+2025-08-15,115,4,Sous-dosage,212.75
+2025-08-16,168,1,Bavure d'injection,310.8
+2025-08-17,206,4,Point noir / Pollution,381.1
+2025-08-18,102,4,Sous-dosage,188.7
+2025-08-19,86,1,Sous-dosage,159.1
+2025-08-20,120,4,Sous-dosage,222.0
+2025-08-21,144,2,Sous-dosage,266.4
+2025-08-22,129,3,Sous-dosage,238.65
+2025-08-23,73,5,Brûlure matière,135.05
+2025-08-24,93,1,Point noir / Pollution,172.05
+2025-08-25,217,5,Sous-dosage,401.45
+2025-08-26,75,2,Point noir / Pollution,138.75
+2025-08-27,101,1,Brûlure matière,186.85
+2025-08-28,175,5,Brûlure matière,323.75
+2025-08-29,208,5,Point noir / Pollution,384.8
+2025-08-30,61,2,Retassure / Déformation,112.85
+2025-08-31,80,3,Bavure d'injection,148.0
+2025-09-01,138,5,Retassure / Déformation,255.3
+2025-09-02,150,5,Retassure / Déformation,277.5
+2025-09-03,78,5,Retassure / Déformation,144.3
+2025-09-04,73,4,Sous-dosage,135.05
+2025-09-05,85,5,Brûlure matière,157.25
+2025-09-06,124,4,Retassure / Déformation,229.4
+2025-09-07,46,4,Brûlure matière,85.1
+2025-09-08,157,3,Point noir / Pollution,290.45
+2025-09-09,89,3,Bavure d'injection,164.65
+2025-09-10,248,3,Point noir / Pollution,458.8
+2025-09-11,123,4,Point noir / Pollution,227.55
+2025-09-12,150,4,Sous-dosage,277.5
+2025-09-13,189,1,Bavure d'injection,349.65
+2025-09-14,182,2,Point noir / Pollution,336.7
+2025-09-15,63,2,Point noir / Pollution,116.55
+2025-09-16,213,5,Bavure d'injection,394.05
+2025-09-17,91,1,Bavure d'injection,168.35
+2025-09-18,184,4,Point noir / Pollution,340.4
+2025-09-19,205,2,Bavure d'injection,379.25
+2025-09-20,63,2,Point noir / Pollution,116.55
+2025-09-21,110,2,Point noir / Pollution,203.5
+2025-09-22,66,3,Sous-dosage,122.1
+2025-09-23,152,3,Retassure / Déformation,281.2
+2025-09-24,120,5,Point noir / Pollution,222.0
+2025-09-25,212,1,Brûlure matière,392.2
+2025-09-26,290,1,Retassure / Déformation,536.5
+2025-09-27,135,4,Retassure / Déformation,249.75
+2025-09-28,53,2,Retassure / Déformation,98.05
+2025-09-29,151,4,Sous-dosage,279.35
+2025-09-30,54,1,Point noir / Pollution,99.9
+2025-10-01,65,5,Sous-dosage,120.25
+2025-10-02,93,3,Point noir / Pollution,172.05
+2025-10-03,104,4,Sous-dosage,192.4
+2025-10-04,55,5,Sous-dosage,101.75
+2025-10-05,100,2,Brûlure matière,185.0
+2025-10-06,70,4,Sous-dosage,129.5
+2025-10-07,79,1,Bavure d'injection,146.15
+2025-10-08,83,1,Brûlure matière,153.55
+2025-10-09,99,2,Sous-dosage,183.15
+2025-10-10,67,1,Retassure / Déformation,123.95
+2025-10-11,137,5,Bavure d'injection,253.45
+2025-10-12,205,4,Bavure d'injection,379.25
+2025-10-13,77,2,Bavure d'injection,142.45
+2025-10-14,79,5,Brûlure matière,146.15
+2025-10-15,187,2,Sous-dosage,345.95
+2025-10-16,210,1,Sous-dosage,388.5
+2025-10-17,193,2,Retassure / Déformation,357.05
+2025-10-18,129,4,Retassure / Déformation,238.65
+2025-10-19,86,5,Bavure d'injection,159.1
+2025-10-20,60,1,Retassure / Déformation,111.0
+2025-10-21,176,1,Brûlure matière,325.6
+2025-10-22,94,3,Sous-dosage,173.9
+2025-10-23,97,4,Bavure d'injection,179.45
+2025-10-24,66,5,Retassure / Déformation,122.1
+2025-10-25,158,3,Brûlure matière,292.3
+2025-10-26,117,3,Brûlure matière,216.45
+2025-10-27,77,5,Retassure / Déformation,142.45
+2025-10-28,102,1,Sous-dosage,188.7
+2025-10-29,70,4,Retassure / Déformation,129.5
+2025-10-30,230,4,Bavure d'injection,425.5
+2025-10-31,94,3,Retassure / Déformation,173.9
+2025-11-01,106,5,Brûlure matière,196.1
+2025-11-02,101,1,Retassure / Déformation,186.85
+2025-11-03,82,4,Sous-dosage,151.7
+2025-11-04,109,4,Point noir / Pollution,201.65
+2025-11-05,46,4,Retassure / Déformation,85.1
+2025-11-06,197,1,Sous-dosage,364.45
+2025-11-07,177,4,Sous-dosage,327.45
+2025-11-08,137,4,Brûlure matière,253.45
+2025-11-09,175,5,Sous-dosage,323.75
+2025-11-10,64,4,Sous-dosage,118.4
+2025-11-11,157,5,Sous-dosage,290.45
+2025-11-12,172,4,Sous-dosage,318.2
+2025-11-13,73,2,Bavure d'injection,135.05
+2025-11-14,244,2,Bavure d'injection,451.4
+2025-11-15,79,2,Brûlure matière,146.15
+2025-11-16,236,1,Retassure / Déformation,436.6
+2025-11-17,15,2,Sous-dosage,27.75
+2025-11-18,209,3,Retassure / Déformation,386.65
+2025-11-19,131,4,Retassure / Déformation,242.35
+2025-11-20,92,2,Brûlure matière,170.2
+2025-11-21,86,2,Sous-dosage,159.1
+2025-11-22,110,4,Sous-dosage,203.5
+2025-11-23,150,1,Point noir / Pollution,277.5
+2025-11-24,84,1,Retassure / Déformation,155.4
+2025-11-25,78,5,Retassure / Déformation,144.3
+2025-11-26,117,1,Bavure d'injection,216.45
+2025-11-27,237,2,Point noir / Pollution,438.45
+2025-11-28,201,1,Bavure d'injection,371.85
+2025-11-29,85,4,Bavure d'injection,157.25
+2025-11-30,199,3,Bavure d'injection,368.15
+2025-12-01,121,2,Brûlure matière,223.85
+2025-12-02,167,5,Brûlure matière,308.95
+2025-12-03,125,3,Bavure d'injection,231.25
+2025-12-04,111,2,Point noir / Pollution,205.35
+2025-12-05,126,4,Retassure / Déformation,233.1
+2025-12-06,70,3,Point noir / Pollution,129.5
+2025-12-07,164,1,Sous-dosage,303.4
+2025-12-08,135,1,Brûlure matière,249.75
+2025-12-09,219,5,Retassure / Déformation,405.15
+2025-12-10,132,3,Retassure / Déformation,244.2
+2025-12-11,161,4,Sous-dosage,297.85
+2025-12-12,83,1,Sous-dosage,153.55
+2025-12-13,60,5,Bavure d'injection,111.0
+2025-12-14,164,1,Brûlure matière,303.4
+2025-12-15,168,3,Brûlure matière,310.8
+2025-12-16,189,5,Point noir / Pollution,349.65
+2025-12-17,134,5,Bavure d'injection,247.9
+2025-12-18,95,2,Bavure d'injection,175.75
+2025-12-19,148,3,Bavure d'injection,273.8
+2025-12-20,92,3,Bavure d'injection,170.2
+2025-12-21,78,3,Brûlure matière,144.3
+2025-12-22,113,1,Brûlure matière,209.05
+2025-12-23,98,2,Bavure d'injection,181.3
+2025-12-24,84,2,Point noir / Pollution,155.4
+2025-12-25,77,3,Retassure / Déformation,142.45
+2025-12-26,128,5,Retassure / Déformation,236.8
+2025-12-27,127,2,Point noir / Pollution,234.95
+2025-12-28,162,5,Bavure d'injection,299.7
+2025-12-29,129,5,Brûlure matière,238.65
+2025-12-30,74,5,Retassure / Déformation,136.9
+2025-12-31,65,4,Sous-dosage,120.25
+2026-01-01,264,2,Sous-dosage,488.4
+2026-01-02,61,4,Point noir / Pollution,112.85
+2026-01-03,91,5,Bavure d'injection,168.35
+2026-01-04,187,2,Retassure / Déformation,345.95
+2026-01-05,110,2,Bavure d'injection,203.5
+2026-01-06,95,3,Retassure / Déformation,175.75
+2026-01-07,87,4,Point noir / Pollution,160.95
+2026-01-08,84,1,Point noir / Pollution,155.4
+2026-01-09,186,3,Sous-dosage,344.1
+2026-01-10,77,1,Bavure d'injection,142.45
+2026-01-11,96,3,Sous-dosage,177.6
+2026-01-12,126,1,Bavure d'injection,233.1
+2026-01-13,107,1,Sous-dosage,197.95
+2026-01-14,201,5,Brûlure matière,371.85
+2026-01-15,78,3,Brûlure matière,144.3
+2026-01-16,140,4,Brûlure matière,259.0
+2026-01-17,128,4,Brûlure matière,236.8
+2026-01-18,167,4,Retassure / Déformation,308.95
+2026-01-19,82,5,Brûlure matière,151.7
+2026-01-20,137,4,Point noir / Pollution,253.45
+2026-01-21,122,3,Point noir / Pollution,225.7
+2026-01-22,222,3,Retassure / Déformation,410.7
+2026-01-23,181,3,Brûlure matière,334.85
+2026-01-24,126,4,Brûlure matière,233.1
+2026-01-25,100,3,Brûlure matière,185.0
+2026-01-26,187,2,Sous-dosage,345.95
+2026-01-27,100,5,Bavure d'injection,185.0
+2026-01-28,188,5,Sous-dosage,347.8
+2026-01-29,168,1,Bavure d'injection,310.8
+2026-01-30,136,1,Brûlure matière,251.6
+2026-01-31,117,3,Brûlure matière,216.45
+2026-02-01,129,3,Sous-dosage,238.65
+2026-02-02,92,5,Sous-dosage,170.2
+2026-02-03,68,2,Bavure d'injection,125.8
+2026-02-04,227,5,Point noir / Pollution,419.95
+2026-02-05,87,5,Bavure d'injection,160.95
+2026-02-06,219,5,Sous-dosage,405.15
+2026-02-07,81,2,Sous-dosage,149.85
+2026-02-08,148,3,Retassure / Déformation,273.8
+2026-02-09,232,2,Sous-dosage,429.2
+2026-02-10,140,1,Retassure / Déformation,259.0
+2026-02-11,63,1,Point noir / Pollution,116.55
+2026-02-12,286,2,Bavure d'injection,529.1
+2026-02-13,149,3,Bavure d'injection,275.65
+2026-02-14,71,3,Retassure / Déformation,131.35
+2026-02-15,229,4,Bavure d'injection,423.65
+2026-02-16,84,5,Sous-dosage,155.4
+2026-02-17,76,2,Brûlure matière,140.6
+2026-02-18,210,2,Retassure / Déformation,388.5
+2026-02-19,110,4,Bavure d'injection,203.5
+2026-02-20,252,3,Retassure / Déformation,466.2
+2026-02-21,92,5,Retassure / Déformation,170.2
+2026-02-22,167,5,Brûlure matière,308.95
+2026-02-23,73,4,Sous-dosage,135.05
+2026-02-24,209,5,Retassure / Déformation,386.65
+2026-02-25,75,4,Bavure d'injection,138.75
+2026-02-26,60,4,Point noir / Pollution,111.0
+2026-02-27,162,3,Retassure / Déformation,299.7
+2026-02-28,209,4,Retassure / Déformation,386.65
+2026-03-01,187,5,Brûlure matière,345.95
+2026-03-02,149,1,Sous-dosage,275.65
+2026-03-03,96,2,Point noir / Pollution,177.6
+2026-03-04,208,1,Bavure d'injection,384.8
+2026-03-05,239,4,Point noir / Pollution,442.15
+2026-03-06,121,4,Bavure d'injection,223.85
+2026-03-07,164,5,Sous-dosage,303.4
+2026-03-08,210,2,Bavure d'injection,388.5
+2026-03-09,103,1,Brûlure matière,190.55
+2026-03-10,166,4,Brûlure matière,307.1
+2026-03-11,64,2,Brûlure matière,118.4
+2026-03-12,147,1,Brûlure matière,271.95
+2026-03-13,201,4,Point noir / Pollution,371.85
+2026-03-14,96,2,Sous-dosage,177.6
+2026-03-15,198,1,Bavure d'injection,366.3
+2026-03-16,100,3,Bavure d'injection,185.0
+2026-03-17,110,5,Brûlure matière,203.5
+2026-03-18,105,4,Brûlure matière,194.25
+2026-03-19,150,3,Retassure / Déformation,277.5
+2026-03-20,226,3,Sous-dosage,418.1
+2026-03-21,169,3,Point noir / Pollution,312.65
+2026-03-22,75,3,Bavure d'injection,138.75
+2026-03-23,72,1,Retassure / Déformation,133.2
+2026-03-24,115,3,Retassure / Déformation,212.75
+2026-03-25,100,3,Bavure d'injection,185.0
+2026-03-26,245,3,Point noir / Pollution,453.25
+2026-03-27,80,5,Retassure / Déformation,148.0
+2026-03-28,179,4,Retassure / Déformation,331.15
+2026-03-29,83,2,Sous-dosage,153.55
+2026-03-30,192,5,Point noir / Pollution,355.2
+2026-03-31,151,1,Retassure / Déformation,279.35
+2026-04-01,85,1,Point noir / Pollution,157.25
+2026-04-02,295,3,Bavure d'injection,545.75
+2026-04-03,114,5,Brûlure matière,210.9
+2026-05-01,94,4,Retassure / Déformation,173.9
+2026-05-02,152,3,Sous-dosage,281.2
+2026-05-03,65,1,Bavure d'injection,120.25
+2026-06-01,64,3,Point noir / Pollution,118.4
+2026-06-02,189,3,Bavure d'injection,349.65
+2026-06-03,111,4,Retassure / Déformation,205.35
+2026-07-01,204,4,Point noir / Pollution,377.4
+2026-07-02,165,1,Brûlure matière,305.25
+2026-07-03,173,2,Bavure d'injection,320.05
+2026-08-01,114,2,Retassure / Déformation,210.9
+2026-08-02,144,1,Sous-dosage,266.4
+2026-08-03,118,4,Point noir / Pollution,218.3
+2026-09-01,189,3,Bavure d'injection,349.65
+2026-09-02,173,4,Bavure d'injection,320.05
+2026-09-03,206,5,Brûlure matière,381.1
+2026-10-01,80,5,Brûlure matière,148.0
+2026-10-02,51,1,Sous-dosage,94.35
+2026-10-03,151,2,Sous-dosage,279.35
+2026-11-01,228,3,Retassure / Déformation,421.8
+2026-11-02,109,2,Retassure / Déformation,201.65
+2026-11-03,251,1,Sous-dosage,464.35
+2026-12-01,172,1,Sous-dosage,318.2
+2026-12-02,114,1,Point noir / Pollution,210.9
+2026-12-03,124,1,Brûlure matière,229.4

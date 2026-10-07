@@ -1,9 +1,3 @@
-"""
-Loader Module for the ETL Pipeline.
-Loads transformed DataFrames into Microsoft SQL Server (dbDWH1) tables.
-Supports high-performance batch insertion via fast_executemany and dry-run file exports.
-"""
-
 import logging
 from pathlib import Path
 from typing import Dict
@@ -23,7 +17,6 @@ class DWHLoader:
         self._engine = None
 
     def get_engine(self):
-        """Initializes and returns SQLAlchemy engine."""
         if self._engine is None:
             self._engine = create_engine(
                 self.db_url,
@@ -33,7 +26,6 @@ class DWHLoader:
         return self._engine
 
     def test_connection(self) -> bool:
-        """Tests if the target SQL Server is reachable."""
         try:
             engine = self.get_engine()
             with engine.connect() as conn:
@@ -47,9 +39,6 @@ class DWHLoader:
     def load_table_to_sql(
         self, df: pd.DataFrame, table_name: str, if_exists: str = "replace"
     ) -> int:
-        """
-        Loads a single DataFrame into a SQL Server table.
-        """
         engine = self.get_engine()
         logger.info(f"Loading {len(df):,} rows into SQL Server table '[dbo].[{table_name}]'...")
         df.to_sql(
@@ -64,10 +53,6 @@ class DWHLoader:
         return len(df)
 
     def export_to_clean_files(self, tables: Dict[str, pd.DataFrame]):
-        """
-        Exports clean tables to CSV and Parquet files in the output directory.
-        Used for dry-run mode or offline analysis.
-        """
         logger.info(f"Saving cleaned tables to disk in {self.output_dir}...")
         for name, df in tables.items():
             csv_path = self.output_dir / f"{name}.csv"
@@ -80,23 +65,17 @@ class DWHLoader:
         dry_run: bool = False,
         if_exists: str = "replace",
     ) -> Dict[str, str]:
-        """
-        Loads all 7 tables into SQL Server or exports to files if dry-run.
-        """
         status = {}
-        # Always export files for local reference
         self.export_to_clean_files(tables)
 
         if dry_run:
             logger.info("DRY-RUN mode enabled: skipping live database insertion.")
             return {k: "SAVED_TO_CSV" for k in tables.keys()}
 
-        # Check DB connection
         if not self.test_connection():
             logger.warning("Database unavailable. Cleaned files were saved to disk in 'output_clean/'.")
             return {k: "SAVED_TO_CSV_DB_OFFLINE" for k in tables.keys()}
 
-        # Load into database
         logger.info("=== Loading Cleaned Tables into SQL Server dbDWH1 ===")
         for name, df in tables.items():
             try:

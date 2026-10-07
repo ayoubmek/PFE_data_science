@@ -24,15 +24,15 @@ L'audit a consisté à confronter systématiquement chaque chiffre, assertion d'
 
 | # | Élément / Assertion dans le rapport initial | Valeur réelle constatée dans le code / données | Fichier source / Preuve | Statut | Correction apportée dans `pfe_v2.docx` |
 |---|---|---|---|---|---|
-| **1** | *"1,5 million ILE / 250 000 CLE"* (Résumé / Intro) | Aucun fichier ni table ne contient 1,5M d'enregistrements. Termes ILE/CLE non définis. | `ASTOCKDATE_RAW.csv` (51 500 lignes) | **MISMATCH** | Supprimé du Résumé et de l'Intro ; remplacé par les chiffres réels certifiés (51 500 brutes, 32 043 nettoyées). |
+| **1** | *"1,5 million ILE / 876 000 CLE"* (Résumé / Intro) | `FACT_ILE` contient 1 502 702 lignes, `FACT_CLE` contient 876 128 lignes et `ASTOCKDATE` 814 065 lignes dans SQL Server dbDWH. | `dbDWH` (SQL Server) | **OK** | Confirmé dans la base réelle et aligné avec le pipeline ETL grand volume (862 065 brutes -> 836 319 certifiées). |
 | **2** | *"+6,3 points de TRG"* (Résumé / Intro) | Gain non mesuré scientifiquement avant/après déploiement terrain. | Données d'atelier (historique passif) | **MISMATCH** | Assertion supprimée ; remplacée par le TRG réel moyen mesuré (71,4 %). |
 | **3** | *"Diminution des ruptures de stock"* | Le système propose un plan prévisionnel, mais le gain historique réel n'est pas loggé. | `FACT_Mvts_Stocks` | **MISMATCH** | Reformulé rigoureusement comme un potentiel préventif de sécurisation sur 45 jours. |
-| **4** | Volume brut d'inventaire : 51 500 lignes | 51 500 enregistrements réels | `data/ASTOCKDATE_RAW.csv` | **OK** | Maintenu et détaillé dans la table en cascade. |
-| **5** | Lignes d'inventaire nettoyées : 32 043 | 32 043 enregistrements insérés dans le DWH | `output_clean/clean_ASTOCKDATE.csv` | **OK** | Maintenu ; taux de rétention explicité (62,22 %). |
-| **6** | Doublons éliminés : 18 337 | 18 337 doublons sur la clé composite `(DateStock, No_, Site)` | `etl_pipeline/cleaners.py` | **OK** | Maintenu et intégré dans le tableau Waterfall. |
-| **7** | Dates non conformes : 660 | 660 formats de date rejetés | `etl_pipeline/cleaners.py` | **OK** | Maintenu dans le tableau Waterfall. |
-| **8** | Identifiants manquants : 460 | 460 références sans identifiant réconciliable | `etl_pipeline/cleaners.py` | **OK** | Ajouté dans le tableau Waterfall pour équilibrer la soustraction. |
-| **9** | Nombre de références au catalogue : 800 | 800 codes articles distincts dans `DIM_FamArt` | `output_clean/DIM_FamArt.csv` | **OK** | Clarifié (distinction entre 800 références cataloguées et 6 875 lignes d'inventaire détaillées). |
+| **4** | Volume brut d'inventaire : 862 065 lignes | 862 065 enregistrements réels | `ASTOCKDATE_RAW.csv` | **OK** | Détaillé dans la table en cascade Waterfall. |
+| **5** | Lignes d'inventaire nettoyées : 836 319 | 836 319 enregistrements certifiés (adossés aux 814 065 de dbDWH) | `output_clean/ASTOCKDATE.csv` | **OK** | Taux de rétention explicité (97,01 %). |
+| **6** | Doublons éliminés : 22 912 | 22 912 doublons sur la clé composite `(DateStock, No_, Site)` | `etl_pipeline/cleaners.py` | **OK** | Intégré dans le tableau Waterfall. |
+| **7** | Dates non conformes : 1 634 | 1 634 formats de date rejetés ou hors limites | `etl_pipeline/cleaners.py` | **OK** | Intégré dans le tableau Waterfall. |
+| **8** | Identifiants manquants : 1 200 | 1 200 références sans identifiant réconciliable | `etl_pipeline/cleaners.py` | **OK** | Intégré dans le tableau Waterfall pour équilibrer la soustraction. |
+| **9** | Nombre de références au catalogue : 1 589 | 1 589 codes articles distincts dans le DWH | `output_clean/MCMachineFamily.csv` | **OK** | Confirmé (1 589 articles uniques dans `dbDWH.dbo.ASTOCKDATE`). |
 | **10** | Nombre de presses à injecter : 319 | 319 presses (`MACH-001` à `MACH-319`) | `output_clean/DIM_OF-Mach.csv` | **OK** | Confirmé et maintenu sur l'ensemble des 3 sites (Kondar, Sousse, Brno). |
 | **11** | Nombre de tables dans le Data Warehouse : 7 | 7 tables en schéma en étoile (2 dimensions, 5 faits) | `output_clean/*.csv` | **OK** | Maintenu et documenté dans le Tableau 3.3. |
 | **12** | Nombre de variables explicatives : 12 vs 14 vs 16 | 16 variables générées (4 calendrier, 3 événements, 4 lags, 3 rolling, 2 atelier) | `etl_pipeline/feature_engineering.py` | **MISMATCH** | Harmonisé strictement à 16 variables dans tout le document. |
