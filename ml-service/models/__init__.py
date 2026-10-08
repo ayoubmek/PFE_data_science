@@ -5,7 +5,6 @@ from .random_forest_model import RandomForestModel
 from .prophet_model import ProphetModel
 from .arima_model import ARIMAModel
 from .isolation_forest_model import IsolationForestModel
-from .kmeans_clustering import KMeansClusteringModel
 
 __all__ = [
     "LinearRegressionModel",
@@ -13,7 +12,6 @@ __all__ = [
     "ProphetModel",
     "ARIMAModel",
     "IsolationForestModel",
-    "KMeansClusteringModel",
     "compute_eval_metrics",
     "print_metrics_summary",
     "load_production_series",

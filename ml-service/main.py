@@ -20,7 +20,6 @@ from models import (
     ProphetModel,
     ARIMAModel,
     IsolationForestModel,
-    KMeansClusteringModel,
 )
 
 app = FastAPI(
@@ -229,13 +228,35 @@ def simulate_scenario(request: ScenarioRequest):
 def analyze_abc():
     try:
         df = get_stock_df()
-        res = KMeansClusteringModel.analyze_pareto_abc(df)
-        res["data_source"] = "Base de données live" if get_engine() else "Données simulées"
-        return res
+        df["valeur"] = (df["quantite"] * df["cout"]).round(2)
+        df_work = df[df["valeur"] > 0].sort_values("valeur", ascending=False).reset_index(drop=True)
+        if df_work.empty:
+            raise HTTPException(404, "Aucune donnée de stock avec valeur positive.")
+        total_val = float(df_work["valeur"].sum())
+        df_work["cum_pct"] = (df_work["valeur"].cumsum() / total_val * 100).round(2)
+        df_work["classe"] = df_work["cum_pct"].apply(lambda p: "A" if p <= 80.0 else ("B" if p <= 95.0 else "C"))
+        classes_summary = []
+        for cl in ["A", "B", "C"]:
+            sub = df_work[df_work["classe"] == cl]
+            nb = len(sub)
+            val = float(sub["valeur"].sum())
+            classes_summary.append({
+                "classe": cl,
+                "nb_articles": nb,
+                "pct_articles": round((nb / len(df_work)) * 100, 1),
+                "valeur_totale": round(val, 2),
+                "pct_valeur": round((val / total_val) * 100, 1),
+            })
+        cols = [c for c in ["reference", "designation", "categorie", "quantite", "cout", "valeur", "classe"] if c in df_work.columns]
+        return {
+            "total_articles": len(df_work),
+            "valeur_totale": round(total_val, 2),
+            "classes": classes_summary,
+            "top10": df_work.head(10)[cols].to_dict("records"),
+            "data_source": "Base de données live" if get_engine() else "Données simulées"
+        }
     except HTTPException:
         raise
-    except ValueError as e:
-        raise HTTPException(404, str(e))
     except Exception as e:
         raise HTTPException(500, str(e))
 @app.get("/analyze/stats")
@@ -271,16 +292,6 @@ def analyze_stats():
             },
             "data_source": "Base de données live" if get_engine() else "Données simulées",
         }
-    except Exception as e:
-        raise HTTPException(500, str(e))
-@app.get("/cluster/items")
-def cluster_items():
-    try:
-        df = get_stock_df()
-        km = KMeansClusteringModel(n_clusters=3, random_state=42)
-        res = km.cluster_stock_df(df)
-        res["data_source"] = "Base de données live" if get_engine() else "Données simulées"
-        return res
     except Exception as e:
         raise HTTPException(500, str(e))
 @app.get("/insights")
@@ -369,11 +380,6 @@ class CustomPredictionRequest(BaseModel):
     data: List[CustomDataPoint]
     horizon: int = 30
 
-class CustomClusterRequest(BaseModel):
-    data: List[dict]
-    features: List[str]
-    n_clusters: int = 3
-
 @app.post("/predict/custom")
 def predict_custom(req: CustomPredictionRequest):
     try:
@@ -441,19 +447,6 @@ def predict_custom(req: CustomPredictionRequest):
         raise
     except Exception as e:
         raise HTTPException(500, f"Erreur de prédiction : {str(e)}")
-
-@app.post("/cluster/custom")
-def cluster_custom(req: CustomClusterRequest):
-    try:
-        return KMeansClusteringModel.cluster_custom(
-            data=req.data,
-            features=req.features,
-            n_clusters=req.n_clusters
-        )
-    except ValueError as e:
-        raise HTTPException(400, str(e))
-    except Exception as e:
-        raise HTTPException(500, f"Erreur de clustering : {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
