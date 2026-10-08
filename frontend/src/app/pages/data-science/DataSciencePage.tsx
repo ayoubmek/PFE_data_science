@@ -43,7 +43,7 @@ const fetchPredictionData = async () => {
 }
 
 export default function DataSciencePage() {
-  const [horizon, setHorizon] = useState<number>(30)
+  const horizon = 30
 
   const { data: result, isLoading: loading } = useQuery(
     ['productionPredictionsRF'],
@@ -274,29 +274,10 @@ export default function DataSciencePage() {
             <i className='bi bi-file-earmark-spreadsheet-fill text-success fs-6'></i>
             <span>Benchmark 4 Modèles (Import)</span>
           </Link>
-          <span className='text-muted fs-7 fw-semibold'>Horizon :</span>
-          <div className='btn-group shadow-sm'>
-            <button
-              type='button'
-              className={`btn btn-sm fw-bold px-4 py-2 ${horizon === 7 ? 'btn-primary' : 'btn-light'}`}
-              onClick={() => setHorizon(7)}
-            >
-              7 Jours
-            </button>
-            <button
-              type='button'
-              className={`btn btn-sm fw-bold px-4 py-2 ${horizon === 14 ? 'btn-primary' : 'btn-light'}`}
-              onClick={() => setHorizon(14)}
-            >
-              14 Jours
-            </button>
-            <button
-              type='button'
-              className={`btn btn-sm fw-bold px-4 py-2 ${horizon === 30 ? 'btn-primary' : 'btn-light'}`}
-              onClick={() => setHorizon(30)}
-            >
-              30 Jours
-            </button>
+          <div className='d-flex align-items-center gap-2 px-3 py-2 bg-light-primary rounded border border-primary border-opacity-25 shadow-sm'>
+            <i className='bi bi-calendar-check text-primary fs-5'></i>
+            <span className='text-gray-800 fs-7 fw-bolder'>Horizon Fixe : <span className='text-primary fs-6'>30 Jours</span></span>
+            <span className='badge badge-primary fw-bold fs-9'>Plan Mensuel</span>
           </div>
         </div>
       </div>

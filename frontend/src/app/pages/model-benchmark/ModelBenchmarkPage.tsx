@@ -75,7 +75,7 @@ const SAMPLE_WORKSHOP_DATA: DataPoint[] = [
 ]
 
 export default function ModelBenchmarkPage() {
-  const [horizon, setHorizon] = useState<number>(30)
+  const horizon = 30
   const [importedData, setImportedData] = useState<DataPoint[]>([])
   const [fileName, setFileName] = useState<string>('')
   const [availableColumns, setAvailableColumns] = useState<string[]>([])
@@ -390,8 +390,8 @@ export default function ModelBenchmarkPage() {
 
     return {
       series: [
-        { name: 'Prophet (Meta) ★', data: prophetSeries },
-        { name: 'Random Forest', data: rfSeries },
+        { name: 'Random Forest (Champion) ★', data: rfSeries },
+        { name: 'Prophet (Meta)', data: prophetSeries },
         { name: 'ARIMA', data: arimaSeries },
         { name: 'Régression Linéaire', data: lrSeries },
       ],
@@ -403,7 +403,7 @@ export default function ModelBenchmarkPage() {
           fontFamily: 'Inter, sans-serif',
           zoom: { enabled: true },
         },
-        colors: ['#7239EA', '#50CD89', '#00A3FF', '#7E8299'],
+        colors: ['#50CD89', '#7239EA', '#00A3FF', '#7E8299'],
         stroke: {
           curve: 'smooth',
           width: [3.5, 2.8, 2.2, 2.0],
@@ -435,7 +435,7 @@ export default function ModelBenchmarkPage() {
           horizontalAlign: 'right',
           fontWeight: 600,
         }
-      }
+      } as any
     }
   }, [benchmarkResult])
 
@@ -659,17 +659,12 @@ export default function ModelBenchmarkPage() {
 
                   <div className='mb-4'>
                     <label className='form-label fw-bold fs-7 text-gray-700'>Horizon de prévision :</label>
-                    <div className='d-flex gap-2'>
-                      {[7, 14, 30, 45].map((h) => (
-                        <button
-                          key={h}
-                          type='button'
-                          className={`btn btn-sm flex-fill fw-bolder ${horizon === h ? 'btn-primary' : 'btn-outline btn-outline-secondary'}`}
-                          onClick={() => setHorizon(h)}
-                        >
-                          {h} jours
-                        </button>
-                      ))}
+                    <div className='p-3 bg-light-primary rounded border border-primary border-opacity-25 d-flex align-items-center justify-content-between'>
+                      <div className='d-flex align-items-center gap-2'>
+                        <i className='bi bi-calendar-check text-primary fs-5'></i>
+                        <span className='fw-bolder text-gray-800 fs-7'>Horizon Fixe : <strong className='text-primary'>30 Jours</strong></span>
+                      </div>
+                      <span className='badge badge-primary fw-bold fs-8'>Plan Mensuel Retenu</span>
                     </div>
                   </div>
 
@@ -911,5 +906,3 @@ export default function ModelBenchmarkPage() {
     </div>
   )
 }
-
-export default ModelBenchmarkPage
