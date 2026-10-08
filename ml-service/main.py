@@ -89,8 +89,6 @@ class AnomalyRequest(BaseModel):
     feature_columns: Optional[List[str]] = None
     contamination: Optional[float] = 0.1
 class ScenarioRequest(BaseModel):
-    type: str
-    item_id: Optional[int] = None
     variation_percent: float = 0.0
     horizon: int = 30
 @app.get("/health")
@@ -212,22 +210,19 @@ def simulate_scenario(request: ScenarioRequest):
     try:
         factor = 1 + (request.variation_percent / 100)
         dates  = [datetime.now() + timedelta(days=i) for i in range(1, request.horizon + 1)]
-        if request.type == "stock":
-            base     = 300
-            baseline = [round(max(0, base - i * 1.5)) for i in range(request.horizon)]
-            scenario = [round(max(0, v * factor)) for v in baseline]
-            return {"type": "stock", "variation_percent": request.variation_percent,
-                    "horizon": request.horizon, "dates": [d.strftime("%Y-%m-%d") for d in dates],
-                    "baseline": baseline, "scenario": scenario,
-                    "impact": f"{'Augmentation' if factor > 1 else 'Réduction'} du stock de {abs(request.variation_percent)}%"}
-        else:
-            baseline = [round(120 * (0 if d.weekday() >= 5 else 1)) for d in dates]
-            scenario = [round(v * factor) for v in baseline]
-            return {"type": "production", "variation_percent": request.variation_percent,
-                    "horizon": request.horizon, "dates": [d.strftime("%Y-%m-%d") for d in dates],
-                    "baseline": baseline, "scenario": scenario,
-                    "total_baseline": sum(baseline), "total_scenario": sum(scenario),
-                    "impact": f"Production {'augmentée' if factor > 1 else 'réduite'} de {abs(request.variation_percent)}%"}
+        baseline = [round(120 * (0 if d.weekday() >= 5 else 1)) for d in dates]
+        scenario = [round(v * factor) for v in baseline]
+        return {
+            "type": "production",
+            "variation_percent": request.variation_percent,
+            "horizon": request.horizon,
+            "dates": [d.strftime("%Y-%m-%d") for d in dates],
+            "baseline": baseline,
+            "scenario": scenario,
+            "total_baseline": sum(baseline),
+            "total_scenario": sum(scenario),
+            "impact": f"Production {'augmentée' if factor > 1 else 'réduite'} de {abs(request.variation_percent)}%",
+        }
     except Exception as e:
         raise HTTPException(500, str(e))
 @app.get("/analyze/abc")

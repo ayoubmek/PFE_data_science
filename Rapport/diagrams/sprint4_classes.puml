@@ -7,7 +7,6 @@ skinparam fontSize 12
 
 class ProphetService {
     + predictProduction(historicalData, horizonDays)
-    + predictStock(historicalData, horizonDays)
     + calculateSeasonality(timeSeries)
     + computeMetrics(actual, predicted)
 }
