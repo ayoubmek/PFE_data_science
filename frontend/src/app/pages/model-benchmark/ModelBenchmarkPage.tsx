@@ -328,48 +328,48 @@ export default function ModelBenchmarkPage() {
       },
       predictions,
       metrics: {
-        prophet: {
-          name: "Prophet (Meta)",
-          mae: 336.6,
-          rmse: 450.9,
-          mape: "4.8%",
-          r2: 0.9824,
-          cv_r2: 0.9785,
-          status: "Modèle Champion Retenu",
-          recommendation: "Excellente capture des saisonnalités hebdomadaires, des postes 3x8 et respect strict du seuil automobile (MAPE < 5%)."
-        },
         random_forest: {
           name: "Random Forest Regressor",
-          mae: 573.9,
-          rmse: 733.3,
-          mape: "7.6%",
-          r2: 0.9534,
-          cv_r2: 0.9490,
-          status: "Très Performant",
-          recommendation: "Modèle d'ensemble robuste sur horizon court, mais accumulation d'erreur récursive sur horizon > 15j."
+          mae: 2467,
+          rmse: 3196,
+          mape: "6.0%",
+          r2: 0.9798,
+          cv_r2: 0.9782,
+          status: "Modèle Champion Retenu",
+          recommendation: "Meilleure précision ponctuelle absolue sur tous les horizons (MAPE 6.0%), modèle champion d'atelier."
         },
-        arima: {
-          name: "ARIMA",
-          mae: 1840.5,
-          rmse: 2420.0,
-          mape: "11.4%",
-          r2: 0.8120,
-          cv_r2: 0.7950,
-          status: "Modèle Comparatif",
-          recommendation: "Modèle linéaire stochastique, moins réactif face aux arrêts et reprises de postes du week-end."
+        prophet: {
+          name: "Prophet (Meta)",
+          mae: 2982,
+          rmse: 3674,
+          mape: "6.7%",
+          r2: 0.9738,
+          cv_r2: 0.9665,
+          status: "Modèle Comparatif (Déployé Power BI)",
+          recommendation: "Décomposition additive explicite (tendance + saisonnalité hebdomadaire) et intervalles de confiance à 95%."
         },
         linear_regression: {
           name: "Régression Linéaire",
-          mae: 2450.0,
-          rmse: 3120.0,
-          mape: "14.2%",
-          r2: 0.7150,
-          cv_r2: 0.7020,
+          mae: 4679,
+          rmse: 6097,
+          mape: "9.8%",
+          r2: 0.9271,
+          cv_r2: 0.9277,
           status: "Baseline de Référence",
           recommendation: "Tendance moyenne globale simple sans modélisation de la cyclicité d'atelier."
+        },
+        arima: {
+          name: "ARIMA",
+          mae: 5321,
+          rmse: 5868,
+          mape: "11.7%",
+          r2: 0.9133,
+          cv_r2: 0.9099,
+          status: "Modèle Comparatif",
+          recommendation: "Modèle linéaire stochastique, moins réactif face aux arrêts et reprises de postes du week-end."
         }
       },
-      best_model: "Prophet"
+      best_model: "Random Forest Regressor"
     }
   }
 
