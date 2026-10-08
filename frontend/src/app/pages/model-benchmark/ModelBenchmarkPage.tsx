@@ -9,7 +9,7 @@ interface DataPoint {
   value: number
 }
 
-interface ModelMetric {
+export interface ModelMetric {
   name: string
   mae: number
   rmse: number
@@ -457,17 +457,17 @@ export default function ModelBenchmarkPage() {
             <div>
               <div className='d-flex align-items-center gap-2 mb-2'>
                 <span className='badge badge-light-primary fw-bolder fs-8 text-uppercase px-3 py-2'>
-                  Nexora IA Studio
+                  Validation Prévisionnelle
                 </span>
                 <span className='badge badge-light-success fw-bolder fs-8 text-uppercase px-3 py-2'>
-                  Multi-Model Benchmark
+                  Séries Temporelles
                 </span>
               </div>
               <h1 className='text-dark fw-bolder fs-2x mb-2'>
-                Comparateur & Benchmark des 4 Modèles IA
+                Comparatif & Benchmark des Modèles Prévisionnels
               </h1>
               <p className='text-muted fs-6 mb-0'>
-                Importez vos fichiers d'atelier (.csv ou .xlsx) ou testez nos données réelles pour évaluer, confronter et valider simultanément les 4 modèles d'intelligence artificielle.
+                Importez vos fichiers d'atelier (.csv ou .xlsx) ou testez nos données réelles pour évaluer, confronter et valider simultanément la performance des 4 modèles prévisionnels.
               </p>
             </div>
 

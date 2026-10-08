@@ -96,24 +96,24 @@ const SidebarMenuMain = () => {
       <div className='menu-item'>
         <div className='menu-content pt-8 pb-2'>
           <span className='menu-section text-muted text-uppercase fs-8 ls-1'>
-            IA / Prévisions
+            Planification
           </span>
         </div>
       </div>
 
       <SidebarMenuItem
         to='/data-science'
-        icon='technology'
-        title='Prévisions IA (Production)'
-        fontIcon='bi-cpu'
+        icon='chart-line'
+        title='Prévisions de Production'
+        fontIcon='bi-calendar-check'
         iconColor='#3B82F6'
       />
 
       <SidebarMenuItem
         to='/model-benchmark'
         icon='chart-pie'
-        title='Benchmark 4 Modèles (Import)'
-        fontIcon='bi-bar-chart-steps'
+        title='Comparatif des Modèles'
+        fontIcon='bi-bar-chart-line'
         iconColor='#10B981'
       />
 
