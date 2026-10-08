@@ -102,30 +102,6 @@ def health():
         "db_connected": db_ok,
         "timestamp": datetime.now().isoformat()
     }
-@app.get("/predict/stock")
-def predict_stock(item_id: int = 1, horizon: int = 30):
-    try:
-        dates = [datetime.now() + timedelta(days=i) for i in range(1, horizon + 1)]
-        base  = random.randint(100, 500)
-        trend = random.uniform(-2, -0.5)
-        noise = base * 0.05
-        predictions, current = [], base
-        for date in dates:
-            current = max(0, current + trend + random.gauss(0, noise))
-            predictions.append({
-                "date": date.strftime("%Y-%m-%d"),
-                "predicted_quantity": round(current, 1),
-                "lower_bound": round(max(0, current - 1.96 * noise), 1),
-                "upper_bound": round(current + 1.96 * noise, 1),
-            })
-        reorder = next((p["date"] for p in predictions if p["predicted_quantity"] < 50), None)
-        return {
-            "item_id": item_id, "horizon_days": horizon, "model": "Prophet",
-            "predictions": predictions, "reorder_alert": reorder,
-            "recommendation": f"Réapprovisionner avant le {reorder}" if reorder else "Stock suffisant"
-        }
-    except Exception as e:
-        raise HTTPException(500, str(e))
 @app.get("/predict/production")
 def predict_production(horizon: int = 30):
     try:
