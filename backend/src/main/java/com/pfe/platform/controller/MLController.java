@@ -48,6 +48,17 @@ public class MLController {
         }
     }
 
+    @PostMapping("/predict/custom")
+    public ResponseEntity<Object> predictCustom(@RequestBody Map<String, Object> payload) {
+        try {
+            return ResponseEntity.ok(
+                client().post().uri("/predict/custom").bodyValue(payload).retrieve().bodyToMono(Object.class).block()
+            );
+        } catch (Exception e) {
+            return unavailable();
+        }
+    }
+
     @PostMapping("/predictions/save")
     public ResponseEntity<Object> savePredictions(@RequestBody Map<String, Object> payload) {
         try {

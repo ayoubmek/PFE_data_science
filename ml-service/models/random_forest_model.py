@@ -16,8 +16,11 @@ from data_loader import load_production_series
 
 class RandomForestModel:
     def __init__(self, n_estimators: int = 50, max_depth: int = 8, random_state: int = 42):
+        self.n_estimators = n_estimators
+        self.max_depth = max_depth
+        self.random_state = random_state
         self.model = RandomForestRegressor(
-            n_estimators=n_estimators, max_depth=max_depth, random_state=random_state
+            n_estimators=self.n_estimators, max_depth=self.max_depth, random_state=self.random_state
         )
         self.n_samples = 0
         self.last_date = None
@@ -79,7 +82,11 @@ class RandomForestModel:
         tscv = TimeSeriesSplit(n_splits=n_splits_actual)
 
         for train_idx, test_idx in tscv.split(self.X_train):
-            fold_rf = RandomForestRegressor(n_estimators=50, max_depth=8, random_state=42)
+            fold_rf = RandomForestRegressor(
+                n_estimators=self.n_estimators,
+                max_depth=self.max_depth,
+                random_state=self.random_state,
+            )
             fold_rf.fit(self.X_train[train_idx], self.y_train[train_idx])
             pred_fold = np.maximum(0, fold_rf.predict(self.X_train[test_idx]))
             cv_scores.append(compute_eval_metrics(self.y_train[test_idx], pred_fold))

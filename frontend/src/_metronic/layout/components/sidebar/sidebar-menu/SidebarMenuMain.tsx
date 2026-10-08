@@ -104,9 +104,17 @@ const SidebarMenuMain = () => {
       <SidebarMenuItem
         to='/data-science'
         icon='technology'
-        title='Prévisions IA (Random Forest)'
+        title='Prévisions IA (Production)'
         fontIcon='bi-cpu'
         iconColor='#3B82F6'
+      />
+
+      <SidebarMenuItem
+        to='/model-benchmark'
+        icon='chart-pie'
+        title='Benchmark 4 Modèles (Import)'
+        fontIcon='bi-bar-chart-steps'
+        iconColor='#10B981'
       />
 
       {/* Administration & Sécurité */}

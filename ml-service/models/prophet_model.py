@@ -37,6 +37,7 @@ class ProphetModel:
 
         ratios = y / np.maximum(1e-3, trend_hist)
         dows = dates.dt.dayofweek.values
+        self.dows = dows
         for d in range(7):
             mask = dows == d
             self.dow_multipliers[d] = float(np.mean(ratios[mask])) if np.any(mask) else 1.0
@@ -85,7 +86,7 @@ class ProphetModel:
             lr_fold = LinearRegression().fit(x[train_idx], self.y_train[train_idx])
             pred_fold = []
             for t in test_idx:
-                dow = t % 7
+                dow = self.dows[t] if self.dows is not None and t < len(self.dows) else (t % 7)
                 mult = self.dow_multipliers.get(dow, 1.0)
                 pred_fold.append(max(0.0, lr_fold.predict([[t]])[0] * mult))
             cv_scores.append(compute_eval_metrics(self.y_train[test_idx], pred_fold))

@@ -21,7 +21,6 @@ from models import (
     ARIMAModel,
     IsolationForestModel,
     KMeansClusteringModel,
-    compute_eval_metrics,
 )
 
 app = FastAPI(

@@ -47,7 +47,7 @@ class IsolationForestModel:
             raise ValueError("Aucune donnee fournie pour la detection.")
 
         df = pd.DataFrame(data)
-        cols = feature_columns or [c for c in df.columns if df[c].dtype in [np.float64, np.int64, float, int]]
+        cols = feature_columns or [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
         if not cols:
             raise ValueError("Aucune colonne numerique trouvee pour l'analyse.")
 

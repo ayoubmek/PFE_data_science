@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import axios from 'axios'
 import Chart from 'react-apexcharts'
 import { useQuery } from 'react-query'
+import { Link } from 'react-router-dom'
 
 const fetchPredictionData = async () => {
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
@@ -263,9 +264,17 @@ export default function DataSciencePage() {
           </span>
         </div>
 
-        {/* Contrôles : Sélecteur d'Horizon */}
+        {/* Contrôles : Sélecteur d'Horizon & Lien Benchmark */}
         <div className='d-flex align-items-center gap-3'>
-          <span className='text-muted fs-7 fw-semibold'>Horizon prévisionnel :</span>
+          <Link
+            to='/model-benchmark'
+            className='btn btn-sm btn-light-success fw-bold d-flex align-items-center gap-2 shadow-sm'
+            title='Importer un fichier CSV/Excel et benchmarker les 4 modèles IA'
+          >
+            <i className='bi bi-file-earmark-spreadsheet-fill text-success fs-6'></i>
+            <span>Benchmark 4 Modèles (Import)</span>
+          </Link>
+          <span className='text-muted fs-7 fw-semibold'>Horizon :</span>
           <div className='btn-group shadow-sm'>
             <button
               type='button'
