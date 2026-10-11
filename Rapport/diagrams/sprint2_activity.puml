@@ -14,7 +14,7 @@ endif
 :Opérateur termine l'ordre de production;
 :Statut = TERMINE;
 :Saisir quantité produite et pièces rebutées;
-:Recalculer le TRG de la machine;
-:Mettre à jour le tableau de bord TRG;
+:Consolider les cadences de la machine;
+:Mettre à jour le tableau de bord de production;
 stop
 @enduml

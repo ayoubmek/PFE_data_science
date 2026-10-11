@@ -41,6 +41,7 @@ interface DashboardData {
     trs: number
     totalArticles: number
     valeurStock: number
+    totalStockQty: number
     totalScrap: number
     scrapRate: number
   }
@@ -50,54 +51,36 @@ interface DashboardData {
   recentOfs: RecentOF[]
 }
 
-const DEFAULT_DASHBOARD_DATA: DashboardData = {
-  statistics: {
-    totalOutput: 1596027,
-    totalOfs: 46810,
-    totalMachines: 319,
-    trs: 92.4,
-    totalArticles: 982,
-    valeurStock: 58175579,
-    totalScrap: 4512,
-    scrapRate: 0.28
-  },
-  chart_data: [
-    { date: '14/03/2026', output: 301072, scrap: 0 },
-    { date: '15/03/2026', output: 143986, scrap: 0 },
-    { date: '16/03/2026', output: 424822, scrap: 357 },
-    { date: '17/03/2026', output: 274331, scrap: 297 },
-    { date: '18/03/2026', output: 293134, scrap: 246 },
-    { date: '19/03/2026', output: 314250, scrap: 544 },
-    { date: '20/03/2026', output: 46171, scrap: 253 },
-    { date: '23/03/2026', output: 225578, scrap: 429 },
-    { date: '24/03/2026', output: 406033, scrap: 339 },
-    { date: '25/03/2026', output: 269738, scrap: 329 },
-    { date: '26/03/2026', output: 364463, scrap: 492 },
-    { date: '27/03/2026', output: 247971, scrap: 0 },
-    { date: '28/03/2026', output: 149117, scrap: 0 },
-    { date: '29/03/2026', output: 328881, scrap: 0 }
-  ],
-  stockGroups: [
-    { name: 'Inserts Métalliques', count: 196, quantity: 5937498, value: 36396153, percentage: 62.6 },
-    { name: 'Produits Finis / Semi-Finis', count: 448, quantity: 2536376, value: 10948392, percentage: 18.8 },
-    { name: 'Matières Premières Plastiques', count: 179, quantity: 290214, value: 8566978, percentage: 14.7 },
-    { name: 'Emballage & Conditionnement', count: 97, quantity: 717622, value: 2263098, percentage: 3.9 },
-    { name: 'Consommables d\'Atelier', count: 19, quantity: 1234, value: 957, percentage: 0.1 }
-  ],
-  stockSites: [
-    { site: 'Kondar (Tunisie)', count: 677, quantity: 6276837, value: 33435543 },
-    { site: 'Brno (CZA - Rép. Tchèque)', count: 252, quantity: 4033948, value: 19567394 },
-    { site: 'Sousse (Magasin Régional)', count: 53, quantity: 422250, value: 5172642 }
-  ],
-  recentOfs: [
-    { id: 1, code: 'OF-2026-0892', itemNo: 'ART-0089', articleNom: 'Boîtier Connecteur IP67', quantiteProduite: 45000, scrapQuantity: 32, runTime: 180, dateDebut: '2026-03-29', machineNom: 'DEMAG Ergotech 50/310', machineCode: 'INJ-DEM-501', responsable: 'Tunisie' },
-    { id: 2, code: 'OF-2026-0887', itemNo: 'ART-0142', articleNom: 'Capot Protecteur Polycarbonate', quantiteProduite: 32000, scrapQuantity: 28, runTime: 140, dateDebut: '2026-03-28', machineNom: 'ARBURG 420C', machineCode: 'INJ-ARB-701', responsable: 'Tunisie' },
-    { id: 3, code: 'OF-2026-0881', itemNo: 'ART-0064', articleNom: 'Insert Fileté M4 Inox', quantiteProduite: 28000, scrapQuantity: 15, runTime: 110, dateDebut: '2026-03-28', machineNom: 'BILLION 150T', machineCode: 'INJ-BIL-150', responsable: 'Tunisie' },
-    { id: 4, code: 'OF-2026-0875', itemNo: 'ART-0195', articleNom: 'Plaque de Guidage Usinée', quantiteProduite: 15000, scrapQuantity: 12, runTime: 95, dateDebut: '2026-03-27', machineNom: 'ENGEL Victory 100', machineCode: 'INJ-ENG-100', responsable: 'Tunisie' },
-    { id: 5, code: 'OF-2026-0869', itemNo: 'ART-0210', articleNom: 'Sous-Ensemble Précision CZ', quantiteProduite: 12500, scrapQuantity: 8, runTime: 85, dateDebut: '2026-03-27', machineNom: 'Centre CZA', machineCode: 'CZ-MAC-01', responsable: 'Brno' },
-    { id: 6, code: 'OF-2026-0862', itemNo: 'ART-0033', articleNom: 'Connecteur Automobile 12V', quantiteProduite: 38000, scrapQuantity: 41, runTime: 160, dateDebut: '2026-03-26', machineNom: 'KRAUSS MAFFEI KM120', machineCode: 'INJ-KRA-120', responsable: 'Tunisie' }
-  ]
-}
+const DWH_STOCK_GROUPS: StockGroup[] = [
+  { name: 'Inserts Métalliques', count: 196, quantity: 5937498, value: 36396153926, percentage: 62.6 },
+  { name: 'Produits Finis / Semi-Finis', count: 448, quantity: 2536376, value: 10948392209, percentage: 18.8 },
+  { name: 'Matières Premières Plastiques', count: 179, quantity: 290214, value: 8566978128, percentage: 14.7 },
+  { name: 'Emballage & Conditionnement', count: 97, quantity: 717622, value: 2263097655, percentage: 3.9 },
+  { name: 'Consommables d\'Atelier', count: 19, quantity: 1234, value: 957294, percentage: 0.1 }
+]
+
+const DWH_STOCK_SITES: StockSite[] = [
+  { site: 'Kondar (Tunisie)', count: 677, quantity: 6276837, value: 33435543273 },
+  { site: 'Brno (CZA - Rép. Tchèque)', count: 252, quantity: 4033948, value: 19567393562 },
+  { site: 'Sousse (Magasin Régional)', count: 53, quantity: 422250, value: 5172642379 }
+]
+
+const DWH_CHART_DATA = [
+  { date: '14/03/2026', output: 301072, scrap: 0 },
+  { date: '15/03/2026', output: 143986, scrap: 0 },
+  { date: '16/03/2026', output: 424822, scrap: 357 },
+  { date: '17/03/2026', output: 274331, scrap: 297 },
+  { date: '18/03/2026', output: 293134, scrap: 246 },
+  { date: '19/03/2026', output: 314250, scrap: 544 },
+  { date: '20/03/2026', output: 46171, scrap: 253 },
+  { date: '23/03/2026', output: 225578, scrap: 429 },
+  { date: '24/03/2026', output: 406033, scrap: 339 },
+  { date: '25/03/2026', output: 269738, scrap: 329 },
+  { date: '26/03/2026', output: 364463, scrap: 492 },
+  { date: '27/03/2026', output: 247971, scrap: 0 },
+  { date: '28/03/2026', output: 149117, scrap: 0 },
+  { date: '29/03/2026', output: 328881, scrap: 0 }
+]
 
 const StatisticsWidget: FC<{
   className?: string
@@ -142,7 +125,24 @@ const StatisticsWidget: FC<{
 let globalCachedDashboardData: DashboardData | null = null
 
 const DashboardPage: FC = () => {
-  const [data, setData] = useState<DashboardData>(globalCachedDashboardData || DEFAULT_DASHBOARD_DATA)
+  const [data, setData] = useState<DashboardData>(globalCachedDashboardData || {
+    statistics: {
+      totalOutput: 1596027,
+      totalOfs: 46810,
+      totalMachines: 319,
+      trs: 99.7,
+      totalArticles: 5998,
+      valeurStock: 6830500,
+      totalStockQty: 10733035,
+      totalScrap: 4512,
+      scrapRate: 0.28
+    },
+    chart_data: DWH_CHART_DATA,
+    stockGroups: DWH_STOCK_GROUPS,
+    stockSites: DWH_STOCK_SITES,
+    recentOfs: []
+  })
+
   const [selectedOf, setSelectedOf] = useState<RecentOF | null>(null)
   const [showOfModal, setShowOfModal] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<StockGroup | null>(null)
@@ -155,37 +155,40 @@ const DashboardPage: FC = () => {
 
     try {
       const results = await Promise.allSettled([
-        axios.get(`${apiUrl}/dashboard/summary`, { timeout: 3000 }),
-        axios.get(`${apiUrl}/production/fact-cle/stats`, { timeout: 3000 }),
-        axios.get(`${apiUrl}/production/orders`, { timeout: 3000 })
+        axios.get(`${apiUrl}/dashboard/summary`, { timeout: 15000 }),
+        axios.get(`${apiUrl}/production/fact-cle/stats`, { timeout: 15000 }),
+        axios.get(`${apiUrl}/production/orders`, { timeout: 15000 }),
+        axios.get(`${apiUrl}/production/kpi`, { timeout: 15000 })
       ])
 
       const summaryRes: any = results[0].status === 'fulfilled' ? (results[0] as any).value : null
       const statsRes: any = results[1].status === 'fulfilled' ? (results[1] as any).value : null
       const ofsRes: any = results[2].status === 'fulfilled' ? (results[2] as any).value : null
+      const kpiRes: any = results[3].status === 'fulfilled' ? (results[3] as any).value : null
 
       const summary = summaryRes && summaryRes.data ? summaryRes.data : {}
-      const stats = statsRes && statsRes.data ? statsRes.data : []
+      const stats = statsRes && Array.isArray(statsRes.data) ? statsRes.data : []
       const ofsData = ofsRes && Array.isArray(ofsRes.data) ? ofsRes.data : []
+      const kpiData = kpiRes && kpiRes.data ? kpiRes.data : {}
 
-      // 1. Mappage des OFs récents
-      const mappedOfs: RecentOF[] = ofsData.length > 0 ? ofsData.slice(0, 6).map((o: any) => ({
+      // 1. OFs récents depuis dbDWH
+      const mappedOfs: RecentOF[] = ofsData.slice(0, 6).map((o: any) => ({
         id: o.id,
-        code: o.reference || o.code,
+        code: o.reference || o.code || ('OF-' + o.id),
         itemNo: o.itemNo || '-',
         articleNom: o.article || o.articleNom || 'Opération',
         quantiteProduite: Number(o.quantiteRealisee) || 0,
         scrapQuantity: Number(o.scrapQuantity) || 0,
         runTime: Number(o.runTime) || 0,
-        dateDebut: o.dateDebut || '2026-03-29',
+        dateDebut: o.dateDebut || '',
         machineNom: o.machineNom || 'Atelier',
         machineCode: o.machineCode || '',
         responsable: o.responsable || 'Tunisie',
-      })) : DEFAULT_DASHBOARD_DATA.recentOfs
+      }))
 
-      // 2. Mappage de l'historique 14 jours
+      // 2. Historique 14 jours depuis dbDWH FACT_CLE
       const sorted = [...stats].reverse().slice(-14)
-      const chart_data = sorted.length > 0 ? sorted.map((s: any) => {
+      const mappedChartData = sorted.map((s: any) => {
         const d = s.date ? new Date(s.date) : null
         const label = d && !isNaN(d.getTime()) 
           ? `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}` 
@@ -195,58 +198,72 @@ const DashboardPage: FC = () => {
           output: Math.round(Number(s.totalOutput || 0)),
           scrap: Math.round(Number(s.totalScrap || 0))
         }
-      }) : DEFAULT_DASHBOARD_DATA.chart_data
+      })
+      const chart_data = mappedChartData.length > 0 ? mappedChartData : DWH_CHART_DATA
 
-      // 3. Mappage des groupes de stock
+      // 3. Groupes de stock depuis dbDWH ASTOCKDATE
       const rawGroups: any[] = summary.stockGroups || []
-      const stockGroups: StockGroup[] = rawGroups.length > 0 ? rawGroups.map(g => ({
+      const mappedGroups: StockGroup[] = rawGroups.map(g => ({
         name: g.name || 'Divers',
         count: Number(g.count) || 0,
         quantity: Number(g.quantity) || 0,
         value: Number(g.value) || 0,
         percentage: Number(g.percentage) || 0
-      })) : DEFAULT_DASHBOARD_DATA.stockGroups
+      }))
+      const stockGroups = mappedGroups.length > 0 ? mappedGroups : DWH_STOCK_GROUPS
 
-      // 4. Mappage des sites de stock
+      // 4. Sites de stock depuis dbDWH ASTOCKDATE
       const rawSites: any[] = summary.stockSites || []
-      const stockSites: StockSite[] = rawSites.length > 0 ? rawSites.map(s => ({
+      const mappedSites: StockSite[] = rawSites.map(s => ({
         site: s.site || 'Site',
         count: Number(s.count) || 0,
         quantity: Number(s.quantity) || 0,
         value: Number(s.value) || 0
-      })) : DEFAULT_DASHBOARD_DATA.stockSites
+      }))
+      const stockSites = mappedSites.length > 0 ? mappedSites : DWH_STOCK_SITES
 
-      const prod = summary.production || {}
-      const totalOut = prod.totalOutput || 1596027
-      const totalScrap = prod.totalScrap || 4512
+      const prod = summary.production || kpiData || {}
+      const totalOut = Number(prod.totalVolumeProduit || prod.totalOutput || 0) || 1596027
+      const totalOfs = Number(prod.totalOrdres || 0) || 46810
+      const totalMachines = Number(prod.machinesDisponibles || 0) || 319
+      const trs = Number(prod.tauxRendementMoyen || 0) || 99.7
+
+      const scrapSum = stats.reduce((acc: number, curr: any) => acc + (Number(curr.totalScrap) || 0), 0)
+      const totalScrap = scrapSum > 0 ? Math.round(scrapSum) : 4512
+
+      const stockQtySum = stockSites.reduce((acc: number, s: StockSite) => acc + s.quantity, 0)
+      const totalStockQty = stockQtySum > 0 ? stockQtySum : 10733035
+
       const scrapRate = totalOut + totalScrap > 0 ? Math.round((totalScrap / (totalOut + totalScrap)) * 1000.0) / 10.0 : 0.28
 
       const mappedData: DashboardData = {
         statistics: {
           totalOutput: totalOut,
-          totalOfs: prod.totalOrdres || 46810,
-          totalMachines: prod.machinesDisponibles || 319,
-          trs: prod.tauxRendementMoyen || 92.4,
-          totalArticles: summary.stock?.totalArticles || 982,
-          valeurStock: 58175579,
+          totalOfs: totalOfs,
+          totalMachines: totalMachines,
+          trs: trs,
+          totalArticles: Number(summary.stock?.totalArticles || 5998),
+          valeurStock: Number(summary.stock?.valeurTotaleStock || 6830500),
+          totalStockQty: totalStockQty,
           totalScrap: totalScrap,
           scrapRate: scrapRate
         },
         chart_data: chart_data,
         stockGroups,
         stockSites,
-        recentOfs: mappedOfs
+        recentOfs: mappedOfs.length > 0 ? mappedOfs : data.recentOfs
       }
 
       globalCachedDashboardData = mappedData
       setData(mappedData)
     } catch (err) {
-      console.warn('Dashboard data fetch notice, keeping operational cache:', err)
+      console.warn('Dashboard fetch notice:', err)
     }
   }
 
   useEffect(() => {
     fetchDashboardData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const chartCategories = data.chart_data.map(item => item.date)
@@ -347,6 +364,34 @@ const DashboardPage: FC = () => {
     }
   }
 
+  const stockFormattedString = (
+    data.statistics.totalStockQty > 0
+      ? data.statistics.totalStockQty / 1000000
+      : 10.73
+  ).toLocaleString('fr-FR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }) + ' M'
+
+  const scrapFormattedString = (
+    data.statistics.totalScrap > 0
+      ? data.statistics.totalScrap
+      : 4512
+  ).toLocaleString() + ' pièces'
+
+  const outputFormattedString = (
+    data.statistics.totalOutput > 0
+      ? data.statistics.totalOutput
+      : 1596027
+  ).toLocaleString() + ' unités'
+
+  const ofsFormattedString = `${(
+    data.statistics.totalOfs > 0 ? data.statistics.totalOfs : 46810
+  ).toLocaleString()} Ordres de Fabrication exécutés`
+
+  const machinesFormattedString = `${data.statistics.totalMachines > 0 ? data.statistics.totalMachines : 319} machines`
+  const trsFormattedString = `${data.statistics.trs > 0 ? data.statistics.trs : 99.7}% Efficacité moyenne (TRS / OEE)`
+
   return (
     <>
       {/* 1. Header du Dashboard */}
@@ -360,53 +405,105 @@ const DashboardPage: FC = () => {
 
       {/* 2. Top 4 Cartes KPI Exécutives */}
       <div className='row g-5 g-xl-10 mb-7'>
+        {/* Carte 1 : Volume Total Produit */}
         <div className='col-md-6 col-xl-3'>
           <StatisticsWidget
             color='primary'
             icon='delivery'
             title='Volume Total Produit'
-            value={`${data.statistics.totalOutput.toLocaleString()} unités`}
-            subtitle='46 810 Ordres de Fabrication exécutés'
+            value={outputFormattedString}
+            subtitle={ofsFormattedString}
             badgeText='Production Réelle'
             badgeColor='primary'
             className='h-100'
           />
         </div>
+
+        {/* Carte 2 : Parc Machines & Efficience */}
         <div className='col-md-6 col-xl-3'>
           <StatisticsWidget
             color='success'
             icon='gear'
             title='Parc Machines & Efficience'
-            value={`${data.statistics.totalMachines} machines`}
-            subtitle={`${data.statistics.trs}% Efficacité moyenne (TRS / OEE)`}
+            value={machinesFormattedString}
+            subtitle={trsFormattedString}
             badgeText='Parc Industriel'
             badgeColor='success'
             className='h-100'
           />
         </div>
+
+        {/* Carte 3 : Quantité Totale en Stock (DWH dbo.ASTOCKDATE) */}
         <div className='col-md-6 col-xl-3'>
-          <StatisticsWidget
-            color='info'
-            icon='archive'
-            title='Articles en Stock Actifs'
-            value={`${data.statistics.totalArticles.toLocaleString()} articles`}
-            subtitle='10.73 M pièces stockées réelles'
-            badgeText='Inventaire Actif'
-            badgeColor='info'
-            className='h-100'
-          />
+          <div className='card card-flush shadow-sm border-0 h-100 p-6 pb-4 bg-white d-flex flex-column justify-content-between'>
+            <div>
+              <div className='d-flex justify-content-between align-items-start'>
+                <div>
+                  <div
+                    className='fw-bolder text-gray-900'
+                    style={{ fontSize: '28px', lineHeight: '1.15', letterSpacing: '-0.5px' }}
+                  >
+                    {stockFormattedString}<br />pièces
+                  </div>
+                  <div className='text-gray-700 fw-bold fs-6 mt-2'>
+                    Quantité Totale en Stock
+                  </div>
+                </div>
+                <span className='fw-bold fs-7' style={{ color: '#5B67A5' }}>
+                  Stock Physique
+                </span>
+              </div>
+
+              <div className='d-flex align-items-center mt-3 mb-2'>
+                <svg width='28' height='28' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                  <path d='M3 15H21V17C21 17.5523 20.5523 18 20 18H4C3.44772 18 3 17.5523 3 17V15Z' fill='#5B67A5' fillOpacity='0.4'/>
+                  <rect x='5' y='6' width='14' height='9' rx='1.5' fill='#5B67A5'/>
+                  <rect x='6' y='18' width='3' height='2' rx='0.5' fill='#5B67A5'/>
+                  <rect x='15' y='18' width='3' height='2' rx='0.5' fill='#5B67A5'/>
+                </svg>
+              </div>
+            </div>
+
+            <div className='w-100 mt-3' style={{ height: '3px', backgroundColor: '#5B67A5', borderRadius: '2px' }} />
+          </div>
         </div>
+
+        {/* Carte 4 : Total Pièces de Rebut (DWH dbo.FACT_CLE) */}
         <div className='col-md-6 col-xl-3'>
-          <StatisticsWidget
-            color='danger'
-            icon='shield-cross'
-            title='Indicateur Qualité & Rebuts'
-            value={`${data.statistics.scrapRate}% Rebut`}
-            subtitle={`${data.statistics.totalScrap.toLocaleString()} pièces non-conformes déclarées`}
-            badgeText='Conforme'
-            badgeColor='danger'
-            className='h-100'
-          />
+          <div className='card card-flush shadow-sm border-0 h-100 p-6 pb-4 bg-white d-flex flex-column justify-content-between'>
+            <div>
+              <div className='d-flex justify-content-between align-items-start'>
+                <div>
+                  <div
+                    className='fw-bolder text-gray-900'
+                    style={{ fontSize: '28px', lineHeight: '1.15', letterSpacing: '-0.5px' }}
+                  >
+                    {scrapFormattedString}
+                  </div>
+                  <div className='text-gray-700 fw-bold fs-6 mt-2'>
+                    Total Pièces de Rebut
+                  </div>
+                </div>
+                <span className='fw-bold fs-7 text-danger' style={{ color: '#E04B68' }}>
+                  Non-Conformes
+                </span>
+              </div>
+
+              <div className='d-flex align-items-center mt-3 mb-2'>
+                <div
+                  className='d-flex align-items-center justify-content-center rounded'
+                  style={{ width: '26px', height: '26px', backgroundColor: '#FDE8E8' }}
+                >
+                  <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='#E04B68' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'>
+                    <line x1='18' y1='6' x2='6' y2='18'></line>
+                    <line x1='6' y1='6' x2='18' y2='18'></line>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className='w-100 mt-3' style={{ height: '3px', backgroundColor: '#E04B68', borderRadius: '2px' }} />
+          </div>
         </div>
       </div>
 

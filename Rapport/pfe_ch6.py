@@ -23,11 +23,11 @@ def get_chapter6():
           ["Priorité", "Tâche de réalisation", "Durée estimée"],
           [
             ["Élevée", "Connexion de Power BI au Data Warehouse et modélisation du schéma analytique", "1 jour"],
-            ["Élevée", "Conception du rapport décisionnel « Supervision de Production & TRG »", "2 jours"],
+            ["Élevée", "Conception du rapport décisionnel « Supervision du Parc Machines »", "2 jours"],
             ["Élevée", "Conception du rapport décisionnel « Prévision des Cadences par IA »", "2 jours"],
             ["Élevée", "Conception du rapport décisionnel « Gestion des Stocks & Alertes »", "2 jours"],
             ["Élevée", "Développement des API REST du portail web (Spring Boot / FastAPI) et vues React", "3 jours"],
-            ["Moyenne", "Écriture des mesures DAX (calcul du TRG, seuils critiques, taux de rotation)", "1 jour"],
+            ["Moyenne", "Écriture des mesures DAX (valorisation de stock, seuils critiques, taux de rotation)", "1 jour"],
             ["Moyenne", "Recette fonctionnelle et évaluation d'utilisabilité auprès des utilisateurs (Administrateurs et Opérateurs)", "2 jours"]
           ],
           [1600, 5666, 1400]
@@ -57,11 +57,11 @@ def get_chapter6():
         pb(),
 
         title2("6.5 Conception des rapports décisionnels Power BI"),
-        title3("6.5.1 Tableau de bord de supervision et TRG"),
-        body("Ce rapport offre une supervision complète du parc de 319 presses à injecter réparties sur les sites de Kondar, Sousse et Brno :"),
-        bullet("**Indicateurs clés d'atelier** : valeur consolidée du TRG d'atelier (moyenne observée de 71,4 % [25]), décomposée en taux de disponibilité (88,2 %), de performance (84,5 %) et de qualité (95,8 %)."),
+        title3("6.5.1 Tableau de bord de supervision du parc machines"),
+        body("Ce rapport offre une supervision complète de l'activité du parc de 319 presses à injecter réparties sur les sites de Kondar, Sousse et Brno :"),
+        bullet("**Indicateurs clés d'atelier** : cadences réelles de production par atelier (moyenne globale de 64 890 pièces/jour), volumes déclarés conformes et taux de rebut moyen (1,85 %)."),
         bullet("**Suivi du parc machines** : décompte des presses en production, en maintenance planifiée ou en arrêt pour changement de moule."),
-        bullet("**Analyse des causes d'arrêt** : diagramme de Pareto des motifs d'interruption (défaillances hydrauliques, surchauffe de fourreau, manque matière)."),
+        bullet("**Analyse des causes d'arrêt** : répartition des motifs d'interruption (défaillances hydrauliques, surchauffe de fourreau, rupture de matière première)."),
         pb(),
 
         title3("6.5.2 Tableau de bord des prévisions de cadence"),
@@ -85,13 +85,13 @@ def get_chapter6():
         ...imageFigure("image/powerbi_3.png", "Figure 6.3 : Vue d'ensemble du tableau de bord décisionnel Power BI Nexora", 540, 260),
         pb(),
 
-        title3("6.6.2 Supervision de la production et TRG"),
-        body("La figure 6.4 montre l'interface de pilotage du parc machines et d'analyse des composantes du TRG :"),
+        title3("6.6.2 Historique et répartition des stocks d'atelier"),
+        body("La figure 6.4 montre l'interface d'historique de stock et d'évolution des valorisations par site de production (Kondar, Sousse, Brno) :"),
         pb(),
-        ...imageFigure("image/powerbi_1.png", "Figure 6.4 : Interface « Supervision de la production et TRG »", 540, 280),
-        body("La figure 6.5 présente la répartition des volumes fabriqués par grande famille de composants plastiques automobiles :"),
+        ...imageFigure("image/powerbi_1.png", "Figure 6.4 : Rapport Power BI « Historique d'évolution des stocks par site »", 540, 280),
+        body("La figure 6.5 présente la vue globale de l'état des stocks d'atelier, la répartition par famille d'articles et les parts par site industriel :"),
         pb(),
-        ...imageFigure("image/powerbi_2.png", "Figure 6.5 : Répartition des volumes d'injection par famille de pièces", 540, 280),
+        ...imageFigure("image/powerbi_2.png", "Figure 6.5 : Rapport Power BI « État de stock global et répartition par famille »", 540, 280),
         pb(),
 
         title3("6.6.3 Prévisions de cadence d'atelier"),
@@ -135,7 +135,7 @@ def get_chapter6():
           ["Cas de test", "Protocole d'exécution", "Résultat constaté", "Statut"],
           [
             ["Connexion DWH DirectQuery", "Interrogation simultanée des tables FACT_PA et FACT_Mvts_Stocks depuis Power BI.", "Temps de réponse fluide, synchronisation immédiate des visuels.", "Validé"],
-            ["Calcul du TRG (DAX)", "Vérification des formules de disponibilité, performance et qualité sur 10 shifts types.", "Conformité stricte avec les déclarations d'atelier validées.", "Validé"],
+            ["Mesures d'atelier (DAX)", "Vérification des formules de cadence, valorisation et rotation de stock sur 10 shifts types.", "Conformité stricte avec les déclarations d'atelier validées.", "Validé"],
             ["Sélection multi-horizons", "Bascule entre les horizons de prévision 7j, 15j et 30j sur l'interface graphique.", "Mise à jour instantanée des courbes et des bornes d'incertitude à 95 %.", "Validé"],
             ["Détection des ruptures", "Filtrage sur les références à stock nul (47 références distinctes) et contrôle de l'indicateur visuel rouge.", "Identification immédiate des références prioritaires avec tri par criticité.", "Validé"],
             ["Chiffrage commande 45j", "Contrôle de la somme budgétaire sur les 193 références prioritaires du catalogue.", "Montant égal aux 380 400 TND calculés dans le module d'approvisionnement.", "Validé"],
@@ -165,7 +165,7 @@ def get_chapter6():
           ["Tâche planifiée", "Livrable produit", "Statut"],
           [
             ["Modélisation Power BI", "Connexion au Data Warehouse et création des mesures DAX", "Réalisé"],
-            ["Rapport Supervision & TRG", "Tableau de bord de suivi du parc machines et décomposition du TRG", "Réalisé"],
+            ["Rapport Supervision Machines", "Tableau de bord de suivi du parc machines et cadence des lignes", "Réalisé"],
             ["Rapport Prévision IA", "Tableau de bord multi-horizons (7, 15, 30 jours) avec bornes à 95 %", "Réalisé"],
             ["Rapport Gestion des stocks", "Tableau de bord d'analyse d'inventaire, classification ABC et alertes", "Réalisé"],
             ["Portail web opérationnel", "Application React 18 / Spring Boot avec API REST documentées", "Réalisé"],

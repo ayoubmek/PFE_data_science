@@ -20,7 +20,7 @@ Ce document récapitule les validations certifiées et les points spécifiques d
 ## 2. Développement et Comparaison des Modèles d'IA (Chapitre 5 — Sprint 3)
 
 * **Section 5.6 claire, épurée et pédagogique :**
-  * Présentation accessible des 4 modèles prédictifs (Régression Linéaire, ARIMA, Random Forest, Prophet) et du modèle Isolation Forest avec leurs équations directes, sans hyperparamètres ni jargon complexe.
+  * Présentation accessible des 4 modèles prédictifs (Régression Linéaire, ARIMA, Random Forest, Prophet) avec leurs équations directes, sans hyperparamètres ni jargon complexe.
   * Formules des 4 métriques de performance : MAE, RMSE, MAPE et R².
 * **Performances réelles vérifiées (Tableau 5.4) :**
   * Horizon 7 jours : Random Forest à 5,9 % MAPE (2 645 pcs/j) | Prophet à 7,3 % MAPE (3 653 pcs/j).

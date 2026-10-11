@@ -87,7 +87,7 @@ def generate_diagram(output_path):
         {
             "id": 1,
             "title": "DÉFINITION STRATÉGIQUE",
-            "desc": "Cadrage métier & KPI TRG",
+            "desc": "Cadrage métier & KPI Atelier",
             "icon": "strategy"
         },
         {

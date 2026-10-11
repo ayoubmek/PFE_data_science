@@ -30,14 +30,14 @@ skinparam rectangle {
 actor "Opérateur" as OPE
 actor "Administrateur" as ADM
 
-rectangle "Gestion de Production & Rendement" {
+rectangle "Gestion et Suivi de Production" {
     usecase "S'authentifier" as UC_Auth
     usecase "Mettre à jour le statut d'un ordre" as UC24
     usecase "Enregistrer un temps d'arrêt" as UC26
     usecase "Gérer les machines d'atelier" as UC21
     usecase "Planifier un ordre de production" as UC22
     usecase "Affecter une machine à un ordre" as UC23
-    usecase "Suivre le TRG en direct" as UC25
+    usecase "Suivre la production en direct" as UC25
 }
 
 OPE --> UC24

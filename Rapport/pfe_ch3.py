@@ -106,7 +106,7 @@ def get_chapter3():
             ["Heures d'injection effectives / jour", "420 h", "2 380 h", "1 840 h", "1 890 h", "295 h", "16,0 %"],
             ["Heures d'arrêts machines / jour", "45 h", "890 h", "285 h", "260 h", "115 h", "40,4 %"],
             ["Taux de rebut moyen d'atelier", "0,4 %", "6,8 %", "1,85 %", "1,70 %", "0,65 %", "35,1 %"],
-            ["Taux de Rendement Global (TRG/OEE) [25]", "48,2 %", "88,6 %", "71,4 %", "72,1 %", "6,8 %", "9,5 %"]
+            ["Taux de conformité des pièces (%)", "93,2 %", "99,6 %", "98,15 %", "98,30 %", "0,65 %", "0,7 %"]
           ],
           [2400, 1000, 1000, 1100, 1100, 1000, 1066]
         ),

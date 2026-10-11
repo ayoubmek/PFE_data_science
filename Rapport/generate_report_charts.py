@@ -275,42 +275,6 @@ plt.close()
 print(f"-> {fig_path} généré.")
 
 # ==============================================================================
-# 7. Figure 4.5 : Détection d'anomalies Isolation Forest (image/fig_4_5_isolation_forest.png)
-# ==============================================================================
-fig, ax = plt.subplots(figsize=(9, 4.2))
-fig.patch.set_facecolor('white')
-
-np.random.seed(77)
-n_points = 240
-# Cadence normale
-normal_speed = np.random.normal(9200, 600, int(n_points*0.9))
-normal_temp = np.random.normal(235, 6, int(n_points*0.9))
-
-# Anomalies (presses en sous-cadence ou surchauffe)
-anomaly_speed = np.concatenate([np.random.uniform(2000, 6500, int(n_points*0.06)),
-                                np.random.uniform(11200, 12500, int(n_points*0.04))])
-anomaly_temp = np.concatenate([np.random.uniform(252, 270, int(n_points*0.06)),
-                               np.random.uniform(200, 220, int(n_points*0.04))])
-
-ax.scatter(normal_temp, normal_speed, color=BLUE, alpha=0.7, s=35, label='Fonctionnement nominal (90 %)', edgecolors='none')
-ax.scatter(anomaly_temp, anomaly_speed, color=RED, marker='x', s=60, linewidth=2, label="Anomalies détectées par Isolation Forest (10 %)", zorder=5)
-
-ax.axvspan(248, 275, color=RED, alpha=0.08)
-ax.text(260, 4000, "Zone critique :\nSurchauffe vis\net chute cadence", color=RED, fontsize=8.5, fontweight='bold', ha='center', bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor=RED))
-
-ax.set_title("Détection non supervisée des dérives de presses par Isolation Forest", fontsize=11, fontweight='bold', color=NAVY, pad=12)
-ax.set_xlabel("Température de plastification (°C)", fontsize=10, fontweight='bold', color=NAVY)
-ax.set_ylabel("Cadence machine (pièces / shift)", fontsize=10, fontweight='bold', color=NAVY)
-ax.grid(True, linestyle=':', alpha=0.7)
-ax.legend(loc='upper right', frameon=True, fontsize=9)
-
-plt.tight_layout()
-fig_path = os.path.join(img_dir, 'fig_4_5_isolation_forest.png')
-plt.savefig(fig_path, bbox_inches='tight')
-plt.close()
-print(f"-> {fig_path} généré.")
-
-# ==============================================================================
 # 8. Figure 5.3 : Ruptures et alertes par catégorie (image/fig_5_3_ruptures_stocks.png)
 # ==============================================================================
 fig, ax = plt.subplots(figsize=(9, 4.0))

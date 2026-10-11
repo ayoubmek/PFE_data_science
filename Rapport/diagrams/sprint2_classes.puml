@@ -10,7 +10,7 @@ class Machine {
     + String code
     + String nom
     + String statut
-    + Double tauxRendement
+    + Double cadenceNominale
     + Integer totalOutput
 }
 

@@ -47,7 +47,7 @@ endif
 :Charger les permissions selon le rôle;
 
 if (Rôle ?) then (Administrateur)
-  :Accès supervision globale, machines, ordres, TRG, IA et gestion RBAC;
+  :Accès supervision globale, machines, ordres, cadences, IA et gestion RBAC;
 else (Opérateur)
   :Accès saisie d'atelier, avancement de production et mouvements de stock;
 endif

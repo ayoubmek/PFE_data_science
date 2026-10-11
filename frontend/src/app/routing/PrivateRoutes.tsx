@@ -11,7 +11,6 @@ const PrivateRoutes = () => {
   const MachinesPage = lazy(() => import('../pages/production/MachinesPage'))
   const StockInventoryPage = lazy(() => import('../pages/stock/StockPage'))
   const MovementsPage = lazy(() => import('../pages/stock/MovementsPage'))
-  const AnalyticsPage = lazy(() => import('../pages/analytics/AnalyticsPage'))
   const DataSciencePage = lazy(() => import('../pages/data-science/DataSciencePage'))
   const ModelBenchmarkPage = lazy(() => import('../pages/model-benchmark/ModelBenchmarkPage'))
   const UserManagementPage = lazy(() => import('../pages/admin/UserManagementPage'))
@@ -31,7 +30,6 @@ const PrivateRoutes = () => {
         <Route path='production/machines' element={<SuspensedView><MachinesPage /></SuspensedView>} />
         <Route path='stock' element={<SuspensedView><StockInventoryPage /></SuspensedView>} />
         <Route path='stock/movements' element={<SuspensedView><MovementsPage /></SuspensedView>} />
-        <Route path='analytics' element={<SuspensedView><AnalyticsPage /></SuspensedView>} />
         <Route path='data-science' element={<SuspensedView><DataSciencePage /></SuspensedView>} />
         <Route path='model-benchmark' element={<SuspensedView><ModelBenchmarkPage /></SuspensedView>} />
 

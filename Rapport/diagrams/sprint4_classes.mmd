@@ -81,7 +81,7 @@ classDiagram
     Commande "1" *-- "*" LigneCommande : contient
     Commande "1" -- "*" Produit : concerne
     
-    %% Data Flow to Analytics
+    %% Data Flow to Reporting
     Commande ..> StatsJournalieres : alimente
     
     StatsJournalieres ..> KPIDashboard : alimente

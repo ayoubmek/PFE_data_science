@@ -44,7 +44,7 @@ rectangle "Plateforme Nexora" {
     usecase "Saisir un mouvement de stock" as UC2
     usecase "Gérer les machines d'atelier" as UC3
     usecase "Planifier les ordres de production" as UC4
-    usecase "Suivre le rendement (TRG)" as UC5
+    usecase "Superviser les lignes d'atelier" as UC5
     usecase "Consulter les prévisions d'IA" as UC6
     usecase "Gérer les comptes utilisateurs" as UC7
     usecase "Gérer les permissions (RBAC)" as UC8

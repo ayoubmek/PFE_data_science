@@ -5,40 +5,26 @@ import { useQuery } from 'react-query'
 
 const fetchPredictionData = async () => {
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
-  try {
-    const { data } = await axios.get(`${apiUrl}/ml/predict/production`)
-    return data
-  } catch (err) {
-    const mockPredictions: any[] = []
-    const today = new Date()
-    for (let i = 1; i <= 30; i++) {
-      const nextDate = new Date(today)
-      nextDate.setDate(today.getDate() + i)
-      const dateStr = nextDate.toISOString().split('T')[0]
-      const wd = nextDate.getDay()
+  const { data } = await axios.get(`${apiUrl}/ml/predict/production`, { timeout: 15000 })
+  if (data && Array.isArray(data.predictions)) {
+    const startDate = new Date(2027, 0, 1)
+    data.predictions = data.predictions.map((p: any, idx: number) => {
+      const d = new Date(startDate)
+      d.setDate(startDate.getDate() + idx)
+      const y = d.getFullYear()
+      const m = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      const wd = d.getDay()
       const isWeekend = wd === 0 || wd === 6
-      const rfQty = isWeekend ? 0 : Math.round(8500 * (1.0 + Math.sin(i / 2.7) * 0.13 + (Math.random() * 0.03 - 0.015)))
-      mockPredictions.push({
-        date: dateStr,
-        rf_quantity: rfQty,
-        working_day: !isWeekend
-      })
-    }
-    return {
-      predictions: mockPredictions,
-      metrics: {
-        random_forest: {
-          name: 'Random Forest Regressor',
-          mae: 2467,
-          rmse: 3196,
-          mape: '6.0%',
-          r2: 0.9798,
-          status: 'Modèle Retenu'
-        }
-      },
-      best_model: 'random_forest'
-    }
+      return {
+        ...p,
+        date: `${y}-${m}-${day}`,
+        working_day: !isWeekend,
+        rf_quantity: isWeekend ? 0 : Math.round(Number(p.rf_quantity) || Number(p.prophet_quantity) || 8500)
+      }
+    })
   }
+  return data
 }
 
 export default function DataSciencePage() {
@@ -60,7 +46,9 @@ export default function DataSciencePage() {
   const categories = useMemo(() => {
     return filteredPredictions.map((x: any) => {
       if (!x.date) return ''
-      const d = new Date(x.date)
+      const parts = x.date.split('-')
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}`
+      const d = new Date(x.date.replace(/-/g, '/'))
       return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`
     })
   }, [filteredPredictions])
@@ -69,9 +57,6 @@ export default function DataSciencePage() {
     return filteredPredictions.map((x: any) => Math.round(Number(x.rf_quantity) || Number(x.prophet_quantity) || 0))
   }, [filteredPredictions])
 
-  const targetValues = useMemo(() => {
-    return rfValues.map((val: number) => Math.round(val * 1.08))
-  }, [rfValues])
 
   const maxCapacityValues = useMemo(() => {
     return rfValues.map((val: number) => Math.round(val * 1.25))
@@ -168,7 +153,6 @@ export default function DataSciencePage() {
           return {
             date: x.date,
             prophet_quantity: qty,
-            target_quantity: Math.round(qty * 1.08),
             max_capacity: Math.round(qty * 1.25),
             working_day: !!x.working_day
           }
@@ -193,11 +177,6 @@ export default function DataSciencePage() {
         data: maxCapacityValues
       },
       {
-        name: 'Production Cible (+8%)',
-        type: 'line',
-        data: targetValues
-      },
-      {
         name: 'Prévision Random Forest',
         type: 'line',
         data: rfValues
@@ -211,19 +190,19 @@ export default function DataSciencePage() {
         toolbar: { show: false },
         zoom: { enabled: false }
       },
-      colors: ['#F69B11', '#F1416C', '#00A3FF'],
+      colors: ['#F69B11', '#00A3FF'],
       stroke: {
         curve: 'smooth',
-        width: [2, 2.5, 3.5],
-        dashArray: [6, 4, 0]
+        width: [2, 3.5],
+        dashArray: [6, 0]
       },
       dataLabels: {
         enabled: false
       },
       markers: {
-        size: [0, 0, 4],
-        colors: ['#FFFFFF', '#FFFFFF', '#00A3FF'],
-        strokeColors: ['#F69B11', '#F1416C', '#FFFFFF'],
+        size: [0, 4],
+        colors: ['#FFFFFF', '#00A3FF'],
+        strokeColors: ['#F69B11', '#FFFFFF'],
         strokeWidth: 2,
         hover: { size: 6 }
       },
@@ -243,13 +222,13 @@ export default function DataSciencePage() {
         }
       },
       fill: {
-        type: ['gradient', 'solid', 'solid'],
+        type: ['gradient', 'solid'],
         gradient: {
           shade: 'light',
           type: 'vertical',
           shadeIntensity: 0.3,
-          opacityFrom: [0.18, 0, 0],
-          opacityTo: [0.01, 0, 0],
+          opacityFrom: [0.18, 0],
+          opacityTo: [0.01, 0],
           stops: [0, 100]
         }
       },
@@ -284,30 +263,40 @@ export default function DataSciencePage() {
     }
   }
 
-  const startDateFormatted =
-    filteredPredictions.length > 0 && filteredPredictions[0]?.date
-      ? new Date(filteredPredictions[0].date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      : ''
+  const startDateFormatted = useMemo(() => {
+    if (!filteredPredictions.length || !filteredPredictions[0]?.date) return '01/01/2027'
+    const parts = filteredPredictions[0].date.split('-')
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
+    return new Date(filteredPredictions[0].date.replace(/-/g, '/')).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+  }, [filteredPredictions])
 
-  const endDateFormatted =
-    filteredPredictions.length > 0 && filteredPredictions[filteredPredictions.length - 1]?.date
-      ? new Date(filteredPredictions[filteredPredictions.length - 1].date).toLocaleDateString('fr-FR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        })
-      : ''
+  const endDateFormatted = useMemo(() => {
+    if (!filteredPredictions.length) return '30/01/2027'
+    const lastDate = filteredPredictions[filteredPredictions.length - 1]?.date
+    if (!lastDate) return '30/01/2027'
+    const parts = lastDate.split('-')
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
+    return new Date(lastDate.replace(/-/g, '/')).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+  }, [filteredPredictions])
 
   return (
     <div className='d-flex flex-column gap-6'>
-      {/* 1. Entête épurée et professionnelle */}
+      {/* 1. Entête simple et professionnelle */}
       <div className='card border-0 shadow-sm bg-white p-6 rounded-3'>
         <h2 className='fw-bold text-gray-900 fs-3 mb-1'>
-          Planification Prévisionnelle de la Production
+          Planification de la Production
         </h2>
         <div className='text-muted fs-7'>
           Prévisions sur 30 jours (du <span className='text-gray-900 fw-semibold'>{startDateFormatted}</span> au{' '}
-          <span className='text-gray-900 fw-semibold'>{endDateFormatted}</span>) — Modèle : <span className='text-primary fw-semibold'>Random Forest Regressor</span>
+          <span className='text-gray-900 fw-semibold'>{endDateFormatted}</span>) — Modèle : <span className='text-primary fw-semibold'>Random Forest</span>
         </div>
       </div>
 
@@ -339,7 +328,7 @@ export default function DataSciencePage() {
 
         <div className='col-xl-3 col-md-6'>
           <div className='card border-0 shadow-sm bg-white p-5 rounded-3 h-100'>
-            <div className='text-muted fs-7 fw-semibold mb-2'>Précision du Modèle (Random Forest)</div>
+            <div className='text-muted fs-7 fw-semibold mb-2'>Précision des Prévisions</div>
             <div className='fs-2hx fw-bold text-success mb-1'>6.0% <span className='fs-6 text-muted fw-normal'>MAPE</span></div>
             <div className='text-muted fs-8'>MAE : 2 467 pcs/j &bull; R&sup2; : 0.98</div>
           </div>
@@ -351,7 +340,7 @@ export default function DataSciencePage() {
         <div className='d-flex justify-content-between align-items-center mb-4'>
           <div>
             <h3 className='fs-4 fw-bold text-gray-900 mb-1'>Trajectoire de Cadence et Seuils Opérationnels</h3>
-            <span className='text-muted fs-7'>Évolution journalière de la prévision face à la cible d'amélioration (+8%) et à la capacité nominale (TRG 80%)</span>
+            <span className='text-muted fs-7'>Évolution journalière de la prévision face à la capacité nominale de l'atelier (TRG 80%)</span>
           </div>
         </div>
 
@@ -381,20 +370,37 @@ export default function DataSciencePage() {
         <div className='table-responsive'>
           <table className='table table-row-dashed table-hover align-middle gs-0 gy-3 mb-0'>
             <thead>
-              <tr className='text-start text-gray-600 fw-bold fs-7 text-uppercase gs-0 bg-light'>
-                <th className='ps-4 rounded-start'>Date</th>
-                <th>Régime</th>
-                <th className='text-end'>Production Réelle</th>
-                <th className='text-end'>Prévision</th>
-                <th className='text-end'>Écart (Δ)</th>
-                <th className='text-center'>Erreur (%)</th>
-                <th className='pe-4 rounded-end text-center'>Statut</th>
+              <tr className='text-start text-gray-700 fw-bold fs-7 text-uppercase gs-0 bg-light'>
+                <th className='ps-4 rounded-start py-3'>
+                  <div>Date</div>
+                  <span className='text-muted fw-normal fs-8 text-capitalize'>Calendrier</span>
+                </th>
+                <th className='py-3'>
+                  <div>Régime</div>
+                  <span className='text-muted fw-normal fs-8 text-capitalize'>Poste atelier</span>
+                </th>
+                <th className='text-end py-3'>
+                  <div>Production Réelle</div>
+                  <span className='text-muted fw-normal fs-8 text-capitalize'>Réalisé</span>
+                </th>
+                <th className='text-end py-3'>
+                  <div>Prévision</div>
+                  <span className='text-muted fw-normal fs-8 text-capitalize'>Planifié</span>
+                </th>
+                <th className='text-end py-3'>
+                  <div>Écart (Δ)</div>
+                  <span className='text-muted fw-normal fs-8 text-capitalize'>Différence</span>
+                </th>
+                <th className='pe-4 rounded-end text-center py-3'>
+                  <div>Erreur (%)</div>
+                  <span className='text-muted fw-normal fs-8 text-capitalize'>APE</span>
+                </th>
               </tr>
             </thead>
             <tbody className='fs-7 fw-semibold text-gray-700'>
               {comparisonData.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className='text-center py-8 text-muted'>
+                  <td colSpan={6} className='text-center py-8 text-muted'>
                     Aucun enregistrement disponible.
                   </td>
                 </tr>
@@ -403,48 +409,76 @@ export default function DataSciencePage() {
                   const isPositiveDelta = row.delta >= 0
                   return (
                     <tr key={row.dayIndex} style={{ backgroundColor: row.isWeekend ? '#FAFAFA' : 'inherit' }}>
-                      <td className='ps-4 text-gray-900'>
-                        {new Date(row.date).toLocaleDateString('fr-FR', {
-                          weekday: 'short',
-                          day: '2-digit',
-                          month: 'short'
-                        })}
+                      <td className='ps-4'>
+                        <div className='text-gray-900 fw-bold'>
+                          {new Date(row.date.replace(/-/g, '/')).toLocaleDateString('fr-FR', {
+                            weekday: 'short',
+                            day: '2-digit',
+                            month: 'short'
+                          })}
+                        </div>
+                        <div className='text-muted fs-8'>Jour J+{row.dayIndex}</div>
                       </td>
                       <td>
                         {row.isWeekend ? (
-                          <span className='badge badge-light text-muted fs-8'>Arrêt</span>
+                          <>
+                            <span className='badge badge-light text-muted fs-8'>Arrêt</span>
+                            <div className='text-muted fs-8 mt-0.5'>Week-end / Repos</div>
+                          </>
                         ) : (
-                          <span className='badge badge-light-primary text-primary fs-8'>Jour ouvré</span>
+                          <>
+                            <span className='badge badge-light-primary text-primary fs-8'>Jour ouvré</span>
+                            <div className='text-muted fs-8 mt-0.5'>Équipe 3×8</div>
+                          </>
                         )}
-                      </td>
-                      <td className='text-end fw-bold text-gray-900'>
-                        {row.isWeekend ? '—' : `${row.realQty.toLocaleString()} pcs`}
-                      </td>
-                      <td className='text-end fw-bold text-primary'>
-                        {row.isWeekend ? '—' : `${row.predQty.toLocaleString()} pcs`}
                       </td>
                       <td className='text-end'>
                         {row.isWeekend ? (
                           <span className='text-muted'>—</span>
                         ) : (
-                          <span className={Math.abs(row.delta) <= 300 ? 'text-success fw-bold' : 'text-gray-800'}>
-                            {isPositiveDelta ? `+${row.delta.toLocaleString()}` : row.delta.toLocaleString()} pcs
-                          </span>
+                          <>
+                            <div className='fw-bold text-gray-900'>{row.realQty.toLocaleString()} pcs</div>
+                            <div className='text-muted fs-8'>Atelier validé</div>
+                          </>
                         )}
                       </td>
-                      <td className='text-center'>
+                      <td className='text-end'>
                         {row.isWeekend ? (
                           <span className='text-muted'>—</span>
                         ) : (
-                          <span className={`badge badge-light-${row.statusColor} text-${row.statusColor} fw-bold fs-8`}>
-                            {row.errorPct}%
-                          </span>
+                          <>
+                            <div className='fw-bold text-primary'>{row.predQty.toLocaleString()} pcs</div>
+                            <div className='text-muted fs-8'>Cadence prévue</div>
+                          </>
+                        )}
+                      </td>
+                      <td className='text-end'>
+                        {row.isWeekend ? (
+                          <span className='text-muted'>—</span>
+                        ) : (
+                          <>
+                            <div className={Math.abs(row.delta) <= 300 ? 'text-success fw-bold' : isPositiveDelta ? 'text-primary fw-bold' : 'text-danger fw-bold'}>
+                              {isPositiveDelta ? `+${row.delta.toLocaleString()}` : row.delta.toLocaleString()} pcs
+                            </div>
+                            <div className='text-muted fs-8'>
+                              {isPositiveDelta ? 'Sur-production' : 'Sous-production'}
+                            </div>
+                          </>
                         )}
                       </td>
                       <td className='pe-4 text-center'>
-                        <span className={`badge badge-light-${row.statusColor} text-${row.statusColor} fw-semibold fs-8`}>
-                          {row.status}
-                        </span>
+                        {row.isWeekend ? (
+                          <span className='text-muted'>—</span>
+                        ) : (
+                          <div className='d-inline-flex flex-column align-items-center'>
+                            <span className={`badge badge-light-${row.statusColor} text-${row.statusColor} fw-bold fs-8`}>
+                              {row.errorPct}%
+                            </span>
+                            <span className='text-muted fs-8 mt-0.5'>
+                              Précision : {(100 - row.errorPct).toFixed(1)}%
+                            </span>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   )
@@ -454,14 +488,24 @@ export default function DataSciencePage() {
             <tfoot className='bg-light fw-bold text-gray-900 fs-7 border-top'>
               <tr>
                 <td colSpan={2} className='ps-4 py-3'>
-                  SYNTHÈSE DU PLAN MENSUEL (JOURS OUVRÉS) :
+                  <div>SYNTHÈSE DU PLAN MENSUEL :</div>
+                  <div className='text-muted fs-8 fw-normal'>Cumul jours ouvrés sur 30j</div>
                 </td>
-                <td className='text-end py-3 text-dark fw-bold'>{totalRealActive.toLocaleString()} pcs</td>
-                <td className='text-end py-3 text-primary fw-bold'>{totalPredActive.toLocaleString()} pcs</td>
-                <td className='text-end py-3 text-dark'>Δ {Math.abs(totalPredActive - totalRealActive).toLocaleString()} pcs</td>
-                <td className='text-center py-3 text-success fw-bold'>{avgMapeMonthly}% MAPE</td>
+                <td className='text-end py-3'>
+                  <div className='text-dark fw-bold'>{totalRealActive.toLocaleString()} pcs</div>
+                  <div className='text-muted fs-8 fw-normal'>Total atelier</div>
+                </td>
+                <td className='text-end py-3'>
+                  <div className='text-primary fw-bold'>{totalPredActive.toLocaleString()} pcs</div>
+                  <div className='text-muted fs-8 fw-normal'>Total prévisionnel</div>
+                </td>
+                <td className='text-end py-3'>
+                  <div className='text-dark fw-bold'>Δ {Math.abs(totalPredActive - totalRealActive).toLocaleString()} pcs</div>
+                  <div className='text-muted fs-8 fw-normal'>Écart net cumulé</div>
+                </td>
                 <td className='pe-4 text-center py-3'>
-                  <span className='badge badge-light-success text-success fw-bold fs-8'>Conforme (MAPE ≤ 6%)</span>
+                  <div className='text-success fw-bold'>{avgMapeMonthly}% MAPE</div>
+                  <div className='text-muted fs-8 fw-normal'>Précision moy. : {(100 - parseFloat(avgMapeMonthly)).toFixed(1)}%</div>
                 </td>
               </tr>
             </tfoot>

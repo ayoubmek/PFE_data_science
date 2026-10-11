@@ -19,12 +19,11 @@ from models import (
     RandomForestModel,
     ProphetModel,
     ARIMAModel,
-    IsolationForestModel,
 )
 
 app = FastAPI(
     title="Nexora - ML Service",
-    description="Service IA & Data Science: Prévisions, Clustering, Anomalies, Insights",
+    description="Service IA & Data Science: Prévisions et Insights",
     version="2.0.0"
 )
 app.add_middleware(
@@ -83,10 +82,6 @@ def _mock_stock() -> pd.DataFrame:
         "cout":        rng.uniform(5, 2000, n).round(2).tolist(),
         "site":        rng.choice(["DEPOT A", "DEPOT B", "ATELIER"], n).tolist(),
     })
-class AnomalyRequest(BaseModel):
-    data: List[dict]
-    feature_columns: Optional[List[str]] = None
-    contamination: Optional[float] = 0.1
 class ScenarioRequest(BaseModel):
     variation_percent: float = 0.0
     horizon: int = 30
@@ -99,10 +94,12 @@ def health():
         "db_connected": db_ok,
         "timestamp": datetime.now().isoformat()
     }
+
 @app.get("/predict/production")
 def predict_production(horizon: int = 30):
     try:
-        dates = [datetime.now() + timedelta(days=i) for i in range(1, horizon + 1)]
+        start_date = datetime(2027, 1, 1)
+        dates = [start_date + timedelta(days=i) for i in range(horizon)]
         base_qty = 8500
         predictions = []
         for i, date in enumerate(dates):
@@ -183,32 +180,12 @@ def predict_production(horizon: int = 30):
         }
     except Exception as e:
         raise HTTPException(500, str(e))
-@app.post("/detect/anomaly")
-def detect_anomaly(request: AnomalyRequest):
-    try:
-        data = request.data
-        if not data:
-            raise HTTPException(400, "Aucune donnée fournie")
-        iso_model = IsolationForestModel(
-            contamination=request.contamination if request.contamination and 0.01 <= request.contamination <= 0.5 else 0.1,
-            random_state=42,
-        )
-        return iso_model.detect(
-            data=data,
-            feature_columns=request.feature_columns,
-            contamination=request.contamination,
-        )
-    except HTTPException:
-        raise
-    except ValueError as e:
-        raise HTTPException(400, str(e))
-    except Exception as e:
-        raise HTTPException(500, str(e))
 @app.post("/simulate/scenario")
 def simulate_scenario(request: ScenarioRequest):
     try:
         factor = 1 + (request.variation_percent / 100)
-        dates  = [datetime.now() + timedelta(days=i) for i in range(1, request.horizon + 1)]
+        start_date = datetime(2027, 1, 1)
+        dates  = [start_date + timedelta(days=i) for i in range(request.horizon)]
         baseline = [round(120 * (0 if d.weekday() >= 5 else 1)) for d in dates]
         scenario = [round(v * factor) for v in baseline]
         return {
@@ -388,15 +365,15 @@ def predict_custom(req: CustomPredictionRequest):
             raise HTTPException(400, "Le fichier doit contenir au moins 5 observations temporelles.")
 
         df = pd.DataFrame([{"date": pd.to_datetime(d.date), "value": float(d.value)} for d in raw])
-        df = df.sort_values("date").reset_index(drop=True)
+        df = df.groupby("date")["value"].sum().reset_index().sort_values("date").reset_index(drop=True)
         n = len(df)
 
         lr_m = LinearRegressionModel().fit(df)
         arima_m = ARIMAModel().fit(df)
         prophet_m = ProphetModel().fit(df)
-        rf_m = RandomForestModel(n_estimators=50, max_depth=8).fit(df)
+        rf_m = RandomForestModel(n_estimators=100, max_depth=10).fit(df)
 
-        n_splits = min(5, max(2, n - 2)) if n >= 6 else 2
+        n_splits = min(6, max(2, n - 2)) if n >= 7 else 2
 
         eval_lr = lr_m.evaluate(n_splits=n_splits)
         eval_arima = arima_m.evaluate(n_splits=n_splits)

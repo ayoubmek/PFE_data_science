@@ -12,7 +12,7 @@ Spring -> DB : INSERT INTO production_orders
 activate DB
 DB --> Spring : Success & ID
 deactivate DB
-Spring -> Spring : Déclencher recalcul TRG machine
+Spring -> Spring : Actualiser indicateurs machine
 Spring --> React : HTTP 201 Created (JSON)
 deactivate Spring
 React --> ADM : Afficher confirmation et ordre planifié

@@ -61,12 +61,12 @@ def get_chapter1():
         body("**Nexora** est une solution logicielle d'aide à la décision conçue pour faciliter le suivi des ateliers d'injection plastique et la gestion proactive des approvisionnements de stock. Elle s'appuie sur les données centralisées dans le Data Warehouse pour proposer des indicateurs de fonctionnement mis à jour régulièrement par shift, des prévisions de cadence de production par apprentissage automatique et des recommandations quantifiées de réapprovisionnement."),
         pb(),
         ...imageFigure("logos/logo.png", "Figure 1.1 : Logo de la plateforme Nexora", 220, 90),
-        body("La solution s'adresse aux équipes industrielles selon deux profils d'utilisateurs clairement délimités : les **Administrateurs** (supervision des presses, pilotage du TRG, gestion des approvisionnements et des modèles) et les **Opérateurs** (saisie des mouvements de matière et consultation des stocks d'atelier)."),
+        body("La solution s'adresse aux équipes industrielles selon deux profils d'utilisateurs clairement délimités : les **Administrateurs** (supervision des presses, pilotage des flux, gestion des approvisionnements et des modèles) et les **Opérateurs** (saisie des mouvements de matière et consultation des stocks d'atelier)."),
         pb(),
 
         title3("1.4.2 Fonctionnalités principales"),
         body("La plateforme Nexora s'articule autour de quatre fonctionnalités majeures :"),
-        bullet("**Supervision des machines et du TRG/OEE** : suivi de l'état des 319 presses de l'atelier et calcul des trois composantes normalisées du Taux de Rendement Global selon la démarche TPM [25] (Taux de Disponibilité, Taux de Performance, Taux de Qualité)."),
+        bullet("**Supervision du parc machines** : suivi opérationnel de l'état des 319 presses à injecter réparties sur les trois sites (Kondar, Sousse, Brno) et consolidation des indicateurs de production par shift."),
         bullet("**Prévision des volumes de fabrication** : estimation des cadences futures à court et moyen termes (horizons de 7, 15 et 30 jours) pour guider l'ordonnancement des équipes et des matières."),
         bullet("**Gestion prévisionnelle des stocks** : segmentation multicritère des articles du catalogue (méthode ABC et classification par niveau de risque) et calcul des réapprovisionnements nécessaires pour sécuriser une couverture cible de 45 jours."),
         bullet("**Restitution décisionnelle interactive** : tableaux de bord Power BI permettant de filtrer les indicateurs par usine, atelier, presse ou famille de matière plastique, complétés par une interface web opérationnelle."),
@@ -74,7 +74,7 @@ def get_chapter1():
 
         title3("1.4.3 Limites de la situation actuelle"),
         body("Avant la conception de Nexora, le pilotage industriel présentait plusieurs contraintes méthodologiques et opérationnelles :"),
-        bullet("**Calcul manuel et différé du TRG** : les feuilles d'enregistrement remplies par les opérateurs étaient consolidées mensuellement sur tableur, empêchant une détection rapide des micro-arrêts ou des baisses anormales de cadence."),
+        bullet("**Suivi manuel et différé de l'activité** : les feuilles d'enregistrement remplies par les opérateurs étaient consolidées mensuellement sur tableur, empêchant une détection rapide des ralentissements ou des baisses anormales de cadence."),
         bullet("**Gestion réactive des réapprovisionnements** : les commandes de granulés polymères étaient fréquemment déclenchées en réaction à une alerte visuelle de pénurie en atelier, générant des risques de rupture ou de surcoûts logistiques d'urgence."),
         bullet("**Présence conjointe de ruptures et de surstocks** : l'absence d'outils analytiques entraînait une sur-couverture sur certaines références à faible rotation (immobilisation de trésorerie), tandis que des références critiques tombaient en rupture."),
         bullet("**Fragmentation des sources d'information** : les données de production, d'en-cours et d'inventaire étaient dispersées dans l'ERP, rendant leur croisement complexe pour les décideurs."),
@@ -84,7 +84,7 @@ def get_chapter1():
         title3("1.5.1 Contexte et problématique"),
         body("L'entreprise partenaire dispose d'un Data Warehouse (DWH) conservant l'historique complet des déclarations de production, des nomenclatures (BOM) et des mouvements d'inventaire. Toutefois, ces données massives demeuraient sous-exploitées pour anticiper les charges futures et guider la chaîne logistique."),
         body("La problématique centrale du projet se formule ainsi :"),
-        body("*« Comment valoriser les données centralisées du Data Warehouse industriel pour concevoir un système décisionnel automatisé, capable de superviser le rendement des presses, de modéliser les cadences par apprentissage automatique et d'optimiser les politiques de réapprovisionnement de stock ? »*", { align: AlignmentType.CENTER, italics: true }),
+        body("*« Comment valoriser les données centralisées du Data Warehouse industriel pour concevoir un système décisionnel automatisé, capable de superviser l'activité des presses, de modéliser les cadences par apprentissage automatique et d'optimiser les politiques de réapprovisionnement de stock ? »*", { align: AlignmentType.CENTER, italics: true }),
         pb(),
 
         title3("1.5.2 Étude de l'existant"),
@@ -94,7 +94,7 @@ def get_chapter1():
         title3("1.5.3 Solution proposée"),
         body("Pour concilier agilité décisionnelle, rigueur méthodologique et intégration fluide, la solution **Nexora** combine trois piliers techniques complémentaires :"),
         bullet("**1. Un pipeline de traitement des données (ETL)** : extraction automatisée des sources brutes, nettoyage (doublons, dates erronées, formats, coûts et valeurs manquantes) et chargement dans un Data Warehouse en schéma en étoile."),
-        bullet("**2. Un module de prévision par apprentissage automatique** : comparaison de quatre modèles de séries temporelles sous protocole multi-horizons (Régression Linéaire, ARIMA, Random Forest, Prophet) sur une cadence d'atelier d'environ 65 000 pièces/jour. Random Forest et Prophet atteignent une précision comparable (erreur moyenne de 6 % à 7 % de MAPE). Prophet a été retenu pour le déploiement opérationnel dans l'application en raison de sa décomposition explicable (tendance, saisonnalité hebdomadaire et arrêts d'atelier) et de sa simplicité d'intégration, complété par Isolation Forest pour la détection des anomalies."),
+        bullet("**2. Un module de prévision par apprentissage automatique** : comparaison de quatre modèles de séries temporelles sous protocole multi-horizons (Régression Linéaire, ARIMA, Random Forest, Prophet) sur une cadence d'atelier d'environ 65 000 pièces/jour. Random Forest et Prophet atteignent une précision comparable (erreur moyenne de 6 % à 7 % de MAPE). Prophet a été retenu pour le déploiement opérationnel dans l'application en raison de sa décomposition explicable (tendance, saisonnalité hebdomadaire et arrêts d'atelier) et de sa simplicité d'intégration."),
         bullet("**3. Un module de gestion intelligente des stocks** : segmentation multicritère ABC / K-Means, classification selon la couverture disponible et calcul du plan de réapprovisionnement pour sécuriser 45 jours d'activité sur le catalogue de 800 références distinctes (budget prévisionnel estimé à environ 380 400 TND)."),
         pb(),
         body("L'architecture de restitution associe des tableaux de bord interactifs Microsoft Power BI pour le management décisionnel et une application web (React.js / Spring Boot / FastAPI) pour la saisie et la consultation opérationnelle."),
@@ -104,7 +104,7 @@ def get_chapter1():
         makeTable(
           ["Critère d'évaluation", "Progiciels MES standards", "ERP transactionnel", "Tableurs (Excel)", "Solution Nexora"],
           [
-            ["Suivi du TRG d'atelier",           "Avancé", "Non natif", "Manuel / Différé", "Automatisé par shift"],
+            ["Supervision des cadences atelier", "Avancé", "Non natif", "Manuel / Différé", "Automatisé par shift"],
             ["Prévisions de cadence par IA",     "Non proposé", "Non proposé", "Non proposé", "Intégré (Prophet)"],
             ["Tableaux de bord interactifs",     "Configurable", "Limité", "Statique", "Interactif (Power BI)"],
             ["Intégration directe au DWH",       "Complexe", "Natif", "Instable", "Directe (Schéma en étoile)"],
@@ -132,7 +132,7 @@ def get_chapter1():
         bullet("**2. Nettoyage des données (ETL)** : suppression des doublons, rejet des dates invalides et correction des incohérences de stock."),
         bullet("**3. Calcul des variables explicatives** : 14 variables (calendrier, événements d'atelier, historique de production et moyennes mobiles)."),
         bullet("**4. Découpage chronologique** : apprentissage (janvier 2024 – août 2025), validation (septembre – décembre 2025) et test (janvier – avril 2026)."),
-        bullet("**5. Entraînement des modèles** : Régression Linéaire, ARIMA, Random Forest et Prophet, complétés par Isolation Forest pour la détection d'anomalies."),
+        bullet("**5. Entraînement des modèles** : Régression Linéaire, ARIMA, Random Forest et Prophet sous validation croisée temporelle."),
         bullet("**6. Évaluation sur la période de test de 2026** : les modèles sont évalués sur des données de 2026 qui n'ont pas servi à l'apprentissage."),
         bullet("**7. Mesure des performances** : calcul des erreurs de prévision (MAE, RMSE, MAPE, R²) en pièces par jour aux horizons de 7, 15 et 30 jours."),
         bullet("**8. Restitution utilisateur** : tableaux de bord Power BI et application web."),
@@ -214,9 +214,9 @@ def get_chapter1():
             ["US13", "En tant qu'administrateur, je veux comparer les performances des modèles d'IA et sélectionner le modèle déployé en production", "Haute", "4 jours", "Sprint 3"],
             ["US14", "En tant qu'administrateur, je veux évaluer les modèles selon les différents horizons de prévision (7, 15 et 30 jours)", "Haute", "3 jours", "Sprint 3"],
             ["US15", "En tant qu'administrateur, je veux générer les prévisions de cadence de production aux horizons de 7, 15 et 30 jours", "Haute", "3 jours", "Sprint 3"],
-            ["US16", "En tant qu'administrateur, je veux détecter les dérives de cadence machine via Isolation Forest pour la maintenance", "Haute", "3 jours", "Sprint 3"],
+            ["US16", "En tant qu'administrateur, je veux analyser l'explicabilité et les bornes d'incertitude des prévisions", "Haute", "3 jours", "Sprint 3"],
             ["US17", "En tant qu'opérateur ou administrateur, je veux m'authentifier de manière sécurisée (JWT) et accéder aux fonctionnalités de mon rôle", "Haute", "3 jours", "Sprint 4"],
-            ["US18", "En tant qu'administrateur, je veux superviser le TRG et le statut avec mise à jour périodique des 319 presses sur un rapport Power BI", "Haute", "4 jours", "Sprint 4"],
+            ["US18", "En tant qu'administrateur, je veux superviser le statut et les cadences de production des 319 presses sur un rapport Power BI", "Haute", "4 jours", "Sprint 4"],
             ["US19", "En tant qu'administrateur, je veux analyser les prévisions de cadence et les alertes d'approvisionnement sur Power BI", "Haute", "4 jours", "Sprint 4"],
             ["US20", "En tant qu'opérateur, je veux enregistrer les mouvements d'inventaire et les déclarations de rebuts via l'interface web", "Moyenne", "3 jours", "Sprint 4"]
           ],
@@ -238,7 +238,7 @@ def get_chapter1():
             ["Sprint 0", "Cadrage des besoins et architecture globale", "Spécifications fonctionnelles, cas d'utilisation UML et architecture 4 couches."],
             ["Sprint 1", "Qualité des données et pipeline ETL", "Pipeline Python de nettoyage, schéma en étoile DWH (7 tables) et 32 043 lignes chargées."],
             ["Sprint 2", "Gestion intelligente des stocks", "Segmentation ABC / K-Means, seuils d'alerte, calcul du plan 45 jours et budget."],
-            ["Sprint 3", "Modélisation prédictive par IA", "Entraînement des 4 modèles, sélection du modèle opérationnel et Isolation Forest."],
+            ["Sprint 3", "Modélisation prédictive par IA", "Entraînement des 4 modèles, sélection du modèle opérationnel et validation temporelle."],
             ["Sprint 4", "Restitution décisionnelle et validation", "Tableaux de bord Power BI, portail web opérationnel, mesures DAX et recette fonctionnelle."]
           ],
           [1800, 3400, 3866]

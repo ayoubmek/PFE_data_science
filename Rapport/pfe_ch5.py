@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Chapitre 5 : Sprint 3 : Modélisation prédictive par IA et détection d'anomalies pour Nexora (pfe_v7.docx)
+Chapitre 5 : Sprint 3 : Modélisation prédictive par IA pour Nexora (pfe_v7.docx)
 Texte clair, simple et concis pour jury de Master :
 - Intro courte et ciblée
 - Tableau du backlog (Tableau 5.1) et architecture (Figure 5.1)
@@ -9,7 +9,7 @@ Texte clair, simple et concis pour jury de Master :
 - Formules des 4 métriques (MAE, RMSE, MAPE, R²)
 - Les 5 modèles avec leurs équations simples, sans hyperparamètres
 - Tableau unique des résultats (Tableau 5.4 : MAE et MAPE à 7, 15 et 30 jours) + Figure 5.2
-- Isolation Forest : un paragraphe + Figure 5.3 (sans tableau de sensibilité)
+- Analyse explicable des composantes et robustesse
 - Rôles respectifs des modèles en 3-4 phrases concises
 - Bilan du sprint (Tableau 5.5) et conclusion
 """
@@ -19,10 +19,10 @@ def get_chapter5():
         // =========================================================
         // CHAPITRE 5 : SPRINT 3 : MODÉLISATION PRÉDICTIVE ET IA
         // =========================================================
-        title1("Chapitre 5 : Sprint 3 : Modélisation prédictive par IA et détection d'anomalies"),
+        title1("Chapitre 5 : Sprint 3 : Modélisation prédictive par Intelligence Artificielle"),
 
         title2("5.1 Introduction"),
-        body("Ce chapitre correspond au Sprint 3 de notre démarche Scrum, consacré au développement du moteur prédictif et analytique de la plateforme **Nexora**. Pour anticiper les charges des ateliers d'injection et prévenir les tensions sur les approvisionnements, quatre algorithmes d'apprentissage automatique ont été développés et comparés : la Régression Linéaire, un modèle autorégressif ARIMA, Random Forest et le modèle Prophet. En complément, l'algorithme non supervisé Isolation Forest est employé pour surveiller le rythme des 319 presses à injecter et détecter les dérives anormales de cadence."),
+        body("Ce chapitre correspond au Sprint 3 de notre démarche Scrum, consacré au développement du moteur prédictif et analytique de la plateforme **Nexora**. Pour anticiper les charges des ateliers d'injection et prévenir les tensions sur les approvisionnements, quatre algorithmes d'apprentissage automatique ont été développés et comparés : la Régression Linéaire, un modèle autorégressif ARIMA, Random Forest et le modèle Prophet."),
         pb(),
         body("L'analyse comparative met en évidence que Random Forest et Prophet affichent tous deux des performances proches et satisfaisantes (erreur relative moyenne de 6 % à 7 % de MAPE). Dans l'application opérationnelle, le modèle **Prophet** a été retenu pour le déploiement en production en raison de sa décomposition explicite (tendance de fond, profil hebdomadaire et événements d'atelier) et de sa facilité d'intégration dans l'entrepôt de données SQL Server (table `ml_production_predictions`)."),
         pb(),
@@ -37,7 +37,7 @@ def get_chapter5():
             ["Élevée", "Ingénierie des 14 variables explicatives et calendrier d'atelier", "3 jours"],
             ["Élevée", "Développement des 4 modèles de prévision de séries temporelles", "4 jours"],
             ["Élevée", "Évaluation comparative des performances aux horizons 7, 15 et 30 jours", "3 jours"],
-            ["Moyenne", "Configuration d'Isolation Forest pour la surveillance des cadences", "2 jours"],
+            ["Moyenne", "Analyse d'explicabilité et décomposition des composantes saisonnières", "2 jours"],
             ["Faible", "Intégration des prévisions Prophet dans la table ml_production_predictions du DWH", "2 jours"]
           ],
           [1600, 5666, 1400]
@@ -238,10 +238,8 @@ def get_chapter5():
         ...imageFigure("image/fig_4_3_prophet_vs_reel.png", "Figure 5.2 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 540, 240),
         pb(),
 
-        title2("5.8 Détection des anomalies par Isolation Forest"),
-        body("Pour surveiller en continu le fonctionnement du parc des 319 presses et détecter précocement les ralentissements anormaux ou les micro-arrêts non déclarés, l'algorithme Isolation Forest analyse conjointement les cadences journalières et les temps de cycle de chaque machine. La figure 5.3 illustre les points de fonctionnement observés et la frontière de détection établie par le modèle :"),
-        pb(),
-        ...imageFigure("image/fig_4_5_isolation_forest.png", "Figure 5.3 : Détection non supervisée des anomalies de cadence par Isolation Forest", 520, 235),
+        title2("5.8 Analyse explicable des composantes et robustesse"),
+        body("Au-delà de la performance brute en termes d'erreurs résiduelles, la fiabilité industrielle d'un moteur prédictif repose sur sa transparence et son explicabilité. La décomposition additive offerte par Prophet permet d'isoler explicitement la tendance de fond à long terme, la modulation hebdomadaire liée aux roulements des équipes d'atelier, ainsi que les creux de production correspondant aux jours de maintenance programmée et aux jours fériés. Cette interprétabilité facilite l'appropriation des prévisions par les chefs d'atelier et sécurise la planification opérationnelle face aux fluctuations réelles de cadence."),
         pb(),
 
         title2("5.9 Rôles respectifs des modèles dans la plateforme Nexora"),
@@ -257,7 +255,7 @@ def get_chapter5():
             ["Préparation des variables", "14 variables explicatives et calendrier d'atelier", "Réalisé"],
             ["Développement des modèles", "Implémentation des 4 modèles (Régression Linéaire, ARIMA, Random Forest, Prophet)", "Réalisé"],
             ["Évaluation multi-horizons", "Performances mesurées à 7, 15 et 30 jours", "Réalisé"],
-            ["Surveillance des cadences", "Détection des anomalies de fonctionnement par Isolation Forest", "Réalisé"],
+            ["Explicabilité des modèles", "Décomposition explicable des composantes et analyse de robustesse", "Réalisé"],
             ["Déploiement opérationnel", "Intégration des prévisions Prophet dans la table ml_production_predictions", "Réalisé"]
           ],
           [2600, 4866, 1200]
@@ -270,7 +268,7 @@ def get_chapter5():
         pb(),
 
         title2("5.11 Conclusion"),
-        conclusionBox("Ce chapitre a présenté le développement et l'évaluation comparative de quatre modèles de séries temporelles et d'un algorithme de détection d'anomalies. Les résultats confirment que Random Forest et Prophet atteignent des performances proches et satisfaisantes à l'horizon de 30 jours (6 % à 7 % de MAPE). Prophet a été retenu pour alimenter les rapports et interfaces de la plateforme en raison de sa décomposition explicable et de son intégration directe dans la base de données. Le chapitre suivant aborde le Sprint 4, consacré à la restitution décisionnelle par Power BI, à l'application web et à la recette fonctionnelle."),
+        conclusionBox("Ce chapitre a présenté le développement et l'évaluation comparative de quatre modèles de séries temporelles. Les résultats confirment que Random Forest et Prophet atteignent des performances proches et satisfaisantes à l'horizon de 30 jours (6 % à 7 % de MAPE). Prophet a été retenu pour alimenter les rapports et interfaces de la plateforme en raison de sa décomposition explicable et de son intégration directe dans la base de données. Le chapitre suivant aborde le Sprint 4, consacré à la restitution décisionnelle par Power BI, à l'application web et à la recette fonctionnelle."),
         pageBreak(),
     '''
 

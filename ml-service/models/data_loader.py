@@ -11,12 +11,15 @@ STOCK_CLEAN_CSV = PROJECT_ROOT / "etl_pipeline" / "output_clean" / "ASTOCKDATE.c
 def load_production_series() -> pd.DataFrame:
     if FACT_CLE_CSV.exists():
         df = pd.read_csv(FACT_CLE_CSV)
-        date_col = next((c for c in df.columns if "date" in c.lower()), df.columns[0])
-        val_col = next((c for c in df.columns if "bonne" in c.lower() or "produite" in c.lower()), df.columns[1])
+        date_col = next((c for c in df.columns if "date" in c.lower() or "posting" in c.lower()), df.columns[0])
+        # Priorité absolue à la métrique industrielle calculée 'Quantité produite TRS'
+        val_col = next((c for c in df.columns if "trs" in c.lower()), None)
+        if not val_col:
+            val_col = next((c for c in df.columns if "output" in c.lower() or "bonne" in c.lower() or "produite" in c.lower() or "quantity" in c.lower()), df.columns[1])
         df = df[[date_col, val_col]].rename(columns={date_col: "date", val_col: "value"})
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
         df["value"] = pd.to_numeric(df["value"], errors="coerce").fillna(0)
-        df = df.dropna().sort_values("date").reset_index(drop=True)
+        df = df.dropna().groupby("date")["value"].sum().reset_index().sort_values("date").reset_index(drop=True)
         return df
 
     if PROD_RAW_CSV.exists():

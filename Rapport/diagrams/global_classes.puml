@@ -40,7 +40,7 @@ package "Production & Atelier" {
         +code : string
         +name : string
         +status : string
-        +trg : double
+        +cadenceNominale : double
     }
     class MachineStop {
         +id : int

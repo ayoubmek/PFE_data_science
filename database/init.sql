@@ -14,61 +14,10 @@ CREATE TABLE app_users (
 );
 GO
 
-IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='machines' AND xtype='U')
-CREATE TABLE machines (
-    id                    BIGINT IDENTITY(1,1) PRIMARY KEY,
-    code                  NVARCHAR(50)   NOT NULL UNIQUE,
-    nom                   NVARCHAR(100)  NOT NULL,
-    type                  NVARCHAR(50),
-    emplacement           NVARCHAR(100),
-    statut                NVARCHAR(30)   NOT NULL DEFAULT 'DISPONIBLE',
-    taux_rendement        FLOAT          DEFAULT 100.0,
-    derniere_maintenance  DATETIME2,
-    prochaine_maintenance DATETIME2,
-    created_at            DATETIME2      NOT NULL DEFAULT GETDATE()
-);
-GO
+-- Production data is sourced directly from dbo.FACT_CLE and dbo.MCMachineCenter
+-- Stock data is sourced directly from dbo.ASTOCKDATE and dbo.FACT_ILE
+-- Redundant template tables (machines, production_orders, stock_movements, kpi_logs) have been removed.
 
-IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='production_orders' AND xtype='U')
-CREATE TABLE production_orders (
-    id                  BIGINT IDENTITY(1,1) PRIMARY KEY,
-    reference           NVARCHAR(50)   NOT NULL UNIQUE,
-    article             NVARCHAR(200)  NOT NULL,
-    quantite_prevue     INT            NOT NULL,
-    quantite_realisee   INT            DEFAULT 0,
-    statut              NVARCHAR(30)   NOT NULL DEFAULT 'EN_ATTENTE',
-    date_debut          DATE,
-    date_fin            DATE,
-    machine_id          BIGINT         REFERENCES machines(id),
-    responsable         NVARCHAR(100),
-    notes               NVARCHAR(1000),
-    created_at          DATETIME2      NOT NULL DEFAULT GETDATE(),
-    updated_at          DATETIME2
-);
-GO
-
-IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='stock_movements' AND xtype='U')
-CREATE TABLE stock_movements (
-    id                    BIGINT IDENTITY(1,1) PRIMARY KEY,
-    stock_item_reference  NVARCHAR(50)   NOT NULL,
-    type                  NVARCHAR(20)   NOT NULL,
-    quantite              DECIMAL(18,6)  NOT NULL,
-    motif                 NVARCHAR(255),
-    operateur             NVARCHAR(100),
-    reference             NVARCHAR(50),
-    date                  DATETIME2      NOT NULL DEFAULT GETDATE()
-);
-GO
-
-IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='kpi_logs' AND xtype='U')
-CREATE TABLE kpi_logs (
-    id          BIGINT IDENTITY(1,1) PRIMARY KEY,
-    module      NVARCHAR(50)   NOT NULL,
-    kpi_name    NVARCHAR(100)  NOT NULL,
-    kpi_value   FLOAT          NOT NULL,
-    logged_at   DATETIME2      NOT NULL DEFAULT GETDATE()
-);
-GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ml_production_predictions' AND xtype='U')
 CREATE TABLE ml_production_predictions (
