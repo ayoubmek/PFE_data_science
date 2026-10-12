@@ -26,28 +26,22 @@ Il assure la transition entre les extractions brutes d'atelier / ERP (fichiers C
 │     - Application systématique des 10 règles qualité   │
 │     - Audit & rapport de conformité avant/après       │
 │                                                        │
-│  3. Modélisation Schéma en Étoile (transform.py)       │
-│     - Projection vers 2 Dimensions et 5 Faits         │
+│  3. Modélisation Schéma DWH (transform.py)             │
+│     - Projection vers les 3 tables cibles              │
 │                                                        │
 │  4. Chargement Haute Performance (load.py)             │
 │     - Insertion en masse (fast_executemany / pyodbc)   │
-│     - Export miroir CSV / Parquet certifié             │
+│     - Export miroir CSV certifié                       │
 └──────────────────────────┬─────────────────────────────┘
                            │
                            ▼
 ┌────────────────────────────────────────────────────────┐
 │         DATA WAREHOUSE SQL SERVER (dbDWH1)             │
 │                                                        │
-│  • Dimensions :                                        │
-│    - dbo.DIM_FamArt    (Référentiel articles)          │
-│    - dbo.DIM_OF-Mach   (Centres de charge & 319 presses)│
-│                                                        │
-│  • Faits :                                             │
-│    - dbo.FACT_Mvts_Stocks (Historique valorisé stocks) │
-│    - dbo.FACT_Encours     (En-cours de fabrication)    │
-│    - dbo.FACT_BOM         (Nomenclatures composants)   │
-│    - dbo.Fact_PA          (Production réelle atelier)  │
-│    - dbo.FACT_OF-Rebuts   (Non-qualité et causes)      │
+│  • Tables d'Inventaire et Production :                 │
+│    - dbo.ASTOCKDATE       (Instantanés d'inventaire)   │
+│    - dbo.FACT_CLE         (Production réelle & TRS)    │
+│    - dbo.MCMachineCenter  (Centres de charge machines) │
 └──────────────────────────┬─────────────────────────────┘
                            │
        ┌───────────────────┴───────────────────┐
@@ -87,7 +81,7 @@ pip install -r etl_pipeline/requirements.txt
 ```
 
 ### 2. Exécution en mode Dry-Run (Sans connexion SQL Server requise)
-Génère le rapport d'audit et exporte les 7 tables propres au format CSV dans `etl_pipeline/output_clean/` :
+Génère le rapport d'audit et exporte les 3 tables propres au format CSV dans `etl_pipeline/output_clean/` :
 ```bash
 python -m etl_pipeline.run_etl --dry-run
 ```
@@ -104,12 +98,10 @@ python -m etl_pipeline.run_etl --limit 5000 --dry-run
 
 ---
 
-## 🗄️ Mapping vers les 7 Tables du DWH `dbDWH1`
+## 🗄️ Mapping vers les 3 Tables du DWH `dbDWH1`
 
-1. **`dbo.DIM_FamArt`** : Référentiel unifié des références articles, désignations, familles matières et typologies clients.
-2. **`dbo.DIM_OF-Mach`** : Référentiel des 319 presses à injecter réparties sur Kondar, Sousse et Brno, leurs tonnages et cadences nominales.
-3. **`dbo.FACT_Mvts_Stocks`** : Mouvements historiques d'inventaire, quantités consommées, réapprovisionnements et valorisations financières.
-4. **`dbo.FACT_Encours`** : En-cours de fabrication en pied de presse et stocks immobilisés en production.
-5. **`dbo.Fact_PA`** : Suivi journalier des cadences de production de l'atelier, pièces conformes et cadences réelles.
-6. **`dbo.FACT_OF-Rebuts`** : Analyse des rebuts d'injection par motif de non-qualité (déformation, bavure, brûlure) et évaluation des coûts de perte.
-7. **`dbo.FACT_BOM`** : Nomenclature arborescente liant chaque produit fini à ses composants et résines plastiques.
+1. **`dbo.ASTOCKDATE`** : Instantanés d'inventaire multi-sites (Kondar, Sousse, Brno), niveaux de stock et valorisations.
+2. **`dbo.FACT_CLE`** : Suivi de la production réelle, déclarations de fabrication, métrique TRS nette et rebuts d'atelier.
+3. **`dbo.MCMachineCenter`** : Référentiel des 319 presses à injecter réparties sur les 3 sites d'injection.
+
+

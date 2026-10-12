@@ -28,18 +28,6 @@ public class StockDTO {
         private String niveauAlerte;  
     }
 
-    @Data
-    public static class MovementResponse {
-        private Long id;
-        private String stockItemReference;
-        private String stockItemDesignation;
-        private String type;
-        private BigDecimal quantite;
-        private String motif;
-        private String operateur;
-        private String reference;
-        private LocalDateTime date;
-    }
 
     @Data
     public static class KpiResponse {

@@ -75,23 +75,25 @@ def load_stock_items(limit: int = 5000) -> pd.DataFrame:
     })
 
 
-REBUTS_CSV = PROJECT_ROOT / "etl_pipeline" / "output_clean" / "FACT_OF-Rebuts.csv"
-
-
 def load_rebuts_data(limit: int = 5000) -> pd.DataFrame:
-    if REBUTS_CSV.exists():
-        df = pd.read_csv(REBUTS_CSV, nrows=limit)
-        cols_map = {
-            "Date_Production": "date",
-            "Quantite_Rebut_Totale": "quantite_rebut",
-            "Nb_OF_Impactes": "nb_of_impactes",
-            "Cause_Principale": "cause",
-            "Cout_Rebut_Estime_TND": "cout_rebut",
-        }
-        df = df.rename(columns={k: v for k, v in cols_map.items() if k in df.columns})
-        df["quantite_rebut"] = pd.to_numeric(df["quantite_rebut"], errors="coerce").fillna(0)
-        df["cout_rebut"] = pd.to_numeric(df["cout_rebut"], errors="coerce").fillna(0)
-        return df
+    if FACT_CLE_CSV.exists():
+        df = pd.read_csv(FACT_CLE_CSV, nrows=limit)
+        date_col = next((c for c in df.columns if "posting" in c.lower() or "date" in c.lower()), None)
+        scrap_col = next((c for c in df.columns if "scrap" in c.lower() or "rebut" in c.lower()), None)
+        if date_col and scrap_col:
+            clean_df = pd.DataFrame()
+            clean_df["date"] = pd.to_datetime(df[date_col], errors="coerce").dt.strftime("%Y-%m-%d")
+            clean_df["quantite_rebut"] = pd.to_numeric(
+                df[scrap_col].astype(str).str.replace(r"[^\d.,\-]", "", regex=True).str.replace(",", "."),
+                errors="coerce"
+            ).fillna(0)
+            clean_df = clean_df[clean_df["quantite_rebut"] > 0].dropna()
+            if not clean_df.empty:
+                agg = clean_df.groupby("date")["quantite_rebut"].sum().reset_index()
+                agg["nb_of_impactes"] = 1
+                agg["cout_rebut"] = (agg["quantite_rebut"] * 1.85).round(2)
+                agg["cause"] = "Scrap atelier (FACT_CLE)"
+                return agg
 
     rng = np.random.default_rng(42)
     n = 300

@@ -91,24 +91,6 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
     List<Object[]> findKpiStats();
 
     @Query(value = """
-        SELECT TOP 5000
-            f.[Entry No_]               AS id,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Item No_])), ''), 'REF-ITEM') AS itemReference,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Description])), ''), 'Article Industriel') AS designation,
-            f.[Posting Date]            AS postingDate,
-            ISNULL(CAST(f.[Entry Type] AS VARCHAR(20)), '0') AS entryType,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Document No_])), ''), 'DOC') AS documentNo,
-            ISNULL(f.[Quantity], 0.0)   AS quantite,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Location Code])), ''), 'MAGASIN') AS locationCode,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Site Code])), ''), 'Kondar') AS siteCode,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Source No_])), ''), 'OP') AS sourceNo,
-            0.0                         AS coutActuel,
-            ISNULL(NULLIF(LTRIM(RTRIM(f.[Data Base])), ''), 'Tunisie') AS database_
-        FROM dbo.FACT_ILE f WITH (NOLOCK)
-        """, nativeQuery = true)
-    List<Object[]> findStockMovementsFromDWH();
-
-    @Query(value = """
         SELECT 
             ISNULL(NULLIF(LTRIM(RTRIM(s.[groupeitem])), ''), 'Autres') AS groupe,
             COUNT(*) AS nbArticles,
@@ -133,12 +115,4 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
         ORDER BY SUM(s.[Quantité] * s.[Cout]) DESC
         """, nativeQuery = true)
     List<Object[]> findStockDistributionBySite();
-
-    @Query(value = """
-        SELECT
-            CAST(ISNULL(SUM(CASE WHEN f.[Quantity] > 0 THEN f.[Quantity] ELSE 0 END), 25400.0) AS FLOAT) AS totalEntrees,
-            CAST(ISNULL(SUM(CASE WHEN f.[Quantity] < 0 THEN ABS(f.[Quantity]) ELSE 0 END), 18200.0) AS FLOAT) AS totalSorties
-        FROM dbo.FACT_ILE f WITH (NOLOCK)
-        """, nativeQuery = true)
-    List<Object[]> findStockMovementTotals();
 }

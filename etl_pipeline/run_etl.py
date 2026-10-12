@@ -25,7 +25,7 @@ def print_banner():
     banner = """
     ========================================================================
        NEXORA DATA WAREHOUSE (dbDWH) - ETL PIPELINE & QUALITY ENGINE
-       Raw CSV Ingestion -> 10 Quality Cleaners -> 7 Star Schema Tables
+       Raw CSV Ingestion -> 10 Quality Cleaners -> 3 DWH Tables
     ========================================================================
     """
     print(banner)

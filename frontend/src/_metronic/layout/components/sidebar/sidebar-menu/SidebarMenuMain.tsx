@@ -54,26 +54,13 @@ const SidebarMenuMain = () => {
         </div>
       </div>
 
-      <SidebarMenuItemWithSub
+      <SidebarMenuItem
         to='/stock'
-        title='Stock'
-        fontIcon='bi-archive'
         icon='element-plus'
+        title='Inventaire des Stocks'
+        fontIcon='bi-archive'
         iconColor='#10B981'
-      >
-        <SidebarMenuItem
-          to='/stock'
-          title='Inventaire'
-          hasBullet={true}
-          exact={true}
-        />
-        <SidebarMenuItem
-          to='/stock/movements'
-          title='Mouvements de Stock'
-          hasBullet={true}
-          exact={true}
-        />
-      </SidebarMenuItemWithSub>
+      />
 
 
       {}

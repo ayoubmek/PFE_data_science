@@ -6,10 +6,9 @@ OUTPUT_CLEAN_DIR = PROJECT_ROOT / "etl_pipeline" / "output_clean"
 
 RAW_STOCK_CSV = PROJECT_ROOT / "ASTOCKDATE_RAW.csv"
 RAW_PROD_CSV = PROJECT_ROOT / "PRODUCTION_RAW.csv"
-SAMPLE_PROD_XLSX = PROJECT_ROOT / "echantillon_dwh_production.xlsx"
 
 DB_CONFIG = {
-    "server": os.getenv("DB_SERVER", "localhost"),
+    "server": os.getenv("DB_SERVER", "LAPTOP-M7HILU4Q"),
     "database": os.getenv("DB_NAME", "dbDWH"),
     "driver": os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server"),
     "trusted_connection": os.getenv("DB_TRUSTED", "yes"),

@@ -1,18 +1,15 @@
 import logging
-from pathlib import Path
 from typing import Optional
 import pandas as pd
 
-from .config import RAW_STOCK_CSV, RAW_PROD_CSV, SAMPLE_PROD_XLSX
+from .config import RAW_STOCK_CSV, RAW_PROD_CSV
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def extract_raw_stock_csv(
-    file_path: Optional[Path] = None, nrows: Optional[int] = None
-) -> pd.DataFrame:
-    path = Path(file_path or RAW_STOCK_CSV)
+def extract_raw_stock_csv(nrows: Optional[int] = None) -> pd.DataFrame:
+    path = RAW_STOCK_CSV
     if not path.exists():
         raise FileNotFoundError(f"Raw CSV file not found: {path}")
 
@@ -46,26 +43,14 @@ def extract_raw_stock_csv(
     return df
 
 
-def extract_production_data(
-    file_path: Optional[Path] = None, nrows: Optional[int] = None
-) -> pd.DataFrame:
-    if file_path:
-        path = Path(file_path)
-    elif RAW_PROD_CSV.exists():
-        path = RAW_PROD_CSV
-    else:
-        path = SAMPLE_PROD_XLSX
-
+def extract_production_data(nrows: Optional[int] = None) -> pd.DataFrame:
+    path = RAW_PROD_CSV
     if not path.exists():
-        logger.warning(f"Production file not found at {path}, generating simulated baseline.")
-        return pd.DataFrame()
+        raise FileNotFoundError(f"Raw production CSV file not found: {path}")
 
     logger.info(f"Extracting production data from: {path.name}...")
     try:
-        if path.suffix.lower() == ".csv":
-            df = pd.read_csv(path, nrows=nrows, dtype=str)
-        else:
-            df = pd.read_excel(path, nrows=nrows)
+        df = pd.read_csv(path, nrows=nrows, dtype=str)
         logger.info(f"Read {len(df):,} production records from {path.name}.")
         return df
     except Exception as e:

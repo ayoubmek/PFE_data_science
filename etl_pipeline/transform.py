@@ -31,45 +31,6 @@ def transform_dim_of_mach() -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
-def transform_fact_mvts_stocks(df_clean: pd.DataFrame) -> pd.DataFrame:
-    logger.info("Transforming fact: FACT_Mvts_Stocks...")
-    fact = df_clean[
-        ["DateStock", "No_", "Quantité", "Cout", "Site", "GroupeItem"]
-    ].copy()
-
-    fact = fact.rename(
-        columns={
-            "DateStock": "Date_Mouvement",
-            "No_": "Code_Article",
-            "Quantité": "Quantite_Mouvement",
-            "Cout": "Cout_Unitaire",
-            "Site": "Emplacement_Site",
-            "GroupeItem": "Famille_Article",
-        }
-    )
-    fact["Valeur_Totale"] = (fact["Quantite_Mouvement"] * fact["Cout_Unitaire"]).round(2)
-    fact["Type_Mouvement"] = fact["Quantite_Mouvement"].apply(
-        lambda q: "CONSOMMATION" if q < 500 else "REAPPROVISIONNEMENT"
-    )
-    return fact.reset_index(drop=True)
-
-
-def transform_fact_encours(df_clean: pd.DataFrame) -> pd.DataFrame:
-    logger.info("Transforming fact: FACT_Encours...")
-    encours_df = df_clean[df_clean["Encours"] == 1].copy()
-    fact = encours_df[
-        ["DateStock", "No_", "Quantité", "Site"]
-    ].rename(
-        columns={
-            "DateStock": "Date_Observation",
-            "No_": "Code_Article",
-            "Quantité": "Quantite_Encours",
-            "Site": "Emplacement_Site",
-        }
-    )
-    fact["Statut_Fabrication"] = "EN_COURS_INJECTION"
-    return fact.reset_index(drop=True)
-
 
 def transform_fact_cle(df_prod: pd.DataFrame) -> pd.DataFrame:
     """
@@ -197,74 +158,6 @@ def transform_fact_pa(df_prod: pd.DataFrame) -> pd.DataFrame:
     })
 
 
-def transform_fact_of_rebuts(df_prod: pd.DataFrame) -> pd.DataFrame:
-    logger.info("Transforming fact: FACT_OF-Rebuts...")
-    causes = ["Retassure / Déformation", "Bavure d'injection", "Brûlure matière", "Point noir / Pollution", "Sous-dosage"]
-    if df_prod is not None and not df_prod.empty:
-        date_col = next((c for c in df_prod.columns if "posting" in c.lower() or "date" in c.lower()), df_prod.columns[0])
-        rebut_col = next((c for c in df_prod.columns if "scrap" in c.lower() or "rebut" in c.lower()), None)
-        orders_col = next((c for c in df_prod.columns if "document" in c.lower() or "ordres" in c.lower()), None)
-
-        parsed_dates = pd.to_datetime(
-            df_prod[date_col].astype(str).str.strip(), format="mixed", errors="coerce"
-        )
-        valid_mask = parsed_dates.notna()
-
-        rebut_series = df_prod.loc[valid_mask, rebut_col] if rebut_col else 0
-        rebut_clean = pd.to_numeric(
-            rebut_series.astype(str).str.replace(r"[^\d.,\-]", "", regex=True).str.replace(",", "."),
-            errors="coerce"
-        ).fillna(0).abs().astype(int)
-
-        orders_series = df_prod.loc[valid_mask, orders_col] if orders_col else 1
-
-        raw_df = pd.DataFrame({
-            "Date_Production": parsed_dates[valid_mask].dt.strftime("%Y-%m-%d"),
-            "Scrap": rebut_clean,
-            "Doc": orders_series,
-        })
-
-        fact = raw_df.groupby("Date_Production").agg({
-            "Scrap": "sum",
-            "Doc": "nunique"
-        }).reset_index().rename(columns={"Scrap": "Quantite_Rebut_Totale", "Doc": "Nb_OF_Impactes"}).sort_values("Date_Production")
-    else:
-        dates = pd.date_range("2024-01-01", "2026-04-30", freq="W")
-        fact = pd.DataFrame({
-            "Date_Production": dates.strftime("%Y-%m-%d"),
-            "Quantite_Rebut_Totale": np.random.randint(1500, 6000, len(dates)),
-            "Nb_OF_Impactes": np.random.randint(10, 45, len(dates)),
-        })
-
-    np.random.seed(42)
-    fact["Cause_Principale"] = np.random.choice(causes, len(fact))
-    fact["Cout_Rebut_Estime_TND"] = (fact["Quantite_Rebut_Totale"] * 1.85).round(2)
-    return fact.reset_index(drop=True)
-
-
-def transform_fact_bom(df_clean: pd.DataFrame) -> pd.DataFrame:
-    logger.info("Transforming fact: FACT_BOM...")
-    unique_items = df_clean["No_"].unique()
-    bom_records = []
-    np.random.seed(42)
-
-    max_k = len(unique_items) - 1
-    if max_k <= 0:
-        return pd.DataFrame(columns=["Code_Article_Parent", "Code_Composant", "Quantite_Par_Piece", "Unite_Mesure"])
-
-    for item in unique_items[:150]:
-        k = min(np.random.randint(2, 5), max_k)
-        candidates = [x for x in unique_items if x != item]
-        components = np.random.choice(candidates, size=min(k, len(candidates)), replace=False)
-        for comp in components:
-            bom_records.append({
-                "Code_Article_Parent": item,
-                "Code_Composant": comp,
-                "Quantite_Par_Piece": round(float(np.random.uniform(0.05, 1.5)), 3),
-                "Unite_Mesure": "KG" if "PLASTIQUE" in item else "PCE",
-            })
-    return pd.DataFrame(bom_records)
-
 
 def transform_astockdate(df_clean: pd.DataFrame) -> pd.DataFrame:
     logger.info("Transforming table: ASTOCKDATE...")
@@ -279,12 +172,8 @@ def transform_all(df_clean: pd.DataFrame, df_prod: pd.DataFrame) -> Dict[str, pd
     logger.info("=== Transforming Data into dbDWH Schema Tables ===")
     tables = {
         "ASTOCKDATE": transform_astockdate(df_clean),
-        "FACT_ILE": transform_fact_mvts_stocks(df_clean),
         "FACT_CLE": transform_fact_cle(df_prod),
         "MCMachineCenter": transform_dim_of_mach(),
-        "FACT_Encours": transform_fact_encours(df_clean),
-        "FACT_OF-Rebuts": transform_fact_of_rebuts(df_prod),
-        "FACT_BOM": transform_fact_bom(df_clean),
     }
     for name, df in tables.items():
         logger.info(f"Generated {name:20s}: {len(df):,} rows, {len(df.columns)} columns")

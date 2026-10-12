@@ -15,7 +15,7 @@ CREATE TABLE app_users (
 GO
 
 -- Production data is sourced directly from dbo.FACT_CLE and dbo.MCMachineCenter
--- Stock data is sourced directly from dbo.ASTOCKDATE and dbo.FACT_ILE
+-- Stock data is sourced directly from dbo.ASTOCKDATE
 -- Redundant template tables (machines, production_orders, stock_movements, kpi_logs) have been removed.
 
 

@@ -29,7 +29,6 @@ public class CacheWarmer {
                 productionService.getAllMachines();
                 productionService.getKpi();
                 stockService.getAllItems();
-                stockService.getRecentMovements(6);
                 stockService.getKpi();
                 long elapsed = System.currentTimeMillis() - t0;
                 log.info("[CACHE-WARMUP] All DWH caches warmed in {} ms! All endpoints now respond in 0ms from RAM.", elapsed);

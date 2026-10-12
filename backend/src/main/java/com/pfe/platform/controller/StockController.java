@@ -20,11 +20,6 @@ public class StockController {
         return ResponseEntity.ok(stockService.getAllItems());
     }
 
-    @GetMapping("/movements/recent")
-    public ResponseEntity<List<StockDTO.MovementResponse>> getRecentMovements(
-            @RequestParam(defaultValue = "6") int months) {
-        return ResponseEntity.ok(stockService.getRecentMovements(months));
-    }
 
     @GetMapping("/kpi")
     public ResponseEntity<StockDTO.KpiResponse> getKpi() {
