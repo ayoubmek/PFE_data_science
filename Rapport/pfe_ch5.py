@@ -53,7 +53,7 @@ def get_chapter5():
         body("Le processus de modélisation prédictive suit les cinq étapes illustrées par la figure 5.1 :"),
         pb(),
         ...imageFigure("diagrams/sprint2_activity.png", "Figure 5.1 : Architecture et flux de traitement du module d'IA de Nexora", 520, 240),
-        bullet("**1. Extraction des données d'atelier** : lecture de l'historique des déclarations de fabrication depuis la table `Fact_PA` du Data Warehouse (851 jours réels)."),
+        bullet("**1. Extraction des données d'atelier** : lecture de l'historique des déclarations de fabrication depuis la table `FACT_CLE` du Data Warehouse (851 jours réels)."),
         bullet("**2. Ingénierie des variables** : calcul des variables explicatives (décalages temporels, moyennes mobiles, variables calendaires et événements industriels)."),
         bullet("**3. Entraînement des modèles** : ajustement des algorithmes sur l'historique de production d'injection plastique."),
         bullet("**4. Évaluation multi-horizons** : mesure des métriques d'erreur sur les horizons de planification de 7, 15 et 30 jours."),
@@ -243,7 +243,7 @@ def get_chapter5():
         pb(),
 
         title2("5.9 Rôles respectifs des modèles dans la plateforme Nexora"),
-        body("L'analyse comparative conduit à une organisation claire entre les deux modèles de tête. Random Forest obtient une précision légèrement supérieure sur l'historique d'atelier (6,0 % d'erreur à 30 jours contre 6,7 % pour Prophet). Toutefois, le modèle Prophet a été retenu pour le déploiement opérationnel en production en raison de sa décomposition transparente (séparant la tendance générale, le rythme hebdomadaire et les arrêts programmés) et de sa grande facilité d'intégration dans l'entrepôt de données SQL Server et les tableaux de bord Power BI. Random Forest demeure utilisé comme modèle de référence pour les analyses hors-ligne et les études approfondies."),
+        body("L'analyse comparative conduit à une organisation claire entre les deux modèles de tête. Random Forest s'impose comme le **modèle Champion de référence d'atelier**, offrant la meilleure précision ponctuelle absolue sur l'ensemble des horizons (6,0 % d'erreur MAPE à 30 jours, MAE de 2 467 pièces/jour, R² de 0,98) ; il est mis en avant en premier plan sur le portail web opérationnel et dans le module de benchmark pour l'ordonnancement précis des équipes. Le modèle **Prophet** intervient quant à lui comme moteur prévisionnel comparatif et déployé en production, apprécié pour sa décomposition explicable (séparant la tendance générale, les cycles hebdomadaires et les événements d'atelier) et sa persistance directe dans la table `ml_production_predictions` du Data Warehouse pour les tableaux de bord Power BI."),
         pb(),
 
         title2("5.10 Bilan du Sprint 3"),

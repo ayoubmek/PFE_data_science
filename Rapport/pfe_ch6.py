@@ -13,7 +13,7 @@ def get_chapter6():
         title1("Chapitre 6 : Sprint 4 : Développement du tableau de bord décisionnel et validation"),
 
         title2("6.1 Introduction"),
-        body("Ce chapitre correspond au Sprint 4, dernière phase de réalisation de notre projet. Après avoir mis en place le pipeline ETL (Sprint 1), le module de gestion des stocks (Sprint 2) et les modèles de prévision par IA (Sprint 3), ce sprint a pour objectif d'intégrer l'ensemble de ces briques au sein d'une solution de restitution conviviale et réactive. Les rapports décisionnels développés sous Microsoft Power BI [24], alimentés directement par le Data Warehouse et la table `ml_production_predictions`, permettent à l'administrateur de piloter les indicateurs d'atelier, de suivre les prévisions de cadence et d'analyser les risques de rupture. En complément, un portail web opérationnel en React.js [22] et Spring Boot [17] offre à l'opérateur d'atelier une interface de saisie et de consultation des mouvements d'inventaire."),
+        body("Ce chapitre correspond au Sprint 4, dernière phase de réalisation de notre projet. Après avoir mis en place le pipeline ETL (Sprint 1), le module de gestion des stocks (Sprint 2) et les modèles de prévision par IA (Sprint 3), ce sprint a pour objectif d'intégrer l'ensemble de ces briques au sein d'une solution de restitution conviviale et réactive. Les rapports décisionnels développés sous Microsoft Power BI [24], alimentés directement par le Data Warehouse et la table `ml_production_predictions`, permettent à l'administrateur de piloter les indicateurs d'atelier, de suivre les prévisions de cadence et d'analyser les risques de rupture. En complément, un portail web opérationnel en React.js [22] et Spring Boot [17] offre à l'opérateur et à l'administrateur une interface de consultation des inventaires, de suivi de fabrication et de benchmark comparatif des modèles d'IA."),
         pb(),
 
         title2("6.2 Backlog du Sprint 4"),
@@ -43,10 +43,10 @@ def get_chapter6():
         body("La figure 6.1 présente l'architecture globale d'intégration et de déploiement de la solution décisionnelle **Nexora** :"),
         pb(),
         ...imageFigure("diagrams/arch_physique.png", "Figure 6.1 : Architecture globale d'intégration et de déploiement de Nexora", 540, 240),
-        bullet("**1. Entrepôt de données SQL Server** : centralise les tables de faits et de dimensions nettoyées ainsi que les prévisions issues de l'apprentissage automatique (`ml_production_predictions`)."),
+        bullet("**1. Entrepôt de données SQL Server** : centralise les tables de faits et de dimensions nettoyées (`ASTOCKDATE`, `FACT_CLE`, `MCMachineCenter`) ainsi que les prévisions de cadence (`ml_production_predictions`)."),
         bullet("**2. Backend applicatif d'entreprise (Spring Boot / FastAPI)** : le serveur Spring Boot [17] gère l'authentification sécurisée par jetons JWT, le contrôle d'accès RBAC et les entités métiers, tandis que le micro-service FastAPI [21] sert d'interface d'inférence directe pour les modèles Python."),
         bullet("**3. Rapports décisionnels Microsoft Power BI** : tableaux de bord interactifs connectés en mode DirectQuery ou Import au DWH, exploitant des mesures calculées en DAX pour le management d'atelier."),
-        bullet("**4. Portail web réactif React.js** : interface utilisateur dynamique permettant aux opérateurs de renseigner les réceptions et consommations de matière."),
+        bullet("**4. Portail web réactif React.js** : interface utilisateur dynamique permettant aux équipes d'atelier de consulter les stocks, suivre les alertes critiques et comparer les modèles d'IA sur des données personnalisées."),
         pb(),
 
         title2("6.4 Diagramme de séquence"),
@@ -107,16 +107,17 @@ def get_chapter6():
         pb(),
 
         title3("6.6.5 Portail web opérationnel React & Spring Boot"),
-        body("En complément des tableaux de bord Power BI dédiés à l'administrateur, la plateforme comprend une application web développée avec React 18.2 [22] côté client et Spring Boot 3.2 [17] côté serveur. Ce portail offre à l'opérateur d'atelier une interface fluide pour consulter les données opérationnelles et enregistrer les mouvements de stock."),
-        body("L'architecture des services (API REST) exposés par le serveur applicatif s'articule autour de quatre domaines principaux :"),
+        body("En complément des tableaux de bord Power BI dédiés au pilotage analytique global, la plateforme comprend une application web moderne développée avec React 18.2 [22] côté client et Spring Boot 3.2 [17] côté serveur. Ce portail offre aux équipes d'atelier et aux gestionnaires une interface fluide et réactive pour consulter les données d'inventaire en temps réel, analyser les stocks par segmentation Pareto ABC, superviser les 319 presses à injecter et exploiter les projections prédictives de cadence sur 30 jours ainsi que le banc d'essai comparatif des modèles d'IA."),
+        body("L'architecture des services (API REST) exposés par le serveur applicatif s'articule autour de cinq contrôleurs modulaires :"),
         pb(),
         makeTable(
           ["Module fonctionnel", "Rôle opérationnel", "Profils autorisés"],
           [
-            ["Authentification & Rôles (/api/auth)", "Connexion sécurisée par jeton JWT et contrôle d'accès selon le profil.", "Opérateur / Administrateur"],
-            ["Gestion des stocks (/api/stock)", "Consultation des niveaux d'inventaire, alertes de couverture et saisie des mouvements de matière.", "Opérateur / Administrateur"],
-            ["Parc machines (/api/machines)", "Suivi de l'état opérationnel des 319 presses à injecter et historique des indicateurs de production.", "Opérateur / Administrateur"],
-            ["Prévisions de production (/api/predictions)", "Consultation des cadences prévues par les modèles d'IA pour le pilotage d'atelier.", "Administrateur"]
+            ["Authentification & Sécurité (/api/auth)", "Connexion sécurisée par jeton JWT (durée 24h) et gestion des sessions utilisateurs.", "Opérateur / Administrateur"],
+            ["Gestion d'inventaire (/api/stock)", "Consultation des 32 043 lignes d'inventaire ASTOCKDATE, segmentation Pareto ABC et détection des alertes de rupture/surstock.", "Opérateur / Administrateur"],
+            ["Supervision atelier & machines (/api/production)", "Suivi des déclarations FACT_CLE, indicateurs de TRS net, cadences d'injection et parc des 319 presses MCMachineCenter.", "Opérateur / Administrateur"],
+            ["Inférence IA & Benchmark (/api/ml)", "Génération des prévisions de cadence sur 30 jours, comparaison des métriques du banc d'essai (Random Forest Champion, Prophet) et archivage.", "Opérateur / Administrateur"],
+            ["Gestion des comptes (/api/users)", "Administration des habilitations et attribution stricte des rôles ADMIN et OPERATEUR.", "Administrateur"]
           ],
           [2600, 4200, 2466]
         ),
@@ -134,9 +135,9 @@ def get_chapter6():
         makeTable(
           ["Cas de test", "Protocole d'exécution", "Résultat constaté", "Statut"],
           [
-            ["Connexion DWH DirectQuery", "Interrogation simultanée des tables FACT_PA et FACT_Mvts_Stocks depuis Power BI.", "Temps de réponse fluide, synchronisation immédiate des visuels.", "Validé"],
+            ["Connexion DWH DirectQuery", "Interrogation simultanée des tables FACT_CLE et ASTOCKDATE depuis Power BI.", "Temps de réponse fluide (< 1 s), synchronisation immédiate des visuels.", "Validé"],
             ["Mesures d'atelier (DAX)", "Vérification des formules de cadence, valorisation et rotation de stock sur 10 shifts types.", "Conformité stricte avec les déclarations d'atelier validées.", "Validé"],
-            ["Sélection multi-horizons", "Bascule entre les horizons de prévision 7j, 15j et 30j sur l'interface graphique.", "Mise à jour instantanée des courbes et des bornes d'incertitude à 95 %.", "Validé"],
+            ["Projection prédictive 30j", "Génération de la prévision mensuelle d'atelier (horizon 30 jours) avec le modèle Random Forest Champion.", "Courbe continue avec bornes de confiance à 95 % et calcul des totaux mensuels.", "Validé"],
             ["Détection des ruptures", "Filtrage sur les références à stock nul (47 références distinctes) et contrôle de l'indicateur visuel rouge.", "Identification immédiate des références prioritaires avec tri par criticité.", "Validé"],
             ["Chiffrage commande 45j", "Contrôle de la somme budgétaire sur les 193 références prioritaires du catalogue.", "Montant égal aux 380 400 TND calculés dans le module d'approvisionnement.", "Validé"],
             ["Exportation tabulaire", "Export des alertes d'approvisionnement vers un tableur Excel.", "Génération d'un fichier conforme prêt pour transmission aux fournisseurs.", "Validé"]
@@ -165,10 +166,10 @@ def get_chapter6():
           ["Tâche planifiée", "Livrable produit", "Statut"],
           [
             ["Modélisation Power BI", "Connexion au Data Warehouse et création des mesures DAX", "Réalisé"],
-            ["Rapport Supervision Machines", "Tableau de bord de suivi du parc machines et cadence des lignes", "Réalisé"],
-            ["Rapport Prévision IA", "Tableau de bord multi-horizons (7, 15, 30 jours) avec bornes à 95 %", "Réalisé"],
+            ["Rapport Supervision Machines", "Tableau de bord de suivi du parc de 319 presses et TRS net d'atelier", "Réalisé"],
+            ["Rapport Prévision IA", "Tableau de bord de prévision des cadences (horizon 30 jours) avec bornes à 95 %", "Réalisé"],
             ["Rapport Gestion des stocks", "Tableau de bord d'analyse d'inventaire, classification ABC et alertes", "Réalisé"],
-            ["Portail web opérationnel", "Application React 18 / Spring Boot avec API REST documentées", "Réalisé"],
+            ["Portail web opérationnel & Benchmark", "Application React 18 / Spring Boot avec API REST et banc d'essai des 4 modèles d'IA", "Réalisé"],
             ["Recette et validation", "Validation de 6 scénarios de test fonctionnels et d'intégration d'atelier", "Réalisé"]
           ],
           [2600, 4866, 1200]

@@ -25,7 +25,7 @@ def get_chapter4():
           [
             ["Élevée", "Définition des flux logistiques et architecture du module de gestion des stocks", "1 jour"],
             ["Élevée", "Calcul des taux de consommation journaliers, de la couverture en jours et des rotations", "2 jours"],
-            ["Élevée", "Segmentation multicritère des 800 références : méthode Pareto ABC et clustering K-Means", "3 jours"],
+            ["Élevée", "Segmentation multicritère des 800 références : méthode Pareto ABC et classification par niveau de risque", "3 jours"],
             ["Élevée", "Mise en place de la classification par niveau de risque (Rupture, Critique, Normal, Surstock)", "2 jours"],
             ["Élevée", "Développement de l'algorithme de calcul des commandes d'approvisionnement (horizon 45 jours)", "3 jours"],
             ["Moyenne", "Chiffrage budgétaire global des approvisionnements prioritaires (environ 380 400 TND)", "2 jours"],
@@ -44,9 +44,9 @@ def get_chapter4():
         body("Le fonctionnement du module repose sur un enchaînement méthodique en quatre phases, illustré par la figure 4.1 :"),
         pb(),
         ...imageFigure("diagrams/sprint3_activity.png", "Figure 4.1 : Architecture et flux de traitement du module de gestion des stocks", 520, 240),
-        bullet("**1. Ingestion des données d'inventaire** : lecture des stocks physiques disponibles et de l'historique des sorties matière depuis la table `FACT_Mvts_Stocks` du Data Warehouse."),
+        bullet("**1. Ingestion des données d'inventaire** : lecture des stocks physiques disponibles et des niveaux de valorisation depuis la table `ASTOCKDATE` du Data Warehouse."),
         bullet("**2. Calcul des indicateurs logistiques** : calcul du taux de consommation journalier, de l'autonomie restante en jours de production et de la vitesse de rotation."),
-        bullet("**3. Double segmentation des articles** : catégorisation économique par la méthode Pareto ABC et regroupement non supervisé par clustering K-Means [9], complétés par l'affectation à un statut de risque opérationnel."),
+        bullet("**3. Double classification des articles** : catégorisation économique par la méthode Pareto ABC (Classes A, B, C) et affectation rigoureuse à un niveau de risque opérationnel (Rupture, Critique, Normal, Surstock)."),
         bullet("**4. Recommandations et budgétisation** : proposition de quantités de commande pour sécuriser un horizon de 45 jours calculées à partir du taux de consommation validé, calcul de l'enveloppe budgétaire et émission d'alertes."),
         pb(),
 
@@ -60,10 +60,10 @@ def get_chapter4():
         pb(),
 
         title2("4.5 Classification et segmentation des produits"),
-        title3("4.5.1 Segmentation multicritère Pareto ABC et Clustering K-Means"),
-        body("Afin d'adopter une stratégie de gestion différenciée, les **800 références d'articles du catalogue unique** (`DIM_FamArt`) font l'objet d'une double segmentation économique et volumique :"),
-        bullet("**1. Méthode Pareto ABC sur la valeur annuelle consommée** (valeur totale consommée : 14 311 585 TND, Figure 4.2) :\\n• **Classe A (446 références, 55,8 % des références)** : concentre **70,0 % de la valeur économique** (10 018 110 TND). Elle rassemble les résines thermoplastiques majeures et inserts à forte valeur faisant l'objet d'un contrôle régulier.\\n• **Classe B (202 références, 25,2 % des références)** : représente **20,0 % de la valeur économique** (2 862 317 TND), correspondant aux composants techniques intermédiaires gérés par revue périodique.\\n• **Classe C (152 références, 19,0 % des références)** : représente **10,0 % de la valeur économique** (1 431 158 TND), regroupant les références secondaires gérées par seuil d'alerte simplifié."),
-        bullet("**2. Clustering non supervisé K-Means ($k=3$) [9]** : partitionne les 800 références selon trois axes normalisés : valorisation de stock, stock physique disponible et taux de consommation journalier (Figure 4.2) :\\n• **Cluster 0 (227 références, 28,4 %)** : articles à fort stock moyen (10 643 unités), consommation soutenue (139,8 pièces/jour) et valorisation moyenne de ligne de 327,6 TND (résines principales de forte rotation, soit un coût unitaire réel d'environ 0,031 TND/pièce).\\n• **Cluster 1 (299 références, 37,4 %)** : articles à stock modéré (3 404 unités), cadence moyenne de 101,4 pièces/jour et valorisation moyenne de 300,3 TND par ligne d'inventaire.\\n• **Cluster 2 (274 références, 34,2 %)** : composants techniques et inserts (valorisation moyenne de 351,2 TND par ligne), stock moyen de 3 694 unités et débit régulier de 93,4 pièces/jour.\\n*Note méthodologique :* Ces montants de 300 à 350 TND correspondent à la valorisation consolidée du lot de stock par article (champ `Cout` de la table `ASTOCKDATE`) et non au coût unitaire par pièce. Le coût unitaire réel constaté dans le Data Warehouse s'établit en réalité à une médiane de 0,31 à 0,39 TND par unité (et une moyenne de 0,45 TND par unité sur les références critiques et en rupture)."),
+        title3("4.5.1 Segmentation multicritère Pareto ABC et répartition de la valeur"),
+        body("Afin d'adopter une stratégie de gestion différenciée, les **800 références d'articles du catalogue unique** (`DIM_FamArt`) font l'objet d'une segmentation économique approfondie par la méthode de Pareto ABC :"),
+        bullet("**1. Segmentation Pareto ABC sur la valeur annuelle consommée** (valeur totale consommée : 14 311 585 TND, Figure 4.2) :\\n• **Classe A (446 références, 55,8 % des références)** : concentre **70,0 % de la valeur économique** (10 018 110 TND). Elle rassemble les résines thermoplastiques majeures et inserts à forte valeur faisant l'objet d'un contrôle rigoureux et régulier.\\n• **Classe B (202 références, 25,2 % des références)** : représente **20,0 % de la valeur économique** (2 862 317 TND), correspondant aux composants techniques intermédiaires gérés par revue périodique.\\n• **Classe C (152 références, 19,0 % des références)** : représente **10,0 % de la valeur économique** (1 431 158 TND), regroupant les références secondaires gérées par seuil d'alerte simplifié."),
+        bullet("**2. Analyse de valorisation et structure des coûts unitaires** : l'analyse de l'inventaire dans la table `ASTOCKDATE` révèle que la valorisation médiane par article s'établit entre 0,31 et 0,39 TND par unité, avec une moyenne de 0,45 TND par unité sur les références critiques et en rupture. Cette maîtrise fine des coûts réels permet de budgétiser avec exactitude les commandes d'approvisionnement."),
         pb(),
 
         title3("4.5.2 Classification opérationnelle par niveau de risque"),
@@ -114,9 +114,9 @@ def get_chapter4():
         bullet("**Stock Critique** : 146 références (18,2 %) présentent une autonomie strictement inférieure à 15 jours."),
         bullet("**Surstock** : 50 références (6,2 %) dépassent 120 jours de couverture."),
         pb(),
-        body("La figure 4.2 illustre la double segmentation Pareto ABC et K-Means obtenue sur les 800 références du catalogue :"),
+        body("La figure 4.2 illustre la distribution et la courbe de concentration de Pareto ABC obtenue sur l'ensemble des 800 références du catalogue :"),
         pb(),
-        ...imageFigure("diagrams/segmentation_pareto_kmeans.png", "Figure 4.2 : Segmentation multicritère Pareto ABC et Clustering K-Means des stocks", 540, 250),
+        ...imageFigure("diagrams/segmentation_pareto_kmeans.png", "Figure 4.2 : Segmentation multicritère Pareto ABC et répartition de la valeur de stock", 540, 250),
         pb(),
         body("La figure 4.3 présente la synthèse des articles en alerte regroupés par grande famille de matières plastiques :"),
         pb(),
@@ -133,7 +133,7 @@ def get_chapter4():
           [
             ["Architecture du module", "Schéma fonctionnel des flux et indicateurs de gestion des stocks", "Réalisé"],
             ["Calcul des indicateurs", "Calcul automatisé des taux journaliers, de la couverture et des rotations", "Réalisé"],
-            ["Segmentation multicritère", "Méthode ABC de Pareto et clustering K-Means (k=3) sur 800 références", "Réalisé"],
+            ["Segmentation multicritère", "Méthode ABC de Pareto et classification par niveau de risque sur 800 références", "Réalisé"],
             ["Classification par statut", "Répartition des 800 références en 4 états opérationnels (47 ruptures, 146 critiques)", "Réalisé"],
             ["Algorithme de réapprovisionnement", "Formule de couverture à 45 jours basée sur le taux de consommation validé", "Réalisé"],
             ["Chiffrage budgétaire", "Calcul du budget d'approvisionnement des 193 références (environ 380 400 TND)", "Réalisé"],
@@ -149,7 +149,7 @@ def get_chapter4():
         pb(),
 
         title2("4.9 Conclusion"),
-        conclusionBox("Ce chapitre a détaillé le développement du module de gestion intelligente des stocks lors du Sprint 2. En associant la segmentation économique ABC, le clustering K-Means en trois profils industriels et une formule de réapprovisionnement sur 45 jours basée sur la consommation d'atelier validée, la plateforme Nexora remplace les pratiques manuelles par un pilotage dynamique et préventif unifié sur les 800 références du catalogue. Le chapitre suivant aborde le Sprint 3, consacré à la modélisation prédictive par Intelligence Artificielle et aux prévisions de cadence."),
+        conclusionBox("Ce chapitre a détaillé le développement du module de gestion intelligente des stocks lors du Sprint 2. En associant la segmentation économique ABC de Pareto, la classification opérationnelle selon la couverture disponible et une formule de réapprovisionnement sur 45 jours basée sur la consommation d'atelier validée, la plateforme Nexora remplace les pratiques manuelles par un pilotage dynamique et préventif unifié sur les 800 références du catalogue. Le chapitre suivant aborde le Sprint 3, consacré à la modélisation prédictive par Intelligence Artificielle et aux prévisions de cadence."),
         pageBreak(),
     '''
 

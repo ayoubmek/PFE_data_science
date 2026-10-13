@@ -24,7 +24,7 @@ def get_chapter3():
           [
             ["Élevée", "Extraction et audit de qualité des fichiers d'inventaire et de production bruts", "3 jours"],
             ["Élevée", "Développement des fonctions de nettoyage des anomalies recensées", "4 jours"],
-            ["Élevée", "Modélisation dimensionnelle et structuration du schéma en étoile (7 tables)", "3 jours"],
+            ["Élevée", "Modélisation dimensionnelle et structuration des tables cibles du Data Warehouse", "3 jours"],
             ["Élevée", "Chargement automatisé des 32 043 lignes assainies dans SQL Server", "2 jours"],
             ["Élevée", "Calcul des 14 variables explicatives", "3 jours"],
             ["Moyenne", "Analyse exploratoire des séries de cadence (distributions, tendances, saisonnalités)", "2 jours"],
@@ -54,7 +54,7 @@ def get_chapter3():
             ["Lignes d'inventaire détaillées d'atelier", "6 875 lignes actives", "Inventaire ventilé par atelier, dépôt et lot."],
             ["Références articles au catalogue", "800 références uniques", "Articles distincts du référentiel produit."],
             ["Presses à injecter suivies", "319 machines", "Parc de presses réparti sur les 3 sites industriels."],
-            ["En-cours de fabrication enregistrés", "8 344 enregistrements", "Suivi des ordres d'injection en atelier."]
+            ["Déclarations de fabrication d'atelier", "108 106 relevés réels", "Historique de production d'injection de la table FACT_CLE."]
           ],
           [3500, 2400, 2766]
         ),
@@ -66,23 +66,20 @@ def get_chapter3():
         pb(),
 
         title3("3.3.2 Description des tables principales du Data Warehouse"),
-        body("Le Data Warehouse est modélisé selon un schéma en étoile adapté aux analyses [16], constitué de deux tables de dimensions (référentiels) et de cinq tables de faits (événements mesurés) :"),
+        body("Le Data Warehouse (dbDWH) est structuré autour d'un schéma dimensionnel optimisé et assaini [16], éliminant les tables redondantes ou obsolètes pour se concentrer sur les tables maîtresses d'atelier et de pilotage :"),
         pb(),
         makeTable(
-          ["Table du Data Warehouse", "Nature", "Rôle et contenu"],
+          ["Table du Data Warehouse", "Nature", "Rôle et contenu opérationnel"],
           [
-            ["Articles", "Dimension", "Référentiel des articles : désignation, famille matière (PP, PA66, ABS) et typologie client."],
-            ["Presses", "Dimension", "Référentiel des 319 presses à injecter : site d'implantation (Kondar, Sousse, Brno), tonnage et atelier."],
-            ["Mouvements de stock", "Fait", "Historique validé des stocks : date, article, quantité disponible, coût valorisé et site."],
-            ["En-cours de fabrication", "Fait", "Pièces et sous-ensembles en cours d'injection sur les lignes de production."],
-            ["Production journalière", "Fait", "Volumes injectés, pièces conformes, cadences effectives et temps opératoires."],
-            ["Rebuts", "Fait", "Pièces rebutées lors de la fabrication et type de défaut constaté."],
-            ["Nomenclatures", "Fait", "Composants nécessaires à la fabrication de chaque pièce finie."]
+            ["dbo.ASTOCKDATE", "Table de faits d'inventaire", "Instantanés d'inventaire multi-sites (Kondar, Sousse, Brno) : 32 043 lignes validées, quantités physiques, coûts valorisés, familles d'articles et dépôts."],
+            ["dbo.FACT_CLE", "Table de faits de fabrication", "Suivi détaillé de la production réelle d'injection (26 colonnes) : déclarations d'atelier, temps de marche (Run Time), rebuts et calcul de la 'Quantité produite TRS'."],
+            ["dbo.MCMachineCenter", "Table dimensionnelle", "Référentiel des 319 presses à injecter réparties sur les 3 usines : site d'implantation, tonnage (50T à 1500T), atelier et cadence nominale standard."],
+            ["dbo.ml_production_predictions", "Table de persistance IA", "Historique des prévisions de cadence calculées par les modèles d'apprentissage automatique avec métriques d'erreur et recommandations d'équipes."]
           ],
-          [2200, 1400, 5066]
+          [2400, 2200, 4066]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 3.3 : Tables principales du Data Warehouse en schéma en étoile", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 3.3 : Tables maîtresses du Data Warehouse dimensionnel", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
@@ -92,7 +89,7 @@ def get_chapter3():
         body("La figure 3.1 présente le diagramme relationnel modélisant l'agencement des dimensions et des tables de faits au sein de la base de données DWH :"),
         pb(),
         ...imageFigure("diagrams/er_diagram.png", "Figure 3.1 : Modélisation dimensionnelle en étoile du Data Warehouse Nexora", 540, 310),
-        body("Le référentiel des articles est relié aux mouvements de stock, aux en-cours et aux nomenclatures ; le référentiel des presses est relié à la production journalière, elle-même associée aux rebuts déclarés. Ces liaisons permettent de croiser production, qualité et stocks dans une même analyse."),
+        body("La table de dimension MCMachineCenter est interconnectée à la table de faits de fabrication FACT_CLE pour corréler cadences, temps opératoires et rebuts par presse ; la table d'inventaire ASTOCKDATE fournit quant à elle les niveaux de stock physique et les coûts valorisés nécessaires au module logistique et aux tableaux de bord."),
         pb(),
 
         title2("3.4 Analyse exploratoire des données (EDA)"),
@@ -211,7 +208,7 @@ def get_chapter3():
           ["Indicateur de performance ETL", "Valeur mesurée", "Interprétation"],
           [
             ["Lignes brutes traitées en entrée", "51 500 enregistrements", "Volume d'inventaire extrait de l'ERP."],
-            ["Lignes validées chargées dans le DWH", "32 043 enregistrements", "Volume assaini chargé dans la table des mouvements de stock."],
+            ["Lignes validées chargées dans le DWH", "32 043 enregistrements", "Volume assaini chargé dans la table d'inventaire ASTOCKDATE."],
             ["Taux de rétention de données assainies", "62,22 %", "Après suppression des doublons (-35,6 %) et rejets (-2,2 %)."],
             ["Taux d'anomalies résiduelles dans le DWH", "0,0 %", "Toutes les contraintes d'intégrité et de format sont satisfaites."],
             ["Variables créées pour l'apprentissage", "14 variables explicatives", "Prêtes pour la modélisation prédictive."],
@@ -234,7 +231,7 @@ def get_chapter3():
           [
             ["Extraction des sources brutes", "Module de lecture des fichiers d'extraction", "Réalisé"],
             ["Nettoyage des données", "Module de nettoyage en cinq actions (doublons, dates, formats, coûts, valeurs manquantes)", "Réalisé"],
-            ["Modélisation dimensionnelle", "Structuration des 7 tables du DWH en schéma en étoile", "Réalisé"],
+            ["Modélisation dimensionnelle", "Structuration des tables cibles du DWH en schéma dimensionnel", "Réalisé"],
             ["Chargement en base de données", "Module d'insertion des 32 043 lignes avec index", "Réalisé"],
             ["Variables explicatives", "Calcul des 14 variables explicatives", "Réalisé"],
             ["Rapport d'audit de qualité", "Journal d'exécution et bilan avant/après nettoyage", "Réalisé"]

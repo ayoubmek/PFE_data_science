@@ -22,7 +22,7 @@ def get_chapter2():
 
         title3("2.2.1 Besoins fonctionnels"),
         body("Les fonctionnalités attendues sont organisées selon les deux profils d'utilisateurs du système :"),
-        bullet("**L'Opérateur** : acteur d'atelier habilité à saisir les mouvements d'inventaire réels (entrées, sorties de matière, rebuts d'injection) et à consulter le statut des lignes de production."),
+        bullet("**L'Opérateur** : acteur d'atelier habilité à consulter l'état des stocks d'atelier, suivre les alertes de réapprovisionnement et visualiser le statut des lignes de fabrication."),
         bullet("**L'Administrateur** : superviseur d'atelier et responsable logistique. Il assure le pilotage opérationnel (supervision des 319 presses, planification des ordres de fabrication, suivi des cadences d'atelier, consultation des prévisions d'IA à 7/15/30 jours) ainsi que l'administration technique (gestion des comptes et contrôle d'accès RBAC)."),
         pb(),
 
@@ -51,7 +51,7 @@ def get_chapter2():
         title2("2.3 Analyse des besoins"),
         title3("2.3.1 Identification des acteurs"),
         body("L'analyse des cas d'utilisation met en évidence deux acteurs intervenant sur la plateforme Nexora :"),
-        bullet("**1. L'Opérateur** : acteur opérationnel en atelier, responsable de la saisie des mouvements de stock et du suivi d'avancement des ordres de fabrication."),
+        bullet("**1. L'Opérateur** : acteur opérationnel en atelier, responsable de la consultation des stocks, du suivi des alertes d'inventaire et de l'avancement des ordres de fabrication."),
         bullet("**2. L'Administrateur** : acteur de gestion et de supervision, assurant le pilotage d'atelier (supervision des presses, consultation des cadences et des prévisions IA, gestion des alertes d'approvisionnement) ainsi que l'administration des accès."),
         pb(),
 
@@ -66,10 +66,10 @@ def get_chapter2():
         body("Pour assurer la robustesse, la modularité et l'évolutivité de la solution, l'architecture globale de Nexora est structurée en **quatre couches logiques**, comme l'illustre la figure 2.2 :"),
         pb(),
         ...imageFigure("diagrams/arch_logique.png", "Figure 2.2 : Architecture globale du système décisionnel en quatre couches", 540, 260),
-        bullet("**1. Couche Données (Data Layer)** : articulée autour de Microsoft SQL Server 2022 [16], elle héberge le Data Warehouse (DWH) modélisé en schéma en étoile (tables de dimensions pour les articles et presses, tables de faits pour la production, les stocks et les rebuts)."),
+        bullet("**1. Couche Données (Data Layer)** : articulée autour de Microsoft SQL Server 2022 [16], elle héberge le Data Warehouse (dbDWH) modélisé en schéma dimensionnel assaini (table de faits de production réelle FACT_CLE avec ingénierie de la métrique TRS, table d'inventaire ASTOCKDATE, référentiel des 319 presses MCMachineCenter, et table des prévisions IA ml_production_predictions)."),
         bullet("**2. Couche Traitement & ETL (Processing Layer)** : développée en Python 3.10 [18] avec Pandas [19] et NumPy [20], elle orchestre l'ingestion automatisée, le dédoublonnage, la correction des 10 anomalies recensées et l'alimentation des tables analytiques."),
-        bullet("**3. Couche Métier & IA (Business & AI Layer)** : regroupe les services d'apprentissage automatique (Régression Linéaire, ARIMA, Random Forest, Prophet [12] déployé en production pour les prévisions de cadence) ainsi que le moteur logistique de calcul des couvertures de stock. Les prévisions générées sont automatiquement écrites dans la table `ml_production_predictions` du DWH. Cette couche intègre également un micro-service FastAPI [21] pour l'inférence et un serveur d'entreprise Spring Boot [17] pour la gestion des entités métiers et des utilisateurs."),
-        bullet("**4. Couche Restitution & Présentation (Presentation Layer)** : propose une double modalité d'accès adaptée aux profils : d'une part, des tableaux de bord décisionnels interactifs sous Microsoft Power BI [24] connectés directement au DWH pour le pilotage stratégique ; d'autre part, un portail web réactif en React.js [22] et TypeScript [23] pour les saisies et consultations d'atelier."),
+        bullet("**3. Couche Métier & IA (Business & AI Layer)** : regroupe les services d'apprentissage automatique (Régression Linéaire, ARIMA, Random Forest comme modèle champion de référence, Prophet [12] déployé pour les projections opérationnelles de cadence) ainsi que le moteur logistique de calcul déterministe des couvertures de stock à 45 jours. Les prévisions générées sont automatiquement écrites dans la table `ml_production_predictions` du DWH. Cette couche intègre également un micro-service FastAPI [21] pour l'inférence et un serveur d'entreprise Spring Boot [17] pour la gestion des entités métiers et des utilisateurs."),
+        bullet("**4. Couche Restitution & Présentation (Presentation Layer)** : propose une double modalité d'accès adaptée aux profils : d'une part, des tableaux de bord décisionnels interactifs sous Microsoft Power BI [24] connectés directement au DWH pour le pilotage stratégique ; d'autre part, un portail web réactif en React.js [22] et TypeScript [23] pour les consultations d'atelier, le suivi des alertes de rupture et le benchmark comparatif des modèles."),
         pb(),
 
         title2("2.5 Environnement de travail"),
@@ -104,8 +104,8 @@ def get_chapter2():
             ["Frontend Web", "React.js", "18.2", "Bibliothèque d'interfaces graphiques composables pour le portail atelier [22]."],
 
             ["Data Science & ML", "Pandas & NumPy", "2.1 / 1.26", "Manipulation des séries tabulaires et calculs vectorisés [19, 20]."],
-            ["Data Science & ML", "Prophet", "1.1", "Modèle déployé en production (prévisions de cadence et stocks, décomposition saisonnière) [12]."],
-            ["Data Science & ML", "Scikit-Learn", "1.3", "Normalisation, Random Forest (benchmark récursif), Régression Linéaire et K-Means [11]."],
+            ["Data Science & ML", "Prophet", "1.1", "Modèle déployé en production (prévisions des cadences d'atelier, décomposition saisonnière) [12]."],
+            ["Data Science & ML", "Scikit-Learn", "1.3", "Normalisation, Random Forest (modèle Champion d'atelier), Régression Linéaire et métriques [11]."],
             ["Data Science & ML", "Statsmodels", "0.14", "Modèle statistique ARIMA et tests de stationnarité (ADF) [10]."],
 
             ["Business Intelligence", "Microsoft Power BI Desktop", "2024", "Conception des rapports décisionnels interactifs et modélisation DAX [24]."]
