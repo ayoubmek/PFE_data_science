@@ -104,6 +104,61 @@ class ProphetModel:
         }
         return overall_metrics
 
+    def detect_anomalies(
+        self,
+        df_actual: pd.DataFrame = None,
+        date_col: str = "date",
+        val_col: str = "value",
+    ) -> pd.DataFrame:
+        """
+        Détection d'anomalies de production basée sur les bandes à 95% de Prophet :
+        - DEFICIT_CRITIQUE : y < lower_bound (arrêt inopiné, panne, fermeture ou sous-cadence sévère)
+        - SURPLUS_PIC : y > upper_bound (sur-cadence exceptionnelle)
+        - NORMAL : y à l'intérieur de l'intervalle de confiance [lower_bound, upper_bound]
+        """
+        if df_actual is None:
+            y = self.y_train
+            y_pred = self.y_pred_hist
+            dates = pd.date_range(end=self.last_date, periods=self.n_samples, freq="D")
+        else:
+            data = df_actual.sort_values(date_col).reset_index(drop=True)
+            y = data[val_col].values.astype(float)
+            dates = pd.to_datetime(data[date_col])
+            x = np.arange(len(data)).reshape(-1, 1)
+            trend = self.trend_model.predict(x)
+            dows = dates.dt.dayofweek.values
+            y_pred = np.array([
+                max(0.0, float(trend[i] * self.dow_multipliers.get(dows[i], 1.0)))
+                for i in range(len(data))
+            ])
+
+        lower = np.maximum(0.0, y_pred - 1.96 * self.residual_std)
+        upper = y_pred + 1.96 * self.residual_std
+
+        is_deficit = y < lower
+        is_surge = y > upper
+        is_anomaly = is_deficit | is_surge
+
+        severity = np.zeros_like(y)
+        severity[is_deficit] = lower[is_deficit] - y[is_deficit]
+        severity[is_surge] = y[is_surge] - upper[is_surge]
+
+        anomaly_type = np.where(
+            is_deficit, "DEFICIT_CRITIQUE", np.where(is_surge, "SURPLUS_PIC", "NORMAL")
+        )
+
+        return pd.DataFrame({
+            "date": pd.to_datetime(dates).dt.strftime("%Y-%m-%d"),
+            "y_reel": y,
+            "y_pred": np.round(y_pred, 1),
+            "lower_95": np.round(lower, 1),
+            "upper_95": np.round(upper, 1),
+            "is_anomaly": is_anomaly,
+            "anomaly_type": anomaly_type,
+            "severity": np.round(severity, 1),
+            "is_zero_day": (y == 0.0),
+        })
+
 
 if __name__ == "__main__":
     print("\n--- Lancement du modele : Prophet (Modele Structurel Additif) ---")

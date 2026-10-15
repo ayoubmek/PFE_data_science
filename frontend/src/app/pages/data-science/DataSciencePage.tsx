@@ -2,9 +2,10 @@ import React, { useMemo, useEffect } from 'react'
 import axios from 'axios'
 import Chart from 'react-apexcharts'
 import { useQuery } from 'react-query'
+import { API_BASE_URL } from '../../config'
 
 const fetchPredictionData = async () => {
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+  const apiUrl = API_BASE_URL
   const { data } = await axios.get(`${apiUrl}/ml/predict/production`, { timeout: 15000 })
   if (data && Array.isArray(data.predictions)) {
     const startDate = new Date(2027, 0, 1)
@@ -135,7 +136,7 @@ export default function DataSciencePage() {
     if (!filteredPredictions || filteredPredictions.length === 0) return
 
     const autoPersistToDatabase = async () => {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+      const apiUrl = API_BASE_URL
       const payload = {
         horizon,
         model_name: 'Random Forest',

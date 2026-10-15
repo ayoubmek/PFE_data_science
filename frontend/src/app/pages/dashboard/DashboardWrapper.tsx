@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import Chart from 'react-apexcharts'
+import { API_BASE_URL } from '../../config'
 
 interface StockGroup {
   name: string
@@ -151,7 +152,7 @@ const DashboardPage: FC = () => {
   const [showSiteModal, setShowSiteModal] = useState(false)
 
   const fetchDashboardData = async () => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+    const apiUrl = API_BASE_URL
 
     try {
       const results = await Promise.allSettled([

@@ -54,29 +54,55 @@ def print_audit_summary(report: dict, elapsed_sec: float):
 
 
 def run_pipeline(dry_run: bool = True, limit: int = None):
-    start_time = time.time()
+    t_start = time.perf_counter()
     print_banner()
 
     logger.info("PHASE 1: Extraction des données brutes (Raw CSV & Excel)...")
+    t0 = time.perf_counter()
     df_stock_raw = extract_raw_stock_csv(nrows=limit)
     df_prod_raw = extract_production_data(nrows=limit)
+    t_extract = time.perf_counter() - t0
+    logger.info(f"Phase 1 terminée en {t_extract:.2f} s ({len(df_stock_raw):,} lignes stock, {len(df_prod_raw):,} lignes prod)")
 
     logger.info("PHASE 2: Exécution des 10 règles de nettoyage de données...")
+    t0 = time.perf_counter()
     cleaner = DataCleaner(df_stock_raw)
     df_stock_clean, audit_report = cleaner.run_all_cleaners()
+    t_clean = time.perf_counter() - t0
+    logger.info(f"Phase 2 terminée en {t_clean:.2f} s ({len(df_stock_clean):,} lignes certifiées)")
 
     logger.info("PHASE 3: Modélisation et projection dans les tables du DWH...")
+    t0 = time.perf_counter()
     tables_dict = transform_all(df_stock_clean, df_prod_raw)
+    t_transform = time.perf_counter() - t0
+    logger.info(f"Phase 3 terminée en {t_transform:.2f} s ({len(tables_dict)} tables structurées)")
 
     logger.info("PHASE 4: Chargement des tables...")
+    t0 = time.perf_counter()
     loader = DWHLoader()
     load_results = loader.load_all(
         tables=tables_dict,
         dry_run=dry_run,
     )
+    t_load = time.perf_counter() - t0
+    logger.info(f"Phase 4 terminée en {t_load:.2f} s")
 
-    elapsed = time.time() - start_time
+    elapsed = time.perf_counter() - t_start
+    audit_report["timing_breakdown"] = {
+        "extraction_sec": round(t_extract, 2),
+        "cleaning_sec": round(t_clean, 2),
+        "transformation_sec": round(t_transform, 2),
+        "loading_sec": round(t_load, 2),
+        "total_elapsed_sec": round(elapsed, 2),
+    }
     print_audit_summary(audit_report, elapsed)
+
+    print("Timing Breakdown by Stage:")
+    print(f"  • Extraction     : {t_extract:6.2f} s")
+    print(f"  • Nettoyage (10) : {t_clean:6.2f} s")
+    print(f"  • Transformation : {t_transform:6.2f} s")
+    print(f"  • Chargement DWH : {t_load:6.2f} s")
+    print(f"  • TOTAL GLOBAL   : {elapsed:6.2f} s")
 
     print("Table Loading Status:")
     for tbl, status in load_results.items():

@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from 'react'
 import axios from 'axios'
 import Chart from 'react-apexcharts'
 import * as XLSX from 'xlsx'
+import { API_BASE_URL } from '../../config'
 
 interface DataPoint {
   date: string
@@ -30,7 +31,7 @@ export default function ModelBenchmarkPage() {
   const [showDailyDetails, setShowDailyDetails] = useState<boolean>(false)
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+  const apiUrl = API_BASE_URL
 
   // Moteur d'évaluation local déterministe (aligné sur les 30 jours du 01/01/2027 au 30/01/2027)
   const executeLocalBenchmark = (data: DataPoint[], h: number) => {

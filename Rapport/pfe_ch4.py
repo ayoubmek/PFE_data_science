@@ -121,7 +121,9 @@ def get_chapter4():
         pb(),
         ...imageFigure("image/fig_5_3_ruptures_stocks.png", "Figure 4.2 : Répartition des alertes de rupture et de stock critique par famille de matière", 520, 230),
         pb(),
-        body("Au total, le plan de réapprovisionnement à 45 jours concerne **193 références distinctes** (47 en rupture et 146 critiques, soit 24,1 % du catalogue). La quantité globale à commander s'élève à **847 204 unités**, pour un **budget total prévisionnel estimé à environ 380 400 TND** (380 393 TND). Ce budget est calculé directement d'après les coûts unitaires réels constatés dans le Data Warehouse (coût moyen de 0,45 TND par unité sur les références concernées)."),
+        body("Au total, le plan de réapprovisionnement à 45 jours concerne **193 références distinctes** (47 en rupture et 146 critiques, soit 24,1 % du catalogue). La quantité globale à commander s'élève à **847 204 unités**, pour un **budget total prévisionnel estimé à environ 380 400 TND** (380 393 TND). Ce budget est calculé directement d'après les coûts unitaires réels constatés dans le Data Warehouse (coût moyen pondéré de 0,449 TND par unité sur les références concernées)."),
+        pb(),
+        body("*Précision méthodologique sur les granularités d'analyse* : Il convient de distinguer le niveau catalogue maître consolidé (les **800 références d'articles** du référentiel `DIM_FamArt`, analysées ci-dessus avec 47 ruptures et 146 critiques) du niveau d'inventaire physique détaillé par dépôt et site (les **6 875 lignes de stock** visibles sur le tableau de bord Power BI en section 6.4.3, dénombrant 312 ruptures d'emplacements et 1 240 situations critiques réparties sur les trois usines)."),
         pb(),
 
         title2("4.8 Bilan du Sprint 2"),

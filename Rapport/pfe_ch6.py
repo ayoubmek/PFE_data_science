@@ -65,10 +65,10 @@ def get_chapter6():
         pb(),
 
         title3("6.4.3 Tableau de bord de gestion des stocks"),
-        body("Ce rapport permet le pilotage fin des 6 875 lignes d'inventaire détaillées du catalogue d'articles :"),
-        bullet("**Synthèse par état de stock** : indicateurs visuels des 312 références en Rupture (Rouge) et 1 240 en Stock Critique (Orange)."),
+        body("Ce rapport permet le pilotage fin des **6 875 lignes d'inventaire physiques détaillées** réparties sur les différents magasins et ateliers des trois sites :"),
+        bullet("**Synthèse par état de stock** : indicateurs visuels des **312 lignes d'inventaire en rupture** physique (Rouge) et **1 240 lignes en stock critique** (Orange) sur les 6 875 lignes suivies. En consolidation au niveau du catalogue maître d'articles (les 800 références d'articles analysées au chapitre 4), cette granularité correspond exactement aux **47 références d'articles en rupture globale** et **146 références en stock critique**."),
         bullet("**Filtres multicritères** : sélection par famille de résine (PP, PA66, ABS), atelier d'injection ou niveau de criticité de stock."),
-        bullet("**Plan de commande 45 jours** : tableau exportable indiquant la quantité exacte à commander et le montant budgétaire associé (enveloppe globale de 380 400 TND pour les 193 références prioritaires)."),
+        bullet("**Plan de commande 45 jours** : tableau exportable indiquant la quantité nette à commander (847 204 unités) et le montant budgétaire associé (enveloppe globale de 380 400 TND / 380 393 TND pour les 193 références prioritaires)."),
         pb(),
 
         title2("6.5 Présentation des interfaces réalisées"),
@@ -100,7 +100,7 @@ def get_chapter6():
         pb(),
 
         title3("6.5.5 Portail web opérationnel React & Spring Boot"),
-        body("En complément des tableaux de bord Power BI dédiés à l'administrateur, la plateforme comprend une application web développée avec React 18.2 [22] côté client et Spring Boot 3.2 [17] côté serveur. Ce portail offre à l'opérateur d'atelier une interface fluide et réactive pour consulter les données opérationnelles d'inventaire, filtrer les alertes de criticité et suivre les indicateurs de fabrication en temps réel."),
+        body("En complément des tableaux de bord Power BI dédiés à l'administrateur, la plateforme comprend une application web développée avec React 18.0 [22] et TypeScript 4.7 [23] côté client, adossée à Spring Boot 3.4.5 [17] côté serveur. Ce portail offre à l'opérateur d'atelier une interface fluide et réactive pour consulter les données opérationnelles d'inventaire, filtrer les alertes de criticité et suivre les indicateurs de fabrication en temps réel."),
         body("L'architecture des services (API REST) exposés par le serveur applicatif s'articule autour de cinq domaines principaux :"),
         pb(),
         makeTable(
@@ -108,8 +108,8 @@ def get_chapter6():
           [
             ["Authentification & Rôles (/api/auth)", "Connexion sécurisée par jeton JWT et récupération du profil connecté.", "Opérateur / Administrateur"],
             ["Gestion des stocks (/api/stock)", "Consultation des 800 références, calcul des KPI d'inventaire, filtrage par statut et export Excel.", "Opérateur / Administrateur"],
-            ["Suivi de fabrication (/api/production)", "Suivi des ordres de fabrication, état des 319 presses et flux temps réel par SSE.", "Opérateur / Administrateur"],
-            ["Services d'Intelligence Artificielle (/api/ml)", "Génération et consultation des prévisions de cadence de production à 30 jours.", "Administrateur"],
+            ["Suivi de fabrication (/api/production)", "Suivi des ordres de fabrication, état des 319 presses et suivi des machines.", "Opérateur / Administrateur"],
+            ["Services d'Intelligence Artificielle (/api/ml)", "Génération et consultation des prévisions de cadence de production à 30 jours et détection d'anomalies.", "Administrateur"],
             ["Gestion des utilisateurs (/api/users)", "Création des comptes, activation et attribution des rôles applicatifs (RBAC).", "Administrateur"]
           ],
           [2600, 4200, 2466]
@@ -145,7 +145,7 @@ def get_chapter6():
         pb(),
 
         title3("6.6.2 Validation des prévisions d'atelier"),
-        body("L'analyse comparée des cadences prédites et observées sur les 98 jours de test confirme la cohérence des prévisions par rapport aux dynamiques de production observées, apportant une visibilité prédictive structurée à l'administrateur et aux opérateurs de l'atelier."),
+        body("Le jeu de test temporel complet couvre une durée de **120 jours** (du 01/01/2026 au 30/04/2026). Sur cet ensemble, la fenêtre d'évaluation des prévisions glissantes porte sur **98 jours d'évaluation effective** (du 23/01/2026 au 30/04/2026). Les 22 premiers jours de janvier sont délibérément exclus du calcul d'erreur pour des motifs industriels et méthodologiques précis : d'une part, les 7 premiers jours correspondent à l'arrêt annuel de maintenance d'usine (fermeture complète), et d'autre part, les jours 8 à 22 fournissent la fenêtre de réchauffement (*warm-up*) nécessaire à l'initialisation des 21 retards temporels (*lag features*) avant la première projection prédictive à 30 jours. L'analyse comparée des cadences prédites et observées sur ces 98 jours confirme la grande fidélité des prévisions par rapport aux dynamiques réelles d'atelier (6,7 % de MAPE pour Prophet et 6,0 % pour Random Forest)."),
         pb(),
 
         title3("6.6.3 Validation des règles d'approvisionnement"),

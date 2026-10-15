@@ -33,9 +33,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-DB_SERVER = os.getenv("DB_SERVER", "LAPTOP-M7HILU4Q")
-DB_NAME   = os.getenv("DB_NAME",   "dbDWH")
-_engine   = None
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
+logger = logging.getLogger("ml-service")
+
+DB_HOST = os.getenv("DB_HOST", os.getenv("DB_SERVER", "LAPTOP-M7HILU4Q"))
+DB_NAME = os.getenv("DB_NAME", "dbDWH")
+_engine = None
+
 def get_engine():
     global _engine
     if _engine is not None:
@@ -43,7 +52,7 @@ def get_engine():
     try:
         from sqlalchemy import create_engine, text
         conn_str = (
-            f"mssql+pyodbc://@{DB_SERVER}/{DB_NAME}"
+            f"mssql+pyodbc://@{DB_HOST}/{DB_NAME}"
             "?driver=ODBC+Driver+17+for+SQL+Server"
             "&trusted_connection=yes"
             "&TrustServerCertificate=yes"
@@ -53,10 +62,10 @@ def get_engine():
         with eng.connect() as c:
             c.execute(text("SELECT 1"))
         _engine = eng
-        print("DB connection OK: Connected to dbDWH directly!")
+        logger.info("DB connection OK: Connected to dbDWH directly!")
         return _engine
     except Exception as e:
-        print(f"DB unavailable, using simulated data: {e}")
+        logger.warning(f"DB unavailable, using simulated data fallback: {e}")
         return None
 def get_stock_df() -> pd.DataFrame:
     engine = get_engine()
@@ -85,15 +94,77 @@ def _mock_stock() -> pd.DataFrame:
 class ScenarioRequest(BaseModel):
     variation_percent: float = 0.0
     horizon: int = 30
+
+class AnomalyRequest(BaseModel):
+    dates: Optional[List[str]] = None
+    values: Optional[List[float]] = None
+    confidence_level: float = 0.95
+
 @app.get("/health")
 def health():
-    db_ok = get_engine() is not None
+    eng = get_engine()
+    db_ok = eng is not None
     return {
         "status": "UP",
-        "service": "ML Service v2",
-        "db_connected": db_ok,
+        "service": "Nexora ML Service",
+        "version": "2.0.0",
+        "database": {
+            "connected": db_ok,
+            "server": DB_HOST,
+            "database": DB_NAME
+        },
+        "active_models": ["ProphetModel", "RandomForestModel", "ARIMAModel", "LinearRegressionModel"],
+        "capabilities": [
+            "multi_step_forecasting",
+            "rolling_origin_cross_validation",
+            "prophet_95_anomaly_detection",
+            "abc_segmentation"
+        ],
         "timestamp": datetime.now().isoformat()
     }
+
+@app.get("/detect/anomalies")
+@app.post("/detect/anomalies")
+def detect_production_anomalies(req: Optional[AnomalyRequest] = None):
+    """
+    Détection d'anomalies de cadence d'atelier par bandes de confiance à 95% de Prophet.
+    Identifie les arrêts inopinés (y < lower_95) dont les 68 jours d'usine à zéro, et les sur-cadences (y > upper_95).
+    """
+    try:
+        from models.data_loader import load_production_series
+        if req and req.values and len(req.values) >= 5:
+            df_input = pd.DataFrame({
+                "date": req.dates if req.dates else [(datetime(2026, 1, 1) + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(len(req.values))],
+                "value": req.values
+            })
+        else:
+            df_input = load_production_series()
+
+        m = ProphetModel().fit(df_input)
+        df_res = m.detect_anomalies(df_input)
+
+        total_obs = len(df_res)
+        n_anomalies = int(df_res["is_anomaly"].sum())
+        n_deficits = int((df_res["anomaly_type"] == "DEFICIT_CRITIQUE").sum())
+        n_surges = int((df_res["anomaly_type"] == "SURPLUS_PIC").sum())
+        n_zero_days = int(df_res["is_zero_day"].sum())
+        zero_days_flagged = int((df_res["is_zero_day"] & df_res["is_anomaly"]).sum())
+
+        return {
+            "total_observations": total_obs,
+            "anomalies_count": n_anomalies,
+            "anomaly_rate_pct": round((n_anomalies / total_obs) * 100, 2),
+            "deficits_critiques": n_deficits,
+            "surplus_pics": n_surges,
+            "zero_days_total": n_zero_days,
+            "zero_days_detected_as_anomaly": zero_days_flagged,
+            "detection_rule": "y < lower_95 (arrêt/déficit) OU y > upper_95 (sur-cadence)",
+            "model": "Prophet (intervalle de confiance natif à 95 %)",
+            "sample_anomalies": df_res[df_res["is_anomaly"]].head(20).to_dict("records")
+        }
+    except Exception as e:
+        logger.error(f"Erreur lors de la détection d'anomalies : {e}")
+        raise HTTPException(500, f"Erreur détection anomalies : {str(e)}")
 
 @app.get("/predict/production")
 def predict_production(horizon: int = 30):

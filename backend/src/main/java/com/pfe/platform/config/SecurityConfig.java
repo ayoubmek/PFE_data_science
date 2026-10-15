@@ -40,8 +40,16 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/dashboard/**", "/api/ml/**", "/api/production/**", "/api/stock/**", "/api/users/**", "/actuator/**").permitAll()
-                .anyRequest().permitAll()
+                .requestMatchers("/api/auth/**", "/actuator/health", "/actuator/info").permitAll()
+                .requestMatchers("/api/users/**", "/api/ml/**").hasRole("ADMIN")
+                .requestMatchers("/api/dashboard/**", "/api/production/**", "/api/stock/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) ->
+                    response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Non authentifié : jeton JWT manquant ou invalide"))
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                    response.sendError(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN, "Accès refusé : privilèges administrateur requis"))
             )
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

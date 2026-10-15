@@ -14,10 +14,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/ml")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class MLController {
 
     private final WebClient.Builder webClientBuilder;

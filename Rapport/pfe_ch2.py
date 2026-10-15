@@ -96,19 +96,19 @@ def get_chapter2():
 
             ["Langages", "Python", "3.10", "Langage principal pour le pipeline ETL, l'ingénierie des variables et les modèles d'IA [18]."],
             ["Langages", "Java", "17 (LTS)", "Langage orienté objet pour les services backend Spring Boot."],
-            ["Langages", "TypeScript / JavaScript", "5.2 / ES2022", "Développement typé du frontend web React [23]."],
+            ["Langages", "TypeScript / JavaScript", "4.7 / ES2022", "Développement typé du frontend web React [23]."],
 
-            ["Services & Backend", "Spring Boot", "3.2", "Framework backend assurant la sécurité JWT, le modèle de données JPA et les API REST [17]."],
-            ["Services & Backend", "FastAPI", "0.115", "Micro-service Python asynchrone pour l'inférence des modèles ML avec mise à jour périodique [21]."],
+            ["Services & Backend", "Spring Boot", "3.4.5", "Framework backend assurant la sécurité JWT, le modèle de données JPA et les API REST [17]."],
+            ["Services & Backend", "FastAPI", "0.115.5", "Micro-service Python asynchrone pour l'inférence des modèles ML avec mise à jour périodique [21]."],
 
-            ["Frontend Web", "React.js", "18.2", "Bibliothèque d'interfaces graphiques composables pour le portail atelier [22]."],
+            ["Frontend Web", "React.js", "18.0", "Bibliothèque d'interfaces graphiques composables pour le portail atelier [22]."],
 
             ["Data Science & ML", "Pandas & NumPy", "2.1 / 1.26", "Manipulation des séries tabulaires et calculs vectorisés [19, 20]."],
-            ["Data Science & ML", "Prophet", "1.1", "Modèle déployé en production (prévisions de cadence et stocks, décomposition saisonnière) [12]."],
-            ["Data Science & ML", "Scikit-Learn", "1.3", "Normalisation, Random Forest (benchmark récursif), Régression Linéaire et métriques [11]."],
+            ["Data Science & ML", "Prophet", "1.1.6", "Modèle déployé en production (prévisions de cadence et stocks, décomposition saisonnière) [12]."],
+            ["Data Science & ML", "Scikit-Learn", "1.5.2", "Normalisation, Random Forest (benchmark récursif), Régression Linéaire et métriques [11]."],
             ["Data Science & ML", "Statsmodels", "0.14", "Modèle statistique ARIMA et tests de stationnarité (ADF) [10]."],
 
-            ["Business Intelligence", "Microsoft Power BI Desktop", "2024", "Conception des rapports décisionnels interactifs et modélisation DAX [24]."]
+            ["Business Intelligence", "Microsoft Power BI Desktop", "2.152", "Conception des rapports décisionnels interactifs et modélisation DAX [24]."]
           ],
           [2000, 2400, 1200, 3066]
         ),

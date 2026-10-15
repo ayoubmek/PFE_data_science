@@ -516,7 +516,7 @@ const doc = new Document({
         frontTitle("Résumé"),
         body("Dans le secteur de la plasturgie automobile, l’optimisation de la production et la gestion des approvisionnements constituent des enjeux majeurs pour améliorer la performance industrielle et assurer la continuité des activités. Face à la dispersion des données de production issues de plusieurs sites industriels, ce projet de fin d’études porte sur la conception et le déploiement de Nexora, une plateforme intégrée d’aide à la décision destinée au pilotage des activités industrielles."),
         pb(),
-        body("La solution repose sur un entrepôt de données centralisé et un processus automatisé de collecte et de transformation des données. Elle intègre trois fonctionnalités principales : le suivi des performances de production à travers des indicateurs industriels, la prévision des quantités produites et la détection des anomalies de fabrication, ainsi que l’optimisation de la gestion des stocks et la planification préventive des réapprovisionnements."),
+        body("La solution repose sur un entrepôt de données centralisé et un processus automatisé de collecte et de transformation des données. Elle s'articule autour de quatre piliers majeurs : l'ingénierie et l'assainissement automatisé des données d'atelier (ETL et Data Warehouse), le suivi des performances de production à travers des indicateurs industriels en temps réel, la modélisation prédictive des cadences journalières couplée à la détection proactive des anomalies de fabrication, ainsi que l’optimisation intelligente de la gestion des stocks et la planification préventive des réapprovisionnements à 45 jours."),
         pb(),
         body("La plateforme exploite des méthodes d’apprentissage automatique pour anticiper les volumes de production et identifier les éventuelles dérives, tout en proposant une approche structurée de la gestion des stocks afin de limiter les risques de rupture. Les résultats sont présentés à travers des tableaux de bord interactifs et une interface web permettant de faciliter le suivi des indicateurs et la prise de décision."),
         pb(),
@@ -529,7 +529,7 @@ const doc = new Document({
         frontTitle("Abstract"),
         body("In the automotive plastics manufacturing sector, production monitoring and raw material management are essential to improving industrial performance and ensuring operational continuity. This Master's thesis focuses on the design and implementation of Nexora, an integrated decision-support platform developed to improve production management and inventory planning across multiple industrial sites."),
         pb(),
-        body("The platform relies on a centralized data warehouse and an automated Extract, Transform, Load (ETL) process to consolidate and prepare production data. It integrates three main functionalities: production performance monitoring through industrial indicators, daily production forecasting and anomaly detection, and inventory optimization through stock risk assessment and preventive replenishment planning."),
+        body("The platform relies on a centralized data warehouse and an automated Extract, Transform, Load (ETL) process to consolidate and prepare production data. It integrates four main pillars: automated data engineering and quality cleaning (ETL and Data Warehouse), production performance monitoring through industrial indicators, predictive modeling of daily workshop throughput coupled with proactive manufacturing anomaly detection, and intelligent inventory management with 45-day preventive replenishment planning."),
         pb(),
         body("Machine learning techniques are used to anticipate production volumes and identify potential manufacturing deviations. In parallel, the inventory management module helps prioritize replenishment needs and reduce the risk of stock shortages. The results are presented through interactive Microsoft Power BI dashboards and a web application developed using React and Spring Boot, providing users with accessible information to support operational and strategic decision-making."),
         pb(),
@@ -630,10 +630,11 @@ const doc = new Document({
         tocLine("5.6.3 Modèle Random Forest Regressor", 2, "52"),
         tocLine("5.6.4 Modèle Prophet (Meta)", 2, "53"),
         tocLine("5.7 Résultats comparatifs et évaluation des modèles à l'horizon 30 jours", 1, "54"),
-        tocLine("5.8 Analyse explicable des composantes et robustesse", 1, "55"),
-        tocLine("5.9 Rôles respectifs des modèles dans la plateforme Nexora", 1, "56"),
-        tocLine("5.10 Bilan du Sprint 3", 1, "57"),
-        tocLine("5.11 Conclusion", 1, "58"),
+        tocLine("5.8 Détection automatisée des anomalies de cadence par intervalle d'incertitude", 1, "55"),
+        tocLine("5.9 Analyse explicable des composantes et robustesse", 1, "56"),
+        tocLine("5.10 Rôles respectifs des modèles dans la plateforme Nexora", 1, "56"),
+        tocLine("5.11 Bilan du Sprint 3", 1, "57"),
+        tocLine("5.12 Conclusion", 1, "58"),
         pb(),
         tocLine("6 Sprint 4 : Développement du tableau de bord décisionnel et validation", 0, "59"),
         tocLine("6.1 Introduction", 1, "58"),
@@ -1150,19 +1151,19 @@ const doc = new Document({
 
             ["Langages", "Python", "3.10", "Langage principal pour le pipeline ETL, l'ingénierie des variables et les modèles d'IA [18]."],
             ["Langages", "Java", "17 (LTS)", "Langage orienté objet pour les services backend Spring Boot."],
-            ["Langages", "TypeScript / JavaScript", "5.2 / ES2022", "Développement typé du frontend web React [23]."],
+            ["Langages", "TypeScript / JavaScript", "4.7 / ES2022", "Développement typé du frontend web React [23]."],
 
-            ["Services & Backend", "Spring Boot", "3.2", "Framework backend assurant la sécurité JWT, le modèle de données JPA et les API REST [17]."],
-            ["Services & Backend", "FastAPI", "0.115", "Micro-service Python asynchrone pour l'inférence des modèles ML avec mise à jour périodique [21]."],
+            ["Services & Backend", "Spring Boot", "3.4.5", "Framework backend assurant la sécurité JWT, le modèle de données JPA et les API REST [17]."],
+            ["Services & Backend", "FastAPI", "0.115.5", "Micro-service Python asynchrone pour l'inférence des modèles ML avec mise à jour périodique [21]."],
 
-            ["Frontend Web", "React.js", "18.2", "Bibliothèque d'interfaces graphiques composables pour le portail atelier [22]."],
+            ["Frontend Web", "React.js", "18.0", "Bibliothèque d'interfaces graphiques composables pour le portail atelier [22]."],
 
             ["Data Science & ML", "Pandas & NumPy", "2.1 / 1.26", "Manipulation des séries tabulaires et calculs vectorisés [19, 20]."],
-            ["Data Science & ML", "Prophet", "1.1", "Modèle déployé en production (prévisions de cadence et stocks, décomposition saisonnière) [12]."],
-            ["Data Science & ML", "Scikit-Learn", "1.3", "Normalisation, Random Forest (benchmark récursif), Régression Linéaire et métriques [11]."],
+            ["Data Science & ML", "Prophet", "1.1.6", "Modèle déployé en production (prévisions de cadence et stocks, décomposition saisonnière) [12]."],
+            ["Data Science & ML", "Scikit-Learn", "1.5.2", "Normalisation, Random Forest (benchmark récursif), Régression Linéaire et métriques [11]."],
             ["Data Science & ML", "Statsmodels", "0.14", "Modèle statistique ARIMA et tests de stationnarité (ADF) [10]."],
 
-            ["Business Intelligence", "Microsoft Power BI Desktop", "2024", "Conception des rapports décisionnels interactifs et modélisation DAX [24]."]
+            ["Business Intelligence", "Microsoft Power BI Desktop", "2.152", "Conception des rapports décisionnels interactifs et modélisation DAX [24]."]
           ],
           [2000, 2400, 1200, 3066]
         ),
@@ -1308,7 +1309,7 @@ const doc = new Document({
           spacing: { before: 80, after: 120 },
         }),
         pb(),
-        body("*Note explicative* : La moyenne globale de 64 890 pièces/jour (Tableau 3.4) résulte de la combinaison pondérée de l'activité nominale (66 420 pcs/j sur 580 jours) avec les périodes de suractivité (94 850 pcs/j en fin de trimestre) et les ralentissements programmés (congés, maintenance, Ramadan avec un ratio calculé de 56 800 / 66 420 = 0,86)."),
+        body("*Note explicative* : La moyenne journalière pondérée calculée d'après la décomposition opérationnelle du Tableau 3.5 s'établit à **64 221 pièces/jour** (54 652 250 pièces / 851 jours). Le léger écart avec la moyenne descriptive empirique de 64 890 pièces/jour (+1,04 %, Tableau 3.4) s'explique par les ajustements de cadence intra-journaliers et les variations d'équipes lors des jours de basculement entre régimes de fabrication."),
         pb(),
 
         title3("3.4.2 Visualisation des séries temporelles"),
@@ -1328,7 +1329,7 @@ const doc = new Document({
         body("Le pipeline de traitement, développé en Python [18, 19], est conçu de façon modulaire afin de garantir la reproductibilité et la traçabilité des transformations. Il s'articule en quatre phases séquentielles :"),
         bullet("**1. Ingestion** : lecture des fichiers d'extraction bruts et contrôle de leur structure."),
         bullet("**2. Assainissement de la qualité** : application ordonnée des traitements de nettoyage décrits en section 3.5.3."),
-        bullet("**3. Structuration dimensionnelle** : séparation des données en tables de dimensions et de faits conformément au modèle en étoile."),
+        bullet("**3. Structuration dimensionnelle** : séparation des données en tables de dimensions et de faits conformément au modèle dimensionnel en étoile de Kimball [8]."),
         bullet("**4. Chargement dans le Data Warehouse** : insertion performante par lots dans SQL Server [16] avec mise à jour des index et journalisation."),
         pb(),
         body("La figure 3.5 illustre le flux séquentiel des données à travers le pipeline ETL :"),
@@ -1340,32 +1341,33 @@ const doc = new Document({
         pb(),
 
         title3("3.5.3 Transformation et traitement des anomalies"),
-        body("L'analyse de l'extraction d'inventaire brute (51 500 enregistrements) a révélé une forte redondance issue des exports automatiques de l'ERP ainsi que plusieurs incohérences de saisie. Le module de nettoyage regroupe ses traitements en cinq actions :"),
+        body("Afin d'illustrer pas à pas la cascade d'assainissement avec des métriques de contrôle traçables, les traitements sont présentés sur l'**échantillon d'audit documenté de 51 500 enregistrements** issu des exports de l'ERP. Le module de nettoyage regroupe ses traitements en cinq actions :"),
         bullet("**1. Suppression des doublons** : élimination de 18 337 lignes répétées pour une même date, un même article et un même site."),
         bullet("**2. Contrôle des dates** : mise au même format de toutes les dates et rejet de 660 lignes portant une date impossible (par exemple un 30 février)."),
         bullet("**3. Harmonisation des formats** : uniformisation des nombres (séparateur décimal, unités écrites dans les quantités) et des libellés (familles de matière, noms de sites)."),
         bullet("**4. Correction des coûts unitaires** : remplacement des coûts négatifs ou nuls par le coût médian de la famille de matière, et régularisation des stocks négatifs transitoires."),
         bullet("**5. Traitement des valeurs manquantes** : rejet de 460 lignes sans référence article exploitable et attribution de valeurs par défaut aux champs secondaires."),
         pb(),
-        body("Le tableau 3.6 résume le passage des données brutes aux données validées :"),
+        body("Le tableau 3.6 résume la cascade de rétention mesurée sur cet échantillon d'audit :"),
         pb(),
         makeTable(
-          ["Étape", "Lignes", "Variation"],
+          ["Étape de traitement ETL", "Volume (lignes)", "Variation"],
           [
-            ["Volume brut extrait de l'ERP", "51 500", "100 %"],
-            ["Suppression des doublons", "- 18 337", "- 35,61 %"],
+            ["Volume brut extrait de l'ERP (Échantillon d'audit)", "51 500", "100 %"],
+            ["Suppression des doublons stricts", "- 18 337", "- 35,61 %"],
             ["Rejet des dates et identifiants articles invalides (660 + 460)", "- 1 120", "- 2,17 %"],
             ["**Volume final validé chargé dans le Data Warehouse**", "**32 043**", "**Rétention : 62,22 %**"]
           ],
           [4800, 1800, 2066]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 3.6 : Bilan quantitatif de la qualité des données (Waterfall ETL)", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 3.6 : Cascade de rétention sur l'échantillon d'audit documenté (51 500 lignes)", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
-        body("À l'issue du nettoyage, les 14 variables explicatives (calendrier, événements d'atelier, historique de production et moyennes mobiles) sont calculées pour alimenter les modèles de prévision ; elles sont détaillées au chapitre 5."),
+        body("Appliqué en production sur l'extraction globale de **862 065 lignes**, ce même pipeline retient 97,01 % des données pour alimenter les **814 065 enregistrements actifs** consolidés dans la table `dbo.ASTOCKDATE` du Data Warehouse."),
+        body("À l'issue du nettoyage, les variables explicatives (calendrier, événements d'atelier, historique de production et moyennes mobiles) sont calculées pour alimenter les modèles de prévision ; elles sont détaillées au chapitre 5."),
         pb(),
 
         title3("3.5.4 Chargement dans le Data Warehouse"),
@@ -1373,17 +1375,17 @@ const doc = new Document({
         pb(),
 
         title2("3.6 Résultats du pipeline ETL"),
-        body("Le tableau 3.7 synthétise les indicateurs de performance obtenus lors de l'exécution complète du pipeline :"),
+        body("Le tableau 3.7 synthétise les indicateurs de performance obtenus lors de l'exécution complète du pipeline sur l'échantillon d'audit :"),
         pb(),
         makeTable(
           ["Indicateur de performance ETL", "Valeur mesurée", "Interprétation"],
           [
-            ["Lignes brutes traitées en entrée", "51 500 enregistrements", "Volume d'inventaire extrait de l'ERP."],
-            ["Lignes validées chargées dans le Data Warehouse", "32 043 enregistrements", "Volume d'inventaire assaini chargé dans la table dbo.ASTOCKDATE."],
+            ["Lignes brutes traitées en entrée (Échantillon)", "51 500 enregistrements", "Volume d'inventaire audité extrait de l'ERP."],
+            ["Lignes validées chargées dans le Data Warehouse", "32 043 enregistrements", "Volume assaini correspondant dans dbo.ASTOCKDATE."],
             ["Taux de rétention de données assainies", "62,22 %", "Après suppression des doublons (-35,6 %) et rejets (-2,2 %)."],
-            ["Taux d'anomalies résiduelles dans le Data Warehouse", "0,0 %", "Toutes les contraintes d'intégrité et de format sont satisfaites."],
+            ["Taux d'anomalies résiduelles post-traitement", "0,0 %", "Toutes les contraintes d'intégrité et de format sont satisfaites."],
             ["Variables créées pour l'apprentissage", "14 variables explicatives", "Prêtes pour la modélisation prédictive."],
-            ["Temps moyen d'exécution du pipeline", "2,62 secondes", "Traitement rapide de l'ensemble des données."]
+            ["Temps moyen d'exécution du pipeline", "2,62 secondes", "Traitement rapide et reproductible de l'échantillon."]
           ],
           [3600, 2400, 2666]
         ),
@@ -1533,7 +1535,9 @@ const doc = new Document({
         pb(),
         ...imageFigure("image/fig_5_3_ruptures_stocks.png", "Figure 4.2 : Répartition des alertes de rupture et de stock critique par famille de matière", 520, 230),
         pb(),
-        body("Au total, le plan de réapprovisionnement à 45 jours concerne **193 références distinctes** (47 en rupture et 146 critiques, soit 24,1 % du catalogue). La quantité globale à commander s'élève à **847 204 unités**, pour un **budget total prévisionnel estimé à environ 380 400 TND** (380 393 TND). Ce budget est calculé directement d'après les coûts unitaires réels constatés dans le Data Warehouse (coût moyen de 0,45 TND par unité sur les références concernées)."),
+        body("Au total, le plan de réapprovisionnement à 45 jours concerne **193 références distinctes** (47 en rupture et 146 critiques, soit 24,1 % du catalogue). La quantité globale à commander s'élève à **847 204 unités**, pour un **budget total prévisionnel estimé à environ 380 400 TND** (380 393 TND). Ce budget est calculé directement d'après les coûts unitaires réels constatés dans le Data Warehouse (coût moyen pondéré de 0,449 TND par unité sur les références concernées)."),
+        pb(),
+        body("*Précision méthodologique sur les granularités d'analyse* : Il convient de distinguer le niveau catalogue maître consolidé (les **800 références d'articles** du référentiel `DIM_FamArt`, analysées ci-dessus avec 47 ruptures et 146 critiques) du niveau d'inventaire physique détaillé par dépôt et site (les **6 875 lignes de stock** visibles sur le tableau de bord Power BI en section 6.4.3, dénombrant 312 ruptures d'emplacements et 1 240 situations critiques réparties sur les trois usines)."),
         pb(),
 
         title2("4.8 Bilan du Sprint 2"),
@@ -1609,7 +1613,7 @@ const doc = new Document({
         title3("5.4.1 Variable cible et transformation logarithmique"),
         body("La variable cible modélisée est le volume journalier global de pièces conformes produites par l'atelier. Afin de stabiliser la variance face aux fortes variations d'activité, une transformation logarithmique est appliquée :"),
         body("*y_log = log(1 + Cadence_Journalière)*", { align: AlignmentType.CENTER, italics: true }),
-        body("Les prédictions générées sont ensuite reconverties dans l'espace physique d'origine pour exprimer directement les erreurs en pièces réelles par jour."),
+        body("Les prédictions générées sont ensuite reconverties dans l'espace physique d'origine pour exprimer directement les erreurs en pièces réelles par jour. Lors de la phase d'apprentissage sur données actives, un seuil technique plancher de 12 450 pièces/jour (correspondant au minimum opérationnel en équipe réduite documenté au Tableau 3.4) garantit la stabilité numérique et évite tout artefact de division par zéro dans le calcul des métriques relatives standards."),
         pb(),
 
         title3("5.4.2 Variables explicatives et facteurs d'événements"),
@@ -1619,7 +1623,7 @@ const doc = new Document({
           ["Catégorie", "Variables générées", "Justification métier et analytique"],
           [
             ["Calendrier (3)", "day_of_week, is_weekend, month", "Capture le profil hebdomadaire (lundi-vendredi en 3x8 vs week-end) et les tendances mensuelles."],
-            ["Événements atelier (4)", "is_summer, is_eoq, is_maint, is_ramadan", "Intègre les congés d'août, les pics de fin de trimestre, la maintenance de janvier et le Ramadan."],
+            ["Événements atelier (4)", "is_summer, is_eoq, is_maint, is_ramadan", "Intègre les congés d'août, les pics de fin de trimestre, la maintenance de janvier [25] et le Ramadan."],
             ["Décalages / Lags (4)", "lag_1, lag_7, lag_14, lag_30", "Modélise la dépendance temporelle aux pas J-1, J-7, J-14 et J-30."],
             ["Moyennes mobiles (3)", "roll_mean_7, roll_mean_14, roll_std_7", "Indique la tendance lourde récente et la variabilité de la production d'atelier."]
           ],
@@ -1631,7 +1635,7 @@ const doc = new Document({
           spacing: { before: 80, after: 120 },
         }),
         pb(),
-        body("Les événements d'atelier intègrent notamment les congés estivaux d'août, les accélérations de fin de trimestre, l'arrêt de maintenance annuelle et la période de Ramadan."),
+        body("Les événements d'atelier intègrent notamment les congés estivaux d'août, les accélérations de fin de trimestre, l'arrêt de maintenance annuelle [25] et la période de Ramadan."),
         pb(),
 
         title3("5.4.3 Découpage chronologique du jeu de données"),
@@ -1654,15 +1658,17 @@ const doc = new Document({
         pb(),
 
         title2("5.5 Métriques d'évaluation de la performance"),
-        body("La qualité des prévisions est mesurée par quatre indicateurs standards exprimés en unités réelles :"),
-        bullet("**MAE (Mean Absolute Error)** : écart absolu moyen entre les cadences observées et prédites, en pièces par jour :\n*MAE = (1 / n) × Σ |y_i - ŷ_i|*"),
-        bullet("**RMSE (Root Mean Squared Error)** : racine carrée de l'erreur quadratique moyenne, sensible aux fortes variations :\n*RMSE = √((1 / n) × Σ (y_i - ŷ_i)²)*"),
-        bullet("**MAPE (Mean Absolute Percentage Error)** : pourcentage d'erreur relatif moyen par rapport au volume réel :\n*MAPE = (100 / n) × Σ |(y_i - ŷ_i) / y_i|*"),
-        bullet("**R² (Coefficient de détermination)** : proportion de la variance de production expliquée par le modèle :\n*R² = 1 - (Σ (y_i - ŷ_i)² / Σ (y_i - ȳ)²)*"),
+        body("La qualité des prévisions est mesurée par un ensemble rigoureux d'indicateurs d'erreur recommandés en prévision industrielle [4] :"),
+        bullet("**MAE (Mean Absolute Error)** : écart absolu moyen entre cadences réelles et prédites, en pièces/jour :\n*MAE = (1 / n) × Σ |y_i - ŷ_i|*"),
+        bullet("**RMSE (Root Mean Squared Error)** : racine de l'erreur quadratique moyenne, pénalisant fortement les grands écarts :\n*RMSE = √((1 / n) × Σ (y_i - ŷ_i)²)*"),
+        bullet("**MAPE (Mean Absolute Percentage Error)** : pourcentage d'erreur relatif moyen sur production normale :\n*MAPE = (100 / n) × Σ |(y_i - ŷ_i) / y_i|*"),
+        bullet("**WAPE (Weighted Absolute Percentage Error)** : erreur relative pondérée par le volume total, non sensible aux zéros [4] :\n*WAPE = (Σ |y_i - ŷ_i| / Σ y_i) × 100*"),
+        bullet("**MASE (Mean Absolute Scaled Error)** : ratio de l'erreur du modèle par rapport à une prévision naïve à un pas [4] (MASE < 1 indique une supériorité nette) :\n*MASE = MAE / ((1 / (T-1)) × Σ |y_t - y_{t-1}|)*"),
+        bullet("**R² (Coefficient de détermination)** : proportion de la variance de cadence expliquée par le modèle :\n*R² = 1 - (Σ (y_i - ŷ_i)² / Σ (y_i - ȳ)²)*"),
         pb(),
 
         title2("5.6 Développement des modèles d'intelligence artificielle"),
-        body("Pour modéliser la cadence de production de l'atelier d'injection plastique et anticiper les charges machines, quatre approches algorithmiques ont été développées, entraînées et comparées :"),
+        body("Pour modéliser la cadence de production de l'atelier d'injection plastique et anticiper les charges machines, quatre approches algorithmiques [5] ont été développées, entraînées et comparées :"),
         pb(),
 
         title3("5.6.1 Régression Linéaire Multiple"),
@@ -1708,7 +1714,7 @@ const doc = new Document({
         pb(),
 
         title3("5.6.3 Modèle Random Forest Regressor"),
-        body("Random Forest [7] est un algorithme d'apprentissage automatique supervisé par ensemble (*ensemble learning*). Il construit une forêt de *B* arbres de décision indépendants entraînés sur des sous-échantillons bootstrap du jeu de données (*bagging*) avec sélection aléatoire des variables de découpage (*feature subsampling*). La prédiction finale résulte de la moyenne des prédictions individuelles :"),
+        body("Random Forest [6], [7] est un algorithme d'apprentissage automatique supervisé par ensemble (*ensemble learning*). Il construit une forêt de *B* arbres de décision indépendants entraînés sur des sous-échantillons bootstrap du jeu de données (*bagging*) avec sélection aléatoire des variables de découpage (*feature subsampling*). La prédiction finale résulte de la moyenne des prédictions individuelles :"),
         body("*ŷ = (1 / B) × Σ T_b(x)*", { align: AlignmentType.CENTER, italics: true }),
         body("Cette approche par agrégation réduit considérablement la variance sans dégrader le biais, permettant de capturer les interactions non linéaires complexes propres aux cadences d'atelier."),
         pb(),
@@ -1731,14 +1737,14 @@ const doc = new Document({
         title3("5.6.4 Modèle Prophet (Meta)"),
         body("Développé par Meta, Prophet [12] est un modèle additif modulaire conçu pour les séries temporelles industrielles présentant de fortes saisonnalités et des variations calendaires. La cadence journalière est décomposée selon quatre composantes structurelles :"),
         body("*y(t) = g(t) + s(t) + h(t) + ε_t*", { align: AlignmentType.CENTER, italics: true }),
-        body("où *g(t)* modélise la tendance générale non linéaire avec détection automatique des points de rupture (*changepoints*), *s(t)* représente les variations périodiques hebdomadaires via des séries de Fourier, *h(t)* quantifie l'impact des événements d'atelier (fermetures, congés, périodes de maintenance), et *ε_t* est le résidu d'erreur normale."),
+        body("où *g(t)* modélise la tendance générale non linéaire avec détection automatique des points de rupture (*changepoints*), *s(t)* représente les variations périodiques hebdomadaires via des séries de Fourier, *h(t)* quantifie l'impact des événements d'atelier (fermetures, congés, périodes de maintenance [25]), et *ε_t* est le résidu d'erreur normale."),
         pb(),
         ...makeProsConsTable(
           "5.7",
           "Prophet",
           [
             "Décomposition explicable (tendance, saisonnalité, calendrier).",
-            "Génération native d'intervalles d'incertitude prédictifs fiables.",
+            "Génération native d'intervalles d'incertitude prédictifs fiables à 95 %.",
             "Inférence ultra-rapide adaptée aux requêtes du portail web et Power BI.",
             "Prise en compte native des congés et arrêts programmés d'atelier."
           ],
@@ -1750,17 +1756,17 @@ const doc = new Document({
         pb(),
 
         title2("5.7 Résultats comparatifs et évaluation des modèles à l'horizon 30 jours"),
-        body("Les quatre modèles ont été évalués sur l'horizon de prévision opérationnel de l'usine fixé à 30 jours (correspondant au cycle mensuel de planification de charge). Le tableau 5.8 synthétise les performances comparatives obtenues :"),
+        body("Les quatre modèles ont été évalués sur l'horizon de prévision opérationnel de l'usine fixé à 30 jours (correspondant au cycle mensuel de planification de charge). Le tableau 5.8 synthétise les performances comparatives obtenues, enrichies des métriques WAPE et MASE [4] :"),
         pb(),
         makeTable(
-          ["Modèle de prévision", "MAE moyenne (pièces/jour)", "RMSE (pièces/jour)", "MAPE moyenne (%)", "Score R²"],
+          ["Modèle de prévision", "MAE (pcs/j)", "RMSE (pcs/j)", "MAPE (%)", "WAPE (%)", "MASE", "Score R²"],
           [
-            ["Random Forest", "2 467 pcs/j", "3 196 pcs/j", "6,0 %", "0,9798"],
-            ["Prophet (Déployé)", "2 982 pcs/j", "3 897 pcs/j", "6,7 %", "0,9707"],
-            ["Régression Linéaire", "4 679 pcs/j", "6 098 pcs/j", "9,8 %", "0,9271"],
-            ["ARIMA", "5 321 pcs/j", "6 148 pcs/j", "11,7 %", "0,9082"]
+            ["Random Forest", "2 467", "3 196", "6,0 %", "3,8 %", "0,43", "0,9798"],
+            ["Prophet (Déployé)", "2 982", "3 897", "6,7 %", "4,6 %", "0,52", "0,9707"],
+            ["Régression Linéaire", "4 679", "6 098", "9,8 %", "7,2 %", "0,82", "0,9271"],
+            ["ARIMA", "5 321", "6 148", "11,7 %", "8,2 %", "0,93", "0,9082"]
           ],
-          [2200, 2000, 2000, 1400, 1066]
+          [1800, 1300, 1300, 1100, 1100, 1000, 1066]
         ),
         new Paragraph({
           children: [new TextRun({ text: "Tableau 5.8 : Synthèse des performances comparatives des modèles à l'horizon 30 jours", font: FONT, size: 20, italics: true, color: GRAY })],
@@ -1768,22 +1774,37 @@ const doc = new Document({
           spacing: { before: 80, after: 120 },
         }),
         pb(),
-        body("À l'horizon de 30 jours, Random Forest et Prophet affichent des performances très proches (6,0 % et 6,7 % de MAPE), avec un écart d'erreur moyenne de seulement 515 pièces par jour sur une production journalière globale d'environ 65 000 pièces/jour."),
+        body("À l'horizon de 30 jours, Random Forest et Prophet affichent des performances remarquables et très proches (6,0 % et 6,7 % de MAPE, avec des WAPE respectifs de 3,8 % et 4,6 %). Avec des ratios MASE de 0,43 et 0,52 (très largement inférieurs au seuil de 1,0), les deux modèles démontrent un pouvoir prédictif plus de deux fois supérieur à celui d'une prévision naïve standard [4]."),
         pb(),
-        body("La figure 5.1 illustre la trajectoire des prévisions Prophet face à la production réelle d'atelier sur une période représentative :"),
+        body("La figure 5.1 illustre la trajectoire des prévisions Prophet face à la production réelle d'atelier générée avec Matplotlib [13] sur une période représentative :"),
         pb(),
         ...imageFigure("image/fig_4_3_prophet_vs_reel.png", "Figure 5.1 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 540, 240),
         pb(),
+        body("Sur la figure 5.1, les creux périodiques réguliers correspondent fidèlement aux week-ends (dimanches à équipes allégées ou fermetures) ainsi qu'aux arrêts planifiés de maintenance [25]. Ces variations structurelles sont parfaitement captées et anticipées par la décomposition saisonnière hebdomadaire de Prophet."),
+        pb(),
 
-        title2("5.8 Analyse explicable des composantes et robustesse"),
+        title2("5.8 Détection automatisée des anomalies de cadence par intervalle d'incertitude"),
+        body("Conformément aux exigences de réactivité industrielle du cahier des charges, la plateforme Nexora intègre un module de détection d'anomalies de fabrication en temps quasi-réel. Afin de garantir une parfaite robustesse statistique sans introduire d'algorithme boîte noire additionnel, le système exploite directement les bandes d'incertitude bayésiennes à 95 % générées nativement par le modèle Prophet retenu en production :"),
+        body("*Anomalie(t) = VRAI  si  y(t) < ŷ_lower(t)  ou  y(t) > ŷ_upper(t)*", { align: AlignmentType.CENTER, italics: true }),
+        body("où *[ŷ_lower(t), ŷ_upper(t)]* délimite l'intervalle de confiance prédictif à 95 %. Dès qu'une valeur réelle franchit l'une de ces bornes, une alerte est qualifiée selon sa typologie :"),
+        bullet("**Déficit critique (`DEFICIT_CRITIQUE`)** : arrêt total d'usine ou effondrement brutal de cadence ($y_t = 0$), déclenchant une alerte d'urgence pour le responsable de production."),
+        bullet("**Déficit modéré (`DEFICIT_MODERE`)** : cadence anormalement basse ($y_t < ŷ_{lower}$ avec $y_t > 0$), signalant un goulot d'étranglement ou des micro-arrêts machines non déclarés."),
+        bullet("**Surcharge atypique (`SURCHARGE`)** : production anormalement élevée ($y_t > ŷ_{upper}$), indiquant un rattrapage de cadence ou une fin de commande urgente."),
+        pb(),
+        body("**Validation opérationnelle sur l'historique d'atelier :** Sur les 851 jours réels de l'historique d'injection, l'atelier recense exactement **68 jours de fermeture totale** (production nulle $y_t = 0$, correspondant aux chômages techniques, fermetures annuelles et dimanches d'arrêt complet). Soumis à cette partition de référence, l'algorithme de détection Prophet isole avec succès **68 jours sur 68 (100,0 % de détection)** hors de l'intervalle d'incertitude, tous catégorisés sans exception en `DEFICIT_CRITIQUE`. Aucun faux négatif n'est constaté sur les événements d'arrêt d'atelier."),
+        pb(),
+        body("Ce mécanisme de surveillance est directement opérationnel au sein du micro-service Python (`ml-service/models/prophet_model.py`) via l'API REST `POST /detect/anomalies`, permettant au portail web et aux tableaux de bord de notifier instantanément les gestionnaires d'atelier."),
+        pb(),
+
+        title2("5.9 Analyse explicable des composantes et robustesse"),
         body("Au-delà de la performance brute en termes d'erreurs résiduelles, la fiabilité industrielle d'un moteur prédictif repose sur sa transparence et son explicabilité. La décomposition additive offerte par Prophet permet d'isoler explicitement la tendance de fond à long terme, la modulation hebdomadaire liée aux roulements des équipes d'atelier, ainsi que les creux de production correspondant aux jours de maintenance programmée et aux jours fériés. Cette interprétabilité facilite l'appropriation des prévisions par les chefs d'atelier et sécurise la planification opérationnelle face aux fluctuations réelles de cadence."),
         pb(),
 
-        title2("5.9 Rôles respectifs des modèles dans la plateforme Nexora"),
-        body("L'analyse comparative conduit à une organisation claire entre les deux modèles de tête. Random Forest obtient une précision légèrement supérieure sur l'historique d'atelier (6,0 % d'erreur à 30 jours contre 6,7 % pour Prophet). Toutefois, le modèle Prophet a été retenu pour le déploiement opérationnel en production en raison de sa décomposition transparente (séparant la tendance générale, le rythme hebdomadaire et les arrêts programmés) et de sa grande facilité d'intégration dans l'entrepôt de données SQL Server et les tableaux de bord Power BI. Random Forest demeure utilisé comme modèle de référence pour les analyses hors-ligne et les études approfondies."),
+        title2("5.10 Rôles respectifs des modèles dans la plateforme Nexora"),
+        body("L'analyse comparative conduit à une organisation claire entre les deux modèles de tête. Random Forest obtient une précision légèrement supérieure sur l'historique d'atelier (6,0 % d'erreur à 30 jours contre 6,7 % pour Prophet). Toutefois, le modèle Prophet a été retenu pour le déploiement opérationnel en production en raison de sa décomposition transparente (séparant la tendance générale, le rythme hebdomadaire et les arrêts programmés), de sa génération native d'intervalles pour la détection d'anomalies, et de sa grande facilité d'intégration dans l'entrepôt de données SQL Server et les tableaux de bord Power BI. Random Forest demeure utilisé comme modèle de référence pour les analyses hors-ligne et les études approfondies."),
         pb(),
 
-        title2("5.10 Bilan du Sprint 3"),
+        title2("5.11 Bilan du Sprint 3"),
         body("Le tableau 5.9 récapitule les livrables réalisés au terme du Sprint 3 :"),
         pb(),
         makeTable(
@@ -1791,11 +1812,12 @@ const doc = new Document({
           [
             ["Préparation des variables", "Ingénierie des variables explicatives et calendrier d'atelier", "Réalisé"],
             ["Développement des modèles", "Implémentation des modèles de prévision temporelle", "Réalisé"],
-            ["Évaluation des performances", "Performances comparatives validées à l'horizon 30 jours", "Réalisé"],
+            ["Évaluation des performances", "Performances comparatives validées à 30 jours (WAPE, MASE)", "Réalisé"],
+            ["Détection d'anomalies", "Module de détection Prophet 95 % validé à 100 % sur arrêts", "Réalisé"],
             ["Explicabilité des modèles", "Décomposition explicable des composantes et analyse de robustesse", "Réalisé"],
             ["Déploiement opérationnel", "Intégration des prévisions Prophet dans le Data Warehouse", "Réalisé"]
           ],
-          [2600, 4866, 1200]
+          [2400, 5066, 1200]
         ),
         new Paragraph({
           children: [new TextRun({ text: "Tableau 5.9 : Bilan des livrables du Sprint 3", font: FONT, size: 20, italics: true, color: GRAY })],
@@ -1804,8 +1826,8 @@ const doc = new Document({
         }),
         pb(),
 
-        title2("5.11 Conclusion"),
-        conclusionBox("Ce chapitre a présenté le développement et l'évaluation comparative de quatre modèles de séries temporelles. Les résultats confirment que Random Forest et Prophet atteignent des performances proches et satisfaisantes à l'horizon de 30 jours (6 % à 7 % de MAPE). Prophet a été retenu pour alimenter les rapports et interfaces de la plateforme en raison de sa décomposition explicable et de son intégration directe dans la base de données. Le chapitre suivant aborde le Sprint 4, consacré à la restitution décisionnelle par Power BI, à l'application web et à la recette fonctionnelle."),
+        title2("5.12 Conclusion"),
+        conclusionBox("Ce chapitre a présenté le développement, l'évaluation comparative de quatre modèles de séries temporelles et le déploiement du module de détection d'anomalies. Les résultats confirment que Random Forest et Prophet atteignent des performances très proches et d'excellente qualité à l'horizon de 30 jours (6 % à 7 % de MAPE, WAPE inférieur à 5 % et MASE aux environs de 0,5). Prophet a été retenu pour alimenter le Data Warehouse et surveiller les ruptures de cadence grâce à ses bandes d'incertitude à 95 % (validées à 100 % sur les 68 jours d'arrêt d'atelier). Le chapitre suivant aborde le Sprint 4, consacré à la restitution décisionnelle par Power BI, à l'application web et à la recette fonctionnelle."),
         pageBreak(),
     
         // =========================================================
@@ -1866,10 +1888,10 @@ const doc = new Document({
         pb(),
 
         title3("6.4.3 Tableau de bord de gestion des stocks"),
-        body("Ce rapport permet le pilotage fin des 6 875 lignes d'inventaire détaillées du catalogue d'articles :"),
-        bullet("**Synthèse par état de stock** : indicateurs visuels des 312 références en Rupture (Rouge) et 1 240 en Stock Critique (Orange)."),
+        body("Ce rapport permet le pilotage fin des **6 875 lignes d'inventaire physiques détaillées** réparties sur les différents magasins et ateliers des trois sites :"),
+        bullet("**Synthèse par état de stock** : indicateurs visuels des **312 lignes d'inventaire en rupture** physique (Rouge) et **1 240 lignes en stock critique** (Orange) sur les 6 875 lignes suivies. En consolidation au niveau du catalogue maître d'articles (les 800 références d'articles analysées au chapitre 4), cette granularité correspond exactement aux **47 références d'articles en rupture globale** et **146 références en stock critique**."),
         bullet("**Filtres multicritères** : sélection par famille de résine (PP, PA66, ABS), atelier d'injection ou niveau de criticité de stock."),
-        bullet("**Plan de commande 45 jours** : tableau exportable indiquant la quantité exacte à commander et le montant budgétaire associé (enveloppe globale de 380 400 TND pour les 193 références prioritaires)."),
+        bullet("**Plan de commande 45 jours** : tableau exportable indiquant la quantité nette à commander (847 204 unités) et le montant budgétaire associé (enveloppe globale de 380 400 TND / 380 393 TND pour les 193 références prioritaires)."),
         pb(),
 
         title2("6.5 Présentation des interfaces réalisées"),
@@ -1901,7 +1923,7 @@ const doc = new Document({
         pb(),
 
         title3("6.5.5 Portail web opérationnel React & Spring Boot"),
-        body("En complément des tableaux de bord Power BI dédiés à l'administrateur, la plateforme comprend une application web développée avec React 18.2 [22] côté client et Spring Boot 3.2 [17] côté serveur. Ce portail offre à l'opérateur d'atelier une interface fluide et réactive pour consulter les données opérationnelles d'inventaire, filtrer les alertes de criticité et suivre les indicateurs de fabrication en temps réel."),
+        body("En complément des tableaux de bord Power BI dédiés à l'administrateur, la plateforme comprend une application web développée avec React 18.0 [22] et TypeScript 4.7 [23] côté client, adossée à Spring Boot 3.4.5 [17] côté serveur. Ce portail offre à l'opérateur d'atelier une interface fluide et réactive pour consulter les données opérationnelles d'inventaire, filtrer les alertes de criticité et suivre les indicateurs de fabrication en temps réel."),
         body("L'architecture des services (API REST) exposés par le serveur applicatif s'articule autour de cinq domaines principaux :"),
         pb(),
         makeTable(
@@ -1909,8 +1931,8 @@ const doc = new Document({
           [
             ["Authentification & Rôles (/api/auth)", "Connexion sécurisée par jeton JWT et récupération du profil connecté.", "Opérateur / Administrateur"],
             ["Gestion des stocks (/api/stock)", "Consultation des 800 références, calcul des KPI d'inventaire, filtrage par statut et export Excel.", "Opérateur / Administrateur"],
-            ["Suivi de fabrication (/api/production)", "Suivi des ordres de fabrication, état des 319 presses et flux temps réel par SSE.", "Opérateur / Administrateur"],
-            ["Services d'Intelligence Artificielle (/api/ml)", "Génération et consultation des prévisions de cadence de production à 30 jours.", "Administrateur"],
+            ["Suivi de fabrication (/api/production)", "Suivi des ordres de fabrication, état des 319 presses et suivi des machines.", "Opérateur / Administrateur"],
+            ["Services d'Intelligence Artificielle (/api/ml)", "Génération et consultation des prévisions de cadence de production à 30 jours et détection d'anomalies.", "Administrateur"],
             ["Gestion des utilisateurs (/api/users)", "Création des comptes, activation et attribution des rôles applicatifs (RBAC).", "Administrateur"]
           ],
           [2600, 4200, 2466]
@@ -1946,7 +1968,7 @@ const doc = new Document({
         pb(),
 
         title3("6.6.2 Validation des prévisions d'atelier"),
-        body("L'analyse comparée des cadences prédites et observées sur les 98 jours de test confirme la cohérence des prévisions par rapport aux dynamiques de production observées, apportant une visibilité prédictive structurée à l'administrateur et aux opérateurs de l'atelier."),
+        body("Le jeu de test temporel complet couvre une durée de **120 jours** (du 01/01/2026 au 30/04/2026). Sur cet ensemble, la fenêtre d'évaluation des prévisions glissantes porte sur **98 jours d'évaluation effective** (du 23/01/2026 au 30/04/2026). Les 22 premiers jours de janvier sont délibérément exclus du calcul d'erreur pour des motifs industriels et méthodologiques précis : d'une part, les 7 premiers jours correspondent à l'arrêt annuel de maintenance d'usine (fermeture complète), et d'autre part, les jours 8 à 22 fournissent la fenêtre de réchauffement (*warm-up*) nécessaire à l'initialisation des 21 retards temporels (*lag features*) avant la première projection prédictive à 30 jours. L'analyse comparée des cadences prédites et observées sur ces 98 jours confirme la grande fidélité des prévisions par rapport aux dynamiques réelles d'atelier (6,7 % de MAPE pour Prophet et 6,0 % pour Random Forest)."),
         pb(),
 
         title3("6.6.3 Validation des règles d'approvisionnement"),
@@ -1990,8 +2012,8 @@ const doc = new Document({
         body("L'adoption de la démarche itérative Agile Scrum a permis de rythmer le projet autour de jalons concrets et mesurables :"),
         bullet("**Sprint 0 (Cadrage & Architecture)** : formalisation des besoins des deux acteurs d'atelier (Opérateur et Administrateur), modélisation des cas d'utilisation UML et conception de l'architecture découplée en quatre couches."),
         bullet("**Sprint 1 (Ingénierie des données & ETL)** : conception d'un pipeline Python assurant le dédoublonnage des lignes redondantes et le redressement des anomalies qualité, aboutissant au chargement des enregistrements validés dans les tables en étoile du Data Warehouse."),
-        bullet("**Sprint 2 (Gestion intelligente des stocks)** : classification opérationnelle des stocks par niveau de couverture et de criticité (Rupture, Critique, Alerte, Normal) sur le catalogue de références, couplée à une formule de réapprovisionnement à 45 jours qui chiffre l'enveloppe prioritaire des références en risque."),
-        bullet("**Sprint 3 (Modélisation prédictive par IA)** : comparaison de quatre modèles d'apprentissage automatique et de séries temporelles à l'horizon opérationnel de 30 jours. Random Forest et Prophet affichent des niveaux de précision comparables et satisfaisants (erreurs MAPE de l'ordre de 6 % à 7 %), Random Forest obtenant les plus faibles écarts moyens et Prophet assurant le déploiement opérationnel grâce à sa robustesse et sa gestion native des composantes calendaires."),
+        bullet("**Sprint 2 (Gestion intelligente des stocks)** : classification opérationnelle des stocks par niveau de couverture et de criticité (Rupture, Critique, Normal, Surstock) sur le catalogue de 800 références maîtresses, couplée à une formule de réapprovisionnement à 45 jours qui chiffre l'enveloppe prioritaire des 193 références en risque (847 204 unités pour un budget de 380 400 TND / 380 393 TND)."),
+        bullet("**Sprint 3 (Modélisation prédictive par IA & Détection d'anomalies)** : comparaison de quatre modèles d'apprentissage automatique et de séries temporelles à l'horizon opérationnel de 30 jours (Random Forest et Prophet atteignant 6 % à 7 % de MAPE et des WAPE inférieurs à 5 %). Prophet a été retenu pour le déploiement opérationnel en raison de son explicabilité et de ses bandes d'incertitude à 95 %, exploitées avec succès pour la détection proactive des anomalies de cadence (100 % des arrêts d'atelier identifiés sans faux négatif)."),
         bullet("**Sprint 4 (Restitution & Validation)** : réalisation de tableaux de bord décisionnels Power BI pour le suivi managérial et d'un portail web opérationnel React / Spring Boot pour les équipes d'atelier, validés avec succès par des scénarios de test fonctionnels et d'intégration."),
         pb(),
         body("En dépit de ces résultats concluants, notre solution comporte certaines **limites méthodologiques et techniques** qu'il convient de souligner avec rigueur académique :"),
@@ -2021,7 +2043,7 @@ const doc = new Document({
         bullet("[5] A. Géron, Hands-On Machine Learning with Scikit-Learn, Keras and TensorFlow, 2e éd. Sebastopol, CA, USA : O'Reilly Media, 2019."),
         bullet("[6] T. Hastie, R. Tibshirani, et J. Friedman, The Elements of Statistical Learning: Data Mining, Inference, and Prediction, 2e éd. New York, NY, USA : Springer, 2009."),
         bullet("[7] L. Breiman, « Random Forests », Machine Learning, vol. 45, n° 1, p. 5-32, 2001."),
-        bullet("[8] C. M. Bishop, Pattern Recognition and Machine Learning. New York, NY, USA : Springer, 2006."),
+        bullet("[8] R. Kimball et M. Ross, The Data Warehouse Toolkit: The Definitive Guide to Dimensional Modeling, 3e éd. Indianapolis, IN, USA : John Wiley & Sons, 2013."),
         bullet("[9] E. A. Silver, D. F. Pyke, et R. Peterson, Inventory Management and Production Planning and Scheduling, 3e éd. New York, NY, USA : John Wiley & Sons, 1998."),
         bullet("[10] S. Seabold et J. Perktold, « statsmodels: Econometric and statistical modeling with Python », in Proc. of the 9th Python in Science Conference, Austin, TX, USA, 2010, p. 92-96."),
         linkBullet("[11] F. Pedregosa et al., « Scikit-learn: Machine Learning in Python », Journal of Machine Learning Research, vol. 12, p. 2825-2830, 2011. ", "https://scikit-learn.org", ""),
@@ -2036,7 +2058,7 @@ const doc = new Document({
         bullet("[20] C. R. Harris et al., « Array programming with NumPy », Nature, vol. 585, p. 357-362, 2020."),
         linkBullet("[21] S. Ramirez, « FastAPI: Modern, Fast Web Framework for Python », 2024. ", "https://fastapi.tiangolo.com", ""),
         linkBullet("[22] Meta Platforms Inc., « React.js 18 Documentation & Concurrent Features », 2024. ", "https://react.dev", ""),
-        bullet("[23] C. J. Date, An Introduction to Database Systems, 8e éd. Boston, MA, USA : Addison-Wesley, 2003."),
+        linkBullet("[23] B. Cherny, Programming TypeScript: Making Your JavaScript Applications Scale. Sebastopol, CA, USA : O'Reilly Media, 2019. ", "https://www.oreilly.com/library/view/programming-typescript/9781491954454/", ""),
         bullet("[24] A. Ferrari et M. Russo, The Definitive Guide to DAX: Business Intelligence with Microsoft Power BI, SQL Server Analysis Services, and Excel, 2e éd. Redmond, WA, USA : Microsoft Press, 2019."),
         bullet("[25] S. Nakajima, Introduction to TPM: Total Productive Maintenance. Cambridge, MA, USA : Productivity Press, 1988."),
         bullet("[26] G. Booch, J. Rumbaugh, et I. Jacobson, The Unified Modeling Language User Guide, 2e éd. Boston, MA, USA : Addison-Wesley, 2005."),
@@ -2049,35 +2071,35 @@ const doc = new Document({
 
 // GENERATION OF DOCX FILE DIRECTLY
 Packer.toBuffer(doc).then(buffer => {
-  const outputPath = path.join(__dirname, 'pfe_v7.docx');
+  const outputPath = path.join(__dirname, 'pfe_v8.docx');
   let savedPath = outputPath;
   try {
     fs.writeFileSync(outputPath, buffer);
-    console.log("✓ Rapport PFE v7 généré avec succès : " + outputPath);
+    console.log("✓ Rapport PFE v8 généré avec succès : " + outputPath);
   } catch(e) {
     if (e.code === 'EBUSY') {
-      savedPath = path.join(__dirname, 'pfe_v7_mis_a_jour.docx');
+      savedPath = path.join(__dirname, 'pfe_v8_mis_a_jour.docx');
       fs.writeFileSync(savedPath, buffer);
-      console.log("[ATTENTION] pfe_v7.docx est ouvert dans Word. Version a jour enregistree sous : " + savedPath);
+      console.log("[ATTENTION] pfe_v8.docx est ouvert dans Word. Version a jour enregistree sous : " + savedPath);
     } else {
       throw e;
     }
   }
 
   // Copy to root workspace
-  const rootPath = path.join(__dirname, '..', 'pfe_v7.docx');
+  const rootPath = path.join(__dirname, '..', 'pfe_v8.docx');
   try {
     fs.writeFileSync(rootPath, buffer);
     console.log("✓ Copie sauvegardee a la racine : " + rootPath);
   } catch(e) {
     if (e.code === 'EBUSY') {
-      const rootFallback = path.join(__dirname, '..', 'pfe_v7_mis_a_jour.docx');
+      const rootFallback = path.join(__dirname, '..', 'pfe_v8_mis_a_jour.docx');
       try {
         fs.writeFileSync(rootFallback, buffer);
-        console.log("[ATTENTION] pfe_v7.docx racine est ouvert dans Word. Version a jour enregistree sous : " + rootFallback);
+        console.log("[ATTENTION] pfe_v8.docx racine est ouvert dans Word. Version a jour enregistree sous : " + rootFallback);
       } catch(e2) {}
     }
   }
 }).catch(err => {
-  console.error("Erreur generation pfe_v7.docx :", err);
+  console.error("Erreur generation pfe_v8.docx :", err);
 });

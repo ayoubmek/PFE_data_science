@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import axios from 'axios'
 import { KTIcon } from '../../../_metronic/helpers'
+import { API_BASE_URL } from '../../config'
 
 export type UserRole = 'ADMIN' | 'OPERATEUR'
 
@@ -93,7 +94,7 @@ export default function UserManagementPage() {
 
   const loadUsers = async () => {
     setLoading(true)
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+    const apiUrl = API_BASE_URL
     try {
       const { data } = await axios.get(`${apiUrl}/users`, { timeout: 3500 })
       if (Array.isArray(data)) {
@@ -165,7 +166,7 @@ export default function UserManagementPage() {
     setUsers(updated)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
 
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+    const apiUrl = API_BASE_URL
     try {
       await axios.patch(`${apiUrl}/users/${user.id}/toggle-status`, {}, { timeout: 2000 })
     } catch (e) {
@@ -193,7 +194,7 @@ export default function UserManagementPage() {
     setUsers(updated)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
 
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+    const apiUrl = API_BASE_URL
     try {
       await axios.delete(`${apiUrl}/users/${user.id}`, { timeout: 2000 })
     } catch (e) {}
@@ -258,7 +259,7 @@ export default function UserManagementPage() {
       lastLogin: 'Jamais connecté',
     }
 
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+    const apiUrl = API_BASE_URL
     try {
       const { data } = await axios.post(`${apiUrl}/users`, formData, { timeout: 2500 })
       if (data && data.id) newUser.id = data.id
@@ -294,7 +295,7 @@ export default function UserManagementPage() {
       return u
     })
 
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+    const apiUrl = API_BASE_URL
     try {
       await axios.put(`${apiUrl}/users/${editingUser.id}`, formData, { timeout: 2500 })
     } catch (e) {}

@@ -94,7 +94,7 @@ def get_preliminaries():
         frontTitle("Résumé"),
         body("Dans le secteur de la plasturgie automobile, l’optimisation de la production et la gestion des approvisionnements constituent des enjeux majeurs pour améliorer la performance industrielle et assurer la continuité des activités. Face à la dispersion des données de production issues de plusieurs sites industriels, ce projet de fin d’études porte sur la conception et le déploiement de Nexora, une plateforme intégrée d’aide à la décision destinée au pilotage des activités industrielles."),
         pb(),
-        body("La solution repose sur un entrepôt de données centralisé et un processus automatisé de collecte et de transformation des données. Elle intègre trois fonctionnalités principales : le suivi des performances de production à travers des indicateurs industriels, la prévision des quantités produites et la détection des anomalies de fabrication, ainsi que l’optimisation de la gestion des stocks et la planification préventive des réapprovisionnements."),
+        body("La solution repose sur un entrepôt de données centralisé et un processus automatisé de collecte et de transformation des données. Elle s'articule autour de quatre piliers majeurs : l'ingénierie et l'assainissement automatisé des données d'atelier (ETL et Data Warehouse), le suivi des performances de production à travers des indicateurs industriels en temps réel, la modélisation prédictive des cadences journalières couplée à la détection proactive des anomalies de fabrication, ainsi que l’optimisation intelligente de la gestion des stocks et la planification préventive des réapprovisionnements à 45 jours."),
         pb(),
         body("La plateforme exploite des méthodes d’apprentissage automatique pour anticiper les volumes de production et identifier les éventuelles dérives, tout en proposant une approche structurée de la gestion des stocks afin de limiter les risques de rupture. Les résultats sont présentés à travers des tableaux de bord interactifs et une interface web permettant de faciliter le suivi des indicateurs et la prise de décision."),
         pb(),
@@ -107,7 +107,7 @@ def get_preliminaries():
         frontTitle("Abstract"),
         body("In the automotive plastics manufacturing sector, production monitoring and raw material management are essential to improving industrial performance and ensuring operational continuity. This Master's thesis focuses on the design and implementation of Nexora, an integrated decision-support platform developed to improve production management and inventory planning across multiple industrial sites."),
         pb(),
-        body("The platform relies on a centralized data warehouse and an automated Extract, Transform, Load (ETL) process to consolidate and prepare production data. It integrates three main functionalities: production performance monitoring through industrial indicators, daily production forecasting and anomaly detection, and inventory optimization through stock risk assessment and preventive replenishment planning."),
+        body("The platform relies on a centralized data warehouse and an automated Extract, Transform, Load (ETL) process to consolidate and prepare production data. It integrates four main pillars: automated data engineering and quality cleaning (ETL and Data Warehouse), production performance monitoring through industrial indicators, predictive modeling of daily workshop throughput coupled with proactive manufacturing anomaly detection, and intelligent inventory management with 45-day preventive replenishment planning."),
         pb(),
         body("Machine learning techniques are used to anticipate production volumes and identify potential manufacturing deviations. In parallel, the inventory management module helps prioritize replenishment needs and reduce the risk of stock shortages. The results are presented through interactive Microsoft Power BI dashboards and a web application developed using React and Spring Boot, providing users with accessible information to support operational and strategic decision-making."),
         pb(),
@@ -208,10 +208,11 @@ def get_preliminaries():
         tocLine("5.6.3 Modèle Random Forest Regressor", 2, "52"),
         tocLine("5.6.4 Modèle Prophet (Meta)", 2, "53"),
         tocLine("5.7 Résultats comparatifs et évaluation des modèles à l'horizon 30 jours", 1, "54"),
-        tocLine("5.8 Analyse explicable des composantes et robustesse", 1, "55"),
-        tocLine("5.9 Rôles respectifs des modèles dans la plateforme Nexora", 1, "56"),
-        tocLine("5.10 Bilan du Sprint 3", 1, "57"),
-        tocLine("5.11 Conclusion", 1, "58"),
+        tocLine("5.8 Détection automatisée des anomalies de cadence par intervalle d'incertitude", 1, "55"),
+        tocLine("5.9 Analyse explicable des composantes et robustesse", 1, "56"),
+        tocLine("5.10 Rôles respectifs des modèles dans la plateforme Nexora", 1, "56"),
+        tocLine("5.11 Bilan du Sprint 3", 1, "57"),
+        tocLine("5.12 Conclusion", 1, "58"),
         pb(),
         tocLine("6 Sprint 4 : Développement du tableau de bord décisionnel et validation", 0, "59"),
         tocLine("6.1 Introduction", 1, "58"),
@@ -856,37 +857,37 @@ const doc = new Document({
 
 // GENERATION OF DOCX FILE DIRECTLY
 Packer.toBuffer(doc).then(buffer => {
-  const outputPath = path.join(__dirname, 'pfe_v7.docx');
+  const outputPath = path.join(__dirname, 'pfe_v8.docx');
   let savedPath = outputPath;
   try {
     fs.writeFileSync(outputPath, buffer);
-    console.log("✓ Rapport PFE v7 généré avec succès : " + outputPath);
+    console.log("✓ Rapport PFE v8 généré avec succès : " + outputPath);
   } catch(e) {
     if (e.code === 'EBUSY') {
-      savedPath = path.join(__dirname, 'pfe_v7_mis_a_jour.docx');
+      savedPath = path.join(__dirname, 'pfe_v8_mis_a_jour.docx');
       fs.writeFileSync(savedPath, buffer);
-      console.log("[ATTENTION] pfe_v7.docx est ouvert dans Word. Version a jour enregistree sous : " + savedPath);
+      console.log("[ATTENTION] pfe_v8.docx est ouvert dans Word. Version a jour enregistree sous : " + savedPath);
     } else {
       throw e;
     }
   }
 
   // Copy to root workspace
-  const rootPath = path.join(__dirname, '..', 'pfe_v7.docx');
+  const rootPath = path.join(__dirname, '..', 'pfe_v8.docx');
   try {
     fs.writeFileSync(rootPath, buffer);
     console.log("✓ Copie sauvegardee a la racine : " + rootPath);
   } catch(e) {
     if (e.code === 'EBUSY') {
-      const rootFallback = path.join(__dirname, '..', 'pfe_v7_mis_a_jour.docx');
+      const rootFallback = path.join(__dirname, '..', 'pfe_v8_mis_a_jour.docx');
       try {
         fs.writeFileSync(rootFallback, buffer);
-        console.log("[ATTENTION] pfe_v7.docx racine est ouvert dans Word. Version a jour enregistree sous : " + rootFallback);
+        console.log("[ATTENTION] pfe_v8.docx racine est ouvert dans Word. Version a jour enregistree sous : " + rootFallback);
       } catch(e2) {}
     }
   }
 }).catch(err => {
-  console.error("Erreur generation pfe_v7.docx :", err);
+  console.error("Erreur generation pfe_v8.docx :", err);
 });
 ''')
 

@@ -4,6 +4,7 @@ import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
+import { API_BASE_URL } from '../../config'
 
 let globalCachedOrders: any[] = []
 
@@ -25,7 +26,7 @@ export default function ProductionPage() {
   const [rowsPerPage, setRowsPerPage] = useState(50)
   const [showFilters, setShowFilters] = useState(false)
 
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+  const apiUrl = API_BASE_URL
 
   const fetchOrders = async () => {
     if (globalCachedOrders.length === 0) setLoading(true)

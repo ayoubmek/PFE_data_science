@@ -4,6 +4,7 @@ import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
+import { API_BASE_URL } from '../../config'
 
 let globalCachedMachines: any[] = []
 
@@ -22,7 +23,7 @@ export default function MachinesPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [realTotalVolume, setRealTotalVolume] = useState<number>(1596027)
 
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
+  const apiUrl = API_BASE_URL
 
   const fetchMachines = async () => {
     if (globalCachedMachines.length === 0) setLoading(true)

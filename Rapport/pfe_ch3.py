@@ -138,7 +138,7 @@ def get_chapter3():
           spacing: { before: 80, after: 120 },
         }),
         pb(),
-        body("*Note explicative* : La moyenne globale de 64 890 pièces/jour (Tableau 3.4) résulte de la combinaison pondérée de l'activité nominale (66 420 pcs/j sur 580 jours) avec les périodes de suractivité (94 850 pcs/j en fin de trimestre) et les ralentissements programmés (congés, maintenance, Ramadan avec un ratio calculé de 56 800 / 66 420 = 0,86)."),
+        body("*Note explicative* : La moyenne journalière pondérée calculée d'après la décomposition opérationnelle du Tableau 3.5 s'établit à **64 221 pièces/jour** (54 652 250 pièces / 851 jours). Le léger écart avec la moyenne descriptive empirique de 64 890 pièces/jour (+1,04 %, Tableau 3.4) s'explique par les ajustements de cadence intra-journaliers et les variations d'équipes lors des jours de basculement entre régimes de fabrication."),
         pb(),
 
         title3("3.4.2 Visualisation des séries temporelles"),
@@ -158,7 +158,7 @@ def get_chapter3():
         body("Le pipeline de traitement, développé en Python [18, 19], est conçu de façon modulaire afin de garantir la reproductibilité et la traçabilité des transformations. Il s'articule en quatre phases séquentielles :"),
         bullet("**1. Ingestion** : lecture des fichiers d'extraction bruts et contrôle de leur structure."),
         bullet("**2. Assainissement de la qualité** : application ordonnée des traitements de nettoyage décrits en section 3.5.3."),
-        bullet("**3. Structuration dimensionnelle** : séparation des données en tables de dimensions et de faits conformément au modèle en étoile."),
+        bullet("**3. Structuration dimensionnelle** : séparation des données en tables de dimensions et de faits conformément au modèle dimensionnel en étoile de Kimball [8]."),
         bullet("**4. Chargement dans le Data Warehouse** : insertion performante par lots dans SQL Server [16] avec mise à jour des index et journalisation."),
         pb(),
         body("La figure 3.5 illustre le flux séquentiel des données à travers le pipeline ETL :"),
@@ -170,32 +170,33 @@ def get_chapter3():
         pb(),
 
         title3("3.5.3 Transformation et traitement des anomalies"),
-        body("L'analyse de l'extraction d'inventaire brute (51 500 enregistrements) a révélé une forte redondance issue des exports automatiques de l'ERP ainsi que plusieurs incohérences de saisie. Le module de nettoyage regroupe ses traitements en cinq actions :"),
+        body("Afin d'illustrer pas à pas la cascade d'assainissement avec des métriques de contrôle traçables, les traitements sont présentés sur l'**échantillon d'audit documenté de 51 500 enregistrements** issu des exports de l'ERP. Le module de nettoyage regroupe ses traitements en cinq actions :"),
         bullet("**1. Suppression des doublons** : élimination de 18 337 lignes répétées pour une même date, un même article et un même site."),
         bullet("**2. Contrôle des dates** : mise au même format de toutes les dates et rejet de 660 lignes portant une date impossible (par exemple un 30 février)."),
         bullet("**3. Harmonisation des formats** : uniformisation des nombres (séparateur décimal, unités écrites dans les quantités) et des libellés (familles de matière, noms de sites)."),
         bullet("**4. Correction des coûts unitaires** : remplacement des coûts négatifs ou nuls par le coût médian de la famille de matière, et régularisation des stocks négatifs transitoires."),
         bullet("**5. Traitement des valeurs manquantes** : rejet de 460 lignes sans référence article exploitable et attribution de valeurs par défaut aux champs secondaires."),
         pb(),
-        body("Le tableau 3.6 résume le passage des données brutes aux données validées :"),
+        body("Le tableau 3.6 résume la cascade de rétention mesurée sur cet échantillon d'audit :"),
         pb(),
         makeTable(
-          ["Étape", "Lignes", "Variation"],
+          ["Étape de traitement ETL", "Volume (lignes)", "Variation"],
           [
-            ["Volume brut extrait de l'ERP", "51 500", "100 %"],
-            ["Suppression des doublons", "- 18 337", "- 35,61 %"],
+            ["Volume brut extrait de l'ERP (Échantillon d'audit)", "51 500", "100 %"],
+            ["Suppression des doublons stricts", "- 18 337", "- 35,61 %"],
             ["Rejet des dates et identifiants articles invalides (660 + 460)", "- 1 120", "- 2,17 %"],
             ["**Volume final validé chargé dans le Data Warehouse**", "**32 043**", "**Rétention : 62,22 %**"]
           ],
           [4800, 1800, 2066]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 3.6 : Bilan quantitatif de la qualité des données (Waterfall ETL)", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 3.6 : Cascade de rétention sur l'échantillon d'audit documenté (51 500 lignes)", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
-        body("À l'issue du nettoyage, les 14 variables explicatives (calendrier, événements d'atelier, historique de production et moyennes mobiles) sont calculées pour alimenter les modèles de prévision ; elles sont détaillées au chapitre 5."),
+        body("Appliqué en production sur l'extraction globale de **862 065 lignes**, ce même pipeline retient 97,01 % des données pour alimenter les **814 065 enregistrements actifs** consolidés dans la table `dbo.ASTOCKDATE` du Data Warehouse."),
+        body("À l'issue du nettoyage, les variables explicatives (calendrier, événements d'atelier, historique de production et moyennes mobiles) sont calculées pour alimenter les modèles de prévision ; elles sont détaillées au chapitre 5."),
         pb(),
 
         title3("3.5.4 Chargement dans le Data Warehouse"),
@@ -203,17 +204,17 @@ def get_chapter3():
         pb(),
 
         title2("3.6 Résultats du pipeline ETL"),
-        body("Le tableau 3.7 synthétise les indicateurs de performance obtenus lors de l'exécution complète du pipeline :"),
+        body("Le tableau 3.7 synthétise les indicateurs de performance obtenus lors de l'exécution complète du pipeline sur l'échantillon d'audit :"),
         pb(),
         makeTable(
           ["Indicateur de performance ETL", "Valeur mesurée", "Interprétation"],
           [
-            ["Lignes brutes traitées en entrée", "51 500 enregistrements", "Volume d'inventaire extrait de l'ERP."],
-            ["Lignes validées chargées dans le Data Warehouse", "32 043 enregistrements", "Volume d'inventaire assaini chargé dans la table dbo.ASTOCKDATE."],
+            ["Lignes brutes traitées en entrée (Échantillon)", "51 500 enregistrements", "Volume d'inventaire audité extrait de l'ERP."],
+            ["Lignes validées chargées dans le Data Warehouse", "32 043 enregistrements", "Volume assaini correspondant dans dbo.ASTOCKDATE."],
             ["Taux de rétention de données assainies", "62,22 %", "Après suppression des doublons (-35,6 %) et rejets (-2,2 %)."],
-            ["Taux d'anomalies résiduelles dans le Data Warehouse", "0,0 %", "Toutes les contraintes d'intégrité et de format sont satisfaites."],
+            ["Taux d'anomalies résiduelles post-traitement", "0,0 %", "Toutes les contraintes d'intégrité et de format sont satisfaites."],
             ["Variables créées pour l'apprentissage", "14 variables explicatives", "Prêtes pour la modélisation prédictive."],
-            ["Temps moyen d'exécution du pipeline", "2,62 secondes", "Traitement rapide de l'ensemble des données."]
+            ["Temps moyen d'exécution du pipeline", "2,62 secondes", "Traitement rapide et reproductible de l'échantillon."]
           ],
           [3600, 2400, 2666]
         ),

@@ -9,8 +9,10 @@ spring:
     allow-circular-references: true
 
   datasource:
-    url: jdbc:sqlserver://LAPTOP-M7HILU4Q;databaseName=dbDWH;integratedSecurity=true;encrypt=false;trustServerCertificate=true
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlserver://${DB_HOST:LAPTOP-M7HILU4Q};databaseName=${DB_NAME:dbDWH};integratedSecurity=${DB_INTEGRATED_SECURITY:true};encrypt=false;trustServerCertificate=true}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: ${DB_USER:}
+    password: ${DB_PASSWORD:}
 
   jpa:
     database-platform: org.hibernate.dialect.SQLServerDialect
