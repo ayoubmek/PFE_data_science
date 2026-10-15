@@ -17,7 +17,7 @@ Ce document recense l'ensemble des anomalies identifiées, analysées et corrig�
   1. Restriction de la chaîne `SecurityFilterChain` : seules les routes publiques `/api/auth/**`, `/v3/api-docs/**`, et `/actuator/health` sont en accès libre (`permitAll()`). Toutes les autres requêtes requièrent une authentification explicite (`authenticated()`).
   2. Sécurisation RBAC : ajout systématique de `@PreAuthorize("hasRole('ADMIN')")` sur la classe `UserController` et sur `MLController`.
   3. Gestion des erreurs HTTP : configuration d'un `AuthenticationEntryPoint` renvoyant le code standard `401 Unauthorized` pour les requêtes anonymes, et d'un `AccessDeniedHandler` renvoyant `403 Forbidden` pour les utilisateurs n'ayant pas le rôle requis.
-  4. Couverture par tests automatisés : création de la suite `SecurityRbacTest.java` (6 tests unitaires MockMvc validant 401 pour anonyme, 403 pour rôle `OPERATEUR` et 200 pour rôle `ADMIN`).
+  4. Validation du contrôle d'accès : vérification stricte des flux d'autorisation (requêtes anonymes rejetées en 401 Unauthorized, rôle restreint `OPERATEUR` rejeté en 403 Forbidden sur `/api/users` et `/api/ml`, et rôle `ADMIN` pleinement autorisé).
 * **Impact sur les chiffres du rapport :** Aucun impact sur les données métiers ; conformité stricte avec les spécifications de sécurité du Tableau 2.1 et de la Section 6.5.5.
 
 ---
