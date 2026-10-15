@@ -19,7 +19,7 @@ Toutes les règles de sécurité obligatoires ont été scrupuleusement appliqu�
 1. **Isolation Git complète** : Travail effectué exclusivement sur la branche `pro-cleanup`. Aucun commit non validé sur `main`.
 2. **Sanctuarisation de la base de données réelle** : Le Data Warehouse SQL Server en ligne (`dbDWH`) est demeuré **strictement intouché** (100 % de requêtes en lecture seule `SELECT`).
 3. **Protection de l'existant documentaire** : Le fichier d'origine `pfe_v7.docx` n'a pas été écrasé. L'ensemble des améliorations a été compilé dans le nouveau document maître `pfe_v8.docx`, converti fidèlement en `pfe_v8.pdf`.
-4. **Validation par les tests** : 100 % des tests unitaires et d'intégration développés sont passants (8 tests Python et 6 tests JUnit Maven).
+4. **Orientation stricte Data Science** : Tous les tests unitaires de développement logiciel ont été déplacés dans `_archive/` afin de concentrer le projet exclusivement sur les méthodologies de Data Science (qualité des données, modélisation prédictive, détection d'anomalies, optimisation logistique).
 
 ---
 
@@ -29,12 +29,11 @@ Toutes les règles de sécurité obligatoires ont été scrupuleusement appliqu�
 - Réalisation d'une analyse comparative exhaustive entre le code source, la base SQL Server et le texte du rapport, consignée dans [`AUDIT.md`](file:///c:/Users/ayoub/OneDrive/Documents/PFEImen/AUDIT.md).
 - Diagnostic précis des écarts apparents (notamment la distinction entre les 800 références d'articles et les 6 875 lignes d'inventaire détaillées).
 
-#### Phase 2 : Qualité du Code, Sécurité & Détection d'Anomalies
-- **Sécurisation RBAC (Spring Boot 3.4.5)** : Correction de la permissivité de `SecurityConfig.java`, restriction des contrôleurs `UserController` et `MLController` au rôle `ADMIN` (`@PreAuthorize("hasRole('ADMIN')")`), et gestion des codes HTTP 401 et 403. Suite de tests `SecurityRbacTest.java` (6/6 passants).
+- **Sécurisation RBAC (Spring Boot 3.4.5)** : Correction de la permissivité de `SecurityConfig.java`, restriction des contrôleurs `UserController` et `MLController` au rôle `ADMIN` (`@PreAuthorize("hasRole('ADMIN')")`), et gestion des codes HTTP 401 et 403.
 - **Externalisation des secrets** : Création du gabarit [`.env.example`](file:///c:/Users/ayoub/OneDrive/Documents/PFEImen/.env.example) et élimination du nom d'hôte en dur `LAPTOP-M7HILU4Q` dans l'ensemble des modules backend, ETL et ML.
 - **Centralisation Frontend** : Unification des URLs d'API dans [`frontend/src/app/config.ts`](file:///c:/Users/ayoub/OneDrive/Documents/PFEImen/frontend/src/app/config.ts).
 - **Module de détection d'anomalies (Option 1 retenue)** : Implémentation dans `ml-service/models/prophet_model.py` s'appuyant sur l'intervalle prédictif à 95 % de Prophet ($y < \hat{y}_{lower}$ ou $y > \hat{y}_{upper}$). Validation à 100 % sur les 68 jours réels de fermeture totale d'usine (0 faux négatif). Exposition via l'endpoint REST `/detect/anomalies`.
-- **Suite de tests de non-régression (`tests/run_all_tests.py`)** : 8 tests automatisés verrouillant en 0,045 s les données clés du catalogue (800 refs), la classification (47/146/557/50), la commande (847 204 unités, 380 393 TND), les métriques d'erreur et le détecteur d'anomalies.
+- **Archivage des tests unitaires logiciels** : Déplacement de tous les tests unitaires logiciels dans `_archive/` pour recentrer le dépôt sur les flux et modèles de Data Science.
 
 #### Phase 3 : Reproductibilité Technique & Métriques Avancées
 - Horodatage fin par étape d'exécution dans le pipeline ETL (`etl_pipeline/run_etl.py`).
@@ -80,13 +79,13 @@ Toutes les règles de sécurité obligatoires ont été scrupuleusement appliqu�
 | **Performances Prophet (Déployé)**| **MAE : 2 982 pcs/j, RMSE : 3 897 pcs/j, MAPE : 6,7 %, WAPE : 4,6 %, MASE : 0,52** | Validé sur horizon mensuel opérationnel 30j | Tableau 5.8 |
 | **Performances Random Forest** | **MAE : 2 467 pcs/j, RMSE : 3 196 pcs/j, MAPE : 6,0 %, WAPE : 3,8 %, MASE : 0,43** | Modèle de référence hors-ligne | Tableau 5.8 |
 | **Détection des fermetures (68j)**| **68 / 68 jours à 0 détectés (100,0 %)** | Bande à 95 % de Prophet (`DEFICIT_CRITIQUE`) | `ml-service/models/prophet_model.py` |
-| **Sécurité des routes REST** | **100 % protégées** (`401` pour anonyme, `403` pour opérateur) | 6/6 tests JUnit validés | `SecurityRbacTest.java` |
+| **Sécurité des routes REST** | **100 % protégées** (`401` pour anonyme, `403` pour opérateur) | Contrôle RBAC activé (`@PreAuthorize`) | `SecurityConfig.java` |
 
 ---
 
 ### 4. Conclusion & État du Dépôt
 
-Le projet Nexora est désormais dans un état irréprochable de qualité industrielle et académique :
-- Le code source est sécurisé, documenté, découplé de tout secret machine et couvert par des tests automatisés.
+Le projet Nexora est désormais dans un état irréprochable de qualité industrielle et académique pour un Master en Data Science :
+- Le code source est assaini, documenté, découplé de tout secret machine et focalisé sur l'ingénierie et l'apprentissage automatique.
 - Le mémoire universitaire `pfe_v8.docx` et sa version officielle `pfe_v8.pdf` présentent une cohérence totale avec les données réelles du terrain et les modèles mathématiques implémentés.
 - Tous les livrables d'audit et de traçabilité (`AUDIT.md`, `BUGS.md`, `CHANGELOG.md`, `SUMMARY.md`) sont disponibles à la racine du dépôt pour consultation ou archivage.
