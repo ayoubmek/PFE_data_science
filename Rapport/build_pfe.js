@@ -327,11 +327,39 @@ const emptyFigurePlaceholder = (captionText, heightPt = 160) => [
   pb()
 ];
 
+function getImageDimensions(buffer) {
+  try {
+    if (buffer.length >= 24 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+      return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+    }
+    if (buffer.length >= 2 && buffer[0] === 0xFF && buffer[1] === 0xD8) {
+      let offset = 2;
+      while (offset < buffer.length) {
+        if (buffer[offset] !== 0xFF) break;
+        const marker = buffer[offset + 1];
+        if (marker === 0xC0 || marker === 0xC2) {
+          return { height: buffer.readUInt16BE(offset + 5), width: buffer.readUInt16BE(offset + 7) };
+        }
+        offset += 2 + buffer.readUInt16BE(offset + 2);
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
 const imageFigure = (imageRelPath, captionText, maxW = 540, maxH = 380) => {
   const fullPath = path.isAbsolute(imageRelPath) ? imageRelPath : path.join(__dirname, imageRelPath);
   if (fs.existsSync(fullPath)) {
     try {
       const buffer = fs.readFileSync(fullPath);
+      let targetW = maxW;
+      let targetH = maxH;
+      const dims = getImageDimensions(buffer);
+      if (dims && dims.width > 0 && dims.height > 0) {
+        const scale = Math.min(maxW / dims.width, maxH / dims.height);
+        targetW = Math.round(dims.width * scale);
+        targetH = Math.round(dims.height * scale);
+      }
       return [
         new Paragraph({
           alignment: AlignmentType.CENTER,
@@ -339,7 +367,7 @@ const imageFigure = (imageRelPath, captionText, maxW = 540, maxH = 380) => {
           children: [
             new ImageRun({
               data: buffer,
-              transformation: { width: maxW, height: maxH },
+              transformation: { width: targetW, height: targetH },
             })
           ]
         }),
@@ -486,26 +514,28 @@ const doc = new Document({
 
         // RÉSUMÉ FR
         frontTitle("Résumé"),
-        body("Dans le secteur concurrentiel de la plasturgie automobile (équipementier Tier-1), la maîtrise des cadences de fabrication et la gestion proactive des approvisionnements de matières premières constituent des leviers déterminants de rentabilité. Face à la dispersion des données d'atelier issues de 319 presses à injecter réparties sur trois sites industriels (Kondar et Sousse en Tunisie, Brno en République Tchèque), ce projet de fin d'études présente la conception et le déploiement de **Nexora**, une plateforme décisionnelle et opérationnelle d'aide au pilotage industriel."),
+        body("Dans le secteur de la plasturgie automobile, l’optimisation de la production et la gestion des approvisionnements constituent des enjeux majeurs pour améliorer la performance industrielle et assurer la continuité des activités. Face à la dispersion des données de production issues de plusieurs sites industriels, ce projet de fin d’études porte sur la conception et le déploiement de Nexora, une plateforme intégrée d’aide à la décision destinée au pilotage des activités industrielles."),
         pb(),
-        body("Alimentée par un entrepôt de données (Data Warehouse) sous Microsoft SQL Server consolidant 32 043 enregistrements d'inventaire validés après assainissement par un pipeline ETL automatisé (schéma dimensionnel centré sur ASTOCKDATE, FACT_CLE et MCMachineCenter), la solution s'articule autour de trois modules complémentaires : un module prédictif comparant quatre modèles d'apprentissage automatique et de séries temporelles (Régression Linéaire, ARIMA, Random Forest et Prophet), où Random Forest s'impose comme modèle Champion d'atelier (MAPE de 6,0 % à 30 jours, MAE de 2 467 pièces/jour, R² de 0,98) et Prophet assure le déploiement opérationnel grâce à sa modélisation native des composantes calendaires et son intégration directe dans la base de données ; un module de gestion des stocks structuré par une analyse multicritère Pareto ABC (classes A, B, C) et une classification opérationnelle en quatre niveaux de risque (Rupture, Critique, Normal, Surstock), complété par une règle de réapprovisionnement à horizon cible de 45 jours chiffrant l'enveloppe prioritaire pour 193 références en risque à environ 380 400 TND (sur un catalogue totalisant 14,31 M TND de valeur annuelle consommée) ; et une restitution adaptée aux rôles de l'entreprise via des tableaux de bord interactifs Microsoft Power BI pour le management et un portail web opérationnel React / Spring Boot avec banc d'essai comparatif des modèles d'IA pour les équipes d'atelier."),
+        body("La solution repose sur un entrepôt de données centralisé et un processus automatisé de collecte et de transformation des données. Elle intègre trois fonctionnalités principales : le suivi des performances de production à travers des indicateurs industriels, la prévision des quantités produites et la détection des anomalies de fabrication, ainsi que l’optimisation de la gestion des stocks et la planification préventive des réapprovisionnements."),
         pb(),
-        body("La solution a été validée par des scénarios de test fonctionnels et d'intégration, apportant une visibilité structurée sur les cadences de fabrication et sécurisant l'approvisionnement des lignes d'assemblage."),
+        body("La plateforme exploite des méthodes d’apprentissage automatique pour anticiper les volumes de production et identifier les éventuelles dérives, tout en proposant une approche structurée de la gestion des stocks afin de limiter les risques de rupture. Les résultats sont présentés à travers des tableaux de bord interactifs et une interface web permettant de faciliter le suivi des indicateurs et la prise de décision."),
         pb(),
-        bold_body("Mots-clés :"),
-        body("Système décisionnel, Industrie 4.0, Plasturgie Automobile, Séries Temporelles, Random Forest, Prophet, Segmentation Pareto ABC, Pipeline ETL, Data Warehouse, SQL Server, Power BI, Spring Boot, React.js."),
+        body("Développée à l’aide de technologies de Business Intelligence, de traitement des données et de développement web, Nexora contribue à centraliser l’information, à améliorer la visibilité sur les opérations industrielles et à renforcer l’anticipation des besoins de production et d’approvisionnement."),
+        pb(),
+        body("**Mots-clés :** Système décisionnel, Business Intelligence, Data Science, Plasturgie automobile, Performance industrielle, Prévision de production, Détection d’anomalies, Gestion des stocks, ETL, Data Warehouse, SQL Server, Power BI, React, Spring Boot."),
         pageBreak(),
 
         // ABSTRACT EN
         frontTitle("Abstract"),
-        body("In the highly demanding automotive plastics manufacturing sector (Tier-1 supplier), controlling production throughput and proactively managing raw material replenishment are decisive factors for operational efficiency. Addressing data dispersion across 319 injection moulding machines located across three industrial plants (Kondar and Sousse in Tunisia, Brno in the Czech Republic), this Master's thesis presents the design and deployment of **Nexora**, an intelligent decision-support and operational platform."),
+        body("In the automotive plastics manufacturing sector, production monitoring and raw material management are essential to improving industrial performance and ensuring operational continuity. This Master's thesis focuses on the design and implementation of Nexora, an integrated decision-support platform developed to improve production management and inventory planning across multiple industrial sites."),
         pb(),
-        body("Built upon a Microsoft SQL Server Data Warehouse consolidating 32,043 validated inventory records structured in a streamlined dimensional schema (ASTOCKDATE, FACT_CLE, MCMachineCenter) after automated ETL sanitization, the platform integrates three core modules: a forecasting engine evaluating four machine learning and time series models (Linear Regression, ARIMA, Random Forest, and Prophet), in which Random Forest excels as shop-floor Champion (6.0% MAPE at 30 days, MAE 2,467 pcs/day, R² 0.98) and Prophet is deployed in production for its explainability and native handling of industrial calendar effects; an intelligent inventory management module based on Pareto ABC multi-criteria segmentation, a four-level operational risk classification (Out-of-Stock, Critical, Normal, Overstock), and a 45-day replenishment formula budgeting 193 critical references at approximately 380,400 TND (out of a catalog accounting for 14.31 M TND in annual consumption); and a dual-interface architecture featuring interactive Microsoft Power BI dashboards for executive monitoring and a reactive React / Spring Boot web portal with integrated AI model benchmarking for shop-floor teams."),
+        body("The platform relies on a centralized data warehouse and an automated Extract, Transform, Load (ETL) process to consolidate and prepare production data. It integrates three main functionalities: production performance monitoring through industrial indicators, daily production forecasting and anomaly detection, and inventory optimization through stock risk assessment and preventive replenishment planning."),
         pb(),
-        body("The platform has been validated through functional and integration test scenarios, delivering structured visibility over manufacturing throughput and securing material availability for manufacturing lines."),
+        body("Machine learning techniques are used to anticipate production volumes and identify potential manufacturing deviations. In parallel, the inventory management module helps prioritize replenishment needs and reduce the risk of stock shortages. The results are presented through interactive Microsoft Power BI dashboards and a web application developed using React and Spring Boot, providing users with accessible information to support operational and strategic decision-making."),
         pb(),
-        bold_body("Keywords :"),
-        body("Decision Support System, Industry 4.0, Automotive Plastics, Time Series Forecasting, Random Forest, Prophet, Pareto ABC Analysis, ETL Pipeline, Data Warehouse, SQL Server, Power BI, Spring Boot, React.js."),
+        body("By combining Business Intelligence, data analytics, and web technologies, Nexora contributes to improving data visibility, production planning, and inventory management, while strengthening the integration of data-driven insights into daily industrial operations."),
+        pb(),
+        body("**Keywords:** Decision Support System, Business Intelligence, Data Science, Automotive Plastics Manufacturing, Industrial Performance, Production Forecasting, Anomaly Detection, Inventory Management, ETL, Data Warehouse, SQL Server, Power BI, React, Spring Boot."),
         pageBreak(),
 
         // TABLE DES MATIÈRES
@@ -533,7 +563,7 @@ const doc = new Document({
         tocLine("1.7.3 Organisation des rôles Scrum", 2, "12"),
         tocLine("1.7.4 Product Backlog", 2, "12"),
         tocLine("1.7.5 Planification des sprints", 2, "13"),
-        tocLine("1.8 Langage de modélisation UML", 1, "14"),
+        tocLine("1.8 Langage et démarche de modélisation", 1, "14"),
         tocLine("1.9 Conclusion", 1, "14"),
         pb(),
         tocLine("2 Sprint 0 : Analyse des besoins et Conception du Système", 0, "15"),
@@ -574,9 +604,9 @@ const doc = new Document({
         tocLine("4.2 Backlog du Sprint 2", 1, "37"),
         tocLine("4.3 Architecture du module de gestion des stocks", 1, "37"),
         tocLine("4.4 Analyse des niveaux de stock et indicateurs de rotation", 1, "38"),
-        tocLine("4.5 Classification et segmentation des produits", 1, "39"),
-        tocLine("4.5.1 Segmentation multicritère Pareto ABC et répartition de la valeur", 2, "39"),
-        tocLine("4.5.2 Classification opérationnelle par niveau de risque", 2, "39"),
+        tocLine("4.5 Classification opérationnelle et analyse de criticité des stocks", 1, "39"),
+        tocLine("4.5.1 Typologie des statuts de stock et seuils d'autonomie", 2, "39"),
+        tocLine("4.5.2 Répartition du catalogue et analyse de criticité", 2, "39"),
         tocLine("4.6 Génération des recommandations et chiffrage budgétaire", 1, "40"),
         tocLine("4.6.1 Algorithme de réapprovisionnement à horizon cible de 45 jours", 2, "40"),
         tocLine("4.6.2 Estimation du budget d'approvisionnement", 2, "40"),
@@ -599,7 +629,7 @@ const doc = new Document({
         tocLine("5.6.2 Modèle ARIMA", 2, "51"),
         tocLine("5.6.3 Modèle Random Forest Regressor", 2, "52"),
         tocLine("5.6.4 Modèle Prophet (Meta)", 2, "53"),
-        tocLine("5.7 Résultats comparatifs et évaluation multi-horizons", 1, "54"),
+        tocLine("5.7 Résultats comparatifs et évaluation des modèles à l'horizon 30 jours", 1, "54"),
         tocLine("5.8 Analyse explicable des composantes et robustesse", 1, "55"),
         tocLine("5.9 Rôles respectifs des modèles dans la plateforme Nexora", 1, "56"),
         tocLine("5.10 Bilan du Sprint 3", 1, "57"),
@@ -609,23 +639,22 @@ const doc = new Document({
         tocLine("6.1 Introduction", 1, "58"),
         tocLine("6.2 Backlog du Sprint 4", 1, "58"),
         tocLine("6.3 Architecture du tableau de bord et intégration applicative", 1, "59"),
-        tocLine("6.4 Diagramme de séquence", 1, "60"),
-        tocLine("6.5 Conception des rapports décisionnels Power BI", 1, "61"),
-        tocLine("6.5.1 Tableau de bord de supervision du parc machines", 2, "61"),
-        tocLine("6.5.2 Tableau de bord des prévisions de cadence", 2, "61"),
-        tocLine("6.5.3 Tableau de bord de gestion des stocks", 2, "62"),
-        tocLine("6.6 Présentation des interfaces réalisées", 1, "63"),
-        tocLine("6.6.1 Tableau de bord principal", 2, "63"),
-        tocLine("6.6.2 Historique et répartition des stocks d'atelier", 2, "63"),
-        tocLine("6.6.3 Prévisions de cadence d'atelier", 2, "64"),
-        tocLine("6.6.4 Pilotage des stocks et alertes d'approvisionnement", 2, "65"),
-        tocLine("6.6.5 Portail web opérationnel React & Spring Boot", 2, "65"),
-        tocLine("6.7 Tests et validation", 1, "66"),
-        tocLine("6.7.1 Tests fonctionnels et d'intégration", 2, "66"),
-        tocLine("6.7.2 Validation des prévisions d'atelier", 2, "67"),
-        tocLine("6.7.3 Validation des règles d'approvisionnement", 2, "67"),
-        tocLine("6.8 Bilan du Sprint 4", 1, "68"),
-        tocLine("6.9 Conclusion", 1, "68"),
+        tocLine("6.4 Conception des rapports décisionnels Power BI", 1, "60"),
+        tocLine("6.4.1 Tableau de bord de supervision du parc machines", 2, "60"),
+        tocLine("6.4.2 Tableau de bord des prévisions de cadence", 2, "61"),
+        tocLine("6.4.3 Tableau de bord de gestion des stocks", 2, "61"),
+        tocLine("6.5 Présentation des interfaces réalisées", 1, "62"),
+        tocLine("6.5.1 Tableau de bord principal", 2, "62"),
+        tocLine("6.5.2 Historique et répartition des stocks d'atelier", 2, "63"),
+        tocLine("6.5.3 Prévisions de cadence d'atelier", 2, "63"),
+        tocLine("6.5.4 Pilotage des stocks et alertes d'approvisionnement", 2, "64"),
+        tocLine("6.5.5 Portail web opérationnel React & Spring Boot", 2, "65"),
+        tocLine("6.6 Tests et validation", 1, "66"),
+        tocLine("6.6.1 Tests fonctionnels et d'intégration", 2, "66"),
+        tocLine("6.6.2 Validation des prévisions d'atelier", 2, "67"),
+        tocLine("6.6.3 Validation des règles d'approvisionnement", 2, "67"),
+        tocLine("6.7 Bilan du Sprint 4", 1, "68"),
+        tocLine("6.8 Conclusion", 1, "68"),
         pb(),
         tocLine("Conclusion générale et perspectives", 0, "69"),
         tocLine("Bibliographie", 0, "72"),
@@ -638,42 +667,37 @@ const doc = new Document({
         tocLine("Figure 1.3 : Cycle itératif de la méthodologie Agile Scrum", 1, "12"),
         tocLine("Figure 2.1 : Diagramme des cas d'utilisation global de Nexora", 1, "18"),
         tocLine("Figure 2.2 : Architecture globale du système décisionnel en quatre couches", 1, "19"),
-        tocLine("Figure 3.1 : Modélisation dimensionnelle en étoile du Data Warehouse Nexora", 1, "26"),
+        tocLine("Figure 3.1 : Modélisation dimensionnelle et relationnelle du Data Warehouse Nexora", 1, "26"),
         tocLine("Figure 3.2 : Évolution temporelle de la production globale des 319 presses (2024–2026)", 1, "28"),
         tocLine("Figure 3.3 : Profils de saisonnalité de production par jour de semaine et par mois", 1, "28"),
         tocLine("Figure 3.4 : Heatmap d'activité atelier : cadence selon le mois et le jour de semaine", 1, "29"),
         tocLine("Figure 3.5 : Architecture et flux séquentiel du pipeline ETL", 1, "30"),
-        tocLine("Figure 3.6 : Diagramme de séquence du pipeline ETL d'atelier", 1, "31"),
-        tocLine("Figure 4.1 : Architecture et flux de traitement du module de gestion des stocks", 1, "37"),
-        tocLine("Figure 4.2 : Segmentation multicritère Pareto ABC et répartition de la valeur de stock", 1, "41"),
-        tocLine("Figure 4.3 : Répartition des alertes de rupture et de stock critique par famille de matière", 1, "42"),
-        tocLine("Figure 5.1 : Architecture et flux de traitement du module d'IA de Nexora", 1, "47"),
-        tocLine("Figure 5.2 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 1, "52"),
+        tocLine("Figure 4.1 : Répartition des références du catalogue par statut opérationnel de stock", 1, "41"),
+        tocLine("Figure 4.2 : Répartition des alertes de rupture et de stock critique par famille de matière", 1, "42"),
+        tocLine("Figure 5.1 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 1, "52"),
         tocLine("Figure 6.1 : Architecture globale d'intégration et de déploiement de Nexora", 1, "60"),
-        tocLine("Figure 6.2 : Diagramme de séquence des échanges entre l'utilisateur, l'interface et le DWH", 1, "61"),
-        tocLine("Figure 6.3 : Vue d'ensemble du tableau de bord décisionnel Power BI Nexora", 1, "64"),
-        tocLine("Figure 6.4 : Rapport Power BI « Historique d'évolution des stocks par site »", 1, "64"),
-        tocLine("Figure 6.5 : Rapport Power BI « État de stock global et répartition par famille »", 1, "65"),
-        tocLine("Figure 6.6 : Rapport Power BI « Prévision des cadences et charge atelier »", 1, "65"),
-        tocLine("Figure 6.7 : Rapport Power BI « Gestion des stocks d'atelier et alertes »", 1, "66"),
+        tocLine("Figure 6.2 : Vue d'ensemble du tableau de bord décisionnel Power BI Nexora", 1, "62"),
+        tocLine("Figure 6.3 : Rapport Power BI « Historique d'évolution des stocks par site »", 1, "63"),
+        tocLine("Figure 6.4 : Rapport Power BI « État de stock global et répartition par famille »", 1, "63"),
+        tocLine("Figure 6.5 : Rapport Power BI « Prévision des cadences et charge atelier »", 1, "64"),
+        tocLine("Figure 6.6 : Rapport Power BI « Gestion des stocks d'atelier et alertes »", 1, "64"),
         pageBreak(),
 
         // LISTE DES TABLEAUX
         frontTitle("Liste des tableaux"),
-        tocLine("Tableau 1.1 : Fiche d'identité de Maps-IT", 1, "5"),
-        tocLine("Tableau 1.2 : Positionnement comparatif des solutions existantes avec Nexora", 1, "9"),
-        tocLine("Tableau 1.3 : Comparaison entre approche classique et approche agile", 1, "10"),
-        tocLine("Tableau 1.4 : Avantages et inconvénients des méthodologies", 1, "11"),
-        tocLine("Tableau 1.5 : Product Backlog priorisé du projet", 1, "13"),
-        tocLine("Tableau 1.6 : Planification des sprints du projet", 1, "14"),
+        tocLine("Tableau 1.1 : Positionnement comparatif des solutions existantes avec Nexora", 1, "9"),
+        tocLine("Tableau 1.2 : Comparaison entre approche classique et approche agile", 1, "10"),
+        tocLine("Tableau 1.3 : Avantages et inconvénients des méthodologies", 1, "11"),
+        tocLine("Tableau 1.4 : Product Backlog priorisé du projet", 1, "13"),
+        tocLine("Tableau 1.5 : Planification des sprints du projet", 1, "14"),
         tocLine("Tableau 2.1 : Les besoins non fonctionnels du système", 1, "17"),
         tocLine("Tableau 2.2 : Outils, langages et bibliothèques logiciels utilisés", 1, "21"),
         tocLine("Tableau 3.1 : Priorisation des tâches pour le Sprint 1", 1, "24"),
         tocLine("Tableau 3.2 : Périmètre quantitatif des données industrielles du projet", 1, "25"),
-        tocLine("Tableau 3.3 : Tables maîtresses du Data Warehouse dimensionnel", 1, "25"),
+        tocLine("Tableau 3.3 : Structure des tables du Data Warehouse Nexora", 1, "25"),
         tocLine("Tableau 3.4 : Statistiques descriptives de la série journalière de production d'atelier", 1, "27"),
         tocLine("Tableau 3.5 : Impact des événements et variations industrielles sur la cadence", 1, "27"),
-        tocLine("Tableau 3.6 : Bilan quantitatif du nettoyage des données", 1, "32"),
+        tocLine("Tableau 3.6 : Bilan quantitatif de la qualité des données (Waterfall ETL)", 1, "32"),
         tocLine("Tableau 3.7 : Résultats quantitatifs et techniques du pipeline ETL", 1, "34"),
         tocLine("Tableau 3.8 : Bilan des livrables du Sprint 1", 1, "35"),
         tocLine("Tableau 4.1 : Priorisation des tâches pour le Sprint 2", 1, "37"),
@@ -686,7 +710,7 @@ const doc = new Document({
         tocLine("Tableau 5.5 : Avantages et limites : Modèle ARIMA", 1, "51"),
         tocLine("Tableau 5.6 : Avantages et limites : Random Forest", 1, "52"),
         tocLine("Tableau 5.7 : Avantages et limites : Prophet", 1, "53"),
-        tocLine("Tableau 5.8 : Synthèse des performances prédictives aux horizons 7, 15 et 30 jours", 1, "54"),
+        tocLine("Tableau 5.8 : Synthèse des performances comparatives des modèles à l'horizon 30 jours", 1, "54"),
         tocLine("Tableau 5.9 : Bilan des livrables du Sprint 3", 1, "57"),
         tocLine("Tableau 6.1 : Priorisation des tâches pour le Sprint 4", 1, "58"),
         tocLine("Tableau 6.2 : Synthèse des services REST de l'application web", 1, "65"),
@@ -714,12 +738,15 @@ const doc = new Document({
             ["MAPE", "Mean Absolute Percentage Error", "Pourcentage moyen d'erreur absolue par rapport au volume réel"],
             ["MES", "Manufacturing Execution System", "Système de pilotage et d'exécution des ateliers de fabrication"],
             ["ML", "Machine Learning", "Apprentissage automatique supervisé et non supervisé"],
+            ["OEE", "Overall Equipment Effectiveness", "Indicateur international d'efficience globale des équipements de production (équivalent anglo-saxon du TRS)"],
             ["RBAC", "Role-Based Access Control", "Contrôle d'accès aux fonctionnalités fondé sur les rôles (Opérateur, Administrateur)"],
             ["REST", "Representational State Transfer", "Style d'architecture logicielle pour les services web distribués"],
             ["RF", "Random Forest Regressor", "Algorithme d'apprentissage supervisé par forêt d'arbres de décision"],
             ["RMSE", "Root Mean Square Error", "Racine carrée de l'erreur quadratique moyenne pénalisant les grands écarts"],
             ["SQL", "Structured Query Language", "Langage de requêtage relationnel (Microsoft SQL Server)"],
             ["TND", "Dinar Tunisien", "Unité monétaire légale pour la valorisation financière des stocks"],
+            ["TRG", "Taux de Rendement Global", "Rapport du temps utile de fabrication sur le temps d'ouverture d'atelier"],
+            ["TRS", "Taux de Rendement Synthétique", "Indicateur composite de performance combinant disponibilité, cadence et qualité (équivalent de l'OEE)"],
             ["UML", "Unified Modeling Language", "Langage universel de modélisation visuelle des systèmes logiciels"]
           ],
           [1600, 3600, 3466]
@@ -776,31 +803,28 @@ const doc = new Document({
         // INTRODUCTION GÉNÉRALE
         // =========================================================
         title1("Introduction générale"),
-        body("Dans le secteur manufacturier et la plasturgie automobile, l'amélioration continue de la performance industrielle repose sur la valorisation méthodique des flux de données générés au sein des usines. Le suivi régulier des cadences de fabrication, la surveillance des lignes d'injection et la gestion proactive des approvisionnements constituent des leviers déterminants pour garantir la continuité des lignes d'assemblage et maîtriser les coûts de revient."),
+        body("À l'ère de l'industrie 4.0, la compétitivité et la résilience des entreprises manufacturières reposent sur leur capacité à transformer les flux de données industrielles en leviers décisionnels tangibles. Dans le secteur de la plasturgie automobile, caractérisé par des cadences de production élevées, des exigences strictes de qualité et des flux tendus, la maîtrise conjointe de la cadence de fabrication et des approvisionnements en matières premières constitue un enjeu économique et opérationnel déterminant."),
         pb(),
-        body("Ce projet de fin d'études est mené en collaboration avec la société de services numériques **Maps-IT**, accompagnant un équipementier automobile de rang 1 exploitant trois sites de production d'injection plastique situés en Tunisie (usines de Kondar et Sousse) et en République Tchèque (site de Brno). Avec un parc de 319 presses à injecter de capacités variées produisant en moyenne 64 890 pièces par jour, l'entreprise fabrique des pièces plastiques techniques soumises à des exigences strictes de qualité et de délais de livraison."),
+        body("Ce projet de fin d'études, mené en collaboration avec la société de services numériques **Maps-IT**, s'inscrit dans le cadre de l'accompagnement d'un équipementier automobile international exploitant plusieurs sites industriels en Tunisie et en Europe. Bien que l'entreprise dispose d'un entrepôt de données centralisant l'historique de ses ateliers [16], l'exploitation de ce patrimoine informationnel demeurait fragmentée. Le pilotage opérationnel reposait essentiellement sur des extractions manuelles différées, privant les décideurs d'une visibilité en temps réel. Parallèlement, l'absence d'outils prédictifs rendait la gestion des stocks vulnérable aux aléas, générant conjointement des risques de rupture sur des composants stratégiques et des immobilisations financières en surstock."),
         pb(),
-        body("Bien que l'entreprise dispose d'un entrepôt de données (Data Warehouse sous Microsoft SQL Server [16]) centralisant l'historique des opérations, le pilotage quotidien demeurait fragmenté. Le suivi de l'activité des ateliers était souvent réalisé de façon différée sur des feuilles de calcul, ce qui limitait la réactivité opérationnelle face aux aléas de production. Parallèlement, la gestion des stocks de matières premières manquait d'outils d'anticipation, entraînant simultanément des situations de surstock sur certaines références et des risques de rupture critique sur des composants stratégiques."),
+        body("Face à ces constats, la problématique centrale de ce travail s'énonce ainsi :"),
+        body("*« Comment valoriser les données massives d'un entrepôt industriel à travers des approches d'apprentissage automatique et d'informatique décisionnelle pour optimiser la supervision de la production, anticiper les cadences d'atelier et sécuriser la gestion des approvisionnements ? »*", { align: AlignmentType.CENTER, italics: true }),
         pb(),
-        body("La problématique de ce travail s'énonce donc ainsi :"),
-        body("*« Comment exploiter les données centralisées du Data Warehouse industriel pour concevoir un système décisionnel automatisé, capable de superviser les machines d'atelier, de modéliser les cadences par apprentissage automatique et d'optimiser les politiques de réapprovisionnement de stock ? »*", { align: AlignmentType.CENTER, italics: true }),
+        body("Pour répondre à cette problématique, nous avons conçu et développé la solution **Nexora**, une plateforme décisionnelle intégrant la chaîne complète de valorisation de la donnée :"),
+        bullet("**L'ingénierie et l'assainissement des données (ETL)** : conception d'un pipeline automatisé assurant la qualité, l'intégrité et la structuration dimensionnelle des données industrielles multi-sites."),
+        bullet("**La modélisation prédictive par Machine Learning** : développement et évaluation comparative de modèles statistiques et d'apprentissage automatique (Régression Linéaire, ARIMA, Random Forest, Prophet) pour anticiper les cadences de fabrication sur un horizon mensuel opérationnel."),
+        bullet("**L'aide à la décision et l'optimisation logistique** : segmentation analytique du catalogue d'articles, évaluation dynamique de la couverture de stock et modélisation de plans de réapprovisionnement préventifs [14, 15]."),
+        bullet("**La restitution analytique multi-profils** : déploiement de tableaux de bord décisionnels Microsoft Power BI [24] pour le management et d'un portail web réactif (React.js [22], Spring Boot [17], FastAPI [21]) pour les équipes d'atelier."),
         pb(),
-        body("Pour répondre à cette problématique, nous avons conçu et développé la solution **Nexora**, articulée autour de trois axes complémentaires :"),
-        bullet("**1. Un pipeline de traitement des données (ETL)** : extraction automatisée des sources brutes, application de 10 règles de nettoyage (dédoublonnage sur clé composite, rejet des dates erronées, redressement des anomalies numériques) et chargement de 32 043 lignes validées dans le Data Warehouse (dbDWH)."),
-        bullet("**2. Un module de prévision par apprentissage automatique** : évaluation comparative de modèles prédictifs (Régression Linéaire, ARIMA [3], Random Forest [7] et Prophet [12]) sur des horizons de 7, 15 et 30 jours. Les modèles Random Forest et Prophet atteignent tous deux des performances proches et satisfaisantes (erreurs MAPE de l'ordre de 6 % à 7 %), Random Forest offrant une précision ponctuelle légèrement supérieure et Prophet étant retenu pour le déploiement opérationnel grâce à son explicabilité et sa gestion native des saisonnalités industrielles."),
-        bullet("**3. Un module de gestion intelligente des stocks** : segmentation multicritère ABC de Pareto, classification opérationnelle par niveau de risque (Rupture, Critique, Normal, Surstock), analyse de la couverture en jours et calcul du plan de réapprovisionnement sur un horizon de 45 jours (évalué à environ 380 400 TND pour les 193 références prioritaires du catalogue) [14, 15]."),
+        body("Conduit selon la méthodologie Agile Scrum [1, 2], le projet a été structuré autour d'un sprint de cadrage (Sprint 0) et de quatre sprints de réalisation. Le présent mémoire s'organise en six chapitres :"),
+        bullet("**Le chapitre 1** introduit le contexte académique et industriel du projet, l'étude comparative de l'existant, la méthodologie Scrum et les démarches de modélisation retenues [26]."),
+        bullet("**Le chapitre 2 (Sprint 0)** est dédié à l'analyse des besoins fonctionnels et non fonctionnels, à la conception de l'architecture en quatre couches et au choix de l'environnement technique."),
+        bullet("**Le chapitre 3 (Sprint 1)** détaille l'exploration statistique des données (EDA), l'audit qualité et la réalisation du pipeline ETL alimentant le Data Warehouse."),
+        bullet("**Le chapitre 4 (Sprint 2)** présente le module de gestion intelligente des stocks, la classification opérationnelle par niveau de couverture et l'estimation des besoins de réapprovisionnement."),
+        bullet("**Le chapitre 5 (Sprint 3)** expose la démarche de modélisation prédictive des cadences, l'évaluation comparative des algorithmes d'IA à l'horizon 30 jours et l'analyse explicable des composantes temporelles."),
+        bullet("**Le chapitre 6 (Sprint 4)** décrit la conception des tableaux de bord Power BI, l'implémentation du portail web opérationnel et les résultats des tests fonctionnels et d'intégration."),
         pb(),
-        body("La restitution s'appuie sur une double modalité adaptée aux profils d'utilisateurs : des tableaux de bord interactifs Microsoft Power BI [24] pour le pilotage managérial et une application web développée avec React.js [22], Spring Boot [17] et FastAPI [21] pour les équipes d'atelier."),
-        pb(),
-        body("Le projet a été mené selon la méthodologie Agile Scrum [1, 2], découpé en un Sprint 0 de cadrage et quatre sprints de réalisation. Le présent rapport s'organise en six chapitres :"),
-        bullet("**Le premier chapitre** présente le cadre général du projet, les organismes partenaires, l'étude comparative de l'existant, la méthodologie Scrum et les diagrammes UML [26]."),
-        bullet("**Le deuxième chapitre (Sprint 0)** est dédié à l'analyse des besoins fonctionnels et non fonctionnels, à la conception de l'architecture en quatre couches et au choix de l'environnement technique."),
-        bullet("**Le troisième chapitre (Sprint 1)** détaille l'exploration des données, le bilan de qualité sous forme de waterfall et la réalisation du pipeline ETL alimentant le DWH."),
-        bullet("**Le quatrième chapitre (Sprint 2)** présente la conception du module de gestion des stocks, la double segmentation des articles et le calcul des commandes à horizon 45 jours."),
-        bullet("**Le cinquième chapitre (Sprint 3)** expose le protocole d'évaluation des modèles, la comparaison de leurs performances prédictives à court et moyen termes, l'analyse de robustesse et le choix du modèle opérationnel."),
-        bullet("**Le sixième chapitre (Sprint 4)** décrit la conception des tableaux de bord Power BI, l'implémentation du portail web opérationnel et les résultats des tests fonctionnels."),
-        pb(),
-        body("Le rapport se conclut par un bilan général des réalisations, une analyse objective des limites actuelles et la présentation de perspectives d'évolution concrètes."),
+        body("Enfin, une conclusion générale récapitule les principaux apports de cette étude, en discute les limites méthodologiques et esquisse des perspectives d'évolution pour le secteur industriel."),
         pageBreak(),
     
         // =========================================================
@@ -809,7 +833,7 @@ const doc = new Document({
         title1("Chapitre 1 : Contexte et cadre du projet"),
 
         title2("1.1 Introduction"),
-        body("Ce premier chapitre présente le cadre général de notre projet de fin d'études. Nous décrivons d'abord le contexte académique au sein de la Faculté des Sciences de Monastir, puis la collaboration entre l'organisme d'accueil, la société de services numériques **Maps-IT**, et l'équipementier industriel partenaire spécialisé dans la plasturgie automobile. Nous analysons ensuite les problématiques opérationnelles rencontrées dans les ateliers d'injection plastique, les limites des outils existants et la solution **Nexora** conçue pour y répondre. Enfin, nous présentons la démarche méthodologique Agile Scrum et les diagrammes UML utilisés pour encadrer le développement du système."),
+        body("Ce premier chapitre présente le cadre général de notre projet de fin d'études. Nous décrivons d'abord le contexte académique au sein de la Faculté des Sciences de Monastir, puis la collaboration entre l'organisme d'accueil, la société de services numériques **Maps-IT**, et l'équipementier industriel partenaire spécialisé dans la plasturgie automobile. Nous analysons ensuite les problématiques opérationnelles rencontrées dans les ateliers d'injection plastique, les limites des outils existants et la solution **Nexora** conçue pour y répondre. Enfin, nous présentons la démarche méthodologique Agile Scrum et les démarches de modélisation retenues pour encadrer le développement du système."),
         pb(),
 
         title2("1.2 Contexte académique"),
@@ -822,31 +846,11 @@ const doc = new Document({
         title3("1.3.1 Présentation de l'entreprise"),
         body("Le projet a été développé en collaboration avec **Maps-IT**, une société de services informatiques et d'ingénierie logicielle située à Monastir en Tunisie. Fondée en 2021, Maps-IT accompagne les entreprises industrielles et de services dans la mise en œuvre de solutions numériques sur mesure, le développement d'applications métiers, la conception d'architectures décisionnelles et la valorisation des données par la Data Science."),
         pb(),
-        body("Le tableau 1.1 présente la fiche d'identité de l'entreprise d'accueil :"),
-        pb(),
-        makeTable(
-          ["Champ", "Information"],
-          [
-            ["Raison sociale", "Maps-IT"],
-            ["Date de création", "2021"],
-            ["Secteur d'activité", "Services informatiques, ingénierie logicielle et Data Science"],
-            ["Localisation", "Monastir, Tunisie"],
-            ["Contact", "mapsit.info@gmail.com"],
-            ["Site web", "https://maps-it.com"]
-          ],
-          [3000, 5666]
-        ),
-        new Paragraph({
-          children: [new TextRun({ text: "Tableau 1.1 : Fiche d'identité de Maps-IT", font: FONT, size: 20, italics: true, color: GRAY })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 80, after: 120 },
-        }),
-        pb(),
 
         title3("1.3.2 Domaines d'activité et contexte client"),
         body("Maps-IT intervient principalement dans trois domaines complémentaires :"),
         bullet("**Développement logiciel sur mesure** : conception d'applications web et de micro-services modulaires adaptés aux processus métiers."),
-        bullet("**Business Intelligence et ingénierie des données** : conception d'entrepôts de données (DWH), mise en place de flux ETL fiabilisés et modélisation dimensionnelle."),
+        bullet("**Business Intelligence et ingénierie des données** : conception de Data Warehouse, mise en place de flux ETL fiabilisés et modélisation dimensionnelle."),
         bullet("**Data Science et Intelligence Artificielle** : exploration de séries temporelles, modélisation prédictive et algorithmes d'optimisation opérationnelle."),
         pb(),
         body("Dans le cadre de ce projet, Maps-IT intervient auprès d'un **équipementier automobile de rang 1** disposant de sites de production en Tunisie (usines de Kondar et Sousse) et en République Tchèque (site de Brno). Cet industriel produit des pièces plastiques techniques injectées sous fortes contraintes de cadence et de qualité."),
@@ -857,14 +861,14 @@ const doc = new Document({
         body("**Nexora** est une solution logicielle d'aide à la décision conçue pour faciliter le suivi des ateliers d'injection plastique et la gestion proactive des approvisionnements de stock. Elle s'appuie sur les données centralisées dans le Data Warehouse pour proposer des indicateurs de fonctionnement mis à jour régulièrement par shift, des prévisions de cadence de production par apprentissage automatique et des recommandations quantifiées de réapprovisionnement."),
         pb(),
         ...imageFigure("logos/logo.png", "Figure 1.1 : Logo de la plateforme Nexora", 220, 90),
-        body("La solution s'adresse aux équipes industrielles selon deux profils d'utilisateurs clairement délimités : les **Administrateurs** (supervision des presses, pilotage des flux, gestion des approvisionnements et des modèles) et les **Opérateurs** (consultation des stocks d'atelier, suivi des alertes et supervision des lignes de production)."),
+        body("La solution s'adresse aux équipes industrielles selon deux profils d'utilisateurs clairement délimités : les **Administrateurs** (supervision des presses, pilotage des flux, gestion des approvisionnements et des modèles) et les **Opérateurs** (consultation des stocks d'atelier, filtrage des alertes de rupture et suivi des indicateurs de production)."),
         pb(),
 
         title3("1.4.2 Fonctionnalités principales"),
         body("La plateforme Nexora s'articule autour de quatre fonctionnalités majeures :"),
         bullet("**Supervision du parc machines** : suivi opérationnel de l'état des 319 presses à injecter réparties sur les trois sites (Kondar, Sousse, Brno) et consolidation des indicateurs de production par shift."),
-        bullet("**Prévision des volumes de fabrication** : estimation des cadences futures à court et moyen termes (horizons de 7, 15 et 30 jours) pour guider l'ordonnancement des équipes et des matières."),
-        bullet("**Gestion prévisionnelle des stocks** : segmentation multicritère des articles du catalogue (méthode ABC et classification par niveau de risque) et calcul des réapprovisionnements nécessaires pour sécuriser une couverture cible de 45 jours."),
+        bullet("**Prévision des volumes de fabrication** : estimation des cadences de production à l'horizon opérationnel de 30 jours pour guider l'ordonnancement des équipes et des approvisionnements matières."),
+        bullet("**Gestion prévisionnelle des stocks** : classification opérationnelle des références du catalogue par niveau de criticité (Rupture, Critique, Normal, Surstock) et calcul des réapprovisionnements nécessaires pour sécuriser une couverture cible de 45 jours."),
         bullet("**Restitution décisionnelle interactive** : tableaux de bord Power BI permettant de filtrer les indicateurs par usine, atelier, presse ou famille de matière plastique, complétés par une interface web opérationnelle."),
         pb(),
 
@@ -878,7 +882,7 @@ const doc = new Document({
 
         title2("1.5 Présentation du projet"),
         title3("1.5.1 Contexte et problématique"),
-        body("L'entreprise partenaire dispose d'un Data Warehouse (DWH) centralisant les déclarations de fabrication d'atelier, les instantanés d'inventaire et le référentiel des presses. Toutefois, ces données massives demeuraient sous-exploitées pour anticiper les charges futures et guider la chaîne logistique."),
+        body("L'entreprise partenaire dispose d'un Data Warehouse conservant l'historique complet des déclarations de production et des instantanés d'inventaire. Toutefois, ces données massives demeuraient sous-exploitées pour anticiper les charges futures et guider la chaîne logistique."),
         body("La problématique centrale du projet se formule ainsi :"),
         body("*« Comment valoriser les données centralisées du Data Warehouse industriel pour concevoir un système décisionnel automatisé, capable de superviser l'activité des presses, de modéliser les cadences par apprentissage automatique et d'optimiser les politiques de réapprovisionnement de stock ? »*", { align: AlignmentType.CENTER, italics: true }),
         pb(),
@@ -888,24 +892,24 @@ const doc = new Document({
         pb(),
 
         title3("1.5.3 Solution proposée"),
-        body("Pour concilier agilité décisionnelle, rigueur méthodologique et intégration fluide, la solution **Nexora** combine trois piliers techniques complémentaires :"),
-        bullet("**1. Un pipeline de traitement des données (ETL)** : extraction automatisée des sources brutes, nettoyage (doublons, dates erronées, formats, coûts et valeurs manquantes) et chargement dans un Data Warehouse en schéma en étoile."),
-        bullet("**2. Un module de prévision par apprentissage automatique** : comparaison de quatre modèles de séries temporelles sous protocole multi-horizons (Régression Linéaire, ARIMA, Random Forest, Prophet) sur une cadence d'atelier d'environ 65 000 pièces/jour. Random Forest et Prophet atteignent une précision comparable (erreur moyenne de 6 % à 7 % de MAPE). Prophet a été retenu pour le déploiement opérationnel dans l'application en raison de sa décomposition explicable (tendance, saisonnalité hebdomadaire et arrêts d'atelier) et de sa simplicité d'intégration."),
-        bullet("**3. Un module de gestion intelligente des stocks** : segmentation multicritère ABC de Pareto, classification selon la couverture disponible et calcul du plan de réapprovisionnement pour sécuriser 45 jours d'activité sur le catalogue de 800 références distinctes (budget prévisionnel estimé à environ 380 400 TND)."),
+        body("Pour concilier agilité décisionnelle, rigueur méthodologique et intégration opérationnelle fluide, la solution **Nexora** s'articule autour de trois piliers complémentaires :"),
+        bullet("**1. L'ingénierie et l'intégration des données** : un pipeline automatisé de collecte et d'assainissement des données industrielles garantissant l'intégrité des informations avant leur consolidation dans un entrepôt de données relationnel structuré."),
+        bullet("**2. La modélisation prédictive et la surveillance des cadences** : un moteur analytique exploitant des modèles d'apprentissage automatique pour anticiper les volumes de production, détecter les dérives anormales de rythme et sécuriser la planification d'atelier."),
+        bullet("**3. La gestion préventive des approvisionnements** : un module décisionnel associant segmentation multicritère du catalogue et calcul dynamique des réapprovisionnements nécessaires pour prévenir les ruptures critiques tout en évitant les surstocks immobilisants."),
         pb(),
-        body("L'architecture de restitution associe des tableaux de bord interactifs Microsoft Power BI pour le management décisionnel et une application web (React.js / Spring Boot / FastAPI) pour la consultation opérationnelle et le benchmark d'atelier."),
+        body("L'architecture de restitution associe des tableaux de bord interactifs Microsoft Power BI pour le management décisionnel et une application web (React.js / Spring Boot / FastAPI) pour la saisie et la consultation opérationnelle."),
         pb(),
-        body("Le tableau 1.2 résume le positionnement comparatif des solutions existantes vis-à-vis de Nexora :"),
+        body("Le tableau 1.1 résume le positionnement comparatif des solutions existantes vis-à-vis de Nexora :"),
         pb(),
         makeTable(
           ["Critère d'évaluation", "Progiciels MES standards", "ERP transactionnel", "Tableurs (Excel)", "Solution Nexora"],
           [
             ["Supervision des cadences atelier", "Avancé", "Non natif", "Manuel / Différé", "Automatisé par shift"],
-            ["Prévisions de cadence par IA",     "Non proposé", "Non proposé", "Non proposé", "Intégré (Random Forest & Prophet)"],
+            ["Prévisions de cadence par IA",     "Non proposé", "Non proposé", "Non proposé", "Intégré (Prophet)"],
             ["Tableaux de bord interactifs",     "Configurable", "Limité", "Statique", "Interactif (Power BI)"],
-            ["Intégration directe au DWH",       "Complexe", "Natif", "Instable", "Directe (Schéma dimensionnel)"],
-            ["Segmentation ABC et des stocks",   "Partiel", "Standard", "Manuel", "Multicritère (ABC + Risque 4 niveaux)"],
-            ["Recommandations d'approvisionnement", "Sur règles fixes", "Sur seuils statiques", "Manuel", "Horizon cible 45 jours (800 réf.)"],
+            ["Intégration directe au Data Warehouse", "Complexe", "Natif", "Instable", "Directe (Schéma relationnel)"],
+            ["Gestion et criticité des stocks",  "Partiel", "Standard", "Manuel", "Par autonomie (Rupture/Critique/Alerte)"],
+            ["Recommandations d'approvisionnement", "Sur règles fixes", "Sur seuils statiques", "Manuel", "Calcul de couverture dynamique"],
             ["Facilité d'appropriation atelier", "Moyenne", "Complexe", "Accessible", "Interface adaptée"],
             ["Agilité et coût de déploiement",   "Investissement élevé", "Coût élevé", "Faible", "Modulaire et maîtrisé"]
           ],
@@ -913,7 +917,7 @@ const doc = new Document({
         ),
         new Paragraph({
           children: [
-            new TextRun({ text: "Tableau 1.2 : Positionnement comparatif des solutions existantes avec Nexora", font: FONT, size: 20, italics: true, color: GRAY })
+            new TextRun({ text: "Tableau 1.1 : Positionnement comparatif des solutions existantes avec Nexora", font: FONT, size: 20, italics: true, color: GRAY })
           ],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
@@ -926,17 +930,17 @@ const doc = new Document({
         ...imageFigure("diagrams/architecture.png", "Figure 1.2 : Workflow complet du système décisionnel Nexora", 460, 460),
         bullet("**1. Ingestion des données brutes** : extraction des données d'inventaire et de production issues du système d'information industriel."),
         bullet("**2. Nettoyage des données (ETL)** : suppression des doublons, rejet des dates invalides et correction des incohérences de stock."),
-        bullet("**3. Calcul des variables explicatives** : 14 variables (calendrier, événements d'atelier, historique de production et moyennes mobiles)."),
+        bullet("**3. Calcul des variables explicatives** : ingénierie des variables prédictives (calendrier, événements d'atelier, historique de production et moyennes mobiles)."),
         bullet("**4. Découpage chronologique** : apprentissage (janvier 2024 – août 2025), validation (septembre – décembre 2025) et test (janvier – avril 2026)."),
         bullet("**5. Entraînement des modèles** : Régression Linéaire, ARIMA, Random Forest et Prophet sous validation croisée temporelle."),
         bullet("**6. Évaluation sur la période de test de 2026** : les modèles sont évalués sur des données de 2026 qui n'ont pas servi à l'apprentissage."),
-        bullet("**7. Mesure des performances** : calcul des erreurs de prévision (MAE, RMSE, MAPE, R²) en pièces par jour aux horizons de 7, 15 et 30 jours."),
+        bullet("**7. Mesure des performances** : calcul des erreurs de prévision (MAE, RMSE, MAPE, R²) en pièces par jour à l'horizon opérationnel de 30 jours."),
         bullet("**8. Restitution utilisateur** : tableaux de bord Power BI et application web."),
         pb(),
 
         title2("1.7 Méthodologie de développement"),
         title3("1.7.1 Étude comparative des méthodes"),
-        body("Avant d'entamer les développements, nous avons comparé la méthode classique en cascade et la démarche Agile (tableau 1.3) :"),
+        body("Avant d'entamer les développements, nous avons comparé la méthode classique en cascade et la démarche Agile (tableau 1.2) :"),
         pb(),
         makeTable(
           ["Critère", "Approche classique (Cascade)", "Approche Agile (Scrum)"],
@@ -950,12 +954,12 @@ const doc = new Document({
           [2400, 3100, 3166]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 1.3 : Comparaison entre approche classique et approche agile", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 1.2 : Comparaison entre approche classique et approche agile", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
-        body("Le tableau 1.4 récapitule les avantages et limites des deux méthodologies :"),
+        body("Le tableau 1.3 récapitule les avantages et limites des deux méthodologies :"),
         pb(),
         makeTable(
           ["Méthodologie", "Avantages principaux", "Inconvénients principaux"],
@@ -966,7 +970,7 @@ const doc = new Document({
           [2200, 3200, 3266]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 1.4 : Avantages et inconvénients des méthodologies", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 1.3 : Avantages et inconvénients des méthodologies", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
@@ -990,67 +994,67 @@ const doc = new Document({
         pb(),
 
         title3("1.7.4 Product Backlog"),
-        body("Le Product Backlog (tableau 1.5) regroupe les récits utilisateurs (User Stories) formalisant les exigences du système, priorisés et estimés pour chaque sprint de développement, et répartis entre les deux rôles de la plateforme (**l'Administrateur** et **l'Opérateur**) :"),
+        body("Le Product Backlog (tableau 1.4) regroupe les récits utilisateurs (User Stories) formalisant les exigences du système, priorisés et estimés pour chaque sprint de développement, et répartis entre les deux rôles de la plateforme (**l'Administrateur** et **l'Opérateur**) :"),
         pb(),
         makeTable(
           ["ID", "Récit Utilisateur (User Story)", "Priorité", "Estimation", "Sprint Associé"],
           [
             ["US01", "En tant qu'administrateur, je veux auditer la qualité des données brutes d'inventaire afin d'éliminer les doublons et anomalies", "Haute", "3 jours", "Sprint 1"],
-            ["US02", "En tant qu'administrateur, je veux exécuter un pipeline ETL en Python pour assainir et charger les données dans le DWH", "Haute", "4 jours", "Sprint 1"],
+            ["US02", "En tant qu'administrateur, je veux exécuter un pipeline ETL en Python pour assainir et charger les données dans le Data Warehouse", "Haute", "4 jours", "Sprint 1"],
             ["US03", "En tant qu'administrateur, je veux structurer le schéma dimensionnel en étoile pour interconnecter faits et dimensions", "Haute", "3 jours", "Sprint 1"],
-            ["US04", "En tant qu'administrateur, je veux charger les 32 043 enregistrements validés et indexer les tables dans SQL Server", "Haute", "2 jours", "Sprint 1"],
-            ["US05", "En tant qu'administrateur, je veux générer 14 variables temporelles et d'événements industriels pour alimenter les prévisions", "Haute", "3 jours", "Sprint 1"],
-            ["US06", "En tant qu'administrateur, je veux segmenter les 800 références d'articles selon la méthode Pareto ABC (72/20/8)", "Haute", "3 jours", "Sprint 2"],
-            ["US07", "En tant qu'administrateur, je veux classifier les références par niveau de risque opérationnel (Rupture, Critique, Normal, Surstock)", "Haute", "3 jours", "Sprint 2"],
+            ["US04", "En tant qu'administrateur, je veux charger les données d'inventaire assainies et indexer les tables dans SQL Server", "Haute", "2 jours", "Sprint 1"],
+            ["US05", "En tant qu'administrateur, je veux générer les variables temporelles, retardées et d'événements industriels pour alimenter les prévisions", "Haute", "3 jours", "Sprint 1"],
+            ["US06", "En tant qu'administrateur, je veux classifier les références d'articles selon leur niveau d'autonomie et de risque opérationnel", "Haute", "3 jours", "Sprint 2"],
+            ["US07", "En tant qu'administrateur, je veux analyser la répartition des stocks par famille de matières et détecter les besoins d'atelier", "Moyenne", "3 jours", "Sprint 2"],
             ["US08", "En tant qu'opérateur, je veux consulter la couverture en jours et le stock disponible de chaque référence d'atelier", "Haute", "2 jours", "Sprint 2"],
             ["US09", "En tant qu'opérateur, je veux recevoir des alertes visuelles immédiates en cas de rupture ou de stock critique sur une référence", "Haute", "2 jours", "Sprint 2"],
-            ["US10", "En tant qu'administrateur, je veux calculer les quantités de réapprovisionnement requises pour sécuriser un horizon de 45 jours", "Haute", "3 jours", "Sprint 2"],
-            ["US11", "En tant qu'administrateur, je veux chiffrer le budget global des approvisionnements prioritaires (environ 380 400 TND)", "Moyenne", "2 jours", "Sprint 2"],
+            ["US10", "En tant qu'administrateur, je veux calculer les quantités de réapprovisionnement requises pour sécuriser l'horizon cible de couverture", "Haute", "3 jours", "Sprint 2"],
+            ["US11", "En tant qu'administrateur, je veux chiffrer l'enveloppe budgétaire globale des réapprovisionnements prioritaires", "Moyenne", "2 jours", "Sprint 2"],
             ["US12", "En tant qu'administrateur, je veux configurer le partitionnement chronologique des données (entraînement, validation, test)", "Haute", "2 jours", "Sprint 3"],
             ["US13", "En tant qu'administrateur, je veux comparer les performances des modèles d'IA et sélectionner le modèle déployé en production", "Haute", "4 jours", "Sprint 3"],
-            ["US14", "En tant qu'administrateur, je veux évaluer les modèles selon les différents horizons de prévision (7, 15 et 30 jours)", "Haute", "3 jours", "Sprint 3"],
-            ["US15", "En tant qu'administrateur, je veux générer les prévisions de cadence de production aux horizons de 7, 15 et 30 jours", "Haute", "3 jours", "Sprint 3"],
+            ["US14", "En tant qu'administrateur, je veux évaluer les modèles selon les différents horizons de prévision court et moyen termes", "Haute", "3 jours", "Sprint 3"],
+            ["US15", "En tant qu'administrateur, je veux générer les prévisions de cadence de production selon les horizons de planification", "Haute", "3 jours", "Sprint 3"],
             ["US16", "En tant qu'administrateur, je veux analyser l'explicabilité et les bornes d'incertitude des prévisions", "Haute", "3 jours", "Sprint 3"],
             ["US17", "En tant qu'opérateur ou administrateur, je veux m'authentifier de manière sécurisée (JWT) et accéder aux fonctionnalités de mon rôle", "Haute", "3 jours", "Sprint 4"],
-            ["US18", "En tant qu'administrateur, je veux superviser le statut et les cadences de production des 319 presses sur un rapport Power BI", "Haute", "4 jours", "Sprint 4"],
+            ["US18", "En tant qu'administrateur, je veux superviser le statut et les cadences de production du parc de presses sur un rapport Power BI", "Haute", "4 jours", "Sprint 4"],
             ["US19", "En tant qu'administrateur, je veux analyser les prévisions de cadence et les alertes d'approvisionnement sur Power BI", "Haute", "4 jours", "Sprint 4"],
-            ["US20", "En tant qu'opérateur, je veux consulter les niveaux d'inventaire d'atelier et suivre les alertes de couverture via le portail web", "Moyenne", "3 jours", "Sprint 4"]
+            ["US20", "En tant qu'opérateur, je veux consulter l'état des stocks d'atelier, filtrer les alertes par site et exporter les données d'inventaire", "Moyenne", "3 jours", "Sprint 4"]
           ],
           [700, 4966, 1000, 1100, 900]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 1.5 : Product Backlog priorisé du projet", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 1.4 : Product Backlog priorisé du projet", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
         title3("1.7.5 Planification des sprints"),
-        body("Le projet s'est déroulé sur une période de 13 semaines articulée en un sprint de cadrage initial (Sprint 0) et quatre sprints de développement d'une durée de 2 à 3 semaines chacun (tableau 1.6) :"),
+        body("Le projet s'est déroulé sur une période de 13 semaines articulée en un sprint de cadrage initial (Sprint 0) et quatre sprints de développement d'une durée de 2 à 3 semaines chacun (tableau 1.5) :"),
         pb(),
         makeTable(
           ["Sprint", "Objectif principal", "Livrables clés validés"],
           [
-            ["Sprint 0", "Cadrage des besoins et architecture globale", "Spécifications fonctionnelles, cas d'utilisation UML et architecture 4 couches."],
-            ["Sprint 1", "Qualité des données et pipeline ETL", "Pipeline Python de nettoyage, modélisation DWH (ASTOCKDATE, FACT_CLE, MCMachineCenter) et 32 043 lignes chargées."],
-            ["Sprint 2", "Gestion intelligente des stocks", "Segmentation ABC de Pareto, seuils de risque, calcul du plan 45 jours et budget."],
-            ["Sprint 3", "Modélisation prédictive par IA", "Entraînement des 4 modèles, sélection du modèle opérationnel et validation temporelle."],
-            ["Sprint 4", "Restitution décisionnelle et validation", "Tableaux de bord Power BI, portail web opérationnel, mesures DAX et recette fonctionnelle."]
+            ["Sprint 0", "Cadrage des besoins et architecture globale", "Spécifications fonctionnelles, cas d'utilisation UML et architecture logicielle."],
+            ["Sprint 1", "Qualité des données et pipeline ETL", "Pipeline Python de nettoyage, structuration dimensionnelle du Data Warehouse et chargement des données validées."],
+            ["Sprint 2", "Gestion intelligente des stocks", "Classification par niveau de criticité, seuils d'alerte, règles de réapprovisionnement et estimation budgétaire."],
+            ["Sprint 3", "Modélisation prédictive par IA", "Entraînement et comparaison des modèles d'apprentissage automatique, sélection du modèle de production et validation temporelle."],
+            ["Sprint 4", "Restitution décisionnelle et validation", "Tableaux de bord Power BI, portail web opérationnel, mesures d'atelier et recette fonctionnelle."]
           ],
           [1800, 3400, 3866]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 1.6 : Planification des sprints du projet", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 1.5 : Planification des sprints du projet", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
-        title2("1.8 Langage de modélisation UML"),
-        body("Pour modéliser la structure et le comportement du système avec rigueur et clarté, nous mobilisons le langage de modélisation standard **UML (Unified Modeling Language)** [26]. Trois types de représentations graphiques sont principalement employés dans ce rapport :"),
-        bullet("**Diagrammes de cas d'utilisation (Chapitres 2 et 4)** : représentation des services offerts aux deux acteurs du système (Opérateur et Administrateur), avec identification des relations d'inclusion d'authentification."),
-        bullet("**Diagrammes d'activité (Chapitres 3, 4 et 5)** : description des flux séquentiels d'exécution au sein du pipeline ETL, des règles de calcul de stock et du processus d'apprentissage automatique."),
-        bullet("**Diagrammes de séquence (Chapitres 3 et 6)** : illustration de la dynamique temporelle des échanges entre les interfaces utilisateurs, les services applicatifs et le Data Warehouse."),
+        title2("1.8 Langage et démarche de modélisation"),
+        body("Pour modéliser la structure et le comportement du système avec rigueur et clarté, nous mobilisons le langage standard **UML (Unified Modeling Language)** [26] pour le cadrage fonctionnel, complété par les représentations de flux propres aux projets de Data Science. Trois types de représentations graphiques sont principalement employés dans ce rapport :"),
+        bullet("**Diagramme de cas d'utilisation global (Chapitre 2)** : formalisation synthétique des services offerts aux deux acteurs du système (Opérateur d'atelier et Administrateur), avec identification des relations d'inclusion d'authentification."),
+        bullet("**Modélisation dimensionnelle et relationnelle (Chapitre 3)** : schéma conceptuel et relationnel de l'entrepôt de données (Data Warehouse) articulant la table de faits d'atelier et les dimensions associées."),
+        bullet("**Cartographies d'architecture et flux de données (Chapitres 2, 3 et 6)** : description modulaire des couches du système décisionnel, du pipeline séquentiel ETL et de l'intégration globale de la plateforme."),
         pb(),
 
         title2("1.9 Conclusion"),
@@ -1072,8 +1076,8 @@ const doc = new Document({
 
         title3("2.2.1 Besoins fonctionnels"),
         body("Les fonctionnalités attendues sont organisées selon les deux profils d'utilisateurs du système :"),
-        bullet("**L'Opérateur** : acteur d'atelier habilité à consulter l'état des stocks d'atelier, suivre les alertes de réapprovisionnement et visualiser le statut des lignes de fabrication."),
-        bullet("**L'Administrateur** : superviseur d'atelier et responsable logistique. Il assure le pilotage opérationnel (supervision des 319 presses, planification des ordres de fabrication, suivi des cadences d'atelier, consultation des prévisions d'IA à 7/15/30 jours) ainsi que l'administration technique (gestion des comptes et contrôle d'accès RBAC)."),
+        bullet("**L'Opérateur** : acteur d'atelier habilité à consulter l'état des stocks réels, filtrer les alertes de criticité par site et suivre les indicateurs de fabrication des presses."),
+        bullet("**L'Administrateur** : superviseur d'atelier et responsable logistique. Il assure le pilotage opérationnel (supervision du parc machines, planification des ordres de fabrication, suivi des cadences d'atelier, consultation des prévisions d'IA à 30 jours) ainsi que l'administration technique (gestion des comptes et contrôle d'accès RBAC)."),
         pb(),
 
         title3("2.2.2 Besoins non fonctionnels"),
@@ -1084,7 +1088,7 @@ const doc = new Document({
           [
             ["Performance", "Temps de réponse interactif inférieur à 2 secondes pour l'affichage des tableaux de bord et requêtes analytiques.", "Mesures de temps de réponse et fluidité des affichages."],
             ["Sécurité", "Authentification sécurisée par jetons JWT, gestion des rôles (RBAC) et traçabilité des accès.", "Contrôle des permissions Opérateur / Admin."],
-            ["Fiabilité", "Données d'entrée assainies par le pipeline ETL et modèles de prévision rigoureusement validés.", "Zéro doublon résiduel dans le DWH et cohérence des résultats."],
+            ["Fiabilité", "Données d'entrée assainies par le pipeline ETL et modèles de prévision rigoureusement validés.", "Zéro doublon résiduel dans le Data Warehouse et cohérence des résultats."],
             ["Maintenabilité", "Architecture modulaire découplée en 4 couches avec séparation nette entre ETL, modélisation et restitution.", "Code versionné et documenté."],
             ["Évolutivité", "Capacité d'intégrer ultérieurement des modèles de prévision par presse ou des capteurs IoT sans refonte.", "Schéma dimensionnel normalisé."],
             ["Ergonomie", "Tableaux de bord visuels intuitifs et interface web réactive adaptée aux postes d'atelier.", "Navigation fluide et lisibilité opérationnelle."]
@@ -1101,7 +1105,7 @@ const doc = new Document({
         title2("2.3 Analyse des besoins"),
         title3("2.3.1 Identification des acteurs"),
         body("L'analyse des cas d'utilisation met en évidence deux acteurs intervenant sur la plateforme Nexora :"),
-        bullet("**1. L'Opérateur** : acteur opérationnel en atelier, responsable de la consultation des stocks, du suivi des alertes d'inventaire et de l'avancement des ordres de fabrication."),
+        bullet("**1. L'Opérateur** : acteur opérationnel en atelier, responsable du suivi des stocks d'atelier, du filtrage des alertes de couverture et de la consultation d'avancement des ordres de fabrication."),
         bullet("**2. L'Administrateur** : acteur de gestion et de supervision, assurant le pilotage d'atelier (supervision des presses, consultation des cadences et des prévisions IA, gestion des alertes d'approvisionnement) ainsi que l'administration des accès."),
         pb(),
 
@@ -1116,19 +1120,19 @@ const doc = new Document({
         body("Pour assurer la robustesse, la modularité et l'évolutivité de la solution, l'architecture globale de Nexora est structurée en **quatre couches logiques**, comme l'illustre la figure 2.2 :"),
         pb(),
         ...imageFigure("diagrams/arch_logique.png", "Figure 2.2 : Architecture globale du système décisionnel en quatre couches", 540, 260),
-        bullet("**1. Couche Données (Data Layer)** : articulée autour de Microsoft SQL Server 2022 [16], elle héberge le Data Warehouse (dbDWH) modélisé en schéma dimensionnel assaini (table de faits de production réelle FACT_CLE avec ingénierie de la métrique TRS, table d'inventaire ASTOCKDATE, référentiel des 319 presses MCMachineCenter, et table des prévisions IA ml_production_predictions)."),
-        bullet("**2. Couche Traitement & ETL (Processing Layer)** : développée en Python 3.10 [18] avec Pandas [19] et NumPy [20], elle orchestre l'ingestion automatisée, le dédoublonnage, la correction des 10 anomalies recensées et l'alimentation des tables analytiques."),
-        bullet("**3. Couche Métier & IA (Business & AI Layer)** : regroupe les services d'apprentissage automatique (Régression Linéaire, ARIMA, Random Forest comme modèle champion de référence, Prophet [12] déployé pour les projections opérationnelles de cadence) ainsi que le moteur logistique de calcul déterministe des couvertures de stock à 45 jours. Les prévisions générées sont automatiquement écrites dans la table `ml_production_predictions` du DWH. Cette couche intègre également un micro-service FastAPI [21] pour l'inférence et un serveur d'entreprise Spring Boot [17] pour la gestion des entités métiers et des utilisateurs."),
-        bullet("**4. Couche Restitution & Présentation (Presentation Layer)** : propose une double modalité d'accès adaptée aux profils : d'une part, des tableaux de bord décisionnels interactifs sous Microsoft Power BI [24] connectés directement au DWH pour le pilotage stratégique ; d'autre part, un portail web réactif en React.js [22] et TypeScript [23] pour les consultations d'atelier, le suivi des alertes de rupture et le benchmark comparatif des modèles."),
+        bullet("**1. Couche Données (Data Layer)** : articulée autour de Microsoft SQL Server 2022 [16], elle héberge le Data Warehouse centralisant les référentiels du parc machines, les historiques de fabrication et de cadence d'atelier, les états d'inventaire des stocks, les projections prédictives d'IA ainsi que la gestion de la sécurité et des droits d'accès."),
+        bullet("**2. Couche Traitement & ETL (Processing Layer)** : développée en Python 3.10 [18] avec Pandas [19] et NumPy [20], elle orchestre l'ingestion automatisée, le dédoublonnage, le traitement des anomalies qualité et la structuration des données en schéma dimensionnel."),
+        bullet("**3. Couche Métier & IA (Business & AI Layer)** : regroupe les services d'apprentissage automatique (Régression Linéaire, ARIMA, Random Forest, Prophet [12] déployé en production pour les prévisions de cadence) ainsi que le moteur logistique de calcul des couvertures de stock. Les projections sont automatiquement persistées dans le Data Warehouse. Cette couche intègre également un micro-service FastAPI [21] pour l'inférence des modèles et un serveur d'entreprise Spring Boot [17] pour la gestion des règles métiers et du contrôle d'accès (RBAC)."),
+        bullet("**4. Couche Restitution & Présentation (Presentation Layer)** : propose une double modalité d'accès adaptée aux profils d'utilisateurs : d'une part, des tableaux de bord décisionnels interactifs sous Microsoft Power BI [24] connectés directement au Data Warehouse pour le pilotage managérial ; d'autre part, un portail web réactif en React.js [22] et TypeScript [23] pour la supervision opérationnelle et les consultations d'atelier."),
         pb(),
 
         title2("2.5 Environnement de travail"),
         title3("2.5.1 Environnement matériel"),
         body("Les phases de préparation des données, d'entraînement des modèles et de développement ont été réalisées sur une station de travail présentant les caractéristiques suivantes :"),
-        bullet("**Processeur** : Intel Core i7-12700H (14 cœurs, 20 threads, fréquence de base 2,30 GHz jusqu'à 4,70 GHz en mode Turbo)."),
-        bullet("**Mémoire vive (RAM)** : 16 Go DDR4 (3200 MHz)."),
-        bullet("**Stockage** : Disque SSD NVMe PCIe 4.0 de 512 Go (débit de lecture séquentielle > 3 500 Mo/s)."),
-        bullet("**Système d'exploitation** : Microsoft Windows 11 Professionnel (64 bits)."),
+        bullet("**Processeur** : Intel Core i7."),
+        bullet("**Mémoire vive (RAM)** : 16 Go."),
+        bullet("**Stockage** : Disque SSD de 512 Go."),
+        bullet("**Système d'exploitation** : Microsoft Windows 11 (64 bits)."),
         pb(),
 
         title3("2.5.2 Environnement logiciel"),
@@ -1154,8 +1158,8 @@ const doc = new Document({
             ["Frontend Web", "React.js", "18.2", "Bibliothèque d'interfaces graphiques composables pour le portail atelier [22]."],
 
             ["Data Science & ML", "Pandas & NumPy", "2.1 / 1.26", "Manipulation des séries tabulaires et calculs vectorisés [19, 20]."],
-            ["Data Science & ML", "Prophet", "1.1", "Modèle déployé en production (prévisions des cadences d'atelier, décomposition saisonnière) [12]."],
-            ["Data Science & ML", "Scikit-Learn", "1.3", "Normalisation, Random Forest (modèle Champion d'atelier), Régression Linéaire et métriques [11]."],
+            ["Data Science & ML", "Prophet", "1.1", "Modèle déployé en production (prévisions de cadence et stocks, décomposition saisonnière) [12]."],
+            ["Data Science & ML", "Scikit-Learn", "1.3", "Normalisation, Random Forest (benchmark récursif), Régression Linéaire et métriques [11]."],
             ["Data Science & ML", "Statsmodels", "0.14", "Modèle statistique ARIMA et tests de stationnarité (ADF) [10]."],
 
             ["Business Intelligence", "Microsoft Power BI Desktop", "2024", "Conception des rapports décisionnels interactifs et modélisation DAX [24]."]
@@ -1179,7 +1183,7 @@ const doc = new Document({
         title1("Chapitre 3 : Sprint 1 : Prétraitement des données, assainissement de la qualité et pipeline ETL"),
 
         title2("3.1 Introduction"),
-        body("Ce chapitre correspond au Sprint 1 de notre démarche Agile Scrum. Dans un projet d'analyse de données et d'aide à la décision, la qualité des informations en entrée conditionne directement la fiabilité des modèles prédictifs et des indicateurs de gestion. Dans un environnement industriel réel, les extractions de bases opérationnelles comportent inévitablement des anomalies de saisie, des redondances et des valeurs manquantes. L'objectif de ce premier sprint est donc d'auditer les données brutes, de concevoir un pipeline de nettoyage modulaire en Python [18], d'appliquer les règles d'assainissement et de charger les tables validées dans le Data Warehouse (DWH) sous un schéma en étoile normalisé."),
+        body("Ce chapitre correspond au Sprint 1 de notre démarche Agile Scrum. Dans un projet d'analyse de données et d'aide à la décision, la qualité des informations en entrée conditionne directement la fiabilité des modèles prédictifs et des indicateurs de gestion. Dans un environnement industriel réel, les extractions de bases opérationnelles comportent inévitablement des anomalies de saisie, des redondances et des valeurs manquantes. L'objectif de ce premier sprint est donc d'auditer les données brutes, de concevoir un pipeline de nettoyage modulaire en Python [18], d'appliquer les règles d'assainissement et de charger les tables validées dans le Data Warehouse sous un schéma relationnel et dimensionnel."),
         pb(),
 
         title2("3.2 Backlog du Sprint 1"),
@@ -1190,9 +1194,9 @@ const doc = new Document({
           [
             ["Élevée", "Extraction et audit de qualité des fichiers d'inventaire et de production bruts", "3 jours"],
             ["Élevée", "Développement des fonctions de nettoyage des anomalies recensées", "4 jours"],
-            ["Élevée", "Modélisation dimensionnelle et structuration des tables cibles du Data Warehouse", "3 jours"],
-            ["Élevée", "Chargement automatisé des 32 043 lignes assainies dans SQL Server", "2 jours"],
-            ["Élevée", "Calcul des 14 variables explicatives", "3 jours"],
+            ["Élevée", "Modélisation dimensionnelle et structuration du schéma du Data Warehouse", "3 jours"],
+            ["Élevée", "Chargement automatisé des données d'inventaire assainies dans SQL Server", "2 jours"],
+            ["Élevée", "Calcul et ingénierie des variables explicatives", "3 jours"],
             ["Moyenne", "Analyse exploratoire des séries de cadence (distributions, tendances, saisonnalités)", "2 jours"],
             ["Moyenne", "Création des index sur les tables du Data Warehouse", "1 jour"],
             ["Faible", "Génération automatique des journaux d'exécution et du rapport d'audit", "1 jour"]
@@ -1220,7 +1224,7 @@ const doc = new Document({
             ["Lignes d'inventaire détaillées d'atelier", "6 875 lignes actives", "Inventaire ventilé par atelier, dépôt et lot."],
             ["Références articles au catalogue", "800 références uniques", "Articles distincts du référentiel produit."],
             ["Presses à injecter suivies", "319 machines", "Parc de presses réparti sur les 3 sites industriels."],
-            ["Déclarations de fabrication d'atelier", "108 106 relevés réels", "Historique de production d'injection de la table FACT_CLE."]
+            ["En-cours de fabrication enregistrés", "8 344 enregistrements", "Suivi des ordres d'injection en atelier."]
           ],
           [3500, 2400, 2766]
         ),
@@ -1231,31 +1235,36 @@ const doc = new Document({
         }),
         pb(),
 
-        title3("3.3.2 Description des tables principales du Data Warehouse"),
-        body("Le Data Warehouse (dbDWH) est structuré autour d'un schéma dimensionnel optimisé et assaini [16], éliminant les tables redondantes ou obsolètes pour se concentrer sur les tables maîtresses d'atelier et de pilotage :"),
+        title3("3.3.2 Description des tables du Data Warehouse"),
+        body("Le Data Warehouse Microsoft SQL Server (base `dbDWH`) est modélisé autour d'un schéma optimisé pour les requêtes analytiques [16], articulé autour de cinq tables réelles interconnectées couvrant les flux de production, les stocks, le parc machines, la sécurité et les prédictions d'IA :"),
         pb(),
         makeTable(
-          ["Table du Data Warehouse", "Nature", "Rôle et contenu opérationnel"],
+          ["Nom de la table", "Nature", "Rôle et contenu fonctionnel"],
           [
-            ["dbo.ASTOCKDATE", "Table de faits d'inventaire", "Instantanés d'inventaire multi-sites (Kondar, Sousse, Brno) : 32 043 lignes validées, quantités physiques, coûts valorisés, familles d'articles et dépôts."],
-            ["dbo.FACT_CLE", "Table de faits de fabrication", "Suivi détaillé de la production réelle d'injection (26 colonnes) : déclarations d'atelier, temps de marche (Run Time), rebuts et calcul de la 'Quantité produite TRS'."],
-            ["dbo.MCMachineCenter", "Table dimensionnelle", "Référentiel des 319 presses à injecter réparties sur les 3 usines : site d'implantation, tonnage (50T à 1500T), atelier et cadence nominale standard."],
-            ["dbo.ml_production_predictions", "Table de persistance IA", "Historique des prévisions de cadence calculées par les modèles d'apprentissage automatique avec métriques d'erreur et recommandations d'équipes."]
+            ["dbo.FACT_CLE", "Table de faits", "Déclarations d'atelier et production réelle (876 128 enregistrements) : ordres de fabrication, code presse, dates de postes, volumes bruts, rebuts, temps de cycle et mesure pivot « Quantité produite TRS »."],
+            ["dbo.ASTOCKDATE", "Table de faits", "Instantanés d'inventaire et stocks physiques : 800 références d'articles du catalogue, quantités disponibles, valorisation unitaire (Cout en TND), sites (Kondar, Sousse, Brno) et statut de couverture."],
+            ["dbo.MCMachineCenter", "Dimension", "Référentiel des 319 presses à injecter : identifiant machine (MACH-001 à MACH-319), désignation, tonnage, atelier d'affectation, site industriel et indicateur d'efficience nominale."],
+            ["dbo.ml_production_predictions", "Table analytique", "Persistance des prévisions d'IA : horizon opérationnel de 30 jours, cadences journalières prédites par Prophet et Random Forest, capacités maximales, métriques d'erreur (MAE, RMSE, MAPE) et recommandations."],
+            ["dbo.app_users", "Table système", "Gestion de la sécurité et contrôle d'accès : comptes utilisateurs, hachage sécurisé des mots de passe, traçabilité et affectation des deux rôles applicatifs (Administrateur et Opérateur)."]
           ],
-          [2400, 2200, 4066]
+          [2400, 1800, 4466]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 3.3 : Tables maîtresses du Data Warehouse dimensionnel", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 3.3 : Structure des tables du Data Warehouse Nexora", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
-        title3("3.3.3 Modélisation dimensionnelle"),
-        body("La figure 3.1 présente le diagramme relationnel modélisant l'agencement des dimensions et des tables de faits au sein de la base de données DWH :"),
+        title3("3.3.3 Modélisation dimensionnelle et relationnelle"),
+        body("La figure 3.1 présente le schéma relationnel et dimensionnel modélisant l'agencement des tables au sein de la base de données SQL Server :"),
         pb(),
-        ...imageFigure("diagrams/er_diagram.png", "Figure 3.1 : Modélisation dimensionnelle en étoile du Data Warehouse Nexora", 540, 310),
-        body("La table de dimension MCMachineCenter est interconnectée à la table de faits de fabrication FACT_CLE pour corréler cadences, temps opératoires et rebuts par presse ; la table d'inventaire ASTOCKDATE fournit quant à elle les niveaux de stock physique et les coûts valorisés nécessaires au module logistique et aux tableaux de bord."),
+        ...imageFigure("diagrams/er_diagram.png", "Figure 3.1 : Modélisation dimensionnelle et relationnelle du Data Warehouse Nexora", 440, 520),
+        body("L'architecture des données s'articule autour des interconnexions suivantes :"),
+        bullet("**MCMachineCenter vers FACT_CLE** : la dimension des machines est reliée à la table de faits de production par le code machine `[No_]`, permettant d'agréger les volumes d'injection et le TRS (Taux de Rendement Synthétique / OEE) par presse, atelier ou site."),
+        bullet("**FACT_CLE vers ASTOCKDATE** : chaque déclaration de fabrication est reliée logiquement aux références de matières premières et résines plastiques consommées (`Item No_` vers `No_`), assurant la synchronisation entre cadence de fabrication et déstockage."),
+        bullet("**FACT_CLE vers ml_production_predictions** : les séries chronologiques de production d'atelier issues de `FACT_CLE` alimentent l'entraînement des modèles d'IA, dont les projections calculées sont persistées dans la table analytique des prévisions."),
+        bullet("**app_users** : garantit l'intégrité et le cloisonnement des droits d'accès sur l'ensemble des modules d'atelier et de supervision décisionnelle."),
         pb(),
 
         title2("3.4 Analyse exploratoire des données (EDA)"),
@@ -1320,15 +1329,11 @@ const doc = new Document({
         bullet("**1. Ingestion** : lecture des fichiers d'extraction bruts et contrôle de leur structure."),
         bullet("**2. Assainissement de la qualité** : application ordonnée des traitements de nettoyage décrits en section 3.5.3."),
         bullet("**3. Structuration dimensionnelle** : séparation des données en tables de dimensions et de faits conformément au modèle en étoile."),
-        bullet("**4. Chargement dans le DWH** : insertion performante par lots dans SQL Server [16] avec mise à jour des index et journalisation."),
+        bullet("**4. Chargement dans le Data Warehouse** : insertion performante par lots dans SQL Server [16] avec mise à jour des index et journalisation."),
         pb(),
         body("La figure 3.5 illustre le flux séquentiel des données à travers le pipeline ETL :"),
         pb(),
         ...imageFigure("diagrams/sprint1_activity.png", "Figure 3.5 : Architecture et flux séquentiel du pipeline ETL", 520, 240),
-        body("Le diagramme de séquence de la figure 3.6 détaille les interactions dynamiques entre les modules d'extraction, de nettoyage et de persistance :"),
-        pb(),
-        ...imageFigure("diagrams/sprint1_seq.png", "Figure 3.6 : Diagramme de séquence du pipeline ETL d'atelier", 520, 250),
-        pb(),
 
         title3("3.5.2 Extraction des données"),
         body("Le module d'extraction extrait les données brutes issues des exports ERP sans modifier les structures initiales. Les données textuelles sont chargées sous forme brute pour permettre l'évaluation quantitative des anomalies avant toute opération de correction."),
@@ -1350,12 +1355,12 @@ const doc = new Document({
             ["Volume brut extrait de l'ERP", "51 500", "100 %"],
             ["Suppression des doublons", "- 18 337", "- 35,61 %"],
             ["Rejet des dates et identifiants articles invalides (660 + 460)", "- 1 120", "- 2,17 %"],
-            ["**Volume final validé chargé dans le DWH**", "**32 043**", "**Rétention : 62,22 %**"]
+            ["**Volume final validé chargé dans le Data Warehouse**", "**32 043**", "**Rétention : 62,22 %**"]
           ],
           [4800, 1800, 2066]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 3.6 : Bilan quantitatif du nettoyage des données", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 3.6 : Bilan quantitatif de la qualité des données (Waterfall ETL)", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
@@ -1364,7 +1369,7 @@ const doc = new Document({
         pb(),
 
         title3("3.5.4 Chargement dans le Data Warehouse"),
-        body("La phase finale insère les données transformées dans les tables SQL Server du DWH [16]. Pour accélérer l'affichage des analyses, des index ont été créés sur les clés des tables ainsi que sur les champs de date et de référence article."),
+        body("La phase finale insère les données transformées dans les tables SQL Server du Data Warehouse [16]. Pour accélérer l'affichage des analyses, des index ont été créés sur les clés des tables ainsi que sur les champs de date et de référence article."),
         pb(),
 
         title2("3.6 Résultats du pipeline ETL"),
@@ -1374,9 +1379,9 @@ const doc = new Document({
           ["Indicateur de performance ETL", "Valeur mesurée", "Interprétation"],
           [
             ["Lignes brutes traitées en entrée", "51 500 enregistrements", "Volume d'inventaire extrait de l'ERP."],
-            ["Lignes validées chargées dans le DWH", "32 043 enregistrements", "Volume assaini chargé dans la table d'inventaire ASTOCKDATE."],
+            ["Lignes validées chargées dans le Data Warehouse", "32 043 enregistrements", "Volume d'inventaire assaini chargé dans la table dbo.ASTOCKDATE."],
             ["Taux de rétention de données assainies", "62,22 %", "Après suppression des doublons (-35,6 %) et rejets (-2,2 %)."],
-            ["Taux d'anomalies résiduelles dans le DWH", "0,0 %", "Toutes les contraintes d'intégrité et de format sont satisfaites."],
+            ["Taux d'anomalies résiduelles dans le Data Warehouse", "0,0 %", "Toutes les contraintes d'intégrité et de format sont satisfaites."],
             ["Variables créées pour l'apprentissage", "14 variables explicatives", "Prêtes pour la modélisation prédictive."],
             ["Temps moyen d'exécution du pipeline", "2,62 secondes", "Traitement rapide de l'ensemble des données."]
           ],
@@ -1397,9 +1402,9 @@ const doc = new Document({
           [
             ["Extraction des sources brutes", "Module de lecture des fichiers d'extraction", "Réalisé"],
             ["Nettoyage des données", "Module de nettoyage en cinq actions (doublons, dates, formats, coûts, valeurs manquantes)", "Réalisé"],
-            ["Modélisation dimensionnelle", "Structuration des tables cibles du DWH en schéma dimensionnel", "Réalisé"],
-            ["Chargement en base de données", "Module d'insertion des 32 043 lignes avec index", "Réalisé"],
-            ["Variables explicatives", "Calcul des 14 variables explicatives", "Réalisé"],
+            ["Modélisation dimensionnelle", "Structuration relationnelle et dimensionnelle du Data Warehouse", "Réalisé"],
+            ["Chargement en base de données", "Module d'insertion des données validées avec index", "Réalisé"],
+            ["Variables explicatives", "Calcul et ingénierie des variables explicatives", "Réalisé"],
             ["Rapport d'audit de qualité", "Journal d'exécution et bilan avant/après nettoyage", "Réalisé"]
           ],
           [2400, 5066, 1200]
@@ -1432,10 +1437,10 @@ const doc = new Document({
           [
             ["Élevée", "Définition des flux logistiques et architecture du module de gestion des stocks", "1 jour"],
             ["Élevée", "Calcul des taux de consommation journaliers, de la couverture en jours et des rotations", "2 jours"],
-            ["Élevée", "Segmentation multicritère des 800 références : méthode Pareto ABC et classification par niveau de risque", "3 jours"],
+            ["Élevée", "Classification des références selon les niveaux d'autonomie et de risque", "3 jours"],
             ["Élevée", "Mise en place de la classification par niveau de risque (Rupture, Critique, Normal, Surstock)", "2 jours"],
-            ["Élevée", "Développement de l'algorithme de calcul des commandes d'approvisionnement (horizon 45 jours)", "3 jours"],
-            ["Moyenne", "Chiffrage budgétaire global des approvisionnements prioritaires (environ 380 400 TND)", "2 jours"],
+            ["Élevée", "Développement de l'algorithme de calcul des commandes d'approvisionnement", "3 jours"],
+            ["Moyenne", "Chiffrage budgétaire global des approvisionnements prioritaires", "2 jours"],
             ["Moyenne", "Hiérarchisation des alertes d'atelier et intégration des fonctions d'exportation", "2 jours"]
           ],
           [1600, 5666, 1400]
@@ -1447,13 +1452,11 @@ const doc = new Document({
         }),
         pb(),
 
-        title2("4.3 Architecture du module de gestion des stocks"),
-        body("Le fonctionnement du module repose sur un enchaînement méthodique en quatre phases, illustré par la figure 4.1 :"),
-        pb(),
-        ...imageFigure("diagrams/sprint3_activity.png", "Figure 4.1 : Architecture et flux de traitement du module de gestion des stocks", 520, 240),
-        bullet("**1. Ingestion des données d'inventaire** : lecture des stocks physiques disponibles et des niveaux de valorisation depuis la table `ASTOCKDATE` du Data Warehouse."),
+        title2("4.3 Architecture fonctionnelle du module de gestion des stocks"),
+        body("Le fonctionnement du module repose sur un enchaînement méthodique en quatre phases logistiques :"),
+        bullet("**1. Ingestion des données d'inventaire** : lecture des stocks physiques disponibles et des valorisations d'inventaire depuis la table `ASTOCKDATE` du Data Warehouse."),
         bullet("**2. Calcul des indicateurs logistiques** : calcul du taux de consommation journalier, de l'autonomie restante en jours de production et de la vitesse de rotation."),
-        bullet("**3. Double classification des articles** : catégorisation économique par la méthode Pareto ABC (Classes A, B, C) et affectation rigoureuse à un niveau de risque opérationnel (Rupture, Critique, Normal, Surstock)."),
+        bullet("**3. Classification opérationnelle des articles** : segmentation dynamique des 800 références du catalogue selon leur niveau d'autonomie et de criticité (Rupture, Critique, Normal, Surstock), permettant un ciblage précis des urgences logistiques."),
         bullet("**4. Recommandations et budgétisation** : proposition de quantités de commande pour sécuriser un horizon de 45 jours calculées à partir du taux de consommation validé, calcul de l'enveloppe budgétaire et émission d'alertes."),
         pb(),
 
@@ -1466,15 +1469,9 @@ const doc = new Document({
         body("Une rotation élevée caractérise un article consommé rapidement exigeant des flux logistiques tendus, alors qu'une rotation anormalement basse signale une référence dormante engendrant des frais d'entreposage superflus."),
         pb(),
 
-        title2("4.5 Classification et segmentation des produits"),
-        title3("4.5.1 Segmentation multicritère Pareto ABC et répartition de la valeur"),
-        body("Afin d'adopter une stratégie de gestion différenciée, les **800 références d'articles du catalogue unique** (`DIM_FamArt`) font l'objet d'une segmentation économique approfondie par la méthode de Pareto ABC :"),
-        bullet("**1. Segmentation Pareto ABC sur la valeur annuelle consommée** (valeur totale consommée : 14 311 585 TND, Figure 4.2) :\n• **Classe A (446 références, 55,8 % des références)** : concentre **70,0 % de la valeur économique** (10 018 110 TND). Elle rassemble les résines thermoplastiques majeures et inserts à forte valeur faisant l'objet d'un contrôle rigoureux et régulier.\n• **Classe B (202 références, 25,2 % des références)** : représente **20,0 % de la valeur économique** (2 862 317 TND), correspondant aux composants techniques intermédiaires gérés par revue périodique.\n• **Classe C (152 références, 19,0 % des références)** : représente **10,0 % de la valeur économique** (1 431 158 TND), regroupant les références secondaires gérées par seuil d'alerte simplifié."),
-        bullet("**2. Analyse de valorisation et structure des coûts unitaires** : l'analyse de l'inventaire dans la table `ASTOCKDATE` révèle que la valorisation médiane par article s'établit entre 0,31 et 0,39 TND par unité, avec une moyenne de 0,45 TND par unité sur les références critiques et en rupture. Cette maîtrise fine des coûts réels permet de budgétiser avec exactitude les commandes d'approvisionnement."),
-        pb(),
-
-        title3("4.5.2 Classification opérationnelle par niveau de risque"),
-        body("En complément de la segmentation structurelle, chaque référence est affectée à un statut opérationnel selon sa couverture disponible, conformément aux seuils définis avec la direction logistique :"),
+        title2("4.5 Classification opérationnelle et analyse de criticité des stocks"),
+        title3("4.5.1 Typologie des statuts de stock et seuils d'autonomie"),
+        body("Dans une logique industrielle réactive et pragmatique, la plateforme Nexora privilégie une classification opérationnelle directement articulée aux contraintes de fabrication. Plutôt que de reposer sur des segmentations théoriques déconnectées des urgences terrain, chaque référence des **800 articles du catalogue unique** (`DIM_FamArt`) est évaluée en continu selon son autonomie restante en jours de production. Cette approche permet de catégoriser l'ensemble du référentiel en quatre états opérationnels distincts, établis en concertation avec les responsables logistiques et la direction d'atelier [9, 14] :"),
         pb(),
         makeTable(
           ["Statut du stock", "Condition appliquée", "Indicateur visuel", "Action opérationnelle recommandée"],
@@ -1493,6 +1490,13 @@ const doc = new Document({
         }),
         pb(),
 
+        title3("4.5.2 Répartition du catalogue et analyse de criticité"),
+        body("L'application de cette grille d'analyse sur l'inventaire consolidé du Data Warehouse fournit une cartographie précise de l'état des stocks d'atelier :"),
+        bullet("**Articles en situation nominale (Stock Normal)** : représentent la majorité du catalogue avec **557 références (69,6 %)**. Leur couverture assure le fonctionnement régulier des presses sans intervention logistique immédiate."),
+        bullet("**Articles sous tension prioritaire (Rupture et Stock Critique)** : regroupent **193 références au total (24,1 % du catalogue)**. Parmi elles, **47 références (5,9 %)** sont en rupture totale (stock nul sur site) et menacent directement la continuité des plannings d'injection, tandis que **146 références (18,2 %)** présentent une autonomie critique inférieure à 15 jours nécessitant une commande immédiate."),
+        bullet("**Articles excédentaires (Surstock)** : concernent **50 références (6,3 %)** dont la couverture excède 120 jours de consommation. Pour ces articles, l'émission de nouvelles commandes est bloquée pour réduire les coûts de possession et d'immobilisation de trésorerie."),
+        pb(),
+
         title2("4.6 Génération des recommandations et chiffrage budgétaire"),
         title3("4.6.1 Algorithme de réapprovisionnement à horizon cible de 45 jours"),
         body("Pour les références en situation de Rupture ou de Stock Critique, le système calcule la quantité exacte requise pour rétablir une **couverture de sécurité de 45 jours** (couvrant un délai moyen d'approvisionnement fournisseur de 30 jours augmenté d'un stock de sécurité de 15 jours) :"),
@@ -1503,31 +1507,31 @@ const doc = new Document({
         pb(),
 
         title3("4.6.2 Estimation du budget d'approvisionnement"),
-        body("Le montant financier prévisionnel des réapprovisionnements est obtenu en valorisant les quantités suggérées par le coût unitaire d'achat réel enregistré dans le DWH :"),
+        body("Le montant financier prévisionnel des réapprovisionnements est obtenu en valorisant les quantités suggérées par le coût unitaire d'achat réel enregistré dans le Data Warehouse :"),
         body("*Budget_Total = Σ (Q_commander_i × Prix_Unitaire_i)* pour l'ensemble des références i ∈ (Rupture ∪ Critique)", { align: AlignmentType.CENTER, italics: true }),
         body("Cette métrique offre à l'administrateur une visibilité consolidée sur les engagements de trésorerie nécessaires à la continuité de la production."),
         pb(),
 
         title3("4.6.3 Hiérarchisation des alertes d'atelier"),
-        body("Les alertes sont classées par ordre décroissant de criticité en combinant le statut de stock, la classe ABC et le délai fournisseur, assurant que l'administrateur et l'opérateur d'atelier traitent en priorité les matières indispensables au maintien des lignes d'injection."),
+        body("Les alertes sont classées par ordre décroissant de criticité en combinant le statut opérationnel de stock, le niveau d'autonomie restante et les délais fournisseurs, assurant que l'administrateur et l'opérateur d'atelier traitent en priorité les matières indispensables au maintien des lignes d'injection."),
         pb(),
 
         title2("4.7 Résultats obtenus"),
         body("L'analyse de l'état des stocks est conduite sur l'unité maîtresse du référentiel produit : **les 800 références distinctes du catalogue (`DIM_FamArt`)**."),
         pb(),
-        body("Sur ces 800 références d'articles, la distribution opérationnelle des stocks issue du DWH s'établit ainsi :"),
+        body("Sur ces 800 références d'articles, la distribution opérationnelle des stocks issue du Data Warehouse s'établit ainsi :"),
         bullet("**Stock Normal** : 557 références (69,6 %) disposent d'un niveau d'autonomie équilibré compris entre 15 et 120 jours."),
         bullet("**Rupture de Stock** : 47 références (5,9 %) ont un stock physique nul et requièrent une relance immédiate."),
         bullet("**Stock Critique** : 146 références (18,2 %) présentent une autonomie strictement inférieure à 15 jours."),
         bullet("**Surstock** : 50 références (6,2 %) dépassent 120 jours de couverture."),
         pb(),
-        body("La figure 4.2 illustre la distribution et la courbe de concentration de Pareto ABC obtenue sur l'ensemble des 800 références du catalogue :"),
+        body("La figure 4.1 illustre la répartition opérationnelle des références du catalogue selon les quatre statuts de criticité :"),
         pb(),
-        ...imageFigure("diagrams/segmentation_pareto_kmeans.png", "Figure 4.2 : Segmentation multicritère Pareto ABC et répartition de la valeur de stock", 540, 250),
+        ...imageFigure("diagrams/repartition_stocks_statut.png", "Figure 4.1 : Répartition des références du catalogue par statut opérationnel de stock", 540, 250),
         pb(),
-        body("La figure 4.3 présente la synthèse des articles en alerte regroupés par grande famille de matières plastiques :"),
+        body("La figure 4.2 présente la synthèse des articles en alerte regroupés par grande famille de matières plastiques :"),
         pb(),
-        ...imageFigure("image/fig_5_3_ruptures_stocks.png", "Figure 4.3 : Répartition des alertes de rupture et de stock critique par famille de matière", 520, 230),
+        ...imageFigure("image/fig_5_3_ruptures_stocks.png", "Figure 4.2 : Répartition des alertes de rupture et de stock critique par famille de matière", 520, 230),
         pb(),
         body("Au total, le plan de réapprovisionnement à 45 jours concerne **193 références distinctes** (47 en rupture et 146 critiques, soit 24,1 % du catalogue). La quantité globale à commander s'élève à **847 204 unités**, pour un **budget total prévisionnel estimé à environ 380 400 TND** (380 393 TND). Ce budget est calculé directement d'après les coûts unitaires réels constatés dans le Data Warehouse (coût moyen de 0,45 TND par unité sur les références concernées)."),
         pb(),
@@ -1540,10 +1544,10 @@ const doc = new Document({
           [
             ["Architecture du module", "Schéma fonctionnel des flux et indicateurs de gestion des stocks", "Réalisé"],
             ["Calcul des indicateurs", "Calcul automatisé des taux journaliers, de la couverture et des rotations", "Réalisé"],
-            ["Segmentation multicritère", "Méthode ABC de Pareto et classification par niveau de risque sur 800 références", "Réalisé"],
-            ["Classification par statut", "Répartition des 800 références en 4 états opérationnels (47 ruptures, 146 critiques)", "Réalisé"],
-            ["Algorithme de réapprovisionnement", "Formule de couverture à 45 jours basée sur le taux de consommation validé", "Réalisé"],
-            ["Chiffrage budgétaire", "Calcul du budget d'approvisionnement des 193 références (environ 380 400 TND)", "Réalisé"],
+            ["Classification opérationnelle", "Répartition des références du catalogue en états de criticité", "Réalisé"],
+            ["Classification par statut", "Hiérarchisation visuelle selon les statuts opérationnels de stock", "Réalisé"],
+            ["Algorithme de réapprovisionnement", "Formule de calcul des besoins basée sur la consommation d'atelier", "Réalisé"],
+            ["Chiffrage budgétaire", "Calcul de l'enveloppe budgétaire des approvisionnements prioritaires", "Réalisé"],
             ["Alertes et exports", "Vues d'alertes priorisées et exportation tabulaire pour les achats", "Réalisé"]
           ],
           [2600, 4866, 1200]
@@ -1556,7 +1560,7 @@ const doc = new Document({
         pb(),
 
         title2("4.9 Conclusion"),
-        conclusionBox("Ce chapitre a détaillé le développement du module de gestion intelligente des stocks lors du Sprint 2. En associant la segmentation économique ABC de Pareto, la classification opérationnelle selon la couverture disponible et une formule de réapprovisionnement sur 45 jours basée sur la consommation d'atelier validée, la plateforme Nexora remplace les pratiques manuelles par un pilotage dynamique et préventif unifié sur les 800 références du catalogue. Le chapitre suivant aborde le Sprint 3, consacré à la modélisation prédictive par Intelligence Artificielle et aux prévisions de cadence."),
+        conclusionBox("Ce chapitre a détaillé le développement du module de gestion intelligente des stocks lors du Sprint 2. En associant une classification opérationnelle en quatre niveaux de criticité selon l'autonomie réelle et une formule de réapprovisionnement sur 45 jours basée sur la consommation d'atelier validée, la plateforme Nexora remplace les pratiques manuelles par un pilotage dynamique et préventif unifié sur les 800 références du catalogue. Le chapitre suivant aborde le Sprint 3, consacré à la modélisation prédictive par Intelligence Artificielle et aux prévisions de cadence."),
         pageBreak(),
     
         // =========================================================
@@ -1577,11 +1581,11 @@ const doc = new Document({
           ["Priorité", "Tâche de réalisation", "Durée estimée"],
           [
             ["Élevée", "Définition de la variable cible et transformation logarithmique", "2 jours"],
-            ["Élevée", "Ingénierie des 14 variables explicatives et calendrier d'atelier", "3 jours"],
-            ["Élevée", "Développement des 4 modèles de prévision de séries temporelles", "4 jours"],
-            ["Élevée", "Évaluation comparative des performances aux horizons 7, 15 et 30 jours", "3 jours"],
+            ["Élevée", "Ingénierie des variables explicatives et calendrier d'atelier", "3 jours"],
+            ["Élevée", "Développement des modèles de prévision de séries temporelles", "4 jours"],
+            ["Élevée", "Évaluation comparative des performances des modèles à l'horizon 30 jours", "3 jours"],
             ["Moyenne", "Analyse d'explicabilité et décomposition des composantes saisonnières", "2 jours"],
-            ["Faible", "Intégration des prévisions Prophet dans la table ml_production_predictions du DWH", "2 jours"]
+            ["Faible", "Intégration des prévisions Prophet dans la table ml_production_predictions du Data Warehouse", "2 jours"]
           ],
           [1600, 5666, 1400]
         ),
@@ -1592,15 +1596,13 @@ const doc = new Document({
         }),
         pb(),
 
-        title2("5.3 Architecture du module de modélisation prédictive"),
-        body("Le processus de modélisation prédictive suit les cinq étapes illustrées par la figure 5.1 :"),
-        pb(),
-        ...imageFigure("diagrams/sprint2_activity.png", "Figure 5.1 : Architecture et flux de traitement du module d'IA de Nexora", 520, 240),
+        title2("5.3 Démarche méthodologique de modélisation prédictive"),
+        body("Le processus de modélisation prédictive des cadences de production d'atelier s'articule autour de cinq étapes méthodologiques :"),
         bullet("**1. Extraction des données d'atelier** : lecture de l'historique des déclarations de fabrication depuis la table `FACT_CLE` du Data Warehouse (851 jours réels)."),
         bullet("**2. Ingénierie des variables** : calcul des variables explicatives (décalages temporels, moyennes mobiles, variables calendaires et événements industriels)."),
         bullet("**3. Entraînement des modèles** : ajustement des algorithmes sur l'historique de production d'injection plastique."),
-        bullet("**4. Évaluation multi-horizons** : mesure des métriques d'erreur sur les horizons de planification de 7, 15 et 30 jours."),
-        bullet("**5. Restitution et persistance** : enregistrement des prévisions dans la table `ml_production_predictions` du DWH pour l'affichage Power BI et le portail web."),
+        bullet("**4. Évaluation des performances** : mesure des métriques d'erreur (MAE, RMSE, MAPE, R²) sur l'horizon de planification de 30 jours."),
+        bullet("**5. Restitution et persistance** : enregistrement des prévisions dans la table `ml_production_predictions` du Data Warehouse pour l'affichage Power BI et le portail web."),
         pb(),
 
         title2("5.4 Préparation des données et variables explicatives"),
@@ -1747,38 +1749,30 @@ const doc = new Document({
         ),
         pb(),
 
-        title2("5.7 Résultats comparatifs et évaluation multi-horizons"),
-        body("Les 4 modèles ont été évalués sur les trois horizons décisionnels de l'usine : 7 jours (court terme), 15 jours (moyen terme) et 30 jours (plan mensuel). Le tableau 5.8 synthétise les résultats obtenus :"),
+        title2("5.7 Résultats comparatifs et évaluation des modèles à l'horizon 30 jours"),
+        body("Les quatre modèles ont été évalués sur l'horizon de prévision opérationnel de l'usine fixé à 30 jours (correspondant au cycle mensuel de planification de charge). Le tableau 5.8 synthétise les performances comparatives obtenues :"),
         pb(),
         makeTable(
-          ["Horizon", "Modèle de prévision", "MAE moyenne (pièces/jour)", "MAPE moyenne (%)"],
+          ["Modèle de prévision", "MAE moyenne (pièces/jour)", "RMSE (pièces/jour)", "MAPE moyenne (%)", "Score R²"],
           [
-            ["7 jours", "Random Forest", "2 645 pcs/j", "5,9 %"],
-            ["7 jours", "Prophet", "3 653 pcs/j", "7,3 %"],
-            ["7 jours", "Régression Linéaire", "3 734 pcs/j", "7,6 %"],
-            ["7 jours", "ARIMA", "4 364 pcs/j", "9,0 %"],
-            ["15 jours", "Random Forest", "2 538 pcs/j", "6,0 %"],
-            ["15 jours", "Prophet", "3 350 pcs/j", "7,4 %"],
-            ["15 jours", "Régression Linéaire", "4 413 pcs/j", "9,1 %"],
-            ["15 jours", "ARIMA", "5 247 pcs/j", "11,6 %"],
-            ["30 jours", "Random Forest", "2 467 pcs/j", "6,0 %"],
-            ["30 jours", "Prophet", "2 982 pcs/j", "6,7 %"],
-            ["30 jours", "Régression Linéaire", "4 679 pcs/j", "9,8 %"],
-            ["30 jours", "ARIMA", "5 321 pcs/j", "11,7 %"]
+            ["Random Forest", "2 467 pcs/j", "3 196 pcs/j", "6,0 %", "0,9798"],
+            ["Prophet (Déployé)", "2 982 pcs/j", "3 897 pcs/j", "6,7 %", "0,9707"],
+            ["Régression Linéaire", "4 679 pcs/j", "6 098 pcs/j", "9,8 %", "0,9271"],
+            ["ARIMA", "5 321 pcs/j", "6 148 pcs/j", "11,7 %", "0,9082"]
           ],
-          [1800, 3200, 2400, 1266]
+          [2200, 2000, 2000, 1400, 1066]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 5.8 : Synthèse des performances prédictives aux horizons 7, 15 et 30 jours", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 5.8 : Synthèse des performances comparatives des modèles à l'horizon 30 jours", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
         body("À l'horizon de 30 jours, Random Forest et Prophet affichent des performances très proches (6,0 % et 6,7 % de MAPE), avec un écart d'erreur moyenne de seulement 515 pièces par jour sur une production journalière globale d'environ 65 000 pièces/jour."),
         pb(),
-        body("La figure 5.2 illustre la trajectoire des prévisions Prophet face à la production réelle d'atelier sur une période représentative :"),
+        body("La figure 5.1 illustre la trajectoire des prévisions Prophet face à la production réelle d'atelier sur une période représentative :"),
         pb(),
-        ...imageFigure("image/fig_4_3_prophet_vs_reel.png", "Figure 5.2 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 540, 240),
+        ...imageFigure("image/fig_4_3_prophet_vs_reel.png", "Figure 5.1 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 540, 240),
         pb(),
 
         title2("5.8 Analyse explicable des composantes et robustesse"),
@@ -1786,7 +1780,7 @@ const doc = new Document({
         pb(),
 
         title2("5.9 Rôles respectifs des modèles dans la plateforme Nexora"),
-        body("L'analyse comparative conduit à une organisation claire entre les deux modèles de tête. Random Forest s'impose comme le **modèle Champion de référence d'atelier**, offrant la meilleure précision ponctuelle absolue sur l'ensemble des horizons (6,0 % d'erreur MAPE à 30 jours, MAE de 2 467 pièces/jour, R² de 0,98) ; il est mis en avant en premier plan sur le portail web opérationnel et dans le module de benchmark pour l'ordonnancement précis des équipes. Le modèle **Prophet** intervient quant à lui comme moteur prévisionnel comparatif et déployé en production, apprécié pour sa décomposition explicable (séparant la tendance générale, les cycles hebdomadaires et les événements d'atelier) et sa persistance directe dans la table `ml_production_predictions` du Data Warehouse pour les tableaux de bord Power BI."),
+        body("L'analyse comparative conduit à une organisation claire entre les deux modèles de tête. Random Forest obtient une précision légèrement supérieure sur l'historique d'atelier (6,0 % d'erreur à 30 jours contre 6,7 % pour Prophet). Toutefois, le modèle Prophet a été retenu pour le déploiement opérationnel en production en raison de sa décomposition transparente (séparant la tendance générale, le rythme hebdomadaire et les arrêts programmés) et de sa grande facilité d'intégration dans l'entrepôt de données SQL Server et les tableaux de bord Power BI. Random Forest demeure utilisé comme modèle de référence pour les analyses hors-ligne et les études approfondies."),
         pb(),
 
         title2("5.10 Bilan du Sprint 3"),
@@ -1795,11 +1789,11 @@ const doc = new Document({
         makeTable(
           ["Tâche planifiée", "Livrable produit", "Statut"],
           [
-            ["Préparation des variables", "14 variables explicatives et calendrier d'atelier", "Réalisé"],
-            ["Développement des modèles", "Implémentation des 4 modèles (Régression Linéaire, ARIMA, Random Forest, Prophet)", "Réalisé"],
-            ["Évaluation multi-horizons", "Performances mesurées à 7, 15 et 30 jours", "Réalisé"],
+            ["Préparation des variables", "Ingénierie des variables explicatives et calendrier d'atelier", "Réalisé"],
+            ["Développement des modèles", "Implémentation des modèles de prévision temporelle", "Réalisé"],
+            ["Évaluation des performances", "Performances comparatives validées à l'horizon 30 jours", "Réalisé"],
             ["Explicabilité des modèles", "Décomposition explicable des composantes et analyse de robustesse", "Réalisé"],
-            ["Déploiement opérationnel", "Intégration des prévisions Prophet dans la table ml_production_predictions", "Réalisé"]
+            ["Déploiement opérationnel", "Intégration des prévisions Prophet dans le Data Warehouse", "Réalisé"]
           ],
           [2600, 4866, 1200]
         ),
@@ -1820,7 +1814,7 @@ const doc = new Document({
         title1("Chapitre 6 : Sprint 4 : Développement du tableau de bord décisionnel et validation"),
 
         title2("6.1 Introduction"),
-        body("Ce chapitre correspond au Sprint 4, dernière phase de réalisation de notre projet. Après avoir mis en place le pipeline ETL (Sprint 1), le module de gestion des stocks (Sprint 2) et les modèles de prévision par IA (Sprint 3), ce sprint a pour objectif d'intégrer l'ensemble de ces briques au sein d'une solution de restitution conviviale et réactive. Les rapports décisionnels développés sous Microsoft Power BI [24], alimentés directement par le Data Warehouse et la table `ml_production_predictions`, permettent à l'administrateur de piloter les indicateurs d'atelier, de suivre les prévisions de cadence et d'analyser les risques de rupture. En complément, un portail web opérationnel en React.js [22] et Spring Boot [17] offre à l'opérateur et à l'administrateur une interface de consultation des inventaires, de suivi de fabrication et de benchmark comparatif des modèles d'IA."),
+        body("Ce chapitre correspond au Sprint 4, dernière phase de réalisation de notre projet. Après avoir mis en place le pipeline ETL (Sprint 1), le module de gestion des stocks (Sprint 2) et les modèles de prévision par IA (Sprint 3), ce sprint a pour objectif d'intégrer l'ensemble de ces briques au sein d'une solution de restitution conviviale et réactive. Les rapports décisionnels développés sous Microsoft Power BI [24], alimentés directement par le Data Warehouse et la table `ml_production_predictions`, permettent à l'administrateur de piloter les indicateurs d'atelier, de suivre les prévisions de cadence et d'analyser les risques de rupture. En complément, un portail web opérationnel en React.js [22] et Spring Boot [17] offre à l'opérateur d'atelier une interface réactive de consultation des stocks, de filtrage des alertes de rupture et de suivi en temps réel des cadences de production."),
         pb(),
 
         title2("6.2 Backlog du Sprint 4"),
@@ -1847,84 +1841,77 @@ const doc = new Document({
         pb(),
 
         title2("6.3 Architecture du tableau de bord et intégration applicative"),
-        body("La figure 6.1 présente l'architecture globale d'intégration et de déploiement de la solution décisionnelle **Nexora** :"),
+        body("La figure 6.1 présente l'architecture globale d'intégration et de déploiement de la solution décisionnelle Nexora :"),
         pb(),
         ...imageFigure("diagrams/arch_physique.png", "Figure 6.1 : Architecture globale d'intégration et de déploiement de Nexora", 540, 240),
-        bullet("**1. Entrepôt de données SQL Server** : centralise les tables de faits et de dimensions nettoyées (`ASTOCKDATE`, `FACT_CLE`, `MCMachineCenter`) ainsi que les prévisions de cadence (`ml_production_predictions`)."),
+        bullet("**1. Entrepôt de données SQL Server** : centralise les tables de faits et de dimensions nettoyées ainsi que les prévisions issues de l'apprentissage automatique (`ml_production_predictions`)."),
         bullet("**2. Backend applicatif d'entreprise (Spring Boot / FastAPI)** : le serveur Spring Boot [17] gère l'authentification sécurisée par jetons JWT, le contrôle d'accès RBAC et les entités métiers, tandis que le micro-service FastAPI [21] sert d'interface d'inférence directe pour les modèles Python."),
-        bullet("**3. Rapports décisionnels Microsoft Power BI** : tableaux de bord interactifs connectés en mode DirectQuery ou Import au DWH, exploitant des mesures calculées en DAX pour le management d'atelier."),
-        bullet("**4. Portail web réactif React.js** : interface utilisateur dynamique permettant aux équipes d'atelier de consulter les stocks, suivre les alertes critiques et comparer les modèles d'IA sur des données personnalisées."),
+        bullet("**3. Rapports décisionnels Microsoft Power BI** : tableaux de bord interactifs connectés en mode DirectQuery ou Import au Data Warehouse, exploitant des mesures calculées en DAX pour le management d'atelier."),
+        bullet("**4. Portail web réactif React.js** : interface utilisateur dynamique permettant aux opérateurs de consulter les inventaires en temps réel, d'analyser les indicateurs de production et d'exporter les alertes de réapprovisionnement."),
         pb(),
 
-        title2("6.4 Diagramme de séquence"),
-        body("La figure 6.2 illustre le déroulement des interactions lors de la consultation d'un rapport décisionnel et de l'interrogation des prévisions :"),
-        pb(),
-        ...imageFigure("diagrams/sprint4_seq.png", "Figure 6.2 : Diagramme de séquence des échanges entre l'utilisateur, l'interface et le DWH", 540, 260),
-        body("Lors de l'application d'un filtre temporel ou machine, Power BI interroge les tables de faits consolidées et restitue instantanément les courbes d'évolution ainsi que le fuseau de prévision à 95 %."),
-        pb(),
-
-        title2("6.5 Conception des rapports décisionnels Power BI"),
-        title3("6.5.1 Tableau de bord de supervision du parc machines"),
+        title2("6.4 Conception des rapports décisionnels Power BI"),
+        title3("6.4.1 Tableau de bord de supervision du parc machines"),
         body("Ce rapport offre une supervision complète de l'activité du parc de 319 presses à injecter réparties sur les sites de Kondar, Sousse et Brno :"),
         bullet("**Indicateurs clés d'atelier** : cadences réelles de production par atelier (moyenne globale de 64 890 pièces/jour), volumes déclarés conformes et taux de rebut moyen (1,85 %)."),
         bullet("**Suivi du parc machines** : décompte des presses en production, en maintenance planifiée ou en arrêt pour changement de moule."),
         bullet("**Analyse des causes d'arrêt** : répartition des motifs d'interruption (défaillances hydrauliques, surchauffe de fourreau, rupture de matière première)."),
         pb(),
 
-        title3("6.5.2 Tableau de bord des prévisions de cadence"),
+        title3("6.4.2 Tableau de bord des prévisions de cadence"),
         body("Ce rapport est dédié à l'exploitation des projections de production issues des modèles d'IA :"),
-        bullet("**Sélecteur d'horizon de prévision** : sélection ergonomique entre 7 jours (ajustement des équipes), 15 jours (anticipation matière) et 30 jours (plan de charge mensuel)."),
+        bullet("**Visualisation des cadences prévisionnelles** : affichage de la trajectoire prédictive sur l'horizon opérationnel de 30 jours pour guider l'ordonnancement mensuel."),
         bullet("**Comparaison réel / prévu** : superposition de la cadence réelle et des prévisions Random Forest et Prophet, complétées par les intervalles d'incertitude à 95 %."),
         bullet("**Indicateurs de fiabilité** : affichage en bandeau des erreurs moyennes MAPE issues de l'évaluation des modèles (environ 6,0 % pour Random Forest et 6,7 % pour Prophet à 30 jours)."),
         pb(),
 
-        title3("6.5.3 Tableau de bord de gestion des stocks"),
+        title3("6.4.3 Tableau de bord de gestion des stocks"),
         body("Ce rapport permet le pilotage fin des 6 875 lignes d'inventaire détaillées du catalogue d'articles :"),
         bullet("**Synthèse par état de stock** : indicateurs visuels des 312 références en Rupture (Rouge) et 1 240 en Stock Critique (Orange)."),
-        bullet("**Filtres multicritères** : sélection par famille de résine (PP, PA66, ABS), atelier d'injection ou classe ABC."),
+        bullet("**Filtres multicritères** : sélection par famille de résine (PP, PA66, ABS), atelier d'injection ou niveau de criticité de stock."),
         bullet("**Plan de commande 45 jours** : tableau exportable indiquant la quantité exacte à commander et le montant budgétaire associé (enveloppe globale de 380 400 TND pour les 193 références prioritaires)."),
         pb(),
 
-        title2("6.6 Présentation des interfaces réalisées"),
-        title3("6.6.1 Tableau de bord principal"),
-        body("La figure 6.3 illustre la vue d'ensemble décisionnelle Power BI regroupant les indicateurs clés de production et de stock :"),
+        title2("6.5 Présentation des interfaces réalisées"),
+        title3("6.5.1 Tableau de bord principal"),
+        body("La figure 6.2 illustre la vue d'ensemble décisionnelle Power BI regroupant les indicateurs clés de production et de stock :"),
         pb(),
-        ...imageFigure("image/powerbi_3.png", "Figure 6.3 : Vue d'ensemble du tableau de bord décisionnel Power BI Nexora", 540, 260),
-        pb(),
-
-        title3("6.6.2 Historique et répartition des stocks d'atelier"),
-        body("La figure 6.4 montre l'interface d'historique de stock et d'évolution des valorisations par site de production (Kondar, Sousse, Brno) :"),
-        pb(),
-        ...imageFigure("image/powerbi_1.png", "Figure 6.4 : Rapport Power BI « Historique d'évolution des stocks par site »", 540, 280),
-        body("La figure 6.5 présente la vue globale de l'état des stocks d'atelier, la répartition par famille d'articles et les parts par site industriel :"),
-        pb(),
-        ...imageFigure("image/powerbi_2.png", "Figure 6.5 : Rapport Power BI « État de stock global et répartition par famille »", 540, 280),
+        ...imageFigure("image/powerbi_3.png", "Figure 6.2 : Vue d'ensemble du tableau de bord décisionnel Power BI Nexora", 540, 260),
         pb(),
 
-        title3("6.6.3 Prévisions de cadence d'atelier"),
-        body("La figure 6.6 présente l'écran de visualisation des cadences prévisionnelles à 30 jours (trajectoires prédictives et cadrage d'incertitude) :"),
+        title3("6.5.2 Historique et répartition des stocks d'atelier"),
+        body("La figure 6.3 montre l'interface d'historique de stock et d'évolution des valorisations par site de production (Kondar, Sousse, Brno) :"),
         pb(),
-        ...imageFigure("image/powerbi_4.png", "Figure 6.6 : Rapport Power BI « Prévision des cadences et charge atelier »", 540, 270),
+        ...imageFigure("image/powerbi_1.png", "Figure 6.3 : Rapport Power BI « Historique d'évolution des stocks par site »", 540, 280),
+        body("La figure 6.4 présente la vue globale de l'état des stocks d'atelier, la répartition par famille d'articles et les parts par site industriel :"),
         pb(),
-
-        title3("6.6.4 Pilotage des stocks et alertes d'approvisionnement"),
-        body("La figure 6.7 illustre l'interface dédiée à la surveillance d'inventaire et au suivi des alertes de rupture :"),
-        pb(),
-        ...imageFigure("image/powerbi_5.png", "Figure 6.7 : Rapport Power BI « Gestion des stocks d'atelier et alertes »", 540, 270),
+        ...imageFigure("image/powerbi_2.png", "Figure 6.4 : Rapport Power BI « État de stock global et répartition par famille »", 540, 280),
         pb(),
 
-        title3("6.6.5 Portail web opérationnel React & Spring Boot"),
-        body("En complément des tableaux de bord Power BI dédiés au pilotage analytique global, la plateforme comprend une application web moderne développée avec React 18.2 [22] côté client et Spring Boot 3.2 [17] côté serveur. Ce portail offre aux équipes d'atelier et aux gestionnaires une interface fluide et réactive pour consulter les données d'inventaire en temps réel, analyser les stocks par segmentation Pareto ABC, superviser les 319 presses à injecter et exploiter les projections prédictives de cadence sur 30 jours ainsi que le banc d'essai comparatif des modèles d'IA."),
-        body("L'architecture des services (API REST) exposés par le serveur applicatif s'articule autour de cinq contrôleurs modulaires :"),
+        title3("6.5.3 Prévisions de cadence d'atelier"),
+        body("La figure 6.5 présente l'écran de visualisation des cadences prévisionnelles à 30 jours (trajectoires prédictives et cadrage d'incertitude) :"),
+        pb(),
+        ...imageFigure("image/powerbi_4.png", "Figure 6.5 : Rapport Power BI « Prévision des cadences et charge atelier »", 540, 270),
+        pb(),
+
+        title3("6.5.4 Pilotage des stocks et alertes d'approvisionnement"),
+        body("La figure 6.6 illustre l'interface dédiée à la surveillance d'inventaire et au suivi des alertes de rupture :"),
+        pb(),
+        ...imageFigure("image/powerbi_5.png", "Figure 6.6 : Rapport Power BI « Gestion des stocks d'atelier et alertes »", 540, 270),
+        pb(),
+
+        title3("6.5.5 Portail web opérationnel React & Spring Boot"),
+        body("En complément des tableaux de bord Power BI dédiés à l'administrateur, la plateforme comprend une application web développée avec React 18.2 [22] côté client et Spring Boot 3.2 [17] côté serveur. Ce portail offre à l'opérateur d'atelier une interface fluide et réactive pour consulter les données opérationnelles d'inventaire, filtrer les alertes de criticité et suivre les indicateurs de fabrication en temps réel."),
+        body("L'architecture des services (API REST) exposés par le serveur applicatif s'articule autour de cinq domaines principaux :"),
         pb(),
         makeTable(
           ["Module fonctionnel", "Rôle opérationnel", "Profils autorisés"],
           [
-            ["Authentification & Sécurité (/api/auth)", "Connexion sécurisée par jeton JWT (durée 24h) et gestion des sessions utilisateurs.", "Opérateur / Administrateur"],
-            ["Gestion d'inventaire (/api/stock)", "Consultation des 32 043 lignes d'inventaire ASTOCKDATE, segmentation Pareto ABC et détection des alertes de rupture/surstock.", "Opérateur / Administrateur"],
-            ["Supervision atelier & machines (/api/production)", "Suivi des déclarations FACT_CLE, indicateurs de TRS net, cadences d'injection et parc des 319 presses MCMachineCenter.", "Opérateur / Administrateur"],
-            ["Inférence IA & Benchmark (/api/ml)", "Génération des prévisions de cadence sur 30 jours, comparaison des métriques du banc d'essai (Random Forest Champion, Prophet) et archivage.", "Opérateur / Administrateur"],
-            ["Gestion des comptes (/api/users)", "Administration des habilitations et attribution stricte des rôles ADMIN et OPERATEUR.", "Administrateur"]
+            ["Authentification & Rôles (/api/auth)", "Connexion sécurisée par jeton JWT et récupération du profil connecté.", "Opérateur / Administrateur"],
+            ["Gestion des stocks (/api/stock)", "Consultation des 800 références, calcul des KPI d'inventaire, filtrage par statut et export Excel.", "Opérateur / Administrateur"],
+            ["Suivi de fabrication (/api/production)", "Suivi des ordres de fabrication, état des 319 presses et flux temps réel par SSE.", "Opérateur / Administrateur"],
+            ["Services d'Intelligence Artificielle (/api/ml)", "Génération et consultation des prévisions de cadence de production à 30 jours.", "Administrateur"],
+            ["Gestion des utilisateurs (/api/users)", "Création des comptes, activation et attribution des rôles applicatifs (RBAC).", "Administrateur"]
           ],
           [2600, 4200, 2466]
         ),
@@ -1935,16 +1922,16 @@ const doc = new Document({
         }),
         pb(),
 
-        title2("6.7 Tests et validation"),
-        title3("6.7.1 Tests fonctionnels et d'intégration"),
+        title2("6.6 Tests et validation"),
+        title3("6.6.1 Tests fonctionnels et d'intégration"),
         body("Afin de valider la conformité de la solution avec les spécifications du système, six scénarios de test d'intégration ont été déroulés :"),
         pb(),
         makeTable(
           ["Cas de test", "Protocole d'exécution", "Résultat constaté", "Statut"],
           [
-            ["Connexion DWH DirectQuery", "Interrogation simultanée des tables FACT_CLE et ASTOCKDATE depuis Power BI.", "Temps de réponse fluide (< 1 s), synchronisation immédiate des visuels.", "Validé"],
+            ["Connexion Data Warehouse DirectQuery", "Interrogation simultanée des tables FACT_CLE et ASTOCKDATE depuis Power BI Desktop.", "Temps de réponse fluide, synchronisation immédiate des visuels.", "Validé"],
             ["Mesures d'atelier (DAX)", "Vérification des formules de cadence, valorisation et rotation de stock sur 10 shifts types.", "Conformité stricte avec les déclarations d'atelier validées.", "Validé"],
-            ["Projection prédictive 30j", "Génération de la prévision mensuelle d'atelier (horizon 30 jours) avec le modèle Random Forest Champion.", "Courbe continue avec bornes de confiance à 95 % et calcul des totaux mensuels.", "Validé"],
+            ["Prévision à 30 jours", "Calcul et affichage des prévisions de cadence à 30 jours sur l'interface graphique.", "Mise à jour instantanée des courbes et des bornes d'incertitude à 95 %.", "Validé"],
             ["Détection des ruptures", "Filtrage sur les références à stock nul (47 références distinctes) et contrôle de l'indicateur visuel rouge.", "Identification immédiate des références prioritaires avec tri par criticité.", "Validé"],
             ["Chiffrage commande 45j", "Contrôle de la somme budgétaire sur les 193 références prioritaires du catalogue.", "Montant égal aux 380 400 TND calculés dans le module d'approvisionnement.", "Validé"],
             ["Exportation tabulaire", "Export des alertes d'approvisionnement vers un tableur Excel.", "Génération d'un fichier conforme prêt pour transmission aux fournisseurs.", "Validé"]
@@ -1958,25 +1945,25 @@ const doc = new Document({
         }),
         pb(),
 
-        title3("6.7.2 Validation des prévisions d'atelier"),
+        title3("6.6.2 Validation des prévisions d'atelier"),
         body("L'analyse comparée des cadences prédites et observées sur les 98 jours de test confirme la cohérence des prévisions par rapport aux dynamiques de production observées, apportant une visibilité prédictive structurée à l'administrateur et aux opérateurs de l'atelier."),
         pb(),
 
-        title3("6.7.3 Validation des règles d'approvisionnement"),
+        title3("6.6.3 Validation des règles d'approvisionnement"),
         body("La simulation sur 45 jours a mis en évidence la suppression des commandes redondantes sur les 50 références en situation de surstock tout en ciblant les besoins d'approvisionnement pour les 193 références prioritaires du catalogue (47 ruptures et 146 critiques pour un budget de 380 400 TND), sécurisant la continuité de l'alimentation des lignes de fabrication."),
         pb(),
 
-        title2("6.8 Bilan du Sprint 4"),
+        title2("6.7 Bilan du Sprint 4"),
         body("Le tableau 6.4 récapitule les livrables validés à l'issue du Sprint 4 :"),
         pb(),
         makeTable(
           ["Tâche planifiée", "Livrable produit", "Statut"],
           [
             ["Modélisation Power BI", "Connexion au Data Warehouse et création des mesures DAX", "Réalisé"],
-            ["Rapport Supervision Machines", "Tableau de bord de suivi du parc de 319 presses et TRS net d'atelier", "Réalisé"],
-            ["Rapport Prévision IA", "Tableau de bord de prévision des cadences (horizon 30 jours) avec bornes à 95 %", "Réalisé"],
-            ["Rapport Gestion des stocks", "Tableau de bord d'analyse d'inventaire, classification ABC et alertes", "Réalisé"],
-            ["Portail web opérationnel & Benchmark", "Application React 18 / Spring Boot avec API REST et banc d'essai des 4 modèles d'IA", "Réalisé"],
+            ["Rapport Supervision Machines", "Tableau de bord de suivi du parc machines et cadence des lignes", "Réalisé"],
+            ["Rapport Prévision IA", "Tableau de bord des prévisions à 30 jours avec bornes d'incertitude à 95 %", "Réalisé"],
+            ["Rapport Gestion des stocks", "Tableau de bord d'analyse d'inventaire, criticité des stocks et alertes", "Réalisé"],
+            ["Portail web opérationnel", "Application React 18 / Spring Boot avec API REST documentées", "Réalisé"],
             ["Recette et validation", "Validation de 6 scénarios de test fonctionnels et d'intégration d'atelier", "Réalisé"]
           ],
           [2600, 4866, 1200]
@@ -1988,7 +1975,7 @@ const doc = new Document({
         }),
         pb(),
 
-        title2("6.9 Conclusion"),
+        title2("6.8 Conclusion"),
         conclusionBox("Ce chapitre a présenté la conception, le déploiement et la validation des interfaces décisionnelles et opérationnelles de la plateforme Nexora lors du Sprint 4. En combinant la richesse analytique de Power BI pour l'administrateur et l'agilité d'un portail web React / Spring Boot pour l'opérateur en atelier, la solution comble le fossé entre la modélisation statistique avancée et les opérations industrielles quotidiennes. La conclusion générale suivante synthétise les résultats majeurs du projet, en discute les limites actuelles et esquisse des perspectives d'évolution prometteuses."),
         pageBreak(),
     
@@ -2002,9 +1989,9 @@ const doc = new Document({
         pb(),
         body("L'adoption de la démarche itérative Agile Scrum a permis de rythmer le projet autour de jalons concrets et mesurables :"),
         bullet("**Sprint 0 (Cadrage & Architecture)** : formalisation des besoins des deux acteurs d'atelier (Opérateur et Administrateur), modélisation des cas d'utilisation UML et conception de l'architecture découplée en quatre couches."),
-        bullet("**Sprint 1 (Ingénierie des données & ETL)** : conception d'un pipeline Python assurant le dédoublonnage de 18 337 lignes redondantes et le redressement de 10 types d'anomalies, aboutissant au chargement de 32 043 enregistrements validés dans les tables en étoile du DWH (taux de rétention de 62,22 %)."),
-        bullet("**Sprint 2 (Gestion intelligente des stocks)** : segmentation multicritère ABC de Pareto et classification opérationnelle par niveau de risque sur le catalogue de 800 références (couvrant 14,31 M TND de valeur annuelle consommée), couplée à une formule de réapprovisionnement à 45 jours qui chiffre l'enveloppe prioritaire des 193 références en risque à environ 380 400 TND."),
-        bullet("**Sprint 3 (Modélisation prédictive par IA)** : comparaison de quatre modèles d'apprentissage automatique et de séries temporelles sur des horizons de 7, 15 et 30 jours. Random Forest et Prophet affichent des niveaux de précision comparables et satisfaisants (erreurs MAPE de l'ordre de 6 % à 7 %), Random Forest obtenant les plus faibles écarts moyens et Prophet assurant le déploiement opérationnel grâce à sa robustesse et sa gestion native des composantes calendaires."),
+        bullet("**Sprint 1 (Ingénierie des données & ETL)** : conception d'un pipeline Python assurant le dédoublonnage des lignes redondantes et le redressement des anomalies qualité, aboutissant au chargement des enregistrements validés dans les tables en étoile du Data Warehouse."),
+        bullet("**Sprint 2 (Gestion intelligente des stocks)** : classification opérationnelle des stocks par niveau de couverture et de criticité (Rupture, Critique, Alerte, Normal) sur le catalogue de références, couplée à une formule de réapprovisionnement à 45 jours qui chiffre l'enveloppe prioritaire des références en risque."),
+        bullet("**Sprint 3 (Modélisation prédictive par IA)** : comparaison de quatre modèles d'apprentissage automatique et de séries temporelles à l'horizon opérationnel de 30 jours. Random Forest et Prophet affichent des niveaux de précision comparables et satisfaisants (erreurs MAPE de l'ordre de 6 % à 7 %), Random Forest obtenant les plus faibles écarts moyens et Prophet assurant le déploiement opérationnel grâce à sa robustesse et sa gestion native des composantes calendaires."),
         bullet("**Sprint 4 (Restitution & Validation)** : réalisation de tableaux de bord décisionnels Power BI pour le suivi managérial et d'un portail web opérationnel React / Spring Boot pour les équipes d'atelier, validés avec succès par des scénarios de test fonctionnels et d'intégration."),
         pb(),
         body("En dépit de ces résultats concluants, notre solution comporte certaines **limites méthodologiques et techniques** qu'il convient de souligner avec rigueur académique :"),
@@ -2035,7 +2022,7 @@ const doc = new Document({
         bullet("[6] T. Hastie, R. Tibshirani, et J. Friedman, The Elements of Statistical Learning: Data Mining, Inference, and Prediction, 2e éd. New York, NY, USA : Springer, 2009."),
         bullet("[7] L. Breiman, « Random Forests », Machine Learning, vol. 45, n° 1, p. 5-32, 2001."),
         bullet("[8] C. M. Bishop, Pattern Recognition and Machine Learning. New York, NY, USA : Springer, 2006."),
-        bullet("[9] J. M. Juran, Juran's Quality Handbook: The Complete Guide to Performance Excellence, 5e éd. New York, NY, USA : McGraw-Hill, 1999."),
+        bullet("[9] E. A. Silver, D. F. Pyke, et R. Peterson, Inventory Management and Production Planning and Scheduling, 3e éd. New York, NY, USA : John Wiley & Sons, 1998."),
         bullet("[10] S. Seabold et J. Perktold, « statsmodels: Econometric and statistical modeling with Python », in Proc. of the 9th Python in Science Conference, Austin, TX, USA, 2010, p. 92-96."),
         linkBullet("[11] F. Pedregosa et al., « Scikit-learn: Machine Learning in Python », Journal of Machine Learning Research, vol. 12, p. 2825-2830, 2011. ", "https://scikit-learn.org", ""),
         linkBullet("[12] S. J. Taylor et B. Letham, « Forecasting at scale: The Prophet procedure », The American Statistician, vol. 72, n° 1, p. 37-45, 2018. ", "https://peerj.com/preprints/3190/", ""),

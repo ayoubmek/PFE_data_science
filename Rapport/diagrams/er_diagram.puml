@@ -1,0 +1,101 @@
+@startuml er_diagram
+skinparam monochrome false
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam roundcorner 8
+
+skinparam class {
+    BackgroundColor White
+    BorderColor #2B3A4A
+    ArrowColor #1E3A8A
+    FontSize 11
+    FontName Arial
+    HeaderBackgroundColor #2B3A4A
+}
+
+skinparam classHeader {
+    FontColor White
+    FontSize 12
+    FontStyle bold
+    FontName Arial
+}
+
+entity "dbo.MCMachineCenter\n(Dimension Presses)" as MCMachineCenter << (D,#3B82F6) >> {
+    * **No_** : VARCHAR(20) [PK]
+    --
+    * Name : VARCHAR(100)
+    * Work Center No_ : VARCHAR(20)
+    * Machine Family : VARCHAR(50)
+    * Database : VARCHAR(50) [Site: Kondar/Sousse/Brno]
+    * Tonnage : INT [50T à 1500T]
+    * Cadence_Nominale : INT (pces/h)
+    * Efficiency : FLOAT [TRS nominal]
+}
+
+entity "dbo.FACT_CLE\n(Table de Faits Production)" as FACT_CLE << (F,#EF4444) >> {
+    * **Entry No_** : INT [PK]
+    * **Data Base** : VARCHAR(20) [PK]
+    --
+    * Document No_ : VARCHAR(30) [N° OF]
+    * No_ : VARCHAR(20) [FK -> MCMachineCenter]
+    * Item No_ : VARCHAR(30) [FK -> ASTOCKDATE]
+    * Posting Date : DATETIME2
+    * Output Quantity : FLOAT [Volume brut]
+    * Scrap Quantity : FLOAT [Rebuts]
+    * Run Time : FLOAT [Temps opératoire]
+    * **Quantité produite TRS** : FLOAT [Métrique calculée]
+    * Work Center No_ : VARCHAR(20)
+    * Description : VARCHAR(100)
+}
+
+entity "dbo.ASTOCKDATE\n(Table de Faits / Snapshot Stock)" as ASTOCKDATE << (F,#10B981) >> {
+    * **No_** : VARCHAR(30) [PK]
+    * **datestock** : DATE [PK]
+    * **Site** : VARCHAR(30) [PK]
+    * **Encours** : VARCHAR(20) [PK]
+    --
+    * Description : NVARCHAR(120)
+    * groupeitem : VARCHAR(50) [Famille Résine / Matière]
+    * Quantité : FLOAT [Stock disponible]
+    * Cout : FLOAT [Coût unitaire TND]
+    * Gen_Prod_Posting_Group : VARCHAR(30)
+    * Nom abrégé : VARCHAR(50)
+    * GroupeClient : VARCHAR(50)
+}
+
+entity "dbo.ml_production_predictions\n(Table Analytique Prévisions IA)" as PREDICTIONS << (A,#8B5CF6) >> {
+    * **id** : BIGINT [PK, IDENTITY]
+    --
+    * forecast_date : DATE
+    * horizon_days : INT [Horizon 30 jours]
+    * model_name : VARCHAR(50) [Prophet / Random Forest]
+    * prophet_quantity : INT [Volume journalier prédit]
+    * target_quantity : INT [Objectif d'atelier]
+    * max_capacity : INT [Capacité machine max]
+    * mae : FLOAT [Mean Absolute Error]
+    * rmse : FLOAT [Root Mean Square Error]
+    * mape : VARCHAR(20) [Taux d'erreur %]
+    * created_at : DATETIME2
+}
+
+entity "dbo.app_users\n(Table Système Sécurité & RBAC)" as USERS << (S,#F59E0B) >> {
+    * **id** : BIGINT [PK, IDENTITY]
+    --
+    * username : NVARCHAR(50) [UNIQUE]
+    * password : NVARCHAR(255) [Hash BCrypt]
+    * full_name : NVARCHAR(100)
+    * email : NVARCHAR(100) [UNIQUE]
+    * role : NVARCHAR(20) [OPERATEUR, ADMINISTRATEUR]
+    * enabled : BIT
+    * created_at : DATETIME2
+}
+
+' Relations entre tables du Data Warehouse
+MCMachineCenter ||--o{ FACT_CLE : "1..* (exécute sur)"
+ASTOCKDATE ||--o{ FACT_CLE : "1..* (consomme article)"
+FACT_CLE ..> PREDICTIONS : "historique réel\nalimente l'IA"
+USERS ..> FACT_CLE : "traçabilité &\nsaisie atelier"
+USERS ..> ASTOCKDATE : "contrôle &\nconsultation"
+
+@enduml

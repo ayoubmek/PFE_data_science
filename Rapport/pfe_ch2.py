@@ -22,8 +22,8 @@ def get_chapter2():
 
         title3("2.2.1 Besoins fonctionnels"),
         body("Les fonctionnalités attendues sont organisées selon les deux profils d'utilisateurs du système :"),
-        bullet("**L'Opérateur** : acteur d'atelier habilité à consulter l'état des stocks d'atelier, suivre les alertes de réapprovisionnement et visualiser le statut des lignes de fabrication."),
-        bullet("**L'Administrateur** : superviseur d'atelier et responsable logistique. Il assure le pilotage opérationnel (supervision des 319 presses, planification des ordres de fabrication, suivi des cadences d'atelier, consultation des prévisions d'IA à 7/15/30 jours) ainsi que l'administration technique (gestion des comptes et contrôle d'accès RBAC)."),
+        bullet("**L'Opérateur** : acteur d'atelier habilité à consulter l'état des stocks réels, filtrer les alertes de criticité par site et suivre les indicateurs de fabrication des presses."),
+        bullet("**L'Administrateur** : superviseur d'atelier et responsable logistique. Il assure le pilotage opérationnel (supervision du parc machines, planification des ordres de fabrication, suivi des cadences d'atelier, consultation des prévisions d'IA à 30 jours) ainsi que l'administration technique (gestion des comptes et contrôle d'accès RBAC)."),
         pb(),
 
         title3("2.2.2 Besoins non fonctionnels"),
@@ -34,7 +34,7 @@ def get_chapter2():
           [
             ["Performance", "Temps de réponse interactif inférieur à 2 secondes pour l'affichage des tableaux de bord et requêtes analytiques.", "Mesures de temps de réponse et fluidité des affichages."],
             ["Sécurité", "Authentification sécurisée par jetons JWT, gestion des rôles (RBAC) et traçabilité des accès.", "Contrôle des permissions Opérateur / Admin."],
-            ["Fiabilité", "Données d'entrée assainies par le pipeline ETL et modèles de prévision rigoureusement validés.", "Zéro doublon résiduel dans le DWH et cohérence des résultats."],
+            ["Fiabilité", "Données d'entrée assainies par le pipeline ETL et modèles de prévision rigoureusement validés.", "Zéro doublon résiduel dans le Data Warehouse et cohérence des résultats."],
             ["Maintenabilité", "Architecture modulaire découplée en 4 couches avec séparation nette entre ETL, modélisation et restitution.", "Code versionné et documenté."],
             ["Évolutivité", "Capacité d'intégrer ultérieurement des modèles de prévision par presse ou des capteurs IoT sans refonte.", "Schéma dimensionnel normalisé."],
             ["Ergonomie", "Tableaux de bord visuels intuitifs et interface web réactive adaptée aux postes d'atelier.", "Navigation fluide et lisibilité opérationnelle."]
@@ -51,7 +51,7 @@ def get_chapter2():
         title2("2.3 Analyse des besoins"),
         title3("2.3.1 Identification des acteurs"),
         body("L'analyse des cas d'utilisation met en évidence deux acteurs intervenant sur la plateforme Nexora :"),
-        bullet("**1. L'Opérateur** : acteur opérationnel en atelier, responsable de la consultation des stocks, du suivi des alertes d'inventaire et de l'avancement des ordres de fabrication."),
+        bullet("**1. L'Opérateur** : acteur opérationnel en atelier, responsable du suivi des stocks d'atelier, du filtrage des alertes de couverture et de la consultation d'avancement des ordres de fabrication."),
         bullet("**2. L'Administrateur** : acteur de gestion et de supervision, assurant le pilotage d'atelier (supervision des presses, consultation des cadences et des prévisions IA, gestion des alertes d'approvisionnement) ainsi que l'administration des accès."),
         pb(),
 
@@ -66,19 +66,19 @@ def get_chapter2():
         body("Pour assurer la robustesse, la modularité et l'évolutivité de la solution, l'architecture globale de Nexora est structurée en **quatre couches logiques**, comme l'illustre la figure 2.2 :"),
         pb(),
         ...imageFigure("diagrams/arch_logique.png", "Figure 2.2 : Architecture globale du système décisionnel en quatre couches", 540, 260),
-        bullet("**1. Couche Données (Data Layer)** : articulée autour de Microsoft SQL Server 2022 [16], elle héberge le Data Warehouse (dbDWH) modélisé en schéma dimensionnel assaini (table de faits de production réelle FACT_CLE avec ingénierie de la métrique TRS, table d'inventaire ASTOCKDATE, référentiel des 319 presses MCMachineCenter, et table des prévisions IA ml_production_predictions)."),
-        bullet("**2. Couche Traitement & ETL (Processing Layer)** : développée en Python 3.10 [18] avec Pandas [19] et NumPy [20], elle orchestre l'ingestion automatisée, le dédoublonnage, la correction des 10 anomalies recensées et l'alimentation des tables analytiques."),
-        bullet("**3. Couche Métier & IA (Business & AI Layer)** : regroupe les services d'apprentissage automatique (Régression Linéaire, ARIMA, Random Forest comme modèle champion de référence, Prophet [12] déployé pour les projections opérationnelles de cadence) ainsi que le moteur logistique de calcul déterministe des couvertures de stock à 45 jours. Les prévisions générées sont automatiquement écrites dans la table `ml_production_predictions` du DWH. Cette couche intègre également un micro-service FastAPI [21] pour l'inférence et un serveur d'entreprise Spring Boot [17] pour la gestion des entités métiers et des utilisateurs."),
-        bullet("**4. Couche Restitution & Présentation (Presentation Layer)** : propose une double modalité d'accès adaptée aux profils : d'une part, des tableaux de bord décisionnels interactifs sous Microsoft Power BI [24] connectés directement au DWH pour le pilotage stratégique ; d'autre part, un portail web réactif en React.js [22] et TypeScript [23] pour les consultations d'atelier, le suivi des alertes de rupture et le benchmark comparatif des modèles."),
+        bullet("**1. Couche Données (Data Layer)** : articulée autour de Microsoft SQL Server 2022 [16], elle héberge le Data Warehouse centralisant les référentiels du parc machines, les historiques de fabrication et de cadence d'atelier, les états d'inventaire des stocks, les projections prédictives d'IA ainsi que la gestion de la sécurité et des droits d'accès."),
+        bullet("**2. Couche Traitement & ETL (Processing Layer)** : développée en Python 3.10 [18] avec Pandas [19] et NumPy [20], elle orchestre l'ingestion automatisée, le dédoublonnage, le traitement des anomalies qualité et la structuration des données en schéma dimensionnel."),
+        bullet("**3. Couche Métier & IA (Business & AI Layer)** : regroupe les services d'apprentissage automatique (Régression Linéaire, ARIMA, Random Forest, Prophet [12] déployé en production pour les prévisions de cadence) ainsi que le moteur logistique de calcul des couvertures de stock. Les projections sont automatiquement persistées dans le Data Warehouse. Cette couche intègre également un micro-service FastAPI [21] pour l'inférence des modèles et un serveur d'entreprise Spring Boot [17] pour la gestion des règles métiers et du contrôle d'accès (RBAC)."),
+        bullet("**4. Couche Restitution & Présentation (Presentation Layer)** : propose une double modalité d'accès adaptée aux profils d'utilisateurs : d'une part, des tableaux de bord décisionnels interactifs sous Microsoft Power BI [24] connectés directement au Data Warehouse pour le pilotage managérial ; d'autre part, un portail web réactif en React.js [22] et TypeScript [23] pour la supervision opérationnelle et les consultations d'atelier."),
         pb(),
 
         title2("2.5 Environnement de travail"),
         title3("2.5.1 Environnement matériel"),
         body("Les phases de préparation des données, d'entraînement des modèles et de développement ont été réalisées sur une station de travail présentant les caractéristiques suivantes :"),
-        bullet("**Processeur** : Intel Core i7-12700H (14 cœurs, 20 threads, fréquence de base 2,30 GHz jusqu'à 4,70 GHz en mode Turbo)."),
-        bullet("**Mémoire vive (RAM)** : 16 Go DDR4 (3200 MHz)."),
-        bullet("**Stockage** : Disque SSD NVMe PCIe 4.0 de 512 Go (débit de lecture séquentielle > 3 500 Mo/s)."),
-        bullet("**Système d'exploitation** : Microsoft Windows 11 Professionnel (64 bits)."),
+        bullet("**Processeur** : Intel Core i7."),
+        bullet("**Mémoire vive (RAM)** : 16 Go."),
+        bullet("**Stockage** : Disque SSD de 512 Go."),
+        bullet("**Système d'exploitation** : Microsoft Windows 11 (64 bits)."),
         pb(),
 
         title3("2.5.2 Environnement logiciel"),
@@ -104,8 +104,8 @@ def get_chapter2():
             ["Frontend Web", "React.js", "18.2", "Bibliothèque d'interfaces graphiques composables pour le portail atelier [22]."],
 
             ["Data Science & ML", "Pandas & NumPy", "2.1 / 1.26", "Manipulation des séries tabulaires et calculs vectorisés [19, 20]."],
-            ["Data Science & ML", "Prophet", "1.1", "Modèle déployé en production (prévisions des cadences d'atelier, décomposition saisonnière) [12]."],
-            ["Data Science & ML", "Scikit-Learn", "1.3", "Normalisation, Random Forest (modèle Champion d'atelier), Régression Linéaire et métriques [11]."],
+            ["Data Science & ML", "Prophet", "1.1", "Modèle déployé en production (prévisions de cadence et stocks, décomposition saisonnière) [12]."],
+            ["Data Science & ML", "Scikit-Learn", "1.3", "Normalisation, Random Forest (benchmark récursif), Régression Linéaire et métriques [11]."],
             ["Data Science & ML", "Statsmodels", "0.14", "Modèle statistique ARIMA et tests de stationnarité (ADF) [10]."],
 
             ["Business Intelligence", "Microsoft Power BI Desktop", "2024", "Conception des rapports décisionnels interactifs et modélisation DAX [24]."]

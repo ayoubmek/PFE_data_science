@@ -1,20 +1,23 @@
 @startuml sprint2_activity
+skinparam activity {
+    BackgroundColor White
+    BorderColor #2B3A4A
+    FontName Arial
+    FontSize 11
+    ArrowColor #2B3A4A
+}
+
 start
-:Administrateur planifie un Ordre de Production;
-:Statut = EN_ATTENTE;
-:Opérateur démarre la fabrication sur machine;
-:Statut = EN_COURS;
-if (Panne ou arrêt machine?) then (oui)
-    :Opérateur déclare l'arrêt machine;
-    :Machine statut = ARRÊT;
-    :Comptabiliser le temps d'arrêt;
-else (non)
-    :Production continue;
-endif
-:Opérateur termine l'ordre de production;
-:Statut = TERMINE;
-:Saisir quantité produite et pièces rebutées;
-:Consolider les cadences de la machine;
-:Mettre à jour le tableau de bord de production;
+
+:1. Extraction des séries de fabrication\n(Table **dbo.FACT_CLE** : 851 jours de production);
+
+:2. Transformation et ingénierie des variables prédictives\n* Transformation log: y = log(1 + Cadence)\n* Variables calendaires (jour, week-end, mois)\n* Facteurs d'événements (Ramadan, congés, maintenance)\n* Décalages (lags) et moyennes mobiles;
+
+:3. Entraînement et ajustement des modèles de séries temporelles\n* Random Forest Regressor\n* Meta Prophet\n* Régression Linéaire Multiple\n* Modèle ARIMA univarié;
+
+:4. Évaluation des performances (horizon 30 jours)\n* Calcul des métriques : MAE, RMSE, MAPE, R²\n* Validation des bornes d'incertitude à 95 %;
+
+:5. Restitution et persistance décisionnelle\n* Écriture dans **dbo.ml_production_predictions**\n* Visualisation Power BI (Courbes et fuseaux)\n* Consultation sur le portail web (/api/ml);
+
 stop
 @enduml

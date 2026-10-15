@@ -13,7 +13,7 @@ def get_chapter3():
         title1("Chapitre 3 : Sprint 1 : Prétraitement des données, assainissement de la qualité et pipeline ETL"),
 
         title2("3.1 Introduction"),
-        body("Ce chapitre correspond au Sprint 1 de notre démarche Agile Scrum. Dans un projet d'analyse de données et d'aide à la décision, la qualité des informations en entrée conditionne directement la fiabilité des modèles prédictifs et des indicateurs de gestion. Dans un environnement industriel réel, les extractions de bases opérationnelles comportent inévitablement des anomalies de saisie, des redondances et des valeurs manquantes. L'objectif de ce premier sprint est donc d'auditer les données brutes, de concevoir un pipeline de nettoyage modulaire en Python [18], d'appliquer les règles d'assainissement et de charger les tables validées dans le Data Warehouse (DWH) sous un schéma en étoile normalisé."),
+        body("Ce chapitre correspond au Sprint 1 de notre démarche Agile Scrum. Dans un projet d'analyse de données et d'aide à la décision, la qualité des informations en entrée conditionne directement la fiabilité des modèles prédictifs et des indicateurs de gestion. Dans un environnement industriel réel, les extractions de bases opérationnelles comportent inévitablement des anomalies de saisie, des redondances et des valeurs manquantes. L'objectif de ce premier sprint est donc d'auditer les données brutes, de concevoir un pipeline de nettoyage modulaire en Python [18], d'appliquer les règles d'assainissement et de charger les tables validées dans le Data Warehouse sous un schéma relationnel et dimensionnel."),
         pb(),
 
         title2("3.2 Backlog du Sprint 1"),
@@ -24,9 +24,9 @@ def get_chapter3():
           [
             ["Élevée", "Extraction et audit de qualité des fichiers d'inventaire et de production bruts", "3 jours"],
             ["Élevée", "Développement des fonctions de nettoyage des anomalies recensées", "4 jours"],
-            ["Élevée", "Modélisation dimensionnelle et structuration des tables cibles du Data Warehouse", "3 jours"],
-            ["Élevée", "Chargement automatisé des 32 043 lignes assainies dans SQL Server", "2 jours"],
-            ["Élevée", "Calcul des 14 variables explicatives", "3 jours"],
+            ["Élevée", "Modélisation dimensionnelle et structuration du schéma du Data Warehouse", "3 jours"],
+            ["Élevée", "Chargement automatisé des données d'inventaire assainies dans SQL Server", "2 jours"],
+            ["Élevée", "Calcul et ingénierie des variables explicatives", "3 jours"],
             ["Moyenne", "Analyse exploratoire des séries de cadence (distributions, tendances, saisonnalités)", "2 jours"],
             ["Moyenne", "Création des index sur les tables du Data Warehouse", "1 jour"],
             ["Faible", "Génération automatique des journaux d'exécution et du rapport d'audit", "1 jour"]
@@ -54,7 +54,7 @@ def get_chapter3():
             ["Lignes d'inventaire détaillées d'atelier", "6 875 lignes actives", "Inventaire ventilé par atelier, dépôt et lot."],
             ["Références articles au catalogue", "800 références uniques", "Articles distincts du référentiel produit."],
             ["Presses à injecter suivies", "319 machines", "Parc de presses réparti sur les 3 sites industriels."],
-            ["Déclarations de fabrication d'atelier", "108 106 relevés réels", "Historique de production d'injection de la table FACT_CLE."]
+            ["En-cours de fabrication enregistrés", "8 344 enregistrements", "Suivi des ordres d'injection en atelier."]
           ],
           [3500, 2400, 2766]
         ),
@@ -65,31 +65,36 @@ def get_chapter3():
         }),
         pb(),
 
-        title3("3.3.2 Description des tables principales du Data Warehouse"),
-        body("Le Data Warehouse (dbDWH) est structuré autour d'un schéma dimensionnel optimisé et assaini [16], éliminant les tables redondantes ou obsolètes pour se concentrer sur les tables maîtresses d'atelier et de pilotage :"),
+        title3("3.3.2 Description des tables du Data Warehouse"),
+        body("Le Data Warehouse Microsoft SQL Server (base `dbDWH`) est modélisé autour d'un schéma optimisé pour les requêtes analytiques [16], articulé autour de cinq tables réelles interconnectées couvrant les flux de production, les stocks, le parc machines, la sécurité et les prédictions d'IA :"),
         pb(),
         makeTable(
-          ["Table du Data Warehouse", "Nature", "Rôle et contenu opérationnel"],
+          ["Nom de la table", "Nature", "Rôle et contenu fonctionnel"],
           [
-            ["dbo.ASTOCKDATE", "Table de faits d'inventaire", "Instantanés d'inventaire multi-sites (Kondar, Sousse, Brno) : 32 043 lignes validées, quantités physiques, coûts valorisés, familles d'articles et dépôts."],
-            ["dbo.FACT_CLE", "Table de faits de fabrication", "Suivi détaillé de la production réelle d'injection (26 colonnes) : déclarations d'atelier, temps de marche (Run Time), rebuts et calcul de la 'Quantité produite TRS'."],
-            ["dbo.MCMachineCenter", "Table dimensionnelle", "Référentiel des 319 presses à injecter réparties sur les 3 usines : site d'implantation, tonnage (50T à 1500T), atelier et cadence nominale standard."],
-            ["dbo.ml_production_predictions", "Table de persistance IA", "Historique des prévisions de cadence calculées par les modèles d'apprentissage automatique avec métriques d'erreur et recommandations d'équipes."]
+            ["dbo.FACT_CLE", "Table de faits", "Déclarations d'atelier et production réelle (876 128 enregistrements) : ordres de fabrication, code presse, dates de postes, volumes bruts, rebuts, temps de cycle et mesure pivot « Quantité produite TRS »."],
+            ["dbo.ASTOCKDATE", "Table de faits", "Instantanés d'inventaire et stocks physiques : 800 références d'articles du catalogue, quantités disponibles, valorisation unitaire (Cout en TND), sites (Kondar, Sousse, Brno) et statut de couverture."],
+            ["dbo.MCMachineCenter", "Dimension", "Référentiel des 319 presses à injecter : identifiant machine (MACH-001 à MACH-319), désignation, tonnage, atelier d'affectation, site industriel et indicateur d'efficience nominale."],
+            ["dbo.ml_production_predictions", "Table analytique", "Persistance des prévisions d'IA : horizon opérationnel de 30 jours, cadences journalières prédites par Prophet et Random Forest, capacités maximales, métriques d'erreur (MAE, RMSE, MAPE) et recommandations."],
+            ["dbo.app_users", "Table système", "Gestion de la sécurité et contrôle d'accès : comptes utilisateurs, hachage sécurisé des mots de passe, traçabilité et affectation des deux rôles applicatifs (Administrateur et Opérateur)."]
           ],
-          [2400, 2200, 4066]
+          [2400, 1800, 4466]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 3.3 : Tables maîtresses du Data Warehouse dimensionnel", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 3.3 : Structure des tables du Data Warehouse Nexora", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
 
-        title3("3.3.3 Modélisation dimensionnelle"),
-        body("La figure 3.1 présente le diagramme relationnel modélisant l'agencement des dimensions et des tables de faits au sein de la base de données DWH :"),
+        title3("3.3.3 Modélisation dimensionnelle et relationnelle"),
+        body("La figure 3.1 présente le schéma relationnel et dimensionnel modélisant l'agencement des tables au sein de la base de données SQL Server :"),
         pb(),
-        ...imageFigure("diagrams/er_diagram.png", "Figure 3.1 : Modélisation dimensionnelle en étoile du Data Warehouse Nexora", 540, 310),
-        body("La table de dimension MCMachineCenter est interconnectée à la table de faits de fabrication FACT_CLE pour corréler cadences, temps opératoires et rebuts par presse ; la table d'inventaire ASTOCKDATE fournit quant à elle les niveaux de stock physique et les coûts valorisés nécessaires au module logistique et aux tableaux de bord."),
+        ...imageFigure("diagrams/er_diagram.png", "Figure 3.1 : Modélisation dimensionnelle et relationnelle du Data Warehouse Nexora", 440, 520),
+        body("L'architecture des données s'articule autour des interconnexions suivantes :"),
+        bullet("**MCMachineCenter vers FACT_CLE** : la dimension des machines est reliée à la table de faits de production par le code machine `[No_]`, permettant d'agréger les volumes d'injection et le TRS (Taux de Rendement Synthétique / OEE) par presse, atelier ou site."),
+        bullet("**FACT_CLE vers ASTOCKDATE** : chaque déclaration de fabrication est reliée logiquement aux références de matières premières et résines plastiques consommées (`Item No_` vers `No_`), assurant la synchronisation entre cadence de fabrication et déstockage."),
+        bullet("**FACT_CLE vers ml_production_predictions** : les séries chronologiques de production d'atelier issues de `FACT_CLE` alimentent l'entraînement des modèles d'IA, dont les projections calculées sont persistées dans la table analytique des prévisions."),
+        bullet("**app_users** : garantit l'intégrité et le cloisonnement des droits d'accès sur l'ensemble des modules d'atelier et de supervision décisionnelle."),
         pb(),
 
         title2("3.4 Analyse exploratoire des données (EDA)"),
@@ -154,15 +159,11 @@ def get_chapter3():
         bullet("**1. Ingestion** : lecture des fichiers d'extraction bruts et contrôle de leur structure."),
         bullet("**2. Assainissement de la qualité** : application ordonnée des traitements de nettoyage décrits en section 3.5.3."),
         bullet("**3. Structuration dimensionnelle** : séparation des données en tables de dimensions et de faits conformément au modèle en étoile."),
-        bullet("**4. Chargement dans le DWH** : insertion performante par lots dans SQL Server [16] avec mise à jour des index et journalisation."),
+        bullet("**4. Chargement dans le Data Warehouse** : insertion performante par lots dans SQL Server [16] avec mise à jour des index et journalisation."),
         pb(),
         body("La figure 3.5 illustre le flux séquentiel des données à travers le pipeline ETL :"),
         pb(),
         ...imageFigure("diagrams/sprint1_activity.png", "Figure 3.5 : Architecture et flux séquentiel du pipeline ETL", 520, 240),
-        body("Le diagramme de séquence de la figure 3.6 détaille les interactions dynamiques entre les modules d'extraction, de nettoyage et de persistance :"),
-        pb(),
-        ...imageFigure("diagrams/sprint1_seq.png", "Figure 3.6 : Diagramme de séquence du pipeline ETL d'atelier", 520, 250),
-        pb(),
 
         title3("3.5.2 Extraction des données"),
         body("Le module d'extraction extrait les données brutes issues des exports ERP sans modifier les structures initiales. Les données textuelles sont chargées sous forme brute pour permettre l'évaluation quantitative des anomalies avant toute opération de correction."),
@@ -184,12 +185,12 @@ def get_chapter3():
             ["Volume brut extrait de l'ERP", "51 500", "100 %"],
             ["Suppression des doublons", "- 18 337", "- 35,61 %"],
             ["Rejet des dates et identifiants articles invalides (660 + 460)", "- 1 120", "- 2,17 %"],
-            ["**Volume final validé chargé dans le DWH**", "**32 043**", "**Rétention : 62,22 %**"]
+            ["**Volume final validé chargé dans le Data Warehouse**", "**32 043**", "**Rétention : 62,22 %**"]
           ],
           [4800, 1800, 2066]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 3.6 : Bilan quantitatif du nettoyage des données", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 3.6 : Bilan quantitatif de la qualité des données (Waterfall ETL)", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
@@ -198,7 +199,7 @@ def get_chapter3():
         pb(),
 
         title3("3.5.4 Chargement dans le Data Warehouse"),
-        body("La phase finale insère les données transformées dans les tables SQL Server du DWH [16]. Pour accélérer l'affichage des analyses, des index ont été créés sur les clés des tables ainsi que sur les champs de date et de référence article."),
+        body("La phase finale insère les données transformées dans les tables SQL Server du Data Warehouse [16]. Pour accélérer l'affichage des analyses, des index ont été créés sur les clés des tables ainsi que sur les champs de date et de référence article."),
         pb(),
 
         title2("3.6 Résultats du pipeline ETL"),
@@ -208,9 +209,9 @@ def get_chapter3():
           ["Indicateur de performance ETL", "Valeur mesurée", "Interprétation"],
           [
             ["Lignes brutes traitées en entrée", "51 500 enregistrements", "Volume d'inventaire extrait de l'ERP."],
-            ["Lignes validées chargées dans le DWH", "32 043 enregistrements", "Volume assaini chargé dans la table d'inventaire ASTOCKDATE."],
+            ["Lignes validées chargées dans le Data Warehouse", "32 043 enregistrements", "Volume d'inventaire assaini chargé dans la table dbo.ASTOCKDATE."],
             ["Taux de rétention de données assainies", "62,22 %", "Après suppression des doublons (-35,6 %) et rejets (-2,2 %)."],
-            ["Taux d'anomalies résiduelles dans le DWH", "0,0 %", "Toutes les contraintes d'intégrité et de format sont satisfaites."],
+            ["Taux d'anomalies résiduelles dans le Data Warehouse", "0,0 %", "Toutes les contraintes d'intégrité et de format sont satisfaites."],
             ["Variables créées pour l'apprentissage", "14 variables explicatives", "Prêtes pour la modélisation prédictive."],
             ["Temps moyen d'exécution du pipeline", "2,62 secondes", "Traitement rapide de l'ensemble des données."]
           ],
@@ -231,9 +232,9 @@ def get_chapter3():
           [
             ["Extraction des sources brutes", "Module de lecture des fichiers d'extraction", "Réalisé"],
             ["Nettoyage des données", "Module de nettoyage en cinq actions (doublons, dates, formats, coûts, valeurs manquantes)", "Réalisé"],
-            ["Modélisation dimensionnelle", "Structuration des tables cibles du DWH en schéma dimensionnel", "Réalisé"],
-            ["Chargement en base de données", "Module d'insertion des 32 043 lignes avec index", "Réalisé"],
-            ["Variables explicatives", "Calcul des 14 variables explicatives", "Réalisé"],
+            ["Modélisation dimensionnelle", "Structuration relationnelle et dimensionnelle du Data Warehouse", "Réalisé"],
+            ["Chargement en base de données", "Module d'insertion des données validées avec index", "Réalisé"],
+            ["Variables explicatives", "Calcul et ingénierie des variables explicatives", "Réalisé"],
             ["Rapport d'audit de qualité", "Journal d'exécution et bilan avant/après nettoyage", "Réalisé"]
           ],
           [2400, 5066, 1200]

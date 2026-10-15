@@ -2,68 +2,62 @@
 hide footbox
 skinparam backgroundColor White
 skinparam sequence {
-  BackgroundColor White
-  BorderColor #333333
-  ArrowColor #333333
-  ActorBorderColor #333333
-  ActorBackgroundColor White
-  ParticipantBorderColor #333333
-  ParticipantBackgroundColor #F5F5F5
-  ParticipantFontName Arial
-  ParticipantFontSize 12
-  ArrowFontName Arial
-  ArrowFontSize 11
-  LifeLineBorderColor #999999
-  ActivationBorderColor #333333
-  ActivationBackgroundColor #E8E8E8
+    BackgroundColor White
+    BorderColor #2B3A4A
+    ArrowColor #2B3A4A
+    ParticipantBorderColor #2B3A4A
+    ParticipantBackgroundColor #F5F7FA
+    ParticipantFontName Arial
+    ParticipantFontSize 11
+    ArrowFontName Arial
+    ArrowFontSize 10
+    LifeLineBorderColor #999999
 }
-skinparam noteFontName Arial
-skinparam noteFontSize 11
-skinparam noteBorderColor #333333
-skinparam noteBackgroundColor #FFFFF0
 
+actor "Orchestrateur ETL\n(run_etl.py)" as ETL
+participant "Module Extraction\n(extract.py)" as EXT
+participant "Module Nettoyage\n(cleaners.py)" as CLN
+participant "Transformation\n(transform.py)" as TRF
+participant "Module Chargement\n(load.py)" as LOD
+database "Data Warehouse\n(SQL Server dbDWH)" as DWH
 
+== 1. Phase d'Extraction ==
+ETL -> EXT : Lancer l'extraction des fichiers ERP
+activate EXT
+EXT -> EXT : Lecture flux bruts (CSV / Excel)
+EXT --> ETL : DataFrames bruts (Production & Stocks)
+deactivate EXT
 
-actor "Utilisateur" as U
-participant "LoginView" as WEB
-participant "AuthController" as SRV
-participant "JWTService" as AUTH
-database "Base de Données" as DB
+== 2. Phase d'Assainissement ==
+ETL -> CLN : Exécuter le pipeline de nettoyage
+activate CLN
+CLN -> CLN : Élimination des doublons (-18 337 lignes)
+CLN -> CLN : Rejet des dates invalides (-660 lignes)
+CLN -> CLN : Imputation des valeurs manquantes (-460 lignes)
+CLN --> ETL : Données certifiées (32 043 lignes stock, 876k prod)
+deactivate CLN
 
-== Authentification ==
+== 3. Phase de Structuration ==
+ETL -> TRF : Structuration relationnelle et dimensionnelle
+activate TRF
+TRF -> TRF : Formatage des tables cibles (FACT_CLE, ASTOCKDATE...)
+TRF --> ETL : Modèles dimensionnels prêts
+deactivate TRF
 
-U -> WEB : Saisir les identifiants de connexion
-activate WEB
+== 4. Phase de Chargement ==
+ETL -> LOD : Charger les tables assainies
+activate LOD
+LOD -> DWH : Insertion par lots (Batch Insert DirectQuery)
+activate DWH
+DWH --> LOD : Confirmation d'insertion
+deactivate DWH
+LOD -> DWH : Mise à jour des index de performance
+activate DWH
+DWH --> LOD : Index optimisés
+deactivate DWH
+LOD --> ETL : Statut de chargement validé (0 % anomalie)
+deactivate LOD
 
-WEB -> SRV : Soumettre les identifiants
-activate SRV
-
-SRV -> DB : Vérifier l'existence du compte
-activate DB
-DB --> SRV : Informations du compte
-deactivate DB
-
-SRV -> SRV : Vérifier le mot de passe
-
-SRV -> AUTH : Générer le jeton d'accès
-activate AUTH
-AUTH --> SRV : Jeton d'accès généré
-deactivate AUTH
-
-SRV -> DB : Enregistrer la session active
-activate DB
-DB --> SRV : Session enregistrée
-deactivate DB
-
-SRV --> WEB : Authentification réussie
-deactivate SRV
-
-WEB --> U : Redirection vers le tableau de bord
-deactivate WEB
-
-note over U, DB
-  Le rôle détermine les modules accessibles :
-  Administrateur | Opérateur
-end note
-
+== 5. Clôture ==
+ETL -> ETL : Journalisation des métriques d'exécution (2,62 s)
 @enduml

@@ -1,57 +1,35 @@
 @startuml sprint1_activity
-skinparam backgroundColor White
 skinparam activity {
-  BackgroundColor #F5F5F5
-  BorderColor #333333
-  FontName Arial
-  FontSize 11
-  ArrowColor #333333
-  StartColor #333333
-  EndColor #333333
-}
-skinparam swimlane {
-  BorderColor #333333
-  TitleFontName Arial
-  TitleFontSize 12
+    BackgroundColor White
+    BorderColor #2B3A4A
+    FontName Arial
+    FontSize 11
+    ArrowColor #2B3A4A
 }
 
-
-|Utilisateur|
 start
-:Saisir les identifiants de connexion;
-:Soumettre le formulaire;
 
-|Système|
-:Vérifier l'existence du compte;
-if (Compte existant ?) then (non)
-  :Refuser l'accès;
-  |Utilisateur|
-  :Afficher le message d'erreur;
-  stop
-else (oui)
-  :Vérifier le mot de passe;
-  if (Mot de passe correct ?) then (non)
-    :Refuser l'accès;
-    |Utilisateur|
-    :Afficher le message d'erreur;
-    stop
-  else (oui)
-    :Générer le jeton d'accès;
-    :Enregistrer la session;
-    :Retourner les droits et le rôle;
-  endif
-endif
+:1. Ingestion des sources brutes\n* Extractions ERP atelier (PRODUCTION_RAW, ASTOCKDATE_RAW);
 
-|Utilisateur|
-:Mémoriser les informations de session;
-:Charger les permissions selon le rôle;
+partition "2. Assainissement et Contrôle Qualité" {
+    :Détection et suppression des doublons\n(Clé composite Date, Article, Emplacement);
+    :Validation et normalisation des dates\n(Filtrage des formats erronés);
+    :Harmonisation des types et séparateurs numériques;
+    :Régularisation des coûts unitaires et stocks négatifs;
+    :Gestion des valeurs manquantes et imputation;
+}
 
-if (Rôle ?) then (Administrateur)
-  :Accès supervision globale, machines, ordres, cadences, IA et gestion RBAC;
-else (Opérateur)
-  :Accès saisie d'atelier, avancement de production et mouvements de stock;
-endif
+partition "3. Structuration dimensionnelle" {
+    :Génération des clés primaires et étrangères;
+    :Alimentation des dimensions (MCMachineCenter);
+    :Constitution des faits (FACT_CLE, ASTOCKDATE);
+}
 
-:Rediriger vers le tableau de bord du rôle;
+partition "4. Chargement dans le Data Warehouse" {
+    :Insertion par lots dans Microsoft SQL Server;
+    :Reconstruction et optimisation des index;
+    :Génération du journal d'exécution et rapport d'audit;
+}
+
 stop
 @enduml

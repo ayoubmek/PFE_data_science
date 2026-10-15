@@ -40,19 +40,20 @@ actor "Administrateur" as ADM
 
 rectangle "Plateforme Nexora" {
     usecase "S'authentifier" as UC0
-    usecase "Mettre à jour l'état de production" as UC1
-    usecase "Saisir un mouvement de stock" as UC2
-    usecase "Gérer les machines d'atelier" as UC3
-    usecase "Planifier les ordres de production" as UC4
-    usecase "Superviser les lignes d'atelier" as UC5
+    usecase "Suivre les ordres de production" as UC1
+    usecase "Consulter et filtrer les stocks" as UC2
+    usecase "Superviser le parc machines" as UC3
+    usecase "Analyser les indicateurs d'atelier" as UC4
+    usecase "Consulter les alertes d'approvisionnement" as UC5
     usecase "Consulter les prévisions d'IA" as UC6
     usecase "Gérer les comptes utilisateurs" as UC7
-    usecase "Gérer les permissions (RBAC)" as UC8
+    usecase "Gérer les rôles et accès (RBAC)" as UC8
 }
 
 ' Associations Opérateur
 OPE --> UC1
 OPE --> UC2
+OPE --> UC3
 
 ' Associations Administrateur
 ADM --> UC3

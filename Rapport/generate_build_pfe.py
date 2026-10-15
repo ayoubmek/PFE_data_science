@@ -92,26 +92,28 @@ def get_preliminaries():
 
         // RÉSUMÉ FR
         frontTitle("Résumé"),
-        body("Dans le secteur concurrentiel de la plasturgie automobile (équipementier Tier-1), la maîtrise des cadences de fabrication et la gestion proactive des approvisionnements de matières premières constituent des leviers déterminants de rentabilité. Face à la dispersion des données d'atelier issues de 319 presses à injecter réparties sur trois sites industriels (Kondar et Sousse en Tunisie, Brno en République Tchèque), ce projet de fin d'études présente la conception et le déploiement de **Nexora**, une plateforme décisionnelle et opérationnelle d'aide au pilotage industriel."),
+        body("Dans le secteur de la plasturgie automobile, l’optimisation de la production et la gestion des approvisionnements constituent des enjeux majeurs pour améliorer la performance industrielle et assurer la continuité des activités. Face à la dispersion des données de production issues de plusieurs sites industriels, ce projet de fin d’études porte sur la conception et le déploiement de Nexora, une plateforme intégrée d’aide à la décision destinée au pilotage des activités industrielles."),
         pb(),
-        body("Alimentée par un entrepôt de données (Data Warehouse) sous Microsoft SQL Server consolidant 32 043 enregistrements d'inventaire validés après assainissement par un pipeline ETL automatisé (schéma dimensionnel centré sur ASTOCKDATE, FACT_CLE et MCMachineCenter), la solution s'articule autour de trois modules complémentaires : un module prédictif comparant quatre modèles d'apprentissage automatique et de séries temporelles (Régression Linéaire, ARIMA, Random Forest et Prophet), où Random Forest s'impose comme modèle Champion d'atelier (MAPE de 6,0 % à 30 jours, MAE de 2 467 pièces/jour, R² de 0,98) et Prophet assure le déploiement opérationnel grâce à sa modélisation native des composantes calendaires et son intégration directe dans la base de données ; un module de gestion des stocks structuré par une analyse multicritère Pareto ABC (classes A, B, C) et une classification opérationnelle en quatre niveaux de risque (Rupture, Critique, Normal, Surstock), complété par une règle de réapprovisionnement à horizon cible de 45 jours chiffrant l'enveloppe prioritaire pour 193 références en risque à environ 380 400 TND (sur un catalogue totalisant 14,31 M TND de valeur annuelle consommée) ; et une restitution adaptée aux rôles de l'entreprise via des tableaux de bord interactifs Microsoft Power BI pour le management et un portail web opérationnel React / Spring Boot avec banc d'essai comparatif des modèles d'IA pour les équipes d'atelier."),
+        body("La solution repose sur un entrepôt de données centralisé et un processus automatisé de collecte et de transformation des données. Elle intègre trois fonctionnalités principales : le suivi des performances de production à travers des indicateurs industriels, la prévision des quantités produites et la détection des anomalies de fabrication, ainsi que l’optimisation de la gestion des stocks et la planification préventive des réapprovisionnements."),
         pb(),
-        body("La solution a été validée par des scénarios de test fonctionnels et d'intégration, apportant une visibilité structurée sur les cadences de fabrication et sécurisant l'approvisionnement des lignes d'assemblage."),
+        body("La plateforme exploite des méthodes d’apprentissage automatique pour anticiper les volumes de production et identifier les éventuelles dérives, tout en proposant une approche structurée de la gestion des stocks afin de limiter les risques de rupture. Les résultats sont présentés à travers des tableaux de bord interactifs et une interface web permettant de faciliter le suivi des indicateurs et la prise de décision."),
         pb(),
-        bold_body("Mots-clés :"),
-        body("Système décisionnel, Industrie 4.0, Plasturgie Automobile, Séries Temporelles, Random Forest, Prophet, Segmentation Pareto ABC, Pipeline ETL, Data Warehouse, SQL Server, Power BI, Spring Boot, React.js."),
+        body("Développée à l’aide de technologies de Business Intelligence, de traitement des données et de développement web, Nexora contribue à centraliser l’information, à améliorer la visibilité sur les opérations industrielles et à renforcer l’anticipation des besoins de production et d’approvisionnement."),
+        pb(),
+        body("**Mots-clés :** Système décisionnel, Business Intelligence, Data Science, Plasturgie automobile, Performance industrielle, Prévision de production, Détection d’anomalies, Gestion des stocks, ETL, Data Warehouse, SQL Server, Power BI, React, Spring Boot."),
         pageBreak(),
 
         // ABSTRACT EN
         frontTitle("Abstract"),
-        body("In the highly demanding automotive plastics manufacturing sector (Tier-1 supplier), controlling production throughput and proactively managing raw material replenishment are decisive factors for operational efficiency. Addressing data dispersion across 319 injection moulding machines located across three industrial plants (Kondar and Sousse in Tunisia, Brno in the Czech Republic), this Master's thesis presents the design and deployment of **Nexora**, an intelligent decision-support and operational platform."),
+        body("In the automotive plastics manufacturing sector, production monitoring and raw material management are essential to improving industrial performance and ensuring operational continuity. This Master's thesis focuses on the design and implementation of Nexora, an integrated decision-support platform developed to improve production management and inventory planning across multiple industrial sites."),
         pb(),
-        body("Built upon a Microsoft SQL Server Data Warehouse consolidating 32,043 validated inventory records structured in a streamlined dimensional schema (ASTOCKDATE, FACT_CLE, MCMachineCenter) after automated ETL sanitization, the platform integrates three core modules: a forecasting engine evaluating four machine learning and time series models (Linear Regression, ARIMA, Random Forest, and Prophet), in which Random Forest excels as shop-floor Champion (6.0% MAPE at 30 days, MAE 2,467 pcs/day, R² 0.98) and Prophet is deployed in production for its explainability and native handling of industrial calendar effects; an intelligent inventory management module based on Pareto ABC multi-criteria segmentation, a four-level operational risk classification (Out-of-Stock, Critical, Normal, Overstock), and a 45-day replenishment formula budgeting 193 critical references at approximately 380,400 TND (out of a catalog accounting for 14.31 M TND in annual consumption); and a dual-interface architecture featuring interactive Microsoft Power BI dashboards for executive monitoring and a reactive React / Spring Boot web portal with integrated AI model benchmarking for shop-floor teams."),
+        body("The platform relies on a centralized data warehouse and an automated Extract, Transform, Load (ETL) process to consolidate and prepare production data. It integrates three main functionalities: production performance monitoring through industrial indicators, daily production forecasting and anomaly detection, and inventory optimization through stock risk assessment and preventive replenishment planning."),
         pb(),
-        body("The platform has been validated through functional and integration test scenarios, delivering structured visibility over manufacturing throughput and securing material availability for manufacturing lines."),
+        body("Machine learning techniques are used to anticipate production volumes and identify potential manufacturing deviations. In parallel, the inventory management module helps prioritize replenishment needs and reduce the risk of stock shortages. The results are presented through interactive Microsoft Power BI dashboards and a web application developed using React and Spring Boot, providing users with accessible information to support operational and strategic decision-making."),
         pb(),
-        bold_body("Keywords :"),
-        body("Decision Support System, Industry 4.0, Automotive Plastics, Time Series Forecasting, Random Forest, Prophet, Pareto ABC Analysis, ETL Pipeline, Data Warehouse, SQL Server, Power BI, Spring Boot, React.js."),
+        body("By combining Business Intelligence, data analytics, and web technologies, Nexora contributes to improving data visibility, production planning, and inventory management, while strengthening the integration of data-driven insights into daily industrial operations."),
+        pb(),
+        body("**Keywords:** Decision Support System, Business Intelligence, Data Science, Automotive Plastics Manufacturing, Industrial Performance, Production Forecasting, Anomaly Detection, Inventory Management, ETL, Data Warehouse, SQL Server, Power BI, React, Spring Boot."),
         pageBreak(),
 
         // TABLE DES MATIÈRES
@@ -139,7 +141,7 @@ def get_preliminaries():
         tocLine("1.7.3 Organisation des rôles Scrum", 2, "12"),
         tocLine("1.7.4 Product Backlog", 2, "12"),
         tocLine("1.7.5 Planification des sprints", 2, "13"),
-        tocLine("1.8 Langage de modélisation UML", 1, "14"),
+        tocLine("1.8 Langage et démarche de modélisation", 1, "14"),
         tocLine("1.9 Conclusion", 1, "14"),
         pb(),
         tocLine("2 Sprint 0 : Analyse des besoins et Conception du Système", 0, "15"),
@@ -180,9 +182,9 @@ def get_preliminaries():
         tocLine("4.2 Backlog du Sprint 2", 1, "37"),
         tocLine("4.3 Architecture du module de gestion des stocks", 1, "37"),
         tocLine("4.4 Analyse des niveaux de stock et indicateurs de rotation", 1, "38"),
-        tocLine("4.5 Classification et segmentation des produits", 1, "39"),
-        tocLine("4.5.1 Segmentation multicritère Pareto ABC et répartition de la valeur", 2, "39"),
-        tocLine("4.5.2 Classification opérationnelle par niveau de risque", 2, "39"),
+        tocLine("4.5 Classification opérationnelle et analyse de criticité des stocks", 1, "39"),
+        tocLine("4.5.1 Typologie des statuts de stock et seuils d'autonomie", 2, "39"),
+        tocLine("4.5.2 Répartition du catalogue et analyse de criticité", 2, "39"),
         tocLine("4.6 Génération des recommandations et chiffrage budgétaire", 1, "40"),
         tocLine("4.6.1 Algorithme de réapprovisionnement à horizon cible de 45 jours", 2, "40"),
         tocLine("4.6.2 Estimation du budget d'approvisionnement", 2, "40"),
@@ -205,7 +207,7 @@ def get_preliminaries():
         tocLine("5.6.2 Modèle ARIMA", 2, "51"),
         tocLine("5.6.3 Modèle Random Forest Regressor", 2, "52"),
         tocLine("5.6.4 Modèle Prophet (Meta)", 2, "53"),
-        tocLine("5.7 Résultats comparatifs et évaluation multi-horizons", 1, "54"),
+        tocLine("5.7 Résultats comparatifs et évaluation des modèles à l'horizon 30 jours", 1, "54"),
         tocLine("5.8 Analyse explicable des composantes et robustesse", 1, "55"),
         tocLine("5.9 Rôles respectifs des modèles dans la plateforme Nexora", 1, "56"),
         tocLine("5.10 Bilan du Sprint 3", 1, "57"),
@@ -215,23 +217,22 @@ def get_preliminaries():
         tocLine("6.1 Introduction", 1, "58"),
         tocLine("6.2 Backlog du Sprint 4", 1, "58"),
         tocLine("6.3 Architecture du tableau de bord et intégration applicative", 1, "59"),
-        tocLine("6.4 Diagramme de séquence", 1, "60"),
-        tocLine("6.5 Conception des rapports décisionnels Power BI", 1, "61"),
-        tocLine("6.5.1 Tableau de bord de supervision du parc machines", 2, "61"),
-        tocLine("6.5.2 Tableau de bord des prévisions de cadence", 2, "61"),
-        tocLine("6.5.3 Tableau de bord de gestion des stocks", 2, "62"),
-        tocLine("6.6 Présentation des interfaces réalisées", 1, "63"),
-        tocLine("6.6.1 Tableau de bord principal", 2, "63"),
-        tocLine("6.6.2 Historique et répartition des stocks d'atelier", 2, "63"),
-        tocLine("6.6.3 Prévisions de cadence d'atelier", 2, "64"),
-        tocLine("6.6.4 Pilotage des stocks et alertes d'approvisionnement", 2, "65"),
-        tocLine("6.6.5 Portail web opérationnel React & Spring Boot", 2, "65"),
-        tocLine("6.7 Tests et validation", 1, "66"),
-        tocLine("6.7.1 Tests fonctionnels et d'intégration", 2, "66"),
-        tocLine("6.7.2 Validation des prévisions d'atelier", 2, "67"),
-        tocLine("6.7.3 Validation des règles d'approvisionnement", 2, "67"),
-        tocLine("6.8 Bilan du Sprint 4", 1, "68"),
-        tocLine("6.9 Conclusion", 1, "68"),
+        tocLine("6.4 Conception des rapports décisionnels Power BI", 1, "60"),
+        tocLine("6.4.1 Tableau de bord de supervision du parc machines", 2, "60"),
+        tocLine("6.4.2 Tableau de bord des prévisions de cadence", 2, "61"),
+        tocLine("6.4.3 Tableau de bord de gestion des stocks", 2, "61"),
+        tocLine("6.5 Présentation des interfaces réalisées", 1, "62"),
+        tocLine("6.5.1 Tableau de bord principal", 2, "62"),
+        tocLine("6.5.2 Historique et répartition des stocks d'atelier", 2, "63"),
+        tocLine("6.5.3 Prévisions de cadence d'atelier", 2, "63"),
+        tocLine("6.5.4 Pilotage des stocks et alertes d'approvisionnement", 2, "64"),
+        tocLine("6.5.5 Portail web opérationnel React & Spring Boot", 2, "65"),
+        tocLine("6.6 Tests et validation", 1, "66"),
+        tocLine("6.6.1 Tests fonctionnels et d'intégration", 2, "66"),
+        tocLine("6.6.2 Validation des prévisions d'atelier", 2, "67"),
+        tocLine("6.6.3 Validation des règles d'approvisionnement", 2, "67"),
+        tocLine("6.7 Bilan du Sprint 4", 1, "68"),
+        tocLine("6.8 Conclusion", 1, "68"),
         pb(),
         tocLine("Conclusion générale et perspectives", 0, "69"),
         tocLine("Bibliographie", 0, "72"),
@@ -244,42 +245,37 @@ def get_preliminaries():
         tocLine("Figure 1.3 : Cycle itératif de la méthodologie Agile Scrum", 1, "12"),
         tocLine("Figure 2.1 : Diagramme des cas d'utilisation global de Nexora", 1, "18"),
         tocLine("Figure 2.2 : Architecture globale du système décisionnel en quatre couches", 1, "19"),
-        tocLine("Figure 3.1 : Modélisation dimensionnelle en étoile du Data Warehouse Nexora", 1, "26"),
+        tocLine("Figure 3.1 : Modélisation dimensionnelle et relationnelle du Data Warehouse Nexora", 1, "26"),
         tocLine("Figure 3.2 : Évolution temporelle de la production globale des 319 presses (2024–2026)", 1, "28"),
         tocLine("Figure 3.3 : Profils de saisonnalité de production par jour de semaine et par mois", 1, "28"),
         tocLine("Figure 3.4 : Heatmap d'activité atelier : cadence selon le mois et le jour de semaine", 1, "29"),
         tocLine("Figure 3.5 : Architecture et flux séquentiel du pipeline ETL", 1, "30"),
-        tocLine("Figure 3.6 : Diagramme de séquence du pipeline ETL d'atelier", 1, "31"),
-        tocLine("Figure 4.1 : Architecture et flux de traitement du module de gestion des stocks", 1, "37"),
-        tocLine("Figure 4.2 : Segmentation multicritère Pareto ABC et répartition de la valeur de stock", 1, "41"),
-        tocLine("Figure 4.3 : Répartition des alertes de rupture et de stock critique par famille de matière", 1, "42"),
-        tocLine("Figure 5.1 : Architecture et flux de traitement du module d'IA de Nexora", 1, "47"),
-        tocLine("Figure 5.2 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 1, "52"),
+        tocLine("Figure 4.1 : Répartition des références du catalogue par statut opérationnel de stock", 1, "41"),
+        tocLine("Figure 4.2 : Répartition des alertes de rupture et de stock critique par famille de matière", 1, "42"),
+        tocLine("Figure 5.1 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 1, "52"),
         tocLine("Figure 6.1 : Architecture globale d'intégration et de déploiement de Nexora", 1, "60"),
-        tocLine("Figure 6.2 : Diagramme de séquence des échanges entre l'utilisateur, l'interface et le DWH", 1, "61"),
-        tocLine("Figure 6.3 : Vue d'ensemble du tableau de bord décisionnel Power BI Nexora", 1, "64"),
-        tocLine("Figure 6.4 : Rapport Power BI « Historique d'évolution des stocks par site »", 1, "64"),
-        tocLine("Figure 6.5 : Rapport Power BI « État de stock global et répartition par famille »", 1, "65"),
-        tocLine("Figure 6.6 : Rapport Power BI « Prévision des cadences et charge atelier »", 1, "65"),
-        tocLine("Figure 6.7 : Rapport Power BI « Gestion des stocks d'atelier et alertes »", 1, "66"),
+        tocLine("Figure 6.2 : Vue d'ensemble du tableau de bord décisionnel Power BI Nexora", 1, "62"),
+        tocLine("Figure 6.3 : Rapport Power BI « Historique d'évolution des stocks par site »", 1, "63"),
+        tocLine("Figure 6.4 : Rapport Power BI « État de stock global et répartition par famille »", 1, "63"),
+        tocLine("Figure 6.5 : Rapport Power BI « Prévision des cadences et charge atelier »", 1, "64"),
+        tocLine("Figure 6.6 : Rapport Power BI « Gestion des stocks d'atelier et alertes »", 1, "64"),
         pageBreak(),
 
         // LISTE DES TABLEAUX
         frontTitle("Liste des tableaux"),
-        tocLine("Tableau 1.1 : Fiche d'identité de Maps-IT", 1, "5"),
-        tocLine("Tableau 1.2 : Positionnement comparatif des solutions existantes avec Nexora", 1, "9"),
-        tocLine("Tableau 1.3 : Comparaison entre approche classique et approche agile", 1, "10"),
-        tocLine("Tableau 1.4 : Avantages et inconvénients des méthodologies", 1, "11"),
-        tocLine("Tableau 1.5 : Product Backlog priorisé du projet", 1, "13"),
-        tocLine("Tableau 1.6 : Planification des sprints du projet", 1, "14"),
+        tocLine("Tableau 1.1 : Positionnement comparatif des solutions existantes avec Nexora", 1, "9"),
+        tocLine("Tableau 1.2 : Comparaison entre approche classique et approche agile", 1, "10"),
+        tocLine("Tableau 1.3 : Avantages et inconvénients des méthodologies", 1, "11"),
+        tocLine("Tableau 1.4 : Product Backlog priorisé du projet", 1, "13"),
+        tocLine("Tableau 1.5 : Planification des sprints du projet", 1, "14"),
         tocLine("Tableau 2.1 : Les besoins non fonctionnels du système", 1, "17"),
         tocLine("Tableau 2.2 : Outils, langages et bibliothèques logiciels utilisés", 1, "21"),
         tocLine("Tableau 3.1 : Priorisation des tâches pour le Sprint 1", 1, "24"),
         tocLine("Tableau 3.2 : Périmètre quantitatif des données industrielles du projet", 1, "25"),
-        tocLine("Tableau 3.3 : Tables maîtresses du Data Warehouse dimensionnel", 1, "25"),
+        tocLine("Tableau 3.3 : Structure des tables du Data Warehouse Nexora", 1, "25"),
         tocLine("Tableau 3.4 : Statistiques descriptives de la série journalière de production d'atelier", 1, "27"),
         tocLine("Tableau 3.5 : Impact des événements et variations industrielles sur la cadence", 1, "27"),
-        tocLine("Tableau 3.6 : Bilan quantitatif du nettoyage des données", 1, "32"),
+        tocLine("Tableau 3.6 : Bilan quantitatif de la qualité des données (Waterfall ETL)", 1, "32"),
         tocLine("Tableau 3.7 : Résultats quantitatifs et techniques du pipeline ETL", 1, "34"),
         tocLine("Tableau 3.8 : Bilan des livrables du Sprint 1", 1, "35"),
         tocLine("Tableau 4.1 : Priorisation des tâches pour le Sprint 2", 1, "37"),
@@ -292,7 +288,7 @@ def get_preliminaries():
         tocLine("Tableau 5.5 : Avantages et limites : Modèle ARIMA", 1, "51"),
         tocLine("Tableau 5.6 : Avantages et limites : Random Forest", 1, "52"),
         tocLine("Tableau 5.7 : Avantages et limites : Prophet", 1, "53"),
-        tocLine("Tableau 5.8 : Synthèse des performances prédictives aux horizons 7, 15 et 30 jours", 1, "54"),
+        tocLine("Tableau 5.8 : Synthèse des performances comparatives des modèles à l'horizon 30 jours", 1, "54"),
         tocLine("Tableau 5.9 : Bilan des livrables du Sprint 3", 1, "57"),
         tocLine("Tableau 6.1 : Priorisation des tâches pour le Sprint 4", 1, "58"),
         tocLine("Tableau 6.2 : Synthèse des services REST de l'application web", 1, "65"),
@@ -320,12 +316,15 @@ def get_preliminaries():
             ["MAPE", "Mean Absolute Percentage Error", "Pourcentage moyen d'erreur absolue par rapport au volume réel"],
             ["MES", "Manufacturing Execution System", "Système de pilotage et d'exécution des ateliers de fabrication"],
             ["ML", "Machine Learning", "Apprentissage automatique supervisé et non supervisé"],
+            ["OEE", "Overall Equipment Effectiveness", "Indicateur international d'efficience globale des équipements de production (équivalent anglo-saxon du TRS)"],
             ["RBAC", "Role-Based Access Control", "Contrôle d'accès aux fonctionnalités fondé sur les rôles (Opérateur, Administrateur)"],
             ["REST", "Representational State Transfer", "Style d'architecture logicielle pour les services web distribués"],
             ["RF", "Random Forest Regressor", "Algorithme d'apprentissage supervisé par forêt d'arbres de décision"],
             ["RMSE", "Root Mean Square Error", "Racine carrée de l'erreur quadratique moyenne pénalisant les grands écarts"],
             ["SQL", "Structured Query Language", "Langage de requêtage relationnel (Microsoft SQL Server)"],
             ["TND", "Dinar Tunisien", "Unité monétaire légale pour la valorisation financière des stocks"],
+            ["TRG", "Taux de Rendement Global", "Rapport du temps utile de fabrication sur le temps d'ouverture d'atelier"],
+            ["TRS", "Taux de Rendement Synthétique", "Indicateur composite de performance combinant disponibilité, cadence et qualité (équivalent de l'OEE)"],
             ["UML", "Unified Modeling Language", "Langage universel de modélisation visuelle des systèmes logiciels"]
           ],
           [1600, 3600, 3466]
@@ -670,11 +669,39 @@ const emptyFigurePlaceholder = (captionText, heightPt = 160) => [
   pb()
 ];
 
+function getImageDimensions(buffer) {
+  try {
+    if (buffer.length >= 24 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+      return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+    }
+    if (buffer.length >= 2 && buffer[0] === 0xFF && buffer[1] === 0xD8) {
+      let offset = 2;
+      while (offset < buffer.length) {
+        if (buffer[offset] !== 0xFF) break;
+        const marker = buffer[offset + 1];
+        if (marker === 0xC0 || marker === 0xC2) {
+          return { height: buffer.readUInt16BE(offset + 5), width: buffer.readUInt16BE(offset + 7) };
+        }
+        offset += 2 + buffer.readUInt16BE(offset + 2);
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
 const imageFigure = (imageRelPath, captionText, maxW = 540, maxH = 380) => {
   const fullPath = path.isAbsolute(imageRelPath) ? imageRelPath : path.join(__dirname, imageRelPath);
   if (fs.existsSync(fullPath)) {
     try {
       const buffer = fs.readFileSync(fullPath);
+      let targetW = maxW;
+      let targetH = maxH;
+      const dims = getImageDimensions(buffer);
+      if (dims && dims.width > 0 && dims.height > 0) {
+        const scale = Math.min(maxW / dims.width, maxH / dims.height);
+        targetW = Math.round(dims.width * scale);
+        targetH = Math.round(dims.height * scale);
+      }
       return [
         new Paragraph({
           alignment: AlignmentType.CENTER,
@@ -682,7 +709,7 @@ const imageFigure = (imageRelPath, captionText, maxW = 540, maxH = 380) => {
           children: [
             new ImageRun({
               data: buffer,
-              transformation: { width: maxW, height: maxH },
+              transformation: { width: targetW, height: targetH },
             })
           ]
         }),

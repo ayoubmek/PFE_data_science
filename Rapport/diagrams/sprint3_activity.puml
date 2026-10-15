@@ -1,21 +1,45 @@
 @startuml sprint3_activity
+skinparam activity {
+    BackgroundColor White
+    BorderColor #2B3A4A
+    FontName Arial
+    FontSize 11
+    ArrowColor #2B3A4A
+}
+skinparam note {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A4A
+    FontName Arial
+    FontSize 10
+}
+
 start
-:Saisie de l'article et de la quantité;
-if (Type de mouvement?) then (Sortie)
-    if (Quantité <= Stock Actuel?) then (oui)
-        :Mettre à jour le stock en déduction;
-    else (non)
-        :Afficher "Stock insuffisant" et bloquer;
-        stop
+
+:Extraction des données d'inventaire\n(Table **dbo.ASTOCKDATE** : 800 références);
+
+:Calcul des indicateurs logistiques\n* Taux de consommation journalier\n* Couverture en jours d'autonomie\n* Coefficient de rotation;
+
+partition "Classification opérationnelle de criticité" {
+    if (Couverture disponible ?) then (0 jour / Stock nul)
+        #FFD2D2:Statut **Rupture de Stock**\nPriorité critique d'atelier;
+    else if (Couverture < 15 jours) then (oui)
+        #FFE6CC:Statut **Stock Critique**\nRéapprovisionnement sous 48h;
+    else if (Couverture >= 120 jours) then (oui)
+        #E8DAEF:Statut **Surstock**\nGel préventif des commandes;
+    else (15j <= Couverture < 120j)
+        #D5F5E3:Statut **Stock Normal**\nNiveau nominal équilibré;
     endif
-else (Entrée)
-    :Mettre à jour le stock en addition;
-endif
-:Enregistrer le mouvement en base;
-if (Stock < Seuil d'alerte?) then (oui)
-    :Générer une notification d'alerte de rupture;
-    :Afficher l'alerte sur le tableau de bord;
-else (non)
-endif
+}
+
+partition "Recommandations et Budgétisation" {
+    if (Article en Rupture ou Critique ?) then (oui (193 références))
+        :Calcul quantité commande horizon 45 jours\nQ = max(Q_min, ceil(Taux_j * 45) - Stock_Actuel);
+        :Valorisation au coût unitaire DWH\n(Budget total estimé : ~380 400 TND);
+        :Émission des alertes priorisées\net export Excel pour les achats;
+    else (non)
+        :Maintien sous surveillance\nnominale dans le tableau de bord;
+    endif
+}
+
 stop
 @enduml

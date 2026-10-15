@@ -8,7 +8,7 @@ Texte clair, simple et concis pour jury de Master :
 - Découpage chronologique simple (Tableau 5.3 : Train / Validation / Test)
 - Formules des 4 métriques (MAE, RMSE, MAPE, R²)
 - Les 5 modèles avec leurs équations simples, sans hyperparamètres
-- Tableau unique des résultats (Tableau 5.4 : MAE et MAPE à 7, 15 et 30 jours) + Figure 5.2
+- Tableau unique des résultats (Tableau 5.8 : MAE, RMSE, MAPE et R² à 30 jours) + Figure 5.2
 - Analyse explicable des composantes et robustesse
 - Rôles respectifs des modèles en 3-4 phrases concises
 - Bilan du sprint (Tableau 5.5) et conclusion
@@ -34,11 +34,11 @@ def get_chapter5():
           ["Priorité", "Tâche de réalisation", "Durée estimée"],
           [
             ["Élevée", "Définition de la variable cible et transformation logarithmique", "2 jours"],
-            ["Élevée", "Ingénierie des 14 variables explicatives et calendrier d'atelier", "3 jours"],
-            ["Élevée", "Développement des 4 modèles de prévision de séries temporelles", "4 jours"],
-            ["Élevée", "Évaluation comparative des performances aux horizons 7, 15 et 30 jours", "3 jours"],
+            ["Élevée", "Ingénierie des variables explicatives et calendrier d'atelier", "3 jours"],
+            ["Élevée", "Développement des modèles de prévision de séries temporelles", "4 jours"],
+            ["Élevée", "Évaluation comparative des performances des modèles à l'horizon 30 jours", "3 jours"],
             ["Moyenne", "Analyse d'explicabilité et décomposition des composantes saisonnières", "2 jours"],
-            ["Faible", "Intégration des prévisions Prophet dans la table ml_production_predictions du DWH", "2 jours"]
+            ["Faible", "Intégration des prévisions Prophet dans la table ml_production_predictions du Data Warehouse", "2 jours"]
           ],
           [1600, 5666, 1400]
         ),
@@ -49,15 +49,13 @@ def get_chapter5():
         }),
         pb(),
 
-        title2("5.3 Architecture du module de modélisation prédictive"),
-        body("Le processus de modélisation prédictive suit les cinq étapes illustrées par la figure 5.1 :"),
-        pb(),
-        ...imageFigure("diagrams/sprint2_activity.png", "Figure 5.1 : Architecture et flux de traitement du module d'IA de Nexora", 520, 240),
+        title2("5.3 Démarche méthodologique de modélisation prédictive"),
+        body("Le processus de modélisation prédictive des cadences de production d'atelier s'articule autour de cinq étapes méthodologiques :"),
         bullet("**1. Extraction des données d'atelier** : lecture de l'historique des déclarations de fabrication depuis la table `FACT_CLE` du Data Warehouse (851 jours réels)."),
         bullet("**2. Ingénierie des variables** : calcul des variables explicatives (décalages temporels, moyennes mobiles, variables calendaires et événements industriels)."),
         bullet("**3. Entraînement des modèles** : ajustement des algorithmes sur l'historique de production d'injection plastique."),
-        bullet("**4. Évaluation multi-horizons** : mesure des métriques d'erreur sur les horizons de planification de 7, 15 et 30 jours."),
-        bullet("**5. Restitution et persistance** : enregistrement des prévisions dans la table `ml_production_predictions` du DWH pour l'affichage Power BI et le portail web."),
+        bullet("**4. Évaluation des performances** : mesure des métriques d'erreur (MAE, RMSE, MAPE, R²) sur l'horizon de planification de 30 jours."),
+        bullet("**5. Restitution et persistance** : enregistrement des prévisions dans la table `ml_production_predictions` du Data Warehouse pour l'affichage Power BI et le portail web."),
         pb(),
 
         title2("5.4 Préparation des données et variables explicatives"),
@@ -204,38 +202,30 @@ def get_chapter5():
         ),
         pb(),
 
-        title2("5.7 Résultats comparatifs et évaluation multi-horizons"),
-        body("Les 4 modèles ont été évalués sur les trois horizons décisionnels de l'usine : 7 jours (court terme), 15 jours (moyen terme) et 30 jours (plan mensuel). Le tableau 5.8 synthétise les résultats obtenus :"),
+        title2("5.7 Résultats comparatifs et évaluation des modèles à l'horizon 30 jours"),
+        body("Les quatre modèles ont été évalués sur l'horizon de prévision opérationnel de l'usine fixé à 30 jours (correspondant au cycle mensuel de planification de charge). Le tableau 5.8 synthétise les performances comparatives obtenues :"),
         pb(),
         makeTable(
-          ["Horizon", "Modèle de prévision", "MAE moyenne (pièces/jour)", "MAPE moyenne (%)"],
+          ["Modèle de prévision", "MAE moyenne (pièces/jour)", "RMSE (pièces/jour)", "MAPE moyenne (%)", "Score R²"],
           [
-            ["7 jours", "Random Forest", "2 645 pcs/j", "5,9 %"],
-            ["7 jours", "Prophet", "3 653 pcs/j", "7,3 %"],
-            ["7 jours", "Régression Linéaire", "3 734 pcs/j", "7,6 %"],
-            ["7 jours", "ARIMA", "4 364 pcs/j", "9,0 %"],
-            ["15 jours", "Random Forest", "2 538 pcs/j", "6,0 %"],
-            ["15 jours", "Prophet", "3 350 pcs/j", "7,4 %"],
-            ["15 jours", "Régression Linéaire", "4 413 pcs/j", "9,1 %"],
-            ["15 jours", "ARIMA", "5 247 pcs/j", "11,6 %"],
-            ["30 jours", "Random Forest", "2 467 pcs/j", "6,0 %"],
-            ["30 jours", "Prophet", "2 982 pcs/j", "6,7 %"],
-            ["30 jours", "Régression Linéaire", "4 679 pcs/j", "9,8 %"],
-            ["30 jours", "ARIMA", "5 321 pcs/j", "11,7 %"]
+            ["Random Forest", "2 467 pcs/j", "3 196 pcs/j", "6,0 %", "0,9798"],
+            ["Prophet (Déployé)", "2 982 pcs/j", "3 897 pcs/j", "6,7 %", "0,9707"],
+            ["Régression Linéaire", "4 679 pcs/j", "6 098 pcs/j", "9,8 %", "0,9271"],
+            ["ARIMA", "5 321 pcs/j", "6 148 pcs/j", "11,7 %", "0,9082"]
           ],
-          [1800, 3200, 2400, 1266]
+          [2200, 2000, 2000, 1400, 1066]
         ),
         new Paragraph({
-          children: [new TextRun({ text: "Tableau 5.8 : Synthèse des performances prédictives aux horizons 7, 15 et 30 jours", font: FONT, size: 20, italics: true, color: GRAY })],
+          children: [new TextRun({ text: "Tableau 5.8 : Synthèse des performances comparatives des modèles à l'horizon 30 jours", font: FONT, size: 20, italics: true, color: GRAY })],
           alignment: AlignmentType.CENTER,
           spacing: { before: 80, after: 120 },
         }),
         pb(),
         body("À l'horizon de 30 jours, Random Forest et Prophet affichent des performances très proches (6,0 % et 6,7 % de MAPE), avec un écart d'erreur moyenne de seulement 515 pièces par jour sur une production journalière globale d'environ 65 000 pièces/jour."),
         pb(),
-        body("La figure 5.2 illustre la trajectoire des prévisions Prophet face à la production réelle d'atelier sur une période représentative :"),
+        body("La figure 5.1 illustre la trajectoire des prévisions Prophet face à la production réelle d'atelier sur une période représentative :"),
         pb(),
-        ...imageFigure("image/fig_4_3_prophet_vs_reel.png", "Figure 5.2 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 540, 240),
+        ...imageFigure("image/fig_4_3_prophet_vs_reel.png", "Figure 5.1 : Trajectoire des prédictions Prophet face à la production réelle d'atelier", 540, 240),
         pb(),
 
         title2("5.8 Analyse explicable des composantes et robustesse"),
@@ -243,7 +233,7 @@ def get_chapter5():
         pb(),
 
         title2("5.9 Rôles respectifs des modèles dans la plateforme Nexora"),
-        body("L'analyse comparative conduit à une organisation claire entre les deux modèles de tête. Random Forest s'impose comme le **modèle Champion de référence d'atelier**, offrant la meilleure précision ponctuelle absolue sur l'ensemble des horizons (6,0 % d'erreur MAPE à 30 jours, MAE de 2 467 pièces/jour, R² de 0,98) ; il est mis en avant en premier plan sur le portail web opérationnel et dans le module de benchmark pour l'ordonnancement précis des équipes. Le modèle **Prophet** intervient quant à lui comme moteur prévisionnel comparatif et déployé en production, apprécié pour sa décomposition explicable (séparant la tendance générale, les cycles hebdomadaires et les événements d'atelier) et sa persistance directe dans la table `ml_production_predictions` du Data Warehouse pour les tableaux de bord Power BI."),
+        body("L'analyse comparative conduit à une organisation claire entre les deux modèles de tête. Random Forest obtient une précision légèrement supérieure sur l'historique d'atelier (6,0 % d'erreur à 30 jours contre 6,7 % pour Prophet). Toutefois, le modèle Prophet a été retenu pour le déploiement opérationnel en production en raison de sa décomposition transparente (séparant la tendance générale, le rythme hebdomadaire et les arrêts programmés) et de sa grande facilité d'intégration dans l'entrepôt de données SQL Server et les tableaux de bord Power BI. Random Forest demeure utilisé comme modèle de référence pour les analyses hors-ligne et les études approfondies."),
         pb(),
 
         title2("5.10 Bilan du Sprint 3"),
@@ -252,11 +242,11 @@ def get_chapter5():
         makeTable(
           ["Tâche planifiée", "Livrable produit", "Statut"],
           [
-            ["Préparation des variables", "14 variables explicatives et calendrier d'atelier", "Réalisé"],
-            ["Développement des modèles", "Implémentation des 4 modèles (Régression Linéaire, ARIMA, Random Forest, Prophet)", "Réalisé"],
-            ["Évaluation multi-horizons", "Performances mesurées à 7, 15 et 30 jours", "Réalisé"],
+            ["Préparation des variables", "Ingénierie des variables explicatives et calendrier d'atelier", "Réalisé"],
+            ["Développement des modèles", "Implémentation des modèles de prévision temporelle", "Réalisé"],
+            ["Évaluation des performances", "Performances comparatives validées à l'horizon 30 jours", "Réalisé"],
             ["Explicabilité des modèles", "Décomposition explicable des composantes et analyse de robustesse", "Réalisé"],
-            ["Déploiement opérationnel", "Intégration des prévisions Prophet dans la table ml_production_predictions", "Réalisé"]
+            ["Déploiement opérationnel", "Intégration des prévisions Prophet dans le Data Warehouse", "Réalisé"]
           ],
           [2600, 4866, 1200]
         ),
