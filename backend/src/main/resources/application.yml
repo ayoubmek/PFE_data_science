@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 spring:
   application:
@@ -9,7 +9,7 @@ spring:
     allow-circular-references: true
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:sqlserver://${DB_HOST:LAPTOP-M7HILU4Q};databaseName=${DB_NAME:dbDWH};integratedSecurity=${DB_INTEGRATED_SECURITY:true};encrypt=false;trustServerCertificate=true}
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlserver://${DB_HOST:localhost};databaseName=${DB_NAME:dbDWH};integratedSecurity=${DB_INTEGRATED_SECURITY:true};encrypt=false;trustServerCertificate=true}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     username: ${DB_USER:}
     password: ${DB_PASSWORD:}
@@ -18,10 +18,9 @@ spring:
     database-platform: org.hibernate.dialect.SQLServerDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
         jdbc:
           time_zone: UTC
 
@@ -29,23 +28,53 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
 
 
 app:
   jwt:
-    secret: ${JWT_SECRET:PFEImenSecretKey2024VeryLongSecretKeyForJWTSigning1234567890ABCDEF}
-    expiration: 86400000  # 24h in ms
-    refresh-expiration: 604800000  # 7 days
+    # Obligatoire en production (au moins 32 caractères). Si absent, une clé aléatoire est générée
+    # au démarrage : les jetons deviennent invalides à chaque redémarrage.
+    secret: ${JWT_SECRET:}
+    expiration: ${JWT_EXPIRATION_MS:86400000}  # 24h
+
+  # Mots de passe des comptes créés au premier démarrage (table vide). Si absents, ils sont générés
+  # aléatoirement et affichés une seule fois dans les logs.
+  seed:
+    admin-password: ${APP_ADMIN_PASSWORD:}
+    operateur-password: ${APP_OPERATEUR_PASSWORD:}
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:3000}
+
+  # Durée de vie du cache des requêtes DWH : les tableaux de bord reflètent le DWH avec ce délai maximal.
+  cache:
+    ttl-minutes: ${CACHE_TTL_MINUTES:10}
 
   ml-service:
     url: ${ML_SERVICE_URL:http://localhost:8000}
+    api-key: ${ML_API_KEY:}
+    timeout-seconds: ${ML_TIMEOUT_SECONDS:300}
+
+  # Règles de gestion des stocks (identiques au service ML, cf. ml-service/models/stock.py)
+  stock:
+    conso-window-days: ${STOCK_CONSO_WINDOW_DAYS:365}
+    rupture-recent-days: ${STOCK_RUPTURE_RECENT_DAYS:30}
+    critique-days: ${STOCK_CRITIQUE_DAYS:15}
+    surstock-days: ${STOCK_SURSTOCK_DAYS:120}
+    coverage-target-days: ${STOCK_COVERAGE_TARGET_DAYS:45}
+
+  production:
+    # Période (en jours, jusqu'à la dernière date de dbo.FACT_CLE) des KPI et de l'historique du tableau de bord.
+    kpi-period-days: ${PRODUCTION_KPI_PERIOD_DAYS:30}
+    chart-days: ${PRODUCTION_CHART_DAYS:14}
+    orders-limit: ${PRODUCTION_ORDERS_LIMIT:2000}
 
 
 logging:
   level:
-    com.pfe: DEBUG
+    com.pfe: INFO
     org.springframework.security: WARN

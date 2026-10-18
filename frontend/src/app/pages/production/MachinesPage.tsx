@@ -4,7 +4,7 @@ import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
-import { API_BASE_URL } from '../../config'
+import { API_BASE_URL, apiErrorMessage } from '../../config'
 
 let globalCachedMachines: any[] = []
 
@@ -21,27 +21,20 @@ export default function MachinesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(50)
   const [showFilters, setShowFilters] = useState(false)
-  const [realTotalVolume, setRealTotalVolume] = useState<number>(1596027)
+  const [loadError, setLoadError] = useState('')
 
   const apiUrl = API_BASE_URL
 
   const fetchMachines = async () => {
     if (globalCachedMachines.length === 0) setLoading(true)
     try {
-      const [machinesRes, kpiRes] = await Promise.allSettled([
-        axios.get(`${apiUrl}/production/machines`),
-        axios.get(`${apiUrl}/production/kpi`)
-      ])
-      if (machinesRes.status === 'fulfilled') {
-        const list = Array.isArray(machinesRes.value.data) ? machinesRes.value.data : []
-        globalCachedMachines = list
-        setMachines(list)
-      }
-      if (kpiRes.status === 'fulfilled' && (kpiRes.value as any)?.data?.totalVolumeProduit) {
-        setRealTotalVolume(Number((kpiRes.value as any).data.totalVolumeProduit))
-      }
+      const { data } = await axios.get(`${apiUrl}/production/machines`)
+      const list = Array.isArray(data) ? data : []
+      globalCachedMachines = list
+      setMachines(list)
+      setLoadError('')
     } catch (err) {
-      console.error('Failed to fetch machines from API:', err)
+      setLoadError(apiErrorMessage(err, 'Impossible de charger le parc machines.'))
     } finally {
       setLoading(false)
     }
@@ -49,20 +42,7 @@ export default function MachinesPage() {
 
   useEffect(() => {
     fetchMachines()
-
-    let eventSource: EventSource | null = null
-    try {
-      eventSource = new EventSource(`${apiUrl}/production/machines/stream`)
-      eventSource.addEventListener('ORDER_CREATED', () => fetchMachines())
-      eventSource.addEventListener('ORDER_UPDATED', () => fetchMachines())
-      eventSource.addEventListener('MACHINE_STATUS', () => fetchMachines())
-    } catch (e) {
-      console.warn('SSE EventSource not supported or unreachable.')
-    }
-
-    return () => {
-      if (eventSource) eventSource.close()
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -72,7 +52,8 @@ export default function MachinesPage() {
   const workshops = useMemo(() => ['ALL', ...Array.from(new Set(machines.map(m => m.workCenter).filter(Boolean)))], [machines])
   const sites = useMemo(() => ['ALL', ...Array.from(new Set(machines.map(m => m.emplacement).filter(Boolean)))], [machines])
 
-  const getYieldColor = (rate: number) => {
+  const getYieldColor = (rate: number | null) => {
+    if (rate === null || rate === undefined) return 'text-muted'
     if (rate >= 80) return 'text-success'
     if (rate >= 50) return 'text-warning'
     return 'text-danger'
@@ -119,16 +100,14 @@ export default function MachinesPage() {
 
   const stats = useMemo(() => {
     const total = machines.length
-    const totalVolume = realTotalVolume || 1596027
-    const avgTrg = total > 0 ? (machines.reduce((acc, m) => acc + (Number(m.tauxRendement) || 0), 0) / total) : 100
+    const totalVolume = machines.reduce((acc, m) => acc + (Number(m.totalOutput) || 0), 0)
+    const totalScrap = machines.reduce((acc, m) => acc + (Number(m.totalScrap) || 0), 0)
+    // Taux de conformité global pondéré par les volumes (et non moyenne simple des machines)
+    const conformite = totalVolume + totalScrap > 0 ? Math.round((totalVolume / (totalVolume + totalScrap)) * 1000) / 10 : null
     const nbAteliers = new Set(machines.map(m => m.workCenter).filter(Boolean)).size
-    return {
-      total,
-      totalVolume,
-      avgTrg: Math.round(avgTrg * 10) / 10,
-      nbAteliers
-    }
-  }, [machines, realTotalVolume])
+    const bloquees = machines.filter(m => m.bloquee).length
+    return { total, totalVolume, conformite, nbAteliers, bloquees }
+  }, [machines])
 
   const exportExcel = () => {
     const rows = filteredMachines.map(m => ({
@@ -136,9 +115,13 @@ export default function MachinesPage() {
       'Name': m.nom,
       'Work Center No_': m.workCenter,
       'Machine Family': m.family,
-      'Database': m.emplacement,
-      'Capacity': Number(m.totalOutput) || 0,
-      'Efficiency (%)': Number(m.tauxRendement) || 0,
+      'Site': m.emplacement,
+      'Output Quantity (cumul)': Number(m.totalOutput) || 0,
+      'Scrap Quantity (cumul)': Number(m.totalScrap) || 0,
+      'Taux de conformité (%)': m.tauxConformite,
+      'Efficiency nominale Navision (%)': m.efficaciteNominale,
+      'Blocked': m.bloquee ? 'Oui' : 'Non',
+      'Dernière déclaration': m.derniereDeclaration,
     }))
     const ws = XLSX.utils.json_to_sheet(rows)
     const wb = XLSX.utils.book_new()
@@ -148,6 +131,9 @@ export default function MachinesPage() {
 
   if (loading && machines.length === 0) {
     return <PageSkeleton type='table' />
+  }
+  if (loadError && machines.length === 0) {
+    return <div className='alert alert-danger p-5'>{loadError}</div>
   }
 
   return (
@@ -189,7 +175,7 @@ export default function MachinesPage() {
             <div className='card-body d-flex align-items-center justify-content-between p-6'>
               <div>
                 <div className='fs-2hx fw-bold text-gray-900'>{stats.total}</div>
-                <div className='fs-7 fw-semibold text-gray-500 mt-1'>Machines Recensées</div>
+                <div className='fs-7 fw-semibold text-gray-500 mt-1'>Machines recensées ({stats.bloquees} bloquées)</div>
               </div>
               <div className='badge badge-light-primary p-4 rounded-circle'>
                 <KTIcon iconName='gear' className='fs-2x text-primary' />
@@ -216,8 +202,8 @@ export default function MachinesPage() {
           <div className='card card-flush bg-body shadow-sm h-100'>
             <div className='card-body d-flex align-items-center justify-content-between p-6'>
               <div>
-                <div className='fs-2hx fw-bold text-success'>{stats.avgTrg}%</div>
-                <div className='fs-7 fw-semibold text-gray-500 mt-1'>Taux TRG Moyen Global</div>
+                <div className='fs-2hx fw-bold text-success'>{stats.conformite !== null ? `${stats.conformite}%` : '—'}</div>
+                <div className='fs-7 fw-semibold text-gray-500 mt-1'>Taux de conformité global (Output / Output + Scrap)</div>
               </div>
               <div className='badge badge-light-success p-4 rounded-circle'>
                 <KTIcon iconName='chart-line' className='fs-2x text-success' />
@@ -231,7 +217,7 @@ export default function MachinesPage() {
             <div className='card-body d-flex align-items-center justify-content-between p-6'>
               <div>
                 <div className='fs-2hx fw-bold text-gray-900'>{stats.totalVolume.toLocaleString()} u</div>
-                <div className='fs-7 fw-semibold text-gray-500 mt-1'>Volume Total Produit (u)</div>
+                <div className='fs-7 fw-semibold text-gray-500 mt-1'>Volume cumulé déclaré (FACT_CLE)</div>
               </div>
               <div className='badge badge-light-warning p-4 rounded-circle'>
                 <KTIcon iconName='cube-3' className='fs-2x text-warning' />
@@ -276,10 +262,6 @@ export default function MachinesPage() {
               Export Excel
             </button>
 
-            <span className='badge badge-light-info fw-bold fs-8 d-flex align-items-center gap-2 py-2 px-3'>
-              <span className='pulse-dot-small pulse-green'></span>
-              Direct SSE
-            </span>
           </div>
         </div>
 
@@ -345,10 +327,10 @@ export default function MachinesPage() {
                   <th>Machine Family</th>
                   <th>Database</th>
                   <th className='cursor-pointer' onClick={() => handleSort('totalOutput')}>
-                    Capacity <SortIcon field='totalOutput' />
+                    Output cumulé <SortIcon field='totalOutput' />
                   </th>
-                  <th className='cursor-pointer' onClick={() => handleSort('tauxRendement')}>
-                    Efficiency <SortIcon field='tauxRendement' />
+                  <th className='cursor-pointer' onClick={() => handleSort('tauxConformite')}>
+                    Conformité <SortIcon field='tauxConformite' />
                   </th>
                   <th style={{ minWidth: '70px' }} className='text-end pe-4'>Actions</th>
                 </tr>
@@ -374,27 +356,30 @@ export default function MachinesPage() {
                         </td>
                         <td>
                           <span className='badge badge-light-primary fw-bolder fs-7 px-3 py-2'>
-                            {m.workCenter || 'Atelier'}
+                            {m.workCenter || '—'}
                           </span>
                         </td>
-                        <td className='text-gray-700 fs-7'>{m.family || 'Standard'}</td>
+                        <td className='text-gray-700 fs-7'>{m.family || '—'}</td>
                         <td>
-                          <span className='badge badge-light-dark fs-8'>{m.emplacement || 'Principal'}</span>
+                          <span className='badge badge-light-dark fs-8'>{m.emplacement || '—'}</span>
+                          {m.bloquee && <span className='badge badge-light-danger fs-9 ms-1'>Bloquée</span>}
                         </td>
                         <td className='fw-bold text-gray-800'>
                           {m.totalOutput ? `${m.totalOutput.toLocaleString()} unités` : '0 unité'}
                         </td>
                         <td>
                           <div className='d-flex align-items-center gap-2'>
-                            <span className={`fw-extrabolder fs-6 ${getYieldColor(m.tauxRendement)}`}>
-                              {m.tauxRendement ? `${m.tauxRendement}%` : '0%'}
+                            <span className={`fw-extrabolder fs-6 ${getYieldColor(m.tauxConformite)}`}>
+                              {m.tauxConformite !== null ? `${m.tauxConformite}%` : '—'}
                             </span>
-                            <div className='progress h-4px w-60px bg-light rounded'>
-                              <div
-                                className={`progress-bar ${m.tauxRendement >= 80 ? 'bg-success' : m.tauxRendement >= 50 ? 'bg-warning' : 'bg-danger'}`}
-                                style={{ width: `${m.tauxRendement}%` }}
-                              ></div>
-                            </div>
+                            {m.tauxConformite !== null && (
+                              <div className='progress h-4px w-60px bg-light rounded'>
+                                <div
+                                  className={`progress-bar ${m.tauxConformite >= 80 ? 'bg-success' : m.tauxConformite >= 50 ? 'bg-warning' : 'bg-danger'}`}
+                                  style={{ width: `${m.tauxConformite}%` }}
+                                ></div>
+                              </div>
+                            )}
                           </div>
                         </td>
                         <td className='text-end pe-4'>
@@ -505,8 +490,8 @@ export default function MachinesPage() {
                         <span className='fw-bold fs-6'>{selectedMachine.family || '-'}</span>
                       </div>
                       <div className='d-flex justify-content-between'>
-                        <span className='text-gray-500 fw-bold fs-7'>Database :</span>
-                        <span className='badge badge-light-dark fs-8'>{selectedMachine.emplacement || 'Principal'}</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Site :</span>
+                        <span className='badge badge-light-dark fs-8'>{selectedMachine.emplacement || '—'}</span>
                       </div>
                     </div>
                   </div>
@@ -516,7 +501,7 @@ export default function MachinesPage() {
                   <div className='card bg-body border border-dashed p-5 rounded-3 h-100'>
                     <div className='d-flex flex-column gap-4 justify-content-center'>
                       <div className='d-flex justify-content-between border-bottom pb-3'>
-                        <span className='text-gray-500 fw-bold fs-7'>Capacity :</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Output cumulé :</span>
                         <span className='fw-extrabolder fs-6 text-success'>
                           {selectedMachine.totalOutput ? `${selectedMachine.totalOutput.toLocaleString()} unités` : '0 unité'}
                         </span>
@@ -528,14 +513,22 @@ export default function MachinesPage() {
                         </span>
                       </div>
                       <div className='d-flex justify-content-between border-bottom pb-3'>
-                        <span className='text-gray-500 fw-bold fs-7'>Nombre d'Opérations (OF) :</span>
-                        <span className='fw-bold fs-6'>{selectedMachine.operationCount || 0}</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Déclarations (FACT_CLE) :</span>
+                        <span className='fw-bold fs-6'>{(selectedMachine.operationCount || 0).toLocaleString()}</span>
+                      </div>
+                      <div className='d-flex justify-content-between border-bottom pb-3'>
+                        <span className='text-gray-500 fw-bold fs-7'>Taux de conformité :</span>
+                        <span className={`fw-extrabolder fs-5 ${getYieldColor(selectedMachine.tauxConformite)}`}>
+                          {selectedMachine.tauxConformite !== null ? `${selectedMachine.tauxConformite}%` : '—'}
+                        </span>
+                      </div>
+                      <div className='d-flex justify-content-between border-bottom pb-3'>
+                        <span className='text-gray-500 fw-bold fs-7'>Efficiency nominale (Navision) :</span>
+                        <span className='fw-bold fs-6'>{selectedMachine.efficaciteNominale !== null ? `${selectedMachine.efficaciteNominale}%` : '—'}</span>
                       </div>
                       <div className='d-flex justify-content-between'>
-                        <span className='text-gray-500 fw-bold fs-7'>Efficiency :</span>
-                        <span className={`fw-extrabolder fs-5 ${getYieldColor(selectedMachine.tauxRendement)}`}>
-                          {selectedMachine.tauxRendement ? `${selectedMachine.tauxRendement}%` : '0%'}
-                        </span>
+                        <span className='text-gray-500 fw-bold fs-7'>Dernière déclaration :</span>
+                        <span className='fw-bold fs-6'>{selectedMachine.derniereDeclaration || '—'}</span>
                       </div>
                     </div>
                   </div>

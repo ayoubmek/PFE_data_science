@@ -25,7 +25,7 @@ def print_banner():
     banner = """
     ========================================================================
        NEXORA DATA WAREHOUSE (dbDWH) - ETL PIPELINE & QUALITY ENGINE
-       Raw CSV Ingestion -> 10 Quality Cleaners -> 3 DWH Tables
+       Raw CSV Ingestion -> 10 Quality Cleaners -> Staging tables (STG_*)
     ========================================================================
     """
     print(banner)
@@ -46,6 +46,7 @@ def print_audit_summary(report: dict, elapsed_sec: float):
     print(f"  • Stocks négatifs transitoires redressés  : {report.get('negative_stocks_resolved', 0):>10,}")
     print(f"  • Incohérences logiques résolues          : {report.get('logical_mismatches_fixed', 0):>10,}")
     print(f"  • Valeurs manquantes imputées (Imputation): {report.get('missing_imputed', 0):>10,}")
+    print(f"  • Quantités aberrantes écartées           : {report.get('quantity_outliers_dropped', 0):>10,}")
     print("-" * 75)
     print(f"  ==> Lignes valides certifiées (Clean DWH) : {report.get('final_clean_rows', 0):>10,}")
     print(f"  ==> Taux de rétention qualité             : {report.get('retention_rate_pct', 0):>9.2f} %")
@@ -57,7 +58,7 @@ def run_pipeline(dry_run: bool = True, limit: int = None):
     t_start = time.perf_counter()
     print_banner()
 
-    logger.info("PHASE 1: Extraction des données brutes (Raw CSV & Excel)...")
+    logger.info("PHASE 1: Extraction des données brutes (Raw CSV)...")
     t0 = time.perf_counter()
     df_stock_raw = extract_raw_stock_csv(nrows=limit)
     df_prod_raw = extract_production_data(nrows=limit)

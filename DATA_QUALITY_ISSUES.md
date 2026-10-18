@@ -3,9 +3,9 @@
 ## 📌 Présentation des Jeux de Données Bruts
 Ce document récapitule l'ensemble des problèmes de qualité de données introduits dans les fichiers grands volumes :
 - **`ASTOCKDATE_RAW.csv`** : **862 065 lignes** (stocks d'inventaire bruts couvrant l'ensemble de l'historique de l'ERP).
-- **`PRODUCTION_RAW.csv`** : **108 105 lignes** (déclarations de fabrication et rebuts des 4 ateliers d'injection).
+- **`PRODUCTION_RAW.csv`** : **50 000 lignes** (déclarations de fabrication du 12/12/2025 au 29/03/2026, extraites de dbo.FACT_CLE).
 
-Ces jeux de données simulent l'extraction brute ("Raw Export") directement issue du système d'information client **Microsoft SQL Server / ERP Navision** avant tout nettoyage par le pipeline ETL.
+Ces jeux de données sont des extractions du DWH dans lesquelles des anomalies ont été **injectées volontairement** (sites « DEPOT A », « MAGASIN CENTRAL »… inexistants dans le DWH) ; ils simulent l'extraction brute ("Raw Export") directement issue du système d'information client **Microsoft SQL Server / ERP Navision** avant tout nettoyage par le pipeline ETL.
 
 ---
 

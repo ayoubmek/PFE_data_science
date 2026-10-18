@@ -4,7 +4,7 @@ from typing import Dict
 import pandas as pd
 from sqlalchemy import create_engine, text
 
-from .config import DB_URL, OUTPUT_CLEAN_DIR
+from .config import DB_URL, ETL_TARGET_PREFIX, OUTPUT_CLEAN_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -76,10 +76,10 @@ class DWHLoader:
             logger.warning("Database unavailable. Cleaned files were saved to disk in 'output_clean/'.")
             return {k: "SAVED_TO_CSV_DB_OFFLINE" for k in tables.keys()}
 
-        logger.info("=== Loading Cleaned Tables into SQL Server dbDWH1 ===")
+        logger.info(f"=== Loading Cleaned Tables into staging tables {ETL_TARGET_PREFIX}* ===")
         for name, df in tables.items():
             try:
-                self.load_table_to_sql(df, name, if_exists=if_exists)
+                self.load_table_to_sql(df, f"{ETL_TARGET_PREFIX}{name}", if_exists=if_exists)
                 status[name] = "LOADED_SUCCESSFULLY"
             except Exception as e:
                 logger.error(f"Error loading {name}: {e}")

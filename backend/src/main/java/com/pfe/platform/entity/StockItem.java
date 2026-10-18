@@ -2,9 +2,11 @@ package com.pfe.platform.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+/** Ligne d'instantané de stock de dbo.ASTOCKDATE (lecture seule). */
 @Entity
 @Table(name = "ASTOCKDATE", schema = "dbo")
 @Data
@@ -37,12 +39,11 @@ public class StockItem {
     private String categorie;
 
     @Column(name = "[Quantité]", precision = 38, scale = 20)
-    @Builder.Default
-    private BigDecimal quantite = BigDecimal.ZERO;
+    private BigDecimal quantite;
 
+    /** [Cout] de Navision : valeur totale de la ligne de stock (TND), et non un coût unitaire. */
     @Column(name = "[Cout]", precision = 38, scale = 6)
-    @Builder.Default
-    private BigDecimal valeurUnitaire = BigDecimal.ZERO;
+    private BigDecimal valeurTotale;
 
     @Column(name = "[Gen_ Prod_ Posting Group]")
     private String genProdPostingGroup;
@@ -53,41 +54,9 @@ public class StockItem {
     @Column(name = "groupeclient")
     private String groupeClient;
 
-    @Transient
-    @Builder.Default
-    private BigDecimal seuilCritique = BigDecimal.TEN;
-
-    @Transient
-    @Builder.Default
-    private BigDecimal seuilAlerte = BigDecimal.valueOf(20);
-
-    @Transient
-    @Builder.Default
-    private String unite = "U";
-
-    @Transient
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Transient
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
-    public boolean isEnRupture() {
-        return quantite == null || quantite.compareTo(BigDecimal.ZERO) <= 0;
+    /** Coût unitaire déduit (valeur / quantité), null si la quantité est nulle. */
+    public BigDecimal getValeurUnitaire() {
+        if (valeurTotale == null || quantite == null || quantite.signum() <= 0) return null;
+        return valeurTotale.divide(quantite, 6, RoundingMode.HALF_UP);
     }
-
-    public boolean isEnAlerte() {
-        return quantite != null && quantite.compareTo(BigDecimal.ZERO) > 0 && quantite.compareTo(seuilAlerte) <= 0;
-    }
-
-    public boolean isEnNiveauCritique() {
-        return quantite != null && quantite.compareTo(BigDecimal.ZERO) > 0 && quantite.compareTo(seuilCritique) <= 0;
-    }
-
-    public BigDecimal getValeurTotale() {
-        if (valeurUnitaire == null || quantite == null) return BigDecimal.ZERO;
-        return valeurUnitaire.multiply(quantite);
-    }
-
 }

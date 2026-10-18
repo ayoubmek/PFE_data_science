@@ -3,23 +3,22 @@ import { useState } from 'react'
 import * as Yup from 'yup'
 import clsx from 'clsx'
 import { useFormik } from 'formik'
-import { login } from '../core/_requests'
+import { login, toUserModel } from '../core/_requests'
 import { useAuth } from '../core/Auth'
 
 const loginSchema = Yup.object().shape({
   username: Yup.string()
-    .min(3, 'Minimum 3 symbols')
-    .max(50, 'Maximum 50 symbols')
-    .required('Username is required'),
+    .min(3, 'Minimum 3 caractères')
+    .max(100, 'Maximum 100 caractères')
+    .required("Nom d'utilisateur requis"),
   password: Yup.string()
-    .min(3, 'Minimum 3 symbols')
-    .max(50, 'Maximum 50 symbols')
-    .required('Password is required'),
+    .max(100, 'Maximum 100 caractères')
+    .required('Mot de passe requis'),
 })
 
 const initialValues = {
-  username: 'admin',
-  password: 'password',
+  username: '',
+  password: '',
 }
 
 export function Login() {
@@ -31,33 +30,21 @@ export function Login() {
     validationSchema: loginSchema,
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true)
+      setStatus(undefined)
       try {
         const { data } = await login(values.username, values.password)
-        const resData = data as any
-        const token = resData.token || resData.api_token
-        saveAuth({ api_token: token, access_token: token })
-        const user = {
-          id: 1,
-          username: resData.username || 'admin',
-          email: resData.email || 'admin@optiprod.com',
-          first_name: resData.fullName || 'Admin',
-          last_name: '',
-          roles: [(resData.role || 'admin').toLowerCase()]
-        }
-        setCurrentUser(user as any)
+        saveAuth({ api_token: data.token, access_token: data.token })
+        setCurrentUser(toUserModel(data))
       } catch (error: any) {
-        console.warn('API login failed, falling back to mock user session', error)
-        const mockUser = {
-          id: 1,
-          username: values.username || 'admin',
-          email: values.username.includes('@') ? values.username : 'admin@optiprod.com',
-          first_name: 'Admin',
-          last_name: 'System',
-          roles: ['admin', 'super admin'],
-          api_token: 'mock-token-12345'
-        }
-        saveAuth({ api_token: 'mock-token-12345', access_token: 'mock-token-12345' })
-        setCurrentUser(mockUser as any)
+        saveAuth(undefined)
+        setStatus(
+          error?.response?.status === 401
+            ? 'Identifiants incorrects ou compte désactivé.'
+            : 'Serveur indisponible : impossible de vérifier vos identifiants.'
+        )
+      } finally {
+        setLoading(false)
+        setSubmitting(false)
       }
     },
   })

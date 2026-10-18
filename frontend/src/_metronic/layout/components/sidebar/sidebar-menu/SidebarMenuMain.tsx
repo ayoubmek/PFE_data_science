@@ -2,8 +2,13 @@
 import React from 'react'
 import { SidebarMenuItemWithSub } from './SidebarMenuItemWithSub'
 import { SidebarMenuItem } from './SidebarMenuItem'
+import { useAuth } from '../../../../../app/modules/auth'
 
 const SidebarMenuMain = () => {
+  const { currentUser } = useAuth()
+  // Les prévisions ML et la gestion des utilisateurs sont réservées au rôle ADMIN (cf. SecurityConfig).
+  const isAdmin = !!currentUser?.roles?.includes('admin')
+
   return (
     <>
       {}
@@ -63,6 +68,8 @@ const SidebarMenuMain = () => {
       />
 
 
+{isAdmin && (
+        <>
       {}
       <div className='menu-item'>
         <div className='menu-content pt-8 pb-2'>
@@ -104,6 +111,8 @@ const SidebarMenuMain = () => {
         fontIcon='bi-people'
         iconColor='#E11D48'
       />
+        </>
+      )}
     </>
   )
 }

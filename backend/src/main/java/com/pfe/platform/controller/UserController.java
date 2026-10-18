@@ -18,11 +18,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @Slf4j
 public class UserController {
+
+    private static final int MIN_PASSWORD_LENGTH = 8;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -50,9 +51,11 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cette adresse e-mail est déjà utilisée");
         }
 
-        String rawPassword = (request.getPassword() != null && !request.getPassword().isBlank()) 
-                ? request.getPassword() 
-                : "Password123!";
+        if (request.getPassword() == null || request.getPassword().length() < MIN_PASSWORD_LENGTH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Mot de passe requis (au moins " + MIN_PASSWORD_LENGTH + " caractères)");
+        }
+        String rawPassword = request.getPassword();
 
         User user = User.builder()
                 .username(request.getUsername().trim().toLowerCase())
@@ -87,6 +90,10 @@ public class UserController {
             user.setRole(request.getRole());
         }
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            if (request.getPassword().length() < MIN_PASSWORD_LENGTH) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Le mot de passe doit contenir au moins " + MIN_PASSWORD_LENGTH + " caractères");
+            }
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         user.setEnabled(request.isEnabled());

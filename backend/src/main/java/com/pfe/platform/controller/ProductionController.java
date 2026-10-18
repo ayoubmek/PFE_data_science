@@ -1,14 +1,11 @@
 package com.pfe.platform.controller;
 
 import com.pfe.platform.dto.ProductionDTO;
-import com.pfe.platform.repository.FactCleRepository;
 import com.pfe.platform.service.ProductionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,11 +15,11 @@ import java.util.Map;
 public class ProductionController {
 
     private final ProductionService productionService;
-    private final FactCleRepository factCleRepository;
 
+    /** Dernières déclarations de production (dbo.FACT_CLE), les plus récentes d'abord. */
     @GetMapping("/orders")
-    public ResponseEntity<List<ProductionDTO.Response>> getAllOrders() {
-        return ResponseEntity.ok(productionService.getAllOrders());
+    public ResponseEntity<List<ProductionDTO.Response>> getLatestDeclarations() {
+        return ResponseEntity.ok(productionService.getLatestDeclarations());
     }
 
     @GetMapping("/kpi")
@@ -37,17 +34,6 @@ public class ProductionController {
 
     @GetMapping("/fact-cle/stats")
     public ResponseEntity<List<Map<String, Object>>> getFactCleStats() {
-        List<Object[]> rows = factCleRepository.findDailyStats();
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Object[] r : rows) {
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put("date",          r[0]);
-            row.put("nbOperations",  r[1]);
-            row.put("totalOutput",   r[2]);
-            row.put("totalScrap",    r[3]);
-            row.put("totalRunTime",  r[4]);
-            result.add(row);
-        }
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(productionService.getDailyStats());
     }
 }

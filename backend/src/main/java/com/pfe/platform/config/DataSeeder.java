@@ -4,9 +4,13 @@ import com.pfe.platform.entity.User;
 import com.pfe.platform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.security.SecureRandom;
+import java.util.Base64;
 
 @Component
 @RequiredArgsConstructor
@@ -16,24 +20,33 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${app.seed.admin-password:}")
+    private String adminPassword;
+
+    @Value("${app.seed.operateur-password:}")
+    private String operateurPassword;
+
     @Override
     public void run(String... args) {
-        // Seule la table app_users est initialisée pour permettre la connexion
-        if (userRepo.count() == 0) {
-            log.info("Initialisation des utilisateurs par défaut...");
-            seedUsers();
-            log.info("Utilisateurs initialisés avec succès.");
+        // Seule la table des utilisateurs applicatifs est initialisée, et uniquement si elle est vide.
+        if (userRepo.count() > 0) {
+            return;
         }
+        log.info("Table des utilisateurs vide : création des comptes initiaux.");
+        createUser("admin", "Administrateur Système", "admin@pfe.com", User.Role.ADMIN, adminPassword);
+        createUser("operateur", "Opérateur Atelier", "operateur@pfe.com", User.Role.OPERATEUR, operateurPassword);
     }
 
-    private void seedUsers() {
+    private void createUser(String username, String fullName, String email, User.Role role, String configured) {
+        String password = configured;
+        if (password == null || password.isBlank()) {
+            byte[] bytes = new byte[12];
+            new SecureRandom().nextBytes(bytes);
+            password = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+            log.warn("Mot de passe généré pour '{}' (à changer après la première connexion) : {}", username, password);
+        }
         userRepo.save(User.builder()
-            .username("admin").password(passwordEncoder.encode("admin123"))
-            .fullName("Administrateur Système").email("admin@pfe.com")
-            .role(User.Role.ADMIN).build());
-        userRepo.save(User.builder()
-            .username("operateur").password(passwordEncoder.encode("operateur123"))
-            .fullName("Opérateur Atelier").email("operateur@pfe.com")
-            .role(User.Role.OPERATEUR).build());
+            .username(username).password(passwordEncoder.encode(password))
+            .fullName(fullName).email(email).role(role).build());
     }
 }

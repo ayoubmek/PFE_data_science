@@ -61,6 +61,18 @@ export function setupAxios(axios: any) {
     },
     (err: any) => Promise.reject(err)
   )
+  // Session expirée côté serveur (401) : on purge le jeton et on renvoie vers la connexion.
+  axios.interceptors.response.use(
+    (response: any) => response,
+    (err: any) => {
+      const isLoginCall = String(err?.config?.url || '').endsWith('/auth/login')
+      if (err?.response?.status === 401 && !isLoginCall && getAuth()) {
+        removeAuth()
+        window.location.assign('/auth/login')
+      }
+      return Promise.reject(err)
+    }
+  )
 }
 
 export {getAuth, setAuth, removeAuth, AUTH_LOCAL_STORAGE_KEY}

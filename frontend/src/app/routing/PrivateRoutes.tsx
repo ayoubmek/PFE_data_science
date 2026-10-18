@@ -5,6 +5,7 @@ import TopBarProgress from 'react-topbar-progress-indicator'
 import { DashboardWrapper } from '../pages/dashboard/DashboardWrapper'
 import { getCSSVariableValue } from '../../_metronic/assets/ts/_utils'
 import { WithChildren } from '../../_metronic/helpers'
+import { useAuth } from '../modules/auth'
 
 const PrivateRoutes = () => {
   const ProductionPage = lazy(() => import('../pages/production/ProductionPage'))
@@ -13,6 +14,8 @@ const PrivateRoutes = () => {
   const DataSciencePage = lazy(() => import('../pages/data-science/DataSciencePage'))
   const ModelBenchmarkPage = lazy(() => import('../pages/model-benchmark/ModelBenchmarkPage'))
   const UserManagementPage = lazy(() => import('../pages/admin/UserManagementPage'))
+  const { currentUser } = useAuth()
+  const isAdmin = !!currentUser?.roles?.includes('admin')
 
   return (
     <Routes>
@@ -29,13 +32,17 @@ const PrivateRoutes = () => {
         <Route path='production/machines' element={<SuspensedView><MachinesPage /></SuspensedView>} />
         <Route path='stock' element={<SuspensedView><StockInventoryPage /></SuspensedView>} />
         <Route path='stock/movements' element={<Navigate to='/stock' />} />
-        <Route path='data-science' element={<SuspensedView><DataSciencePage /></SuspensedView>} />
-        <Route path='model-benchmark' element={<SuspensedView><ModelBenchmarkPage /></SuspensedView>} />
 
-        {/* Administration & RBAC */}
-        <Route path='admin/users' element={<SuspensedView><UserManagementPage /></SuspensedView>} />
-        <Route path='users' element={<Navigate to='/admin/users' />} />
-        <Route path='gestion-users' element={<Navigate to='/admin/users' />} />
+        {/* Prévisions ML & Administration : rôle ADMIN uniquement (le backend renvoie 403 sinon) */}
+        {isAdmin && (
+          <>
+            <Route path='data-science' element={<SuspensedView><DataSciencePage /></SuspensedView>} />
+            <Route path='model-benchmark' element={<SuspensedView><ModelBenchmarkPage /></SuspensedView>} />
+            <Route path='admin/users' element={<SuspensedView><UserManagementPage /></SuspensedView>} />
+            <Route path='users' element={<Navigate to='/admin/users' />} />
+            <Route path='gestion-users' element={<Navigate to='/admin/users' />} />
+          </>
+        )}
 
         {}
         <Route path='*' element={<Navigate to='/error/404' />} />

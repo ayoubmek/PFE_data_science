@@ -9,6 +9,9 @@
 **Document initial archivé :** `pfe_v7.docx` (préservé intact sans modification)  
 **Date d'achèvement :** 15 Octobre 2026
 
+
+> **⚠ Mise à jour du 18/10/2026 :** plusieurs affirmations de ce document se sont révélées inexactes et ont été corrigées dans le code (voir `BUGS.md`, entrées 8 à 16). En particulier : les métriques ML (MAPE 6,0 % / 6,7 %) provenaient d'une série **synthétique** ; la classification 800 références (47 / 146 / 557 / 50) d'un fichier d'articles **fictifs** ; les « 319 machines MACH-001 à MACH-319 » d'une table **générée** ; « 100 % des routes protégées » était faux. Les valeurs réelles, calculées sur dbDWH, s'obtiennent avec `python ml-service/evaluate_dwh.py`.
+
 ---
 
 ### 1. Objectifs de la Mission & Respect des Règles de Sécurité

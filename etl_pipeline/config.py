@@ -8,7 +8,7 @@ RAW_STOCK_CSV = PROJECT_ROOT / "ASTOCKDATE_RAW.csv"
 RAW_PROD_CSV = PROJECT_ROOT / "PRODUCTION_RAW.csv"
 
 DB_CONFIG = {
-    "server": os.getenv("DB_HOST", os.getenv("DB_SERVER", "LAPTOP-M7HILU4Q")),
+    "server": os.getenv("DB_HOST", os.getenv("DB_SERVER", "localhost")),
     "database": os.getenv("DB_NAME", "dbDWH"),
     "driver": os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server"),
     "trusted_connection": os.getenv("DB_TRUSTED", "yes"),
@@ -27,6 +27,12 @@ else:
         f"{DB_CONFIG['server']}/{DB_CONFIG['database']}?"
         f"driver={DB_CONFIG['driver'].replace(' ', '+')}&TrustServerCertificate=yes"
     )
+
+# Les tables nettoyées sont chargées dans des tables de staging (STG_ASTOCKDATE, STG_FACT_CLE) :
+# le pipeline ne remplace jamais les tables de production du DWH alimentées par Navision.
+ETL_TARGET_PREFIX = os.getenv("ETL_TARGET_PREFIX", "STG_")
+if not ETL_TARGET_PREFIX:
+    raise ValueError("ETL_TARGET_PREFIX ne peut pas être vide : les tables de production ne doivent pas être écrasées.")
 
 QUALITY_THRESHOLDS = {
     "min_valid_year": 2020,

@@ -35,22 +35,17 @@ public class ProductionPrediction {
     private Boolean workingDay = true;
 
     @Column(name = "horizon_days", nullable = false)
-    @Builder.Default
-    private Integer horizonDays = 30;
+    private Integer horizonDays;
 
     @Column(name = "model_name", nullable = false, length = 50)
-    @Builder.Default
-    private String modelName = "Prophet";
+    private String modelName;
 
-    @Builder.Default
-    private Double mae = 7.4;
+    private Double mae;
 
-    @Builder.Default
-    private Double rmse = 9.2;
+    private Double rmse;
 
     @Column(length = 20)
-    @Builder.Default
-    private String mape = "4.8%";
+    private String mape;
 
     @Column(name = "total_volume")
     private Integer totalVolume;

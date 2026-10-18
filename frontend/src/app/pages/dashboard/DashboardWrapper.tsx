@@ -3,7 +3,8 @@ import axios from 'axios'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import Chart from 'react-apexcharts'
-import { API_BASE_URL } from '../../config'
+import { API_BASE_URL, apiErrorMessage } from '../../config'
+import { PageSkeleton } from '../../components/PageSkeleton'
 
 interface StockGroup {
   name: string
@@ -18,70 +19,58 @@ interface StockSite {
   count: number
   quantity: number
   value: number
+  machines: number
 }
 
-interface RecentOF {
+interface Declaration {
   id: number
-  code: string
-  itemNo: string
-  articleNom: string
-  quantiteProduite: number
+  reference: string
+  itemNo: string | null
+  article: string | null
+  quantiteRealisee: number
   scrapQuantity: number
   runTime: number
-  dateDebut: string
-  machineNom: string
-  machineCode?: string
-  responsable: string
+  dateDebut: string | null
+  workCenter: string | null
+  machineNom: string | null
+  machineCode: string | null
+  site: string | null
+}
+
+interface DailyStat {
+  date: string
+  totalOutput: number
+  totalScrap: number
 }
 
 interface DashboardData {
-  statistics: {
-    totalOutput: number
-    totalOfs: number
-    totalMachines: number
-    trs: number
-    totalArticles: number
-    valeurStock: number
-    totalStockQty: number
-    totalScrap: number
-    scrapRate: number
+  production: {
+    periodStart: string
+    periodEnd: string
+    periodDays: number
+    totalOrdres: number
+    totalVolumeProduit: number
+    totalRebut: number
+    tauxConformite: number | null
+    machinesTotal: number
+    machinesActives: number
+    machinesBloquees: number
   }
-  chart_data: { date: string; output: number; scrap: number }[]
+  stock: {
+    dateStock: string
+    totalArticles: number
+    quantiteTotale: number
+    valeurTotaleStock: number
+    statuts: Record<string, number>
+  }
   stockGroups: StockGroup[]
   stockSites: StockSite[]
-  recentOfs: RecentOF[]
+  daily: DailyStat[]
+  recent: Declaration[]
 }
 
-const DWH_STOCK_GROUPS: StockGroup[] = [
-  { name: 'Inserts Métalliques', count: 196, quantity: 5937498, value: 36396153926, percentage: 62.6 },
-  { name: 'Produits Finis / Semi-Finis', count: 448, quantity: 2536376, value: 10948392209, percentage: 18.8 },
-  { name: 'Matières Premières Plastiques', count: 179, quantity: 290214, value: 8566978128, percentage: 14.7 },
-  { name: 'Emballage & Conditionnement', count: 97, quantity: 717622, value: 2263097655, percentage: 3.9 },
-  { name: 'Consommables d\'Atelier', count: 19, quantity: 1234, value: 957294, percentage: 0.1 }
-]
-
-const DWH_STOCK_SITES: StockSite[] = [
-  { site: 'Kondar (Tunisie)', count: 677, quantity: 6276837, value: 33435543273 },
-  { site: 'Brno (CZA - Rép. Tchèque)', count: 252, quantity: 4033948, value: 19567393562 },
-  { site: 'Sousse (Magasin Régional)', count: 53, quantity: 422250, value: 5172642379 }
-]
-
-const DWH_CHART_DATA = [
-  { date: '14/03/2026', output: 301072, scrap: 0 },
-  { date: '15/03/2026', output: 143986, scrap: 0 },
-  { date: '16/03/2026', output: 424822, scrap: 357 },
-  { date: '17/03/2026', output: 274331, scrap: 297 },
-  { date: '18/03/2026', output: 293134, scrap: 246 },
-  { date: '19/03/2026', output: 314250, scrap: 544 },
-  { date: '20/03/2026', output: 46171, scrap: 253 },
-  { date: '23/03/2026', output: 225578, scrap: 429 },
-  { date: '24/03/2026', output: 406033, scrap: 339 },
-  { date: '25/03/2026', output: 269738, scrap: 329 },
-  { date: '26/03/2026', output: 364463, scrap: 492 },
-  { date: '27/03/2026', output: 247971, scrap: 0 },
-  { date: '28/03/2026', output: 149117, scrap: 0 },
-  { date: '29/03/2026', output: 328881, scrap: 0 }
-]
+const fmt = (n: number, digits = 0) => n.toLocaleString('fr-FR', { maximumFractionDigits: digits })
+const fmtDate = (iso?: string | null) => (iso ? new Date(iso).toLocaleDateString('fr-FR') : '—')
 
 const StatisticsWidget: FC<{
   className?: string
@@ -126,139 +115,34 @@ const StatisticsWidget: FC<{
 let globalCachedDashboardData: DashboardData | null = null
 
 const DashboardPage: FC = () => {
-  const [data, setData] = useState<DashboardData>(globalCachedDashboardData || {
-    statistics: {
-      totalOutput: 1596027,
-      totalOfs: 46810,
-      totalMachines: 319,
-      trs: 99.7,
-      totalArticles: 5998,
-      valeurStock: 6830500,
-      totalStockQty: 10733035,
-      totalScrap: 4512,
-      scrapRate: 0.28
-    },
-    chart_data: DWH_CHART_DATA,
-    stockGroups: DWH_STOCK_GROUPS,
-    stockSites: DWH_STOCK_SITES,
-    recentOfs: []
-  })
+  const [data, setData] = useState<DashboardData | null>(globalCachedDashboardData)
+  const [error, setError] = useState<string>('')
 
-  const [selectedOf, setSelectedOf] = useState<RecentOF | null>(null)
-  const [showOfModal, setShowOfModal] = useState(false)
+  const [selectedOf, setSelectedOf] = useState<Declaration | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<StockGroup | null>(null)
-  const [showGroupModal, setShowGroupModal] = useState(false)
   const [selectedSite, setSelectedSite] = useState<StockSite | null>(null)
-  const [showSiteModal, setShowSiteModal] = useState(false)
 
   const fetchDashboardData = async () => {
-    const apiUrl = API_BASE_URL
-
     try {
-      const results = await Promise.allSettled([
-        axios.get(`${apiUrl}/dashboard/summary`, { timeout: 15000 }),
-        axios.get(`${apiUrl}/production/fact-cle/stats`, { timeout: 15000 }),
-        axios.get(`${apiUrl}/production/orders`, { timeout: 15000 }),
-        axios.get(`${apiUrl}/production/kpi`, { timeout: 15000 })
+      const [summaryRes, dailyRes, ordersRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/dashboard/summary`, { timeout: 60000 }),
+        axios.get<DailyStat[]>(`${API_BASE_URL}/production/fact-cle/stats`, { timeout: 60000 }),
+        axios.get<Declaration[]>(`${API_BASE_URL}/production/orders`, { timeout: 60000 }),
       ])
-
-      const summaryRes: any = results[0].status === 'fulfilled' ? (results[0] as any).value : null
-      const statsRes: any = results[1].status === 'fulfilled' ? (results[1] as any).value : null
-      const ofsRes: any = results[2].status === 'fulfilled' ? (results[2] as any).value : null
-      const kpiRes: any = results[3].status === 'fulfilled' ? (results[3] as any).value : null
-
-      const summary = summaryRes && summaryRes.data ? summaryRes.data : {}
-      const stats = statsRes && Array.isArray(statsRes.data) ? statsRes.data : []
-      const ofsData = ofsRes && Array.isArray(ofsRes.data) ? ofsRes.data : []
-      const kpiData = kpiRes && kpiRes.data ? kpiRes.data : {}
-
-      // 1. OFs récents depuis dbDWH
-      const mappedOfs: RecentOF[] = ofsData.slice(0, 6).map((o: any) => ({
-        id: o.id,
-        code: o.reference || o.code || ('OF-' + o.id),
-        itemNo: o.itemNo || '-',
-        articleNom: o.article || o.articleNom || 'Opération',
-        quantiteProduite: Number(o.quantiteRealisee) || 0,
-        scrapQuantity: Number(o.scrapQuantity) || 0,
-        runTime: Number(o.runTime) || 0,
-        dateDebut: o.dateDebut || '',
-        machineNom: o.machineNom || 'Atelier',
-        machineCode: o.machineCode || '',
-        responsable: o.responsable || 'Tunisie',
-      }))
-
-      // 2. Historique 14 jours depuis dbDWH FACT_CLE
-      const sorted = [...stats].reverse().slice(-14)
-      const mappedChartData = sorted.map((s: any) => {
-        const d = s.date ? new Date(s.date) : null
-        const label = d && !isNaN(d.getTime()) 
-          ? `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}` 
-          : String(s.date || '')
-        return {
-          date: label,
-          output: Math.round(Number(s.totalOutput || 0)),
-          scrap: Math.round(Number(s.totalScrap || 0))
-        }
-      })
-      const chart_data = mappedChartData.length > 0 ? mappedChartData : DWH_CHART_DATA
-
-      // 3. Groupes de stock depuis dbDWH ASTOCKDATE
-      const rawGroups: any[] = summary.stockGroups || []
-      const mappedGroups: StockGroup[] = rawGroups.map(g => ({
-        name: g.name || 'Divers',
-        count: Number(g.count) || 0,
-        quantity: Number(g.quantity) || 0,
-        value: Number(g.value) || 0,
-        percentage: Number(g.percentage) || 0
-      }))
-      const stockGroups = mappedGroups.length > 0 ? mappedGroups : DWH_STOCK_GROUPS
-
-      // 4. Sites de stock depuis dbDWH ASTOCKDATE
-      const rawSites: any[] = summary.stockSites || []
-      const mappedSites: StockSite[] = rawSites.map(s => ({
-        site: s.site || 'Site',
-        count: Number(s.count) || 0,
-        quantity: Number(s.quantity) || 0,
-        value: Number(s.value) || 0
-      }))
-      const stockSites = mappedSites.length > 0 ? mappedSites : DWH_STOCK_SITES
-
-      const prod = summary.production || kpiData || {}
-      const totalOut = Number(prod.totalVolumeProduit || prod.totalOutput || 0) || 1596027
-      const totalOfs = Number(prod.totalOrdres || 0) || 46810
-      const totalMachines = Number(prod.machinesDisponibles || 0) || 319
-      const trs = Number(prod.tauxRendementMoyen || 0) || 99.7
-
-      const scrapSum = stats.reduce((acc: number, curr: any) => acc + (Number(curr.totalScrap) || 0), 0)
-      const totalScrap = scrapSum > 0 ? Math.round(scrapSum) : 4512
-
-      const stockQtySum = stockSites.reduce((acc: number, s: StockSite) => acc + s.quantity, 0)
-      const totalStockQty = stockQtySum > 0 ? stockQtySum : 10733035
-
-      const scrapRate = totalOut + totalScrap > 0 ? Math.round((totalScrap / (totalOut + totalScrap)) * 1000.0) / 10.0 : 0.28
-
-      const mappedData: DashboardData = {
-        statistics: {
-          totalOutput: totalOut,
-          totalOfs: totalOfs,
-          totalMachines: totalMachines,
-          trs: trs,
-          totalArticles: Number(summary.stock?.totalArticles || 5998),
-          valeurStock: Number(summary.stock?.valeurTotaleStock || 6830500),
-          totalStockQty: totalStockQty,
-          totalScrap: totalScrap,
-          scrapRate: scrapRate
-        },
-        chart_data: chart_data,
-        stockGroups,
-        stockSites,
-        recentOfs: mappedOfs.length > 0 ? mappedOfs : data.recentOfs
+      const s = summaryRes.data
+      const mapped: DashboardData = {
+        production: s.production,
+        stock: s.stock,
+        stockGroups: s.stockGroups || [],
+        stockSites: s.stockSites || [],
+        daily: dailyRes.data || [],
+        recent: (ordersRes.data || []).slice(0, 6),
       }
-
-      globalCachedDashboardData = mappedData
-      setData(mappedData)
+      globalCachedDashboardData = mapped
+      setData(mapped)
+      setError('')
     } catch (err) {
-      console.warn('Dashboard fetch notice:', err)
+      setError(apiErrorMessage(err, 'Impossible de charger les données du Data Warehouse.'))
     }
   }
 
@@ -267,284 +151,175 @@ const DashboardPage: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const chartCategories = data.chart_data.map(item => item.date)
-  const chartOutput = data.chart_data.map(item => item.output)
-  const chartScrap = data.chart_data.map(item => item.scrap)
+  if (!data) {
+    return error ? (
+      <div className='alert alert-danger d-flex align-items-center p-5'>
+        <KTIcon iconName='information-5' className='fs-2hx text-danger me-4' />
+        <div className='d-flex flex-column'>
+          <h4 className='mb-1 text-danger'>Données indisponibles</h4>
+          <span>{error}</span>
+        </div>
+      </div>
+    ) : (
+      <PageSkeleton type='table' />
+    )
+  }
+
+  const { production, stock } = data
 
   const chartOptions: any = {
     series: [
-      { name: 'Production Conforme', type: 'area', data: chartOutput },
-      { name: 'Pièces Rebutées', type: 'line', data: chartScrap }
+      { name: 'Production déclarée (Output)', type: 'area', data: data.daily.map((d) => Math.round(d.totalOutput)) },
+      { name: 'Pièces rebutées', type: 'line', data: data.daily.map((d) => Math.round(d.totalScrap)) },
     ],
     options: {
-      chart: {
-        fontFamily: 'Inter, sans-serif',
-        type: 'line',
-        height: 310,
-        toolbar: { show: false },
-        zoom: { enabled: false }
-      },
-      stroke: {
-        curve: 'smooth',
-        width: [3, 4]
-      },
+      chart: { fontFamily: 'Inter, sans-serif', type: 'line', height: 310, toolbar: { show: false }, zoom: { enabled: false } },
+      stroke: { curve: 'smooth', width: [3, 4] },
       markers: {
         size: [4, 5],
         colors: ['#FFFFFF', '#FFFFFF'],
         strokeColors: ['#3E97FF', '#F1416C'],
         strokeWidth: 2,
-        hover: { size: 7 }
+        hover: { size: 7 },
       },
       dataLabels: { enabled: false },
       xaxis: {
-        categories: chartCategories,
+        categories: data.daily.map((d) => fmtDate(d.date)),
         axisBorder: { show: false },
         axisTicks: { show: false },
-        crosshairs: {
-          show: true,
-          width: 1,
-          opacity: 0.8,
-          stroke: { color: '#B5B5C3', width: 1, dashArray: 3 }
-        },
-        tooltip: {
-          enabled: false
-        },
-        labels: { style: { colors: '#7E8299', fontSize: '11px', fontWeight: '600' } }
+        tooltip: { enabled: false },
+        labels: { style: { colors: '#7E8299', fontSize: '11px', fontWeight: '600' } },
       },
       yaxis: [
         {
-          seriesName: 'Production Conforme',
+          seriesName: 'Production déclarée (Output)',
           min: 0,
-          max: 500000,
-          labels: {
-            style: { colors: '#7E8299', fontSize: '11px' },
-            formatter: (val: number) => `${Math.round(val / 1000)}k unités`
-          }
+          labels: { style: { colors: '#7E8299', fontSize: '11px' }, formatter: (v: number) => `${Math.round(v / 1000)}k` },
         },
         {
-          seriesName: 'Pièces Rebutées',
+          seriesName: 'Pièces rebutées',
           opposite: true,
           min: 0,
-          max: 2500,
-          labels: {
-            style: { colors: '#F1416C', fontSize: '11px' },
-            formatter: (val: number) => `${Math.round(val)} unités`
-          }
-        }
+          labels: { style: { colors: '#F1416C', fontSize: '11px' }, formatter: (v: number) => `${Math.round(v)}` },
+        },
       ],
       colors: ['#3E97FF', '#F1416C'],
       fill: {
         type: ['gradient', 'solid'],
-        gradient: {
-          shade: 'light',
-          type: 'vertical',
-          shadeIntensity: 0.5,
-          opacityFrom: 0.35,
-          opacityTo: 0.05,
-          stops: [0, 100]
-        }
+        gradient: { shade: 'light', type: 'vertical', shadeIntensity: 0.5, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] },
       },
-      grid: {
-        borderColor: '#F1F1F4',
-        strokeDashArray: 4,
-        yaxis: { lines: { show: true } }
-      },
-      legend: {
-        show: true,
-        position: 'top',
-        horizontalAlign: 'right',
-        fontSize: '12px',
-        fontWeight: 600,
-        markers: { width: 10, height: 10, radius: 10 }
-      },
-      tooltip: {
-        theme: 'light',
-        style: { fontSize: '12px' },
-        y: { formatter: (val: number) => `${val.toLocaleString()} unités` }
-      }
-    }
+      grid: { borderColor: '#F1F1F4', strokeDashArray: 4, yaxis: { lines: { show: true } } },
+      legend: { show: true, position: 'top', horizontalAlign: 'right', fontSize: '12px', fontWeight: 600 },
+      tooltip: { theme: 'light', style: { fontSize: '12px' }, y: { formatter: (v: number) => `${fmt(v)} pièces` } },
+    },
   }
 
-  const stockFormattedString = (
-    data.statistics.totalStockQty > 0
-      ? data.statistics.totalStockQty / 1000000
-      : 10.73
-  ).toLocaleString('fr-FR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }) + ' M'
-
-  const scrapFormattedString = (
-    data.statistics.totalScrap > 0
-      ? data.statistics.totalScrap
-      : 4512
-  ).toLocaleString() + ' pièces'
-
-  const outputFormattedString = (
-    data.statistics.totalOutput > 0
-      ? data.statistics.totalOutput
-      : 1596027
-  ).toLocaleString() + ' unités'
-
-  const ofsFormattedString = `${(
-    data.statistics.totalOfs > 0 ? data.statistics.totalOfs : 46810
-  ).toLocaleString()} Ordres de Fabrication exécutés`
-
-  const machinesFormattedString = `${data.statistics.totalMachines > 0 ? data.statistics.totalMachines : 319} machines`
-  const trsFormattedString = `${data.statistics.trs > 0 ? data.statistics.trs : 99.7}% Efficacité moyenne (TRS / OEE)`
+  const periodLabel = `du ${fmtDate(production.periodStart)} au ${fmtDate(production.periodEnd)}`
+  const ruptures = stock.statuts?.RUPTURE ?? 0
+  const critiques = stock.statuts?.CRITIQUE ?? 0
 
   return (
     <>
-      {/* 1. Header du Dashboard */}
       <div className='d-flex flex-wrap justify-content-between align-items-center mb-6 gap-3'>
         <div>
           <h1 className='d-flex align-items-center text-gray-900 fw-bolder fs-2 my-1'>
             Tableau de Bord Décisionnel Industriel
           </h1>
+          <span className='text-muted fs-7'>
+            Source : dbDWH — production {periodLabel} · stock au {fmtDate(stock.dateStock)}
+          </span>
         </div>
+        {error && <span className='badge badge-light-warning fs-8'>Actualisation impossible : {error}</span>}
       </div>
 
-      {/* 2. Top 4 Cartes KPI Exécutives */}
       <div className='row g-5 g-xl-10 mb-7'>
-        {/* Carte 1 : Volume Total Produit */}
         <div className='col-md-6 col-xl-3'>
           <StatisticsWidget
             color='primary'
             icon='delivery'
-            title='Volume Total Produit'
-            value={outputFormattedString}
-            subtitle={ofsFormattedString}
-            badgeText='Production Réelle'
-            badgeColor='primary'
+            title={`Volume produit (${production.periodDays} derniers jours)`}
+            value={`${fmt(production.totalVolumeProduit)} u`}
+            subtitle={`${fmt(production.totalOrdres)} ordres de fabrication déclarés`}
+            badgeText='FACT_CLE'
             className='h-100'
           />
         </div>
 
-        {/* Carte 2 : Parc Machines & Efficience */}
         <div className='col-md-6 col-xl-3'>
           <StatisticsWidget
             color='success'
             icon='gear'
-            title='Parc Machines & Efficience'
-            value={machinesFormattedString}
-            subtitle={trsFormattedString}
-            badgeText='Parc Industriel'
+            title='Parc machines'
+            value={`${fmt(production.machinesTotal)} machines`}
+            subtitle={`${fmt(production.machinesActives)} actives sur la période · ${fmt(production.machinesBloquees)} bloquées`}
+            badgeText='MCMachineCenter'
             badgeColor='success'
             className='h-100'
           />
         </div>
 
-        {/* Carte 3 : Quantité Totale en Stock (DWH dbo.ASTOCKDATE) */}
         <div className='col-md-6 col-xl-3'>
-          <div className='card card-flush shadow-sm border-0 h-100 p-6 pb-4 bg-white d-flex flex-column justify-content-between'>
-            <div>
-              <div className='d-flex justify-content-between align-items-start'>
-                <div>
-                  <div
-                    className='fw-bolder text-gray-900'
-                    style={{ fontSize: '28px', lineHeight: '1.15', letterSpacing: '-0.5px' }}
-                  >
-                    {stockFormattedString}<br />pièces
-                  </div>
-                  <div className='text-gray-700 fw-bold fs-6 mt-2'>
-                    Quantité Totale en Stock
-                  </div>
-                </div>
-                <span className='fw-bold fs-7' style={{ color: '#5B67A5' }}>
-                  Stock Physique
-                </span>
-              </div>
-
-              <div className='d-flex align-items-center mt-3 mb-2'>
-                <svg width='28' height='28' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                  <path d='M3 15H21V17C21 17.5523 20.5523 18 20 18H4C3.44772 18 3 17.5523 3 17V15Z' fill='#5B67A5' fillOpacity='0.4'/>
-                  <rect x='5' y='6' width='14' height='9' rx='1.5' fill='#5B67A5'/>
-                  <rect x='6' y='18' width='3' height='2' rx='0.5' fill='#5B67A5'/>
-                  <rect x='15' y='18' width='3' height='2' rx='0.5' fill='#5B67A5'/>
-                </svg>
-              </div>
-            </div>
-
-            <div className='w-100 mt-3' style={{ height: '3px', backgroundColor: '#5B67A5', borderRadius: '2px' }} />
-          </div>
+          <StatisticsWidget
+            color='info'
+            icon='parcel'
+            title='Valeur du stock'
+            value={`${fmt(stock.valeurTotaleStock / 1e6, 2)} M TND`}
+            subtitle={`${fmt(stock.quantiteTotale)} unités · ${fmt(stock.totalArticles)} articles`}
+            badgeText='ASTOCKDATE'
+            badgeColor='info'
+            className='h-100'
+          />
         </div>
 
-        {/* Carte 4 : Total Pièces de Rebut (DWH dbo.FACT_CLE) */}
         <div className='col-md-6 col-xl-3'>
-          <div className='card card-flush shadow-sm border-0 h-100 p-6 pb-4 bg-white d-flex flex-column justify-content-between'>
-            <div>
-              <div className='d-flex justify-content-between align-items-start'>
-                <div>
-                  <div
-                    className='fw-bolder text-gray-900'
-                    style={{ fontSize: '28px', lineHeight: '1.15', letterSpacing: '-0.5px' }}
-                  >
-                    {scrapFormattedString}
-                  </div>
-                  <div className='text-gray-700 fw-bold fs-6 mt-2'>
-                    Total Pièces de Rebut
-                  </div>
-                </div>
-                <span className='fw-bold fs-7 text-danger' style={{ color: '#E04B68' }}>
-                  Non-Conformes
-                </span>
-              </div>
-
-              <div className='d-flex align-items-center mt-3 mb-2'>
-                <div
-                  className='d-flex align-items-center justify-content-center rounded'
-                  style={{ width: '26px', height: '26px', backgroundColor: '#FDE8E8' }}
-                >
-                  <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='#E04B68' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'>
-                    <line x1='18' y1='6' x2='6' y2='18'></line>
-                    <line x1='6' y1='6' x2='18' y2='18'></line>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div className='w-100 mt-3' style={{ height: '3px', backgroundColor: '#E04B68', borderRadius: '2px' }} />
-          </div>
+          <StatisticsWidget
+            color='danger'
+            icon='cross-circle'
+            title='Rebuts sur la période'
+            value={`${fmt(production.totalRebut)} u`}
+            subtitle={
+              production.tauxConformite !== null
+                ? `Taux de conformité : ${fmt(production.tauxConformite, 2)} %`
+                : 'Aucune déclaration sur la période'
+            }
+            badgeText={`${ruptures} ruptures · ${critiques} critiques`}
+            badgeColor='danger'
+            className='h-100'
+          />
         </div>
       </div>
 
-      {/* 3. Graphique Central ApexCharts */}
       <div className='row g-5 mb-7'>
         <div className='col-12'>
           <div className='card card-flush shadow-sm border-0 h-100'>
             <div className='card-header pt-6 pb-2 border-0'>
               <h3 className='card-title align-items-start flex-column'>
                 <span className='card-label fw-bold text-gray-900 fs-4'>
-                  Flux de Production & Rebuts (14 Derniers Jours)
+                  Flux de production et rebuts ({data.daily.length} derniers jours de déclaration)
                 </span>
               </h3>
             </div>
             <div className='card-body pt-0 pb-4'>
-              <Chart
-                options={chartOptions.options}
-                series={chartOptions.series}
-                type='line'
-                height={300}
-              />
+              {data.daily.length === 0 ? (
+                <div className='text-muted text-center py-10'>Aucune déclaration sur la période.</div>
+              ) : (
+                <Chart options={chartOptions.options} series={chartOptions.series} type='line' height={300} />
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 4. Section à 2 colonnes : Derniers OFs (Gauche) & Répartition Stock (Droite) */}
       <div className='row g-5 mb-7'>
-        {/* Colonne Gauche : Derniers OFs */}
         <div className='col-lg-6'>
           <div className='card card-flush shadow-sm border-0 h-100'>
             <div className='card-header pt-6 pb-2 border-0'>
               <h3 className='card-title align-items-start flex-column'>
-                <span className='card-label fw-bold text-gray-900 fs-4'>
-                  Derniers Ordres d'Atelier
-                </span>
+                <span className='card-label fw-bold text-gray-900 fs-4'>Dernières déclarations d'atelier</span>
               </h3>
               <div className='card-toolbar'>
                 <a href='/production' className='btn btn-sm btn-light-primary fw-bold fs-8'>
-                  Voir tous les OFs →
+                  Voir toutes les déclarations →
                 </a>
               </div>
             </div>
@@ -555,46 +330,33 @@ const DashboardPage: FC = () => {
                     <tr className='text-start text-muted fw-bold fs-8 text-uppercase gs-0'>
                       <th>N° Ordre</th>
                       <th>Réf. Article</th>
-                      <th>Désignation</th>
                       <th>Qté Produite</th>
-                      <th>Centre / Machine</th>
+                      <th>Machine</th>
                       <th className='text-end pe-2'>Détails</th>
                     </tr>
                   </thead>
                   <tbody className='text-gray-600 fw-semibold'>
-                    {data.recentOfs.map((of) => (
+                    {data.recent.map((of) => (
                       <tr key={of.id}>
-                        <td className='fw-bold text-gray-900'>{of.code}</td>
+                        <td className='fw-bold text-gray-900'>{of.reference}</td>
                         <td>
-                          <span className='badge badge-light-primary fw-bold fs-8'>{of.itemNo}</span>
-                        </td>
-                        <td className='text-gray-800 fw-normal' style={{ maxWidth: '140px' }}>
-                          <div className='text-truncate' title={of.articleNom}>
-                            {of.articleNom}
-                          </div>
+                          <span className='badge badge-light-primary fw-bold fs-8'>{of.itemNo || '—'}</span>
                         </td>
                         <td>
-                          <span className='text-gray-900 fw-bolder'>{of.quantiteProduite.toLocaleString()} unités</span>
+                          <span className='text-gray-900 fw-bolder'>{fmt(of.quantiteRealisee)} u</span>
                           {of.scrapQuantity > 0 && (
-                            <span className='badge badge-light-danger ms-1 fs-9'>
-                              {of.scrapQuantity} reb.
-                            </span>
+                            <span className='badge badge-light-danger ms-1 fs-9'>{fmt(of.scrapQuantity)} reb.</span>
                           )}
                         </td>
                         <td>
-                          <span className='badge badge-light-info fw-bold fs-8'>
-                            {of.machineNom}
-                          </span>
+                          <span className='badge badge-light-info fw-bold fs-8'>{of.machineNom || of.machineCode || '—'}</span>
                         </td>
                         <td className='text-end pe-2'>
                           <button
                             type='button'
                             className='btn btn-icon btn-bg-light btn-active-color-primary btn-sm'
-                            onClick={() => {
-                              setSelectedOf(of)
-                              setShowOfModal(true)
-                            }}
-                            title='Consulter les détails OF'
+                            onClick={() => setSelectedOf(of)}
+                            title='Consulter la déclaration'
                           >
                             <KTIcon iconName='eye' className='fs-4' />
                           </button>
@@ -608,18 +370,16 @@ const DashboardPage: FC = () => {
           </div>
         </div>
 
-        {/* Colonne Droite : Répartition Stock */}
         <div className='col-lg-6'>
           <div className='card card-flush shadow-sm border-0 h-100'>
             <div className='card-header pt-6 pb-2 border-0'>
               <h3 className='card-title align-items-start flex-column'>
-                <span className='card-label fw-bold text-gray-900 fs-4'>
-                  Inventaire par Famille d'Articles
-                </span>
+                <span className='card-label fw-bold text-gray-900 fs-4'>Inventaire par famille d'articles</span>
+                <span className='text-muted fs-8 fw-semibold mt-1'>Instantané du {fmtDate(stock.dateStock)}</span>
               </h3>
               <div className='card-toolbar'>
                 <a href='/stock' className='btn btn-sm btn-light-success fw-bold fs-8'>
-                  Voir le Stock →
+                  Voir le stock →
                 </a>
               </div>
             </div>
@@ -628,36 +388,26 @@ const DashboardPage: FC = () => {
                 <table className='table align-middle table-row-dashed fs-7 gy-3'>
                   <thead>
                     <tr className='text-start text-muted fw-bold fs-8 text-uppercase gs-0'>
-                      <th>Famille d'Articles</th>
-                      <th>Nb Articles</th>
-                      <th>Quantité Totale</th>
-                      <th>Part Valeur (%)</th>
+                      <th>Famille (GroupeItem)</th>
+                      <th>Articles</th>
+                      <th>Valeur</th>
+                      <th>Part valeur</th>
                       <th className='text-end pe-2'>Détails</th>
                     </tr>
                   </thead>
                   <tbody className='text-gray-600 fw-semibold'>
-                    {data.stockGroups.map((group, index) => (
-                      <tr key={index}>
-                        <td className='fw-bold text-gray-900' style={{ maxWidth: '160px' }}>
-                          <div className='text-truncate' title={group.name}>
-                            {group.name}
-                          </div>
-                        </td>
+                    {data.stockGroups.map((group) => (
+                      <tr key={group.name}>
+                        <td className='fw-bold text-gray-900'>{group.name}</td>
                         <td>
-                          <span className='badge badge-light-primary text-primary fw-bolder fs-7 px-2 py-1'>
-                            {group.count} réf.
-                          </span>
+                          <span className='badge badge-light-primary text-primary fw-bolder fs-7 px-2 py-1'>{group.count} réf.</span>
                         </td>
-                        <td className='fw-bolder text-gray-900'>{group.quantity.toLocaleString()} unités</td>
+                        <td className='fw-bolder text-gray-900'>{fmt(group.value)} TND</td>
                         <td>
                           <div className='d-flex align-items-center gap-2'>
                             <span className='fw-bold text-gray-800 fs-8'>{group.percentage}%</span>
                             <div className='progress h-4px w-50px bg-light'>
-                              <div
-                                className='progress-bar bg-success'
-                                role='progressbar'
-                                style={{ width: `${Math.min(100, group.percentage)}%` }}
-                              />
+                              <div className='progress-bar bg-success' role='progressbar' style={{ width: `${Math.min(100, group.percentage)}%` }} />
                             </div>
                           </div>
                         </td>
@@ -665,10 +415,7 @@ const DashboardPage: FC = () => {
                           <button
                             type='button'
                             className='btn btn-icon btn-bg-light btn-active-color-success btn-sm'
-                            onClick={() => {
-                              setSelectedGroup(group)
-                              setShowGroupModal(true)
-                            }}
+                            onClick={() => setSelectedGroup(group)}
                             title='Voir le détail du groupe'
                           >
                             <KTIcon iconName='eye' className='fs-4' />
@@ -684,58 +431,48 @@ const DashboardPage: FC = () => {
         </div>
       </div>
 
-      {/* 5. Section Inférieure : Cartographie Consolidée Multi-Sites */}
       <div className='row g-5 mb-7'>
         <div className='col-12'>
           <div className='card card-flush shadow-sm border-0'>
             <div className='card-header pt-6 pb-2 border-0'>
               <h3 className='card-title align-items-start flex-column'>
-                <span className='card-label fw-bold text-gray-900 fs-4'>
-                  Consolidation Multi-Sites Industriels (Tunisie & Brno)
-                </span>
+                <span className='card-label fw-bold text-gray-900 fs-4'>Consolidation multi-sites</span>
                 <span className='text-muted fs-8 fw-semibold mt-1'>
-                  Répartition des stocks physiques et des équipements par implantation géographique
+                  Stock physique (ASTOCKDATE) et machines (MCMachineCenter) par site
                 </span>
               </h3>
             </div>
             <div className='card-body pt-2'>
               <div className='row g-4'>
-                {data.stockSites.map((site, index) => {
-                  const isKondar = site.site.toLowerCase().includes('kondar')
-                  const isBrno = site.site.toLowerCase().includes('brno')
-                  const color = isKondar ? 'primary' : isBrno ? 'warning' : 'info'
-                  const machinesText = isKondar ? '257 machines (TN1/TN2)' : isBrno ? '62 machines (CZA/CZM)' : 'Plateforme Logistique'
-
+                {data.stockSites.map((site) => {
+                  const key = site.site.toLowerCase()
+                  const color = key.includes('kondar') ? 'primary' : key.includes('brno') ? 'warning' : 'info'
                   return (
-                    <div className='col-md-4' key={index}>
+                    <div className='col-md-4' key={site.site}>
                       <div className={`card bg-light-${color} border border-dashed border-${color} p-5 rounded-3 h-100`}>
                         <div className='d-flex justify-content-between align-items-center mb-3'>
                           <span className={`fw-bolder fs-5 text-${color}`}>{site.site}</span>
-                          <span className={`badge badge-${color} fw-bold fs-8`}>Site Industriel</span>
                         </div>
                         <div className='d-flex flex-column gap-2 text-gray-700 fs-7'>
                           <div className='d-flex justify-content-between'>
-                            <span className='text-muted'>Articles référencés :</span>
-                            <strong>{site.count} articles</strong>
+                            <span className='text-muted'>Articles en stock :</span>
+                            <strong>{fmt(site.count)}</strong>
                           </div>
                           <div className='d-flex justify-content-between'>
-                            <span className='text-muted'>Volume physique stocké :</span>
-                            <strong className='text-gray-900'>{site.quantity.toLocaleString()} unités</strong>
+                            <span className='text-muted'>Volume physique :</span>
+                            <strong className='text-gray-900'>{fmt(site.quantity)} u</strong>
                           </div>
                           <div className='d-flex justify-content-between'>
-                            <span className='text-muted'>Actifs de production :</span>
-                            <strong className={`text-${color}`}>{machinesText}</strong>
+                            <span className='text-muted'>Valeur :</span>
+                            <strong className='text-gray-900'>{fmt(site.value)} TND</strong>
+                          </div>
+                          <div className='d-flex justify-content-between'>
+                            <span className='text-muted'>Machines rattachées :</span>
+                            <strong className={`text-${color}`}>{fmt(site.machines)}</strong>
                           </div>
                         </div>
                         <div className='mt-4 pt-3 border-top border-secondary border-opacity-10 d-flex justify-content-end'>
-                          <button
-                            type='button'
-                            className={`btn btn-xs btn-${color} fw-bold`}
-                            onClick={() => {
-                              setSelectedSite(site)
-                              setShowSiteModal(true)
-                            }}
-                          >
+                          <button type='button' className={`btn btn-xs btn-${color} fw-bold`} onClick={() => setSelectedSite(site)}>
                             Consulter la fiche site →
                           </button>
                         </div>
@@ -749,32 +486,27 @@ const DashboardPage: FC = () => {
         </div>
       </div>
 
-      {/* MODAL 1 : Détails Ordre de Fabrication */}
       {selectedOf && (
-        <Modal show={showOfModal} onHide={() => setShowOfModal(false)} centered size='lg'>
+        <Modal show onHide={() => setSelectedOf(null)} centered size='lg'>
           <Modal.Header closeButton className='border-0 pt-6 px-8 bg-light'>
             <Modal.Title className='fw-bold text-gray-900 fs-4 d-flex align-items-center gap-2'>
               <KTIcon iconName='archive' className='fs-2 text-primary' />
-              Ordre de Fabrication : <span className='text-primary fw-bolder'>{selectedOf.code}</span>
+              Ordre de fabrication : <span className='text-primary fw-bolder'>{selectedOf.reference}</span>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body className='px-8 py-6'>
             <div className='row g-4'>
-              <div className='col-12'>
-                <div className='bg-light p-4 rounded'>
-                  <span className='text-muted fs-8 fw-semibold text-uppercase'>Désignation de l'Opération / Article</span>
-                  <div className='text-gray-900 fw-bold fs-6 mt-1'>{selectedOf.articleNom}</div>
-                </div>
-              </div>
               {[
-                { label: 'N° Document / OF', val: selectedOf.code },
-                { label: 'Référence Composant', val: <span className='badge badge-light-primary fw-bold'>{selectedOf.itemNo}</span> },
-                { label: 'Quantité Conforme Produite', val: <span className='fw-bolder text-success fs-6'>{selectedOf.quantiteProduite.toLocaleString()} unités</span> },
-                { label: 'Quantité Rebutée', val: selectedOf.scrapQuantity > 0 ? <span className='badge badge-light-danger fw-bold'>{selectedOf.scrapQuantity} unités</span> : '0 unité' },
-                { label: 'Temps d\'Usinage Machine', val: `${selectedOf.runTime} h` },
-                { label: 'Centre de Charge / Atelier', val: <span className='badge badge-light-info fw-bold'>{selectedOf.machineNom}</span> },
-                { label: 'Date de Fabrication', val: selectedOf.dateDebut },
-                { label: 'Site Industriel', val: <span className='badge badge-light-dark'>{selectedOf.responsable}</span> }
+                { label: 'N° Document / OF', val: selectedOf.reference },
+                { label: 'Article (Item No_)', val: selectedOf.itemNo || '—' },
+                { label: 'Description', val: selectedOf.article || '—' },
+                { label: 'Quantité produite', val: `${fmt(selectedOf.quantiteRealisee)} u` },
+                { label: 'Quantité rebutée', val: `${fmt(selectedOf.scrapQuantity)} u` },
+                { label: 'Temps de marche', val: `${fmt(selectedOf.runTime, 2)} h` },
+                { label: 'Centre de charge', val: selectedOf.workCenter || '—' },
+                { label: 'Machine', val: [selectedOf.machineCode, selectedOf.machineNom].filter(Boolean).join(' — ') || '—' },
+                { label: 'Date de déclaration', val: fmtDate(selectedOf.dateDebut) },
+                { label: 'Base (Data Base)', val: selectedOf.site || '—' },
               ].map(({ label, val }) => (
                 <div className='col-md-6' key={label}>
                   <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>
@@ -785,95 +517,69 @@ const DashboardPage: FC = () => {
             </div>
           </Modal.Body>
           <Modal.Footer className='border-0 bg-light py-3 px-8'>
-            <button className='btn btn-light-primary btn-sm' onClick={() => setShowOfModal(false)}>
-              Fermer
-            </button>
+            <button className='btn btn-light-primary btn-sm' onClick={() => setSelectedOf(null)}>Fermer</button>
           </Modal.Footer>
         </Modal>
       )}
 
-      {/* MODAL 2 : Détails Groupe d'Articles */}
       {selectedGroup && (
-        <Modal show={showGroupModal} onHide={() => setShowGroupModal(false)} centered size='lg'>
+        <Modal show onHide={() => setSelectedGroup(null)} centered size='lg'>
           <Modal.Header closeButton className='border-0 pt-6 px-8 bg-light'>
             <Modal.Title className='fw-bold text-gray-900 fs-4 d-flex align-items-center gap-2'>
               <KTIcon iconName='category' className='fs-2 text-success' />
-              Famille d'Articles : <span className='text-success fw-bolder'>{selectedGroup.name}</span>
+              Famille d'articles : <span className='text-success fw-bolder'>{selectedGroup.name}</span>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body className='px-8 py-6'>
             <div className='row g-4'>
-              <div className='col-md-6'>
-                <div className='bg-light p-4 rounded'>
-                  <div className='fs-8 text-muted fw-semibold mb-1'>Références Référencées</div>
-                  <div className='fs-4 fw-bolder text-gray-900'>{selectedGroup.count} articles distincts</div>
+              {[
+                { label: 'Articles distincts', val: `${fmt(selectedGroup.count)}` },
+                { label: 'Quantité en stock', val: `${fmt(selectedGroup.quantity)} u` },
+                { label: 'Valeur du stock', val: `${fmt(selectedGroup.value)} TND` },
+                { label: 'Part de la valeur totale', val: `${selectedGroup.percentage} %` },
+              ].map(({ label, val }) => (
+                <div className='col-md-6' key={label}>
+                  <div className='bg-light p-4 rounded'>
+                    <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>
+                    <div className='fs-4 fw-bolder text-gray-900'>{val}</div>
+                  </div>
                 </div>
-              </div>
-              <div className='col-md-6'>
-                <div className='bg-light p-4 rounded'>
-                  <div className='fs-8 text-muted fw-semibold mb-1'>Quantité Totale en Stock</div>
-                  <div className='fs-4 fw-bolder text-success'>{selectedGroup.quantity.toLocaleString()} unités</div>
-                </div>
-              </div>
-              <div className='col-md-6'>
-                <div className='bg-light p-4 rounded'>
-                  <div className='fs-8 text-muted fw-semibold mb-1'>Part dans la Valeur du Stock</div>
-                  <div className='fs-4 fw-bolder text-primary'>{selectedGroup.percentage}% du total</div>
-                </div>
-              </div>
-              <div className='col-md-6'>
-                <div className='bg-light p-4 rounded'>
-                  <div className='fs-8 text-muted fw-semibold mb-1'>État de l'Inventaire</div>
-                  <div className='fs-6 fw-bold text-dark'>Clôture Mensuelle Consolidée</div>
-                </div>
-              </div>
+              ))}
             </div>
           </Modal.Body>
           <Modal.Footer className='border-0 bg-light py-3 px-8'>
-            <button className='btn btn-light-success btn-sm' onClick={() => setShowGroupModal(false)}>
-              Fermer
-            </button>
+            <button className='btn btn-light-success btn-sm' onClick={() => setSelectedGroup(null)}>Fermer</button>
           </Modal.Footer>
         </Modal>
       )}
 
-      {/* MODAL 3 : Détails Fiche Site Industriel */}
       {selectedSite && (
-        <Modal show={showSiteModal} onHide={() => setShowSiteModal(false)} centered size='lg'>
+        <Modal show onHide={() => setSelectedSite(null)} centered size='lg'>
           <Modal.Header closeButton className='border-0 pt-6 px-8 bg-light'>
             <Modal.Title className='fw-bold text-gray-900 fs-4 d-flex align-items-center gap-2'>
               <KTIcon iconName='geolocation' className='fs-2 text-warning' />
-              Implantation Industrielle : <span className='text-warning fw-bolder'>{selectedSite.site}</span>
+              Site : <span className='text-warning fw-bolder'>{selectedSite.site}</span>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body className='px-8 py-6'>
             <div className='row g-4'>
-              <div className='col-md-6'>
-                <div className='bg-light p-4 rounded'>
-                  <div className='fs-8 text-muted fw-semibold mb-1'>Catalogue d'Articles Référencés</div>
-                  <div className='fs-4 fw-bolder text-gray-900'>{selectedSite.count} références</div>
+              {[
+                { label: 'Articles en stock', val: fmt(selectedSite.count) },
+                { label: 'Volume physique', val: `${fmt(selectedSite.quantity)} u` },
+                { label: 'Valeur du stock', val: `${fmt(selectedSite.value)} TND` },
+                { label: 'Machines rattachées', val: fmt(selectedSite.machines) },
+              ].map(({ label, val }) => (
+                <div className='col-md-6' key={label}>
+                  <div className='bg-light p-4 rounded'>
+                    <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>
+                    <div className='fs-4 fw-bolder text-gray-900'>{val}</div>
+                  </div>
                 </div>
-              </div>
-              <div className='col-md-6'>
-                <div className='bg-light p-4 rounded'>
-                  <div className='fs-8 text-muted fw-semibold mb-1'>Volume Physique Stocké</div>
-                  <div className='fs-4 fw-bolder text-warning'>{selectedSite.quantity.toLocaleString()} unités</div>
-                </div>
-              </div>
-              <div className='col-12'>
-                <div className='card bg-light border-0 p-4 rounded'>
-                  <div className='fs-8 text-muted fw-semibold mb-2'>Actifs et Ateliers Associés</div>
-                  <p className='fs-7 text-gray-700 mb-0'>
-                    Ce site participe activement aux opérations de production et à la gestion des approvisionnements de l'usine avec ses ateliers et ses magasins de stockage correspondants.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </Modal.Body>
           <Modal.Footer className='border-0 bg-light py-3 px-8'>
-            <button className='btn btn-light-warning btn-sm' onClick={() => setShowSiteModal(false)}>
-              Fermer
-            </button>
+            <button className='btn btn-light-warning btn-sm' onClick={() => setSelectedSite(null)}>Fermer</button>
           </Modal.Footer>
         </Modal>
       )}
@@ -881,12 +587,6 @@ const DashboardPage: FC = () => {
   )
 }
 
-const DashboardWrapper: FC = () => {
-  return (
-    <>
-      <DashboardPage />
-    </>
-  )
-}
+const DashboardWrapper: FC = () => <DashboardPage />
 
 export { DashboardWrapper }

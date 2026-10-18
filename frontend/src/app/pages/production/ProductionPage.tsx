@@ -4,7 +4,7 @@ import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
-import { API_BASE_URL } from '../../config'
+import { API_BASE_URL, apiErrorMessage } from '../../config'
 
 let globalCachedOrders: any[] = []
 
@@ -25,6 +25,7 @@ export default function ProductionPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(50)
   const [showFilters, setShowFilters] = useState(false)
+  const [loadError, setLoadError] = useState('')
 
   const apiUrl = API_BASE_URL
 
@@ -32,24 +33,26 @@ export default function ProductionPage() {
     if (globalCachedOrders.length === 0) setLoading(true)
     try {
       const { data } = await axios.get(`${apiUrl}/production/orders`)
+      // Déclarations réelles de dbo.FACT_CLE ; les champs absents restent vides (aucune valeur inventée).
       const mapped = (Array.isArray(data) ? data : []).map((o: any) => ({
         id: o.id,
-        code: o.reference || o.code,
-        itemNo: o.itemNo || '-',
-        articleNom: o.article || o.articleNom,
+        code: o.reference,
+        itemNo: o.itemNo || '',
+        articleNom: o.article || '',
         quantiteProduite: Number(o.quantiteRealisee) || 0,
         scrapQuantity: Number(o.scrapQuantity) || 0,
         runTime: Number(o.runTime) || 0,
-        dateDebut: o.dateDebut || '2026-01-01',
-        machineNom: o.machineNom || 'Atelier',
+        dateDebut: o.dateDebut || '',
+        machineNom: o.workCenter || '',
         machineCode: o.machineCode || '',
-        machineLabel: o.notes || '',
-        responsable: o.responsable || 'Tunisie',
+        machineLabel: o.machineNom || '',
+        responsable: o.site || '',
       }))
       globalCachedOrders = mapped
       setOrders(mapped)
+      setLoadError('')
     } catch (err) {
-      console.error('Failed to fetch production orders from API:', err)
+      setLoadError(apiErrorMessage(err, 'Impossible de charger les déclarations de production.'))
     } finally {
       setLoading(false)
     }
@@ -60,20 +63,10 @@ export default function ProductionPage() {
 
   const workshops = useMemo(() => ['ALL', ...Array.from(new Set(orders.map(o => o.machineNom).filter(Boolean)))], [orders])
   const sites = useMemo(() => ['ALL', ...Array.from(new Set(orders.map(o => o.responsable).filter(Boolean)))], [orders])
-
-  const getWorkshopLabel = (code: string) => {
-    switch (code) {
-      case 'TN1-INJE': return 'TN1-INJE — Injection Tunisie 1'
-      case 'TN1-ASSE': return 'TN1-ASSE — Assemblage Tunisie 1'
-      case 'TN2-INJ':  return 'TN2-INJ — Injection Tunisie 2'
-      case 'TN2-ASSE': return 'TN2-ASSE — Assemblage Tunisie 2'
-      case 'TN1-MO':   return 'TN1-MO — Moules & Outillage Tunisie'
-      case 'CZA':      return 'CZA — Assemblage Brno (Rép. Tchèque)'
-      case 'CZM':      return 'CZM — Moulage Brno (Rép. Tchèque)'
-      case 'CZQ':      return 'CZQ — Contrôle Qualité Brno'
-      default: return code
-    }
-  }
+  const years = useMemo(
+    () => Array.from(new Set(orders.map(o => String(o.dateDebut).slice(0, 4)).filter(y => /^\d{4}$/.test(y)))).sort().reverse(),
+    [orders]
+  )
 
   const handleSort = (field: string) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -135,7 +128,7 @@ export default function ProductionPage() {
   }
 
   const stats = useMemo(() => {
-    const total = orders.length
+    const total = new Set(orders.map(o => o.code)).size
     const totalOutput = orders.reduce((s, o) => s + (Number(o.quantiteProduite) || 0), 0)
     const totalScrap = orders.reduce((s, o) => s + (Number(o.scrapQuantity) || 0), 0)
     const totalRunTime = Math.round(orders.reduce((s, o) => s + (Number(o.runTime) || 0), 0) * 10) / 10
@@ -160,7 +153,7 @@ export default function ProductionPage() {
   ].filter(Boolean).length
 
   const filteredStats = useMemo(() => {
-    const total = filteredOrders.length
+    const total = new Set(filteredOrders.map(o => o.code)).size
     const totalOutput = filteredOrders.reduce((s, o) => s + (Number(o.quantiteProduite) || 0), 0)
     const totalScrap = filteredOrders.reduce((s, o) => s + (Number(o.scrapQuantity) || 0), 0)
     const totalRunTime = Math.round(filteredOrders.reduce((s, o) => s + (Number(o.runTime) || 0), 0) * 10) / 10
@@ -188,6 +181,9 @@ export default function ProductionPage() {
   }
 
   if (loading && orders.length === 0) return <PageSkeleton type='table' />
+  if (loadError && orders.length === 0) {
+    return <div className='alert alert-danger p-5'>{loadError}</div>
+  }
 
   return (
     <div className='card card-flush'>
@@ -195,7 +191,7 @@ export default function ProductionPage() {
       <div className='card-header border-0 pt-6 pb-2'>
         <div className='d-flex gap-4 flex-wrap'>
           {[
-            { label: 'Total Document No_', val: stats.total.toLocaleString(), color: 'primary', icon: 'element-11', sub: 'Ordres exécutés' },
+            { label: 'Document No_ distincts', val: stats.total.toLocaleString(), color: 'primary', icon: 'element-11', sub: `${orders.length.toLocaleString()} dernières déclarations` },
             { label: 'Total Output Quantity', val: `${stats.totalOutput.toLocaleString()} unités`, color: 'success', icon: 'check-circle', sub: 'Pièces conformes' },
             { label: 'Total Scrap Quantity', val: `${stats.totalScrap.toLocaleString()} unités`, color: 'danger', icon: 'cross-circle', sub: `Taux : ${stats.scrapRate}%` },
             { label: 'Total Run Time', val: `${stats.totalRunTime.toLocaleString()} h`, color: 'info', icon: 'time', sub: 'Heures machine' },
@@ -279,7 +275,7 @@ export default function ProductionPage() {
               </div>
               <div className='d-flex align-items-center gap-2 mt-2 mt-md-0'>
                 <span className='text-muted fs-8 fw-semibold me-1'>Période rapide :</span>
-                {['ALL', '2026', '2025', '2024'].map(y => (
+                {['ALL', ...years].map(y => (
                   <button
                     key={y}
                     type='button'
@@ -307,7 +303,7 @@ export default function ProductionPage() {
                 >
                   <option value='ALL'>Tous les Ateliers</option>
                   {workshops.filter(w => w !== 'ALL').map(w => (
-                    <option key={w} value={w}>{getWorkshopLabel(w)}</option>
+                    <option key={w} value={w}>{w}</option>
                   ))}
                 </select>
               </div>
@@ -478,11 +474,11 @@ export default function ProductionPage() {
                       {o.runTime > 0 ? `${o.runTime} h` : '0 h'}
                     </td>
                     <td>
-                      <span className='badge badge-light-info fw-bold'>{o.machineNom || 'Atelier'}</span>
+                      <span className='badge badge-light-info fw-bold'>{o.machineNom || '—'}</span>
                     </td>
                     <td className='text-muted'>{o.dateDebut}</td>
                     <td>
-                      <span className='badge badge-light-dark'>{o.responsable || 'Tunisie'}</span>
+                      <span className='badge badge-light-dark'>{o.responsable || '—'}</span>
                     </td>
                     <td className='text-end pe-4'>
                       <button
@@ -555,7 +551,7 @@ export default function ProductionPage() {
                 { label: 'Work Center No_', val: <span className='badge badge-light-info fw-bold'>{selectedOrder.machineNom || '—'}</span> },
                 { label: 'Machine (No_)', val: selectedOrder.machineCode ? `${selectedOrder.machineCode} ${selectedOrder.machineLabel ? `(${selectedOrder.machineLabel})` : ''}` : '—' },
                 { label: 'Posting Date', val: selectedOrder.dateDebut || '—' },
-                { label: 'Data Base', val: <span className='badge badge-light-dark'>{selectedOrder.responsable || 'Tunisie'}</span> },
+                { label: 'Data Base', val: <span className='badge badge-light-dark'>{selectedOrder.responsable || '—'}</span> },
               ].map(({ label, val }) => (
                 <div className='col-md-6' key={label}>
                   <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>

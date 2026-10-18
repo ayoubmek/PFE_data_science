@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import axios from 'axios'
 import { KTIcon } from '../../../_metronic/helpers'
-import { API_BASE_URL } from '../../config'
+import { API_BASE_URL, apiErrorMessage } from '../../config'
 
 export type UserRole = 'ADMIN' | 'OPERATEUR'
 
@@ -16,7 +16,6 @@ export interface UserItem {
   lastLogin?: string
 }
 
-const STORAGE_KEY = 'nexora_users_db'
 
 
 
@@ -86,7 +85,7 @@ export default function UserManagementPage() {
     enabled: true,
   })
 
-  // Load users from backend or localStorage
+  // Load users from the backend (table des utilisateurs de dbDWH)
   useEffect(() => {
     loadUsers()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,41 +93,15 @@ export default function UserManagementPage() {
 
   const loadUsers = async () => {
     setLoading(true)
-    const apiUrl = API_BASE_URL
     try {
-      const { data } = await axios.get(`${apiUrl}/users`, { timeout: 3500 })
-      if (Array.isArray(data)) {
-        const cleaned = data.filter((u: UserItem) => (u.role || '').toUpperCase() !== 'MANAGER' && u.username !== 'manager')
-        setUsers(cleaned)
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned))
-      } else {
-        fallbackToStorage()
-      }
+      const { data } = await axios.get<UserItem[]>(`${API_BASE_URL}/users`)
+      setUsers(Array.isArray(data) ? data : [])
     } catch (err) {
-      fallbackToStorage()
+      setUsers([])
+      showAlert('danger', apiErrorMessage(err, 'Impossible de charger les utilisateurs depuis le serveur.'))
     } finally {
       setLoading(false)
     }
-  }
-
-  const fallbackToStorage = () => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const cleaned = parsed.filter(
-            (u: UserItem) =>
-              (u.role || '').toUpperCase() !== 'MANAGER' &&
-              u.username !== 'manager' &&
-              !['imen.admin@nexora-industrial.com', 'ayoub.hammami@nexora-industrial.com', 'rihab.idoudi@nexora-industrial.com', 'salah.mejri@atelier-kondar.tn', 'fatma.dridi@atelier-kondar.tn', 'kamel.mansour@atelier-brno.cz'].includes(u.email)
-          )
-          setUsers(cleaned)
-          return
-        }
-      } catch (e) {}
-    }
-    setUsers([])
   }
 
   const showAlert = (type: 'success' | 'danger' | 'info', text: string) => {
@@ -161,22 +134,16 @@ export default function UserManagementPage() {
 
   // Toggle user active status
   const handleToggleStatus = async (user: UserItem) => {
-    const newStatus = !user.enabled
-    const updated = users.map((u) => (u.id === user.id ? { ...u, enabled: newStatus } : u))
-    setUsers(updated)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-
-    const apiUrl = API_BASE_URL
     try {
-      await axios.patch(`${apiUrl}/users/${user.id}/toggle-status`, {}, { timeout: 2000 })
-    } catch (e) {
-      // Offline fallback persisted in localStorage
+      const { data } = await axios.patch<UserItem>(`${API_BASE_URL}/users/${user.id}/toggle-status`, {})
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? data : u)))
+      showAlert(
+        data.enabled ? 'success' : 'info',
+        `Le compte de ${user.fullName} a été ${data.enabled ? 'activé' : 'désactivé'}.`
+      )
+    } catch (err) {
+      showAlert('danger', apiErrorMessage(err, 'Modification du statut impossible.'))
     }
-
-    showAlert(
-      newStatus ? 'success' : 'info',
-      `Le compte de ${user.fullName} a été ${newStatus ? 'activé avec succès' : 'désactivé'}.`
-    )
   }
 
   // Delete user
@@ -190,16 +157,13 @@ export default function UserManagementPage() {
       return
     }
 
-    const updated = users.filter((u) => u.id !== user.id)
-    setUsers(updated)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-
-    const apiUrl = API_BASE_URL
     try {
-      await axios.delete(`${apiUrl}/users/${user.id}`, { timeout: 2000 })
-    } catch (e) {}
-
-    showAlert('success', `Le compte utilisateur « ${user.fullName} » a été supprimé.`)
+      await axios.delete(`${API_BASE_URL}/users/${user.id}`)
+      setUsers((prev) => prev.filter((u) => u.id !== user.id))
+      showAlert('success', `Le compte utilisateur « ${user.fullName} » a été supprimé.`)
+    } catch (err) {
+      showAlert('danger', apiErrorMessage(err, 'Suppression impossible.'))
+    }
   }
 
   // Open Edit Modal
@@ -232,44 +196,18 @@ export default function UserManagementPage() {
   // Submit Create User
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.username.trim() || !formData.email.trim() || !formData.fullName.trim()) {
-      showAlert('danger', 'Veuillez renseigner tous les champs obligatoires.')
+    if (!formData.username.trim() || !formData.email.trim() || !formData.fullName.trim() || !formData.password) {
+      showAlert('danger', 'Veuillez renseigner tous les champs obligatoires (mot de passe compris).')
       return
     }
-
-    // Check duplicate username or email
-    const exists = users.some(
-      (u) =>
-        u.username.toLowerCase() === formData.username.trim().toLowerCase() ||
-        u.email.toLowerCase() === formData.email.trim().toLowerCase()
-    )
-    if (exists) {
-      showAlert('danger', "Ce nom d'utilisateur ou cet e-mail est déjà associé à un compte.")
-      return
-    }
-
-    const newUser: UserItem = {
-      id: Date.now(),
-      username: formData.username.trim().toLowerCase(),
-      fullName: formData.fullName.trim(),
-      email: formData.email.trim().toLowerCase(),
-      role: formData.role,
-      enabled: formData.enabled,
-      createdAt: new Date().toISOString().split('T')[0],
-      lastLogin: 'Jamais connecté',
-    }
-
-    const apiUrl = API_BASE_URL
     try {
-      const { data } = await axios.post(`${apiUrl}/users`, formData, { timeout: 2500 })
-      if (data && data.id) newUser.id = data.id
-    } catch (e) {}
-
-    const updated = [newUser, ...users]
-    setUsers(updated)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    setShowCreateModal(false)
-    showAlert('success', `Compte « ${newUser.fullName} » créé avec le rôle ${getRoleConfig(newUser.role).label}.`)
+      const { data } = await axios.post<UserItem>(`${API_BASE_URL}/users`, formData)
+      setUsers((prev) => [data, ...prev])
+      setShowCreateModal(false)
+      showAlert('success', `Compte « ${data.fullName} » créé avec le rôle ${getRoleConfig(data.role).label}.`)
+    } catch (err) {
+      showAlert('danger', apiErrorMessage(err, 'Création du compte impossible.'))
+    }
   }
 
   // Submit Edit User
@@ -281,29 +219,14 @@ export default function UserManagementPage() {
       showAlert('danger', 'Veuillez renseigner les champs obligatoires.')
       return
     }
-
-    const updated = users.map((u) => {
-      if (u.id === editingUser.id) {
-        return {
-          ...u,
-          fullName: formData.fullName.trim(),
-          email: formData.email.trim().toLowerCase(),
-          role: formData.role,
-          enabled: formData.enabled,
-        }
-      }
-      return u
-    })
-
-    const apiUrl = API_BASE_URL
     try {
-      await axios.put(`${apiUrl}/users/${editingUser.id}`, formData, { timeout: 2500 })
-    } catch (e) {}
-
-    setUsers(updated)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    setShowEditModal(false)
-    showAlert('success', `Informations et rôle de « ${formData.fullName} » mis à jour.`)
+      const { data } = await axios.put<UserItem>(`${API_BASE_URL}/users/${editingUser.id}`, formData)
+      setUsers((prev) => prev.map((u) => (u.id === data.id ? data : u)))
+      setShowEditModal(false)
+      showAlert('success', `Informations et rôle de « ${data.fullName} » mis à jour.`)
+    } catch (err) {
+      showAlert('danger', apiErrorMessage(err, 'Mise à jour impossible.'))
+    }
   }
 
   return (

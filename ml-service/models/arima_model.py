@@ -1,98 +1,45 @@
-import sys
-from pathlib import Path
-from datetime import timedelta
-import numpy as np
+"""
+ARIMA saisonnier (SARIMA) de statsmodels : ordre (1,0,1) x (1,1,1) de période 7.
+La différenciation saisonnière hebdomadaire absorbe le cycle jours ouvrés / week-end.
+L'intervalle à 95 % est l'intervalle de prévision analytique du modèle d'état.
+"""
+import warnings
+
 import pandas as pd
-from sklearn.model_selection import TimeSeriesSplit
 
-models_dir = Path(__file__).resolve().parent
-if str(models_dir) not in sys.path:
-    sys.path.insert(0, str(models_dir))
-
-from metrics import compute_eval_metrics, print_metrics_summary
-from data_loader import load_production_series
+from .base import Forecaster
 
 
-class ARIMAModel:
-    def __init__(self, alpha: float = 0.65):
-        self.alpha = alpha
-        self.n_samples = 0
-        self.last_date = None
-        self.last_val = 0.0
-        self.trend_step = 0.0
-        self.val_std = 0.0
-        self.y_train = None
-        self.y_pred_hist = None
+class ARIMAModel(Forecaster):
+    key = "arima"
+    name = "SARIMA (1,0,1)x(1,1,1)7"
 
-    def fit(self, df: pd.DataFrame, date_col: str = "date", val_col: str = "value"):
-        data = df.sort_values(date_col).reset_index(drop=True)
-        self.n_samples = len(data)
-        self.last_date = pd.to_datetime(data[date_col].iloc[-1])
-        y = data[val_col].values.astype(float)
+    def __init__(self, order=(1, 0, 1), seasonal_order=(1, 1, 1, 7)):
+        self.order = order
+        self.seasonal_order = seasonal_order
+        self.result = None
+        self.series = None
 
-        hist = np.zeros(self.n_samples)
-        hist[0] = y[0]
-        for t in range(1, self.n_samples):
-            hist[t] = self.alpha * y[t - 1] + (1 - self.alpha) * hist[t - 1]
+    def fit(self, series: pd.Series) -> "ARIMAModel":
+        from statsmodels.tsa.statespace.sarimax import SARIMAX
 
-        self.y_train = y
-        self.y_pred_hist = hist
-        self.last_val = float(y[-1])
-        self.trend_step = float((y[-1] - y[0]) / max(1, self.n_samples))
-        self.val_std = float(np.std(y))
+        self.series = series
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.result = SARIMAX(
+                series.to_numpy(dtype=float),
+                order=self.order,
+                seasonal_order=self.seasonal_order,
+                enforce_stationarity=False,
+                enforce_invertibility=False,
+            ).fit(disp=False)
         return self
 
-    def predict(self, horizon: int = 30) -> list:
-        dates = [self.last_date + timedelta(days=i + 1) for i in range(horizon)]
-        preds = []
-
-        for h in range(1, horizon + 1):
-            val_a = max(
-                0.0,
-                self.last_val + self.trend_step * 0.3 * h + np.sin(h / 2.5) * (self.val_std * 0.2),
-            )
-            preds.append({
-                "date": dates[h - 1].strftime("%Y-%m-%d"),
-                "predicted_quantity": round(val_a, 1),
-            })
-        return preds
-
-    def evaluate(self, n_splits: int = 5) -> dict:
-        overall_metrics = compute_eval_metrics(self.y_train, self.y_pred_hist)
-
-        cv_scores = []
-        n_splits_actual = min(n_splits, max(2, self.n_samples - 2))
-        tscv = TimeSeriesSplit(n_splits=n_splits_actual)
-        x = np.arange(self.n_samples)
-
-        for train_idx, test_idx in tscv.split(x):
-            y_tr = self.y_train[train_idx]
-            f_last = y_tr[-1]
-            f_step = (y_tr[-1] - y_tr[0]) / max(1, len(y_tr))
-            pred_fold = [max(0.0, f_last + f_step * 0.3 * (k + 1)) for k in range(len(test_idx))]
-            cv_scores.append(compute_eval_metrics(self.y_train[test_idx], pred_fold))
-
-        overall_metrics["cv_r2"] = round(float(np.mean([s["r2"] for s in cv_scores])), 4)
-        overall_metrics["cv_scores"] = cv_scores
-        return overall_metrics
-
-
-if __name__ == "__main__":
-    print("\n--- Lancement du modele : ARIMA (Auto-Regressive Integrated Moving Average) ---")
-    df = load_production_series()
-    print(f"Donnees chargees : {len(df):,} observations journalieres.")
-
-    model = ARIMAModel(alpha=0.65).fit(df)
-    eval_res = model.evaluate(n_splits=5)
-
-    print_metrics_summary(
-        model_name="ARIMA (Modele Autoregressif et Moyennes Mobiles)",
-        metrics=eval_res,
-        cv_scores=eval_res.get("cv_scores"),
-    )
-
-    preds = model.predict(horizon=14)
-    print("Echantillon des previsions futures (14 jours) :")
-    for p in preds[:7]:
-        print(f"  {p['date']} : {p['predicted_quantity']:>10,.0f} pieces")
-    print(f"  ... et {len(preds)-7} jours supplementaires.")
+    def predict(self, horizon: int) -> pd.DataFrame:
+        fc = self.result.get_forecast(horizon)
+        ci = fc.conf_int(alpha=0.05)
+        out = pd.DataFrame(
+            {"yhat": fc.predicted_mean, "yhat_lower": ci[:, 0], "yhat_upper": ci[:, 1]},
+            index=self.future_index(self.series, horizon),
+        )
+        return out.clip(lower=0.0)

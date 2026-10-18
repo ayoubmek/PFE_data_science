@@ -1,15 +1,26 @@
 /**
  * Application Global Configuration
- * Centralizes backend API URLs and runtime constants.
+ * Centralizes the backend API URL. The frontend never calls the ML service directly:
+ * every request goes through the authenticated Spring Boot API (/api/ml/**).
  */
 
 export const API_BASE_URL: string =
-  process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
+  process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
 
-export const ML_SERVICE_URL: string =
-  process.env.REACT_APP_ML_URL || 'http://localhost:8000';
+/** Common helper: readable message from an API error (backend or ML service). */
+export function apiErrorMessage(err: any, fallback: string): string {
+  const data = err?.response?.data
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data)
+      return parsed.detail || parsed.message || parsed.error || fallback
+    } catch {
+      return data || fallback
+    }
+  }
+  return data?.detail || data?.message || data?.error || fallback
+}
 
 export default {
   API_BASE_URL,
-  ML_SERVICE_URL,
-};
+}

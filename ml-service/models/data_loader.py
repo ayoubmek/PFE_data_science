@@ -1,112 +1,131 @@
-from pathlib import Path
+"""
+Accès en lecture seule au Data Warehouse SQL Server (dbDWH).
+
+Toutes les données consommées par le service ML proviennent d'ici. Il n'existe volontairement
+aucune donnée de repli simulée : si le DWH est indisponible, une DWHUnavailableError est levée
+et l'API répond 503.
+"""
+import logging
+import threading
+from typing import Optional, Tuple
+
 import pandas as pd
-import numpy as np
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-FACT_CLE_CSV = PROJECT_ROOT / "etl_pipeline" / "output_clean" / "FACT_CLE.csv"
-PROD_RAW_CSV = PROJECT_ROOT / "PRODUCTION_RAW.csv"
-STOCK_CLEAN_CSV = PROJECT_ROOT / "etl_pipeline" / "output_clean" / "ASTOCKDATE.csv"
+import config
 
+logger = logging.getLogger("ml-service.dwh")
 
-def load_production_series() -> pd.DataFrame:
-    if FACT_CLE_CSV.exists():
-        df = pd.read_csv(FACT_CLE_CSV)
-        date_col = next((c for c in df.columns if "date" in c.lower() or "posting" in c.lower()), df.columns[0])
-        # Priorité absolue à la métrique industrielle calculée 'Quantité produite TRS'
-        val_col = next((c for c in df.columns if "trs" in c.lower()), None)
-        if not val_col:
-            val_col = next((c for c in df.columns if "output" in c.lower() or "bonne" in c.lower() or "produite" in c.lower() or "quantity" in c.lower()), df.columns[1])
-        df = df[[date_col, val_col]].rename(columns={date_col: "date", val_col: "value"})
-        df["date"] = pd.to_datetime(df["date"], errors="coerce")
-        df["value"] = pd.to_numeric(df["value"], errors="coerce").fillna(0)
-        df = df.dropna().groupby("date")["value"].sum().reset_index().sort_values("date").reset_index(drop=True)
-        return df
-
-    if PROD_RAW_CSV.exists():
-        df = pd.read_csv(PROD_RAW_CSV)
-        date_col = next((c for c in df.columns if "date" in c.lower()), df.columns[0])
-        val_col = next((c for c in df.columns if "produite" in c.lower()), df.columns[1])
-        df = df[[date_col, val_col]].rename(columns={date_col: "date", val_col: "value"})
-        df["date"] = pd.to_datetime(df["date"], errors="coerce")
-        df["value"] = pd.to_numeric(df["value"].astype(str).str.replace(",", "."), errors="coerce").fillna(0)
-        df = df.dropna().groupby("date")["value"].sum().reset_index().sort_values("date").reset_index(drop=True)
-        return df
-
-    dates = pd.date_range("2024-01-01", "2026-03-31", freq="D")
-    np.random.seed(42)
-    base = 65000
-    values = []
-    for d in dates:
-        if d.weekday() >= 5:
-            values.append(int(base * 0.15 + np.random.normal(0, 2000)))
-        else:
-            values.append(int(base + np.sin(d.dayofyear / 20) * 8000 + np.random.normal(0, 3500)))
-    return pd.DataFrame({"date": dates, "value": np.maximum(500, values)})
+_engine: Optional[Engine] = None
+_engine_lock = threading.Lock()
 
 
-def load_stock_items(limit: int = 5000) -> pd.DataFrame:
-    if STOCK_CLEAN_CSV.exists():
-        df = pd.read_csv(STOCK_CLEAN_CSV, nrows=limit, low_memory=False)
-        cols_map = {
-            "No_": "reference",
-            "Description": "designation",
-            "Quantité": "quantite",
-            "Cout": "cout",
-            "GroupeItem": "categorie",
-            "Site": "site",
-        }
-        df = df.rename(columns={k: v for k, v in cols_map.items() if k in df.columns})
-        df["quantite"] = pd.to_numeric(df["quantite"], errors="coerce").fillna(0)
-        df["cout"] = pd.to_numeric(df["cout"], errors="coerce").fillna(0)
-        df["valeur"] = (df["quantite"] * df["cout"]).round(2)
-        return df
-
-    rng = np.random.default_rng(42)
-    n = 200
-    categories = ["MATIERE PREMIERE", "PRODUIT FINI", "COMPOSANT", "EMBALLAGE", "CONSOMMABLE"]
-    return pd.DataFrame({
-        "reference": [f"ART-{i:04d}" for i in range(1, n + 1)],
-        "designation": [f"Composant Injection {i}" for i in range(1, n + 1)],
-        "categorie": rng.choice(categories, n).tolist(),
-        "quantite": rng.uniform(0, 1500, n).round(1).tolist(),
-        "cout": rng.uniform(5, 500, n).round(2).tolist(),
-        "valeur": rng.uniform(500, 75000, n).round(2).tolist(),
-        "site": rng.choice(["Kondar", "Sousse", "Brno"], n).tolist(),
-    })
+PRODUCTION_DECIMALS = 6
 
 
-def load_rebuts_data(limit: int = 5000) -> pd.DataFrame:
-    if FACT_CLE_CSV.exists():
-        df = pd.read_csv(FACT_CLE_CSV, nrows=limit)
-        date_col = next((c for c in df.columns if "posting" in c.lower() or "date" in c.lower()), None)
-        scrap_col = next((c for c in df.columns if "scrap" in c.lower() or "rebut" in c.lower()), None)
-        if date_col and scrap_col:
-            clean_df = pd.DataFrame()
-            clean_df["date"] = pd.to_datetime(df[date_col], errors="coerce").dt.strftime("%Y-%m-%d")
-            clean_df["quantite_rebut"] = pd.to_numeric(
-                df[scrap_col].astype(str).str.replace(r"[^\d.,\-]", "", regex=True).str.replace(",", "."),
-                errors="coerce"
-            ).fillna(0)
-            clean_df = clean_df[clean_df["quantite_rebut"] > 0].dropna()
-            if not clean_df.empty:
-                agg = clean_df.groupby("date")["quantite_rebut"].sum().reset_index()
-                agg["nb_of_impactes"] = 1
-                agg["cout_rebut"] = (agg["quantite_rebut"] * 1.85).round(2)
-                agg["cause"] = "Scrap atelier (FACT_CLE)"
-                return agg
+class DWHUnavailableError(RuntimeError):
+    pass
 
-    rng = np.random.default_rng(42)
-    n = 300
-    dates = pd.date_range("2025-01-01", periods=n, freq="D")
-    base_scrap = rng.integers(30, 200, n).astype(float)
-    outliers_idx = rng.choice(n, size=int(n * 0.08), replace=False)
-    base_scrap[outliers_idx] *= rng.uniform(3.5, 7.0, len(outliers_idx))
 
-    return pd.DataFrame({
-        "date": dates.strftime("%Y-%m-%d"),
-        "quantite_rebut": base_scrap.round(1),
-        "nb_of_impactes": rng.integers(1, 6, n),
-        "cout_rebut": (base_scrap * 1.85).round(2),
-        "cause": rng.choice(["Bavure d'injection", "Sous-dosage", "Brûlure matière", "Point noir"], n),
-    })
+def _connection_url() -> str:
+    driver = config.DB_DRIVER.replace(" ", "+")
+    base = f"/{config.DB_NAME}?driver={driver}&TrustServerCertificate=yes&encrypt=no"
+    if config.DB_TRUSTED:
+        return f"mssql+pyodbc://@{config.DB_HOST}{base}&trusted_connection=yes"
+    return f"mssql+pyodbc://{config.DB_USER}:{config.DB_PASSWORD}@{config.DB_HOST}{base}"
 
+
+def get_engine() -> Engine:
+    global _engine
+    with _engine_lock:
+        if _engine is None:
+            _engine = create_engine(_connection_url(), pool_pre_ping=True)
+        return _engine
+
+
+def is_available() -> bool:
+    try:
+        with get_engine().connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return True
+    except Exception as e:
+        logger.warning(f"DWH indisponible : {e}")
+        return False
+
+
+def read_sql(sql: str, params: Optional[dict] = None) -> pd.DataFrame:
+    try:
+        with get_engine().connect() as conn:
+            return pd.read_sql(text(sql), conn, params=params or {})
+    except Exception as e:
+        raise DWHUnavailableError(f"Lecture dbDWH impossible : {e}") from e
+
+
+def load_production_dataset(start: Optional[str] = None) -> Tuple[pd.Series, dict]:
+    """
+    Série journalière de production : somme de [Quantité produite TRS] de dbo.FACT_CLE, tous sites.
+    Les jours calendaires sans déclaration (fermetures d'usine) sont présents avec la valeur 0.
+
+    Les derniers jours dont la TRS n'est pas encore consolidée dans le DWH (TRS < ML_TRS_COMPLETENESS_RATIO
+    x [Output Quantity] déclarée) sont retirés de la fin de la série : ils ne représentent pas une
+    production nulle mais un chargement incomplet.
+    """
+    start = start or config.ML_HISTORY_START
+    df = read_sql(
+        """
+        SELECT CAST([Posting Date] AS date) AS d,
+               SUM(CAST([Quantité produite TRS] AS FLOAT)) AS trs,
+               SUM(CAST([Output Quantity] AS FLOAT)) AS output
+        FROM dbo.FACT_CLE WITH (NOLOCK)
+        WHERE [Posting Date] >= :start
+        GROUP BY CAST([Posting Date] AS date)
+        """,
+        {"start": start},
+    )
+    if df.empty:
+        raise DWHUnavailableError(f"Aucune production dans dbo.FACT_CLE depuis {start}.")
+    df = df.assign(d=pd.to_datetime(df["d"])).set_index("d").sort_index()
+
+    excluded = []
+    while len(df) and df["output"].iloc[-1] > 0 and df["trs"].iloc[-1] < config.ML_TRS_COMPLETENESS_RATIO * df["output"].iloc[-1]:
+        excluded.append({"date": df.index[-1].strftime("%Y-%m-%d"),
+                         "trs": float(df["trs"].iloc[-1]), "output_quantity": float(df["output"].iloc[-1])})
+        df = df.iloc[:-1]
+    if df.empty:
+        raise DWHUnavailableError("Aucun jour de production consolidé dans dbo.FACT_CLE.")
+
+    s = df["trs"].reindex(pd.date_range(df.index.min(), df.index.max(), freq="D"), fill_value=0.0).astype(float)
+    # Arrondi à 6 décimales : supprime le bruit des sommes en virgule flottante (le DWH stocke au plus 3 décimales)
+    # et garantit qu'un fichier exporté puis réimporté donne exactement la même série.
+    s = s.round(PRODUCTION_DECIMALS)
+    s.index.name = "date"
+    s.name = "value"
+    meta = {
+        "last_posting_date": (pd.Timestamp(excluded[0]["date"]) if excluded else s.index[-1]).strftime("%Y-%m-%d"),
+        "excluded_unconsolidated_days": excluded[::-1],
+    }
+    return s, meta
+
+
+def load_production_series(start: Optional[str] = None) -> pd.Series:
+    return load_production_dataset(start)[0]
+
+
+def load_stock_snapshot() -> pd.DataFrame:
+    """Lignes du dernier instantané de dbo.ASTOCKDATE. [Cout] est la valeur totale de la ligne (TND)."""
+    df = read_sql(
+        """
+        SELECT s.[No_] AS reference, s.[Description] AS designation,
+               ISNULL(NULLIF(LTRIM(RTRIM(s.[GroupeItem])), ''), 'Non classé') AS categorie,
+               s.[Site] AS site,
+               CAST(s.[Quantité] AS FLOAT) AS quantite,
+               CAST(s.[Cout] AS FLOAT) AS valeur,
+               s.DateStock AS date_stock
+        FROM dbo.ASTOCKDATE s WITH (NOLOCK)
+        WHERE s.DateStock = (SELECT MAX(DateStock) FROM dbo.ASTOCKDATE)
+        """
+    )
+    if df.empty:
+        raise DWHUnavailableError("dbo.ASTOCKDATE est vide.")
+    return df

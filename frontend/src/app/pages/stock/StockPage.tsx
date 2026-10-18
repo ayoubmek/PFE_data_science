@@ -4,9 +4,23 @@ import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
-import { API_BASE_URL } from '../../config'
+import { API_BASE_URL, apiErrorMessage } from '../../config'
 
 let globalCachedStockItems: any[] = []
+let globalCachedStockKpi: any = null
+
+// Statuts calculés par le backend (couverture = stock / consommation journalière, cf. StockCoverageService)
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  RUPTURE: { label: 'Rupture', color: 'danger' },
+  CRITIQUE: { label: 'Critique', color: 'warning' },
+  NORMAL: { label: 'Normal', color: 'success' },
+  SURSTOCK: { label: 'Surstock', color: 'info' },
+  INACTIF: { label: 'Inactif', color: 'secondary' },
+  SANS_CONSOMMATION: { label: 'Sans consommation', color: 'dark' },
+}
+const statusOf = (code?: string) => STATUS_CONFIG[code || ''] || { label: code || '—', color: 'secondary' }
+const fmt = (n: any, digits = 0) =>
+  n === null || n === undefined || isNaN(Number(n)) ? '—' : Number(n).toLocaleString('fr-FR', { maximumFractionDigits: digits })
 
 export default function StockPage() {
   const [items, setItems] = useState<any[]>(globalCachedStockItems)
@@ -22,18 +36,26 @@ export default function StockPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(50)
   const [showFilters, setShowFilters] = useState(false)
+  const [kpi, setKpi] = useState<any>(globalCachedStockKpi)
+  const [loadError, setLoadError] = useState('')
 
   const apiUrl = API_BASE_URL
 
   const fetchItems = async () => {
     if (globalCachedStockItems.length === 0) setLoading(true)
     try {
-      const { data } = await axios.get(`${apiUrl}/stock/items`)
-      const list = Array.isArray(data) ? data : []
+      const [itemsRes, kpiRes] = await Promise.all([
+        axios.get(`${apiUrl}/stock/items`, { timeout: 60000 }),
+        axios.get(`${apiUrl}/stock/kpi`, { timeout: 60000 }),
+      ])
+      const list = Array.isArray(itemsRes.data) ? itemsRes.data : []
       globalCachedStockItems = list
+      globalCachedStockKpi = kpiRes.data
       setItems(list)
+      setKpi(kpiRes.data)
+      setLoadError('')
     } catch (err) {
-      console.error('Failed to fetch stock items from API:', err)
+      setLoadError(apiErrorMessage(err, 'Impossible de charger le stock depuis le Data Warehouse.'))
     } finally {
       setLoading(false)
     }
@@ -45,7 +67,7 @@ export default function StockPage() {
   const categories = useMemo(() => ['ALL', ...Array.from(new Set(items.map(i => i.categorie).filter(Boolean)))], [items])
   const sites = useMemo(() => ['ALL', ...Array.from(new Set(items.map(i => i.emplacement).filter(Boolean)))], [items])
 
-  const isLowStock = (item: any) => Number(item.quantite) <= Number(item.seuilAlerte ?? 20)
+  const isLowStock = (item: any) => item.statut === 'RUPTURE' || item.statut === 'CRITIQUE'
 
   const handleSort = (field: string) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -64,7 +86,7 @@ export default function StockPage() {
       const matchSearch = !s || i.designation?.toLowerCase().includes(s) || i.reference?.toLowerCase().includes(s) || i.emplacement?.toLowerCase().includes(s) || i.nomAbrege?.toLowerCase().includes(s) || i.groupeClient?.toLowerCase().includes(s)
       const matchCat = categoryFilter === 'ALL' || i.categorie === categoryFilter
       const matchSite = siteFilter === 'ALL' || i.emplacement === siteFilter
-      const matchAlert = alertFilter === 'ALL' || (alertFilter === 'LOW' && isLowStock(i)) || (alertFilter === 'OK' && !isLowStock(i))
+      const matchAlert = alertFilter === 'ALL' || i.statut === alertFilter
       return matchSearch && matchCat && matchSite && matchAlert
     })
     result.sort((a, b) => {
@@ -80,9 +102,7 @@ export default function StockPage() {
   const currentItems = filteredItems.slice(start, start + rowsPerPage)
 
   const stats = useMemo(() => ({
-    total: items.length,
-    lowStock: items.filter(i => isLowStock(i)).length,
-    totalValue: items.reduce((s, i) => s + (Number(i.valeurTotale) || Number(i.quantite) * Number(i.valeurUnitaire) || 0), 0),
+    total: new Set(items.map(i => i.reference)).size,
     nbCategories: new Set(items.map(i => i.categorie).filter(Boolean)).size,
   }), [items])
 
@@ -95,8 +115,11 @@ export default function StockPage() {
       'Description': i.designation,
       'groupeitem': i.categorie,
       'Quantité': Number(i.quantite),
-      'Cout (DT)': Number(i.valeurUnitaire),
-      'Valeur Totale (DT)': Number(i.valeurTotale) || Number(i.quantite) * Number(i.valeurUnitaire),
+      'Coût unitaire (TND)': i.valeurUnitaire,
+      'Valeur (Cout, TND)': Number(i.valeurTotale),
+      'Statut': statusOf(i.statut).label,
+      'Couverture (jours)': i.couvertureJours,
+      'Consommation / jour': i.consommationJournaliere,
       'Site': i.emplacement,
       'Nom abrégé': i.nomAbrege,
       'groupeclient': i.groupeClient,
@@ -111,6 +134,11 @@ export default function StockPage() {
   }
 
   if (loading && items.length === 0) return <PageSkeleton type='table' />
+  if (loadError && items.length === 0) return <div className='alert alert-danger p-5'>{loadError}</div>
+
+  const statuts = kpi?.statuts || {}
+  const plan = kpi?.reapprovisionnement
+  const regles = kpi?.regles
 
   return (
     <div className='card card-flush'>
@@ -119,10 +147,17 @@ export default function StockPage() {
       <div className='card-header border-0 pt-6 pb-0'>
         <div className='d-flex gap-4 flex-wrap'>
           {[
-            { label: 'Total Articles', val: stats.total.toLocaleString(), color: 'primary', icon: 'element-11' },
-            { label: 'Stock Bas', val: stats.lowStock.toLocaleString(), color: 'danger', icon: 'warning-2' },
-            { label: 'groupeitem', val: stats.nbCategories.toString(), color: 'info', icon: 'category' },
-            { label: 'Valeur Totale', val: `${(stats.totalValue / 1e6).toFixed(2)}M DT`, color: 'success', icon: 'dollar' },
+            { label: `Articles en stock au ${kpi?.dateStock ?? '—'}`, val: fmt(stats.total), color: 'primary', icon: 'element-11' },
+            { label: 'Ruptures (articles consommés)', val: fmt(statuts.RUPTURE), color: 'danger', icon: 'cross-circle' },
+            { label: `Critiques (< ${regles?.seuilCritiqueJours ?? '—'} j de couverture)`, val: fmt(statuts.CRITIQUE), color: 'warning', icon: 'information-2' },
+            { label: `Surstock (≥ ${regles?.seuilSurstockJours ?? '—'} j)`, val: fmt(statuts.SURSTOCK), color: 'info', icon: 'archive' },
+            { label: 'Valeur totale du stock', val: `${fmt((kpi?.valeurTotaleStock ?? 0) / 1e6, 2)} M TND`, color: 'success', icon: 'dollar' },
+            {
+              label: `Plan ${plan?.horizonJours ?? '—'} j : ${fmt(plan?.nbReferences)} réf. · ${fmt(plan?.quantiteTotale)} u`,
+              val: `${fmt((plan?.budgetTnd ?? 0) / 1e6, 2)} M TND`,
+              color: 'dark',
+              icon: 'basket',
+            },
           ].map(s => (
             <div key={s.label} className='d-flex align-items-center gap-2 bg-light-subtle rounded px-4 py-2'>
               <span className={`badge badge-circle badge-light-${s.color} p-4`}>
@@ -209,11 +244,12 @@ export default function StockPage() {
               </select>
             </div>
             <div>
-              <label className='form-label fs-7 fw-bold text-gray-600'>Niveau alerte</label>
-              <select className='form-select form-select-solid form-select-sm' style={{ width: 160 }} value={alertFilter} onChange={e => setAlertFilter(e.target.value)}>
-                <option value='ALL'>Tous les niveaux</option>
-                <option value='LOW'>⚠️ Stock bas uniquement</option>
-                <option value='OK'>✅ Stock normal</option>
+              <label className='form-label fs-7 fw-bold text-gray-600'>Statut de couverture</label>
+              <select className='form-select form-select-solid form-select-sm' style={{ width: 200 }} value={alertFilter} onChange={e => setAlertFilter(e.target.value)}>
+                <option value='ALL'>Tous les statuts</option>
+                {Object.entries(STATUS_CONFIG).map(([code, cfg]) => (
+                  <option key={code} value={code}>{cfg.label}</option>
+                ))}
               </select>
             </div>
             <div className='ms-auto d-flex align-items-end'>
@@ -234,8 +270,8 @@ export default function StockPage() {
                 <th className='cursor-pointer user-select-none min-w-150px' onClick={() => handleSort('designation')}>Description <SortIcon field='designation' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('genProdPostingGroup')}>Gen_ Prod_ Posting Group <SortIcon field='genProdPostingGroup' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('quantite')}>Quantité <SortIcon field='quantite' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('valeurUnitaire')}>Cout <SortIcon field='valeurUnitaire' /></th>
-                <th className='cursor-pointer user-select-none' onClick={() => handleSort('valeurTotale')}>Valeur Totale <SortIcon field='valeurTotale' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('valeurTotale')}>Valeur (Cout) <SortIcon field='valeurTotale' /></th>
+                <th className='cursor-pointer user-select-none' onClick={() => handleSort('couvertureJours')}>Couverture <SortIcon field='couvertureJours' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('emplacement')}>Site <SortIcon field='emplacement' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('nomAbrege')}>Nom abrégé <SortIcon field='nomAbrege' /></th>
                 <th className='cursor-pointer user-select-none' onClick={() => handleSort('categorie')}>groupeitem <SortIcon field='categorie' /></th>
@@ -252,7 +288,7 @@ export default function StockPage() {
                 </tr>
               ) : currentItems.map((i, idx) => {
                 const low = isLowStock(i)
-                const val = Number(i.valeurTotale) || Number(i.quantite) * Number(i.valeurUnitaire)
+                const st = statusOf(i.statut)
                 return (
                   <tr key={`${i.reference}-${i.dateStock}-${i.emplacement}-${idx}`}>
                     <td className='ps-4 text-muted'>{i.dateStock ? String(i.dateStock).slice(0, 10) : '—'}</td>
@@ -263,10 +299,10 @@ export default function StockPage() {
                       <span className={`fw-bold text-${low ? 'danger' : 'success'}`}>
                         {Number(i.quantite).toLocaleString()}
                       </span>
-                      {low && <span className='badge badge-light-danger ms-2 fs-9'>BAS</span>}
+                      <span className={`badge badge-light-${st.color} ms-2 fs-9`}>{st.label}</span>
                     </td>
-                    <td className='text-gray-600'>{Number(i.valeurUnitaire).toFixed(2)} DT</td>
-                    <td className='fw-bold text-gray-700'>{val.toLocaleString('fr-TN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} DT</td>
+                    <td className='fw-bold text-gray-700'>{fmt(i.valeurTotale, 2)} TND</td>
+                    <td className='text-gray-600'>{i.couvertureJours !== null && i.couvertureJours !== undefined ? `${fmt(i.couvertureJours, 1)} j` : '—'}</td>
                     <td className='text-muted'>{i.emplacement}</td>
                     <td className='text-muted'>{i.nomAbrege}</td>
                     <td><span className='badge badge-light-info'>{i.categorie}</span></td>
@@ -337,13 +373,15 @@ export default function StockPage() {
                 { label: 'groupeitem', val: <span className='badge badge-light-info'>{selectedItem.categorie || '—'}</span> },
                 { label: 'Site', val: selectedItem.emplacement || '—' },
                 { label: 'Quantité', val: <span className={`fw-bolder text-${isLowStock(selectedItem) ? 'danger' : 'success'}`}>{Number(selectedItem.quantite).toLocaleString()}</span> },
-                { label: 'Cout', val: `${Number(selectedItem.valeurUnitaire).toFixed(3)} DT` },
-                { label: 'Valeur Totale', val: `${(Number(selectedItem.valeurTotale) || Number(selectedItem.quantite) * Number(selectedItem.valeurUnitaire)).toLocaleString('fr-TN', { minimumFractionDigits: 2 })} DT` },
+                { label: 'Valeur de la ligne (Cout)', val: `${fmt(selectedItem.valeurTotale, 2)} TND` },
+                { label: 'Coût unitaire déduit', val: selectedItem.valeurUnitaire !== null ? `${fmt(selectedItem.valeurUnitaire, 4)} TND` : '—' },
+                { label: 'Consommation / jour (article)', val: fmt(selectedItem.consommationJournaliere, 1) },
+                { label: 'Couverture (article, tous sites)', val: selectedItem.couvertureJours !== null && selectedItem.couvertureJours !== undefined ? `${fmt(selectedItem.couvertureJours, 1)} jours` : '—' },
                 { label: 'Gen_ Prod_ Posting Group', val: selectedItem.genProdPostingGroup || '—' },
                 { label: 'Nom abrégé', val: selectedItem.nomAbrege || '—' },
                 { label: 'groupeclient', val: selectedItem.groupeClient || '—' },
                 { label: 'Encours', val: selectedItem.encours ?? '—' },
-                { label: 'Niveau Stock', val: isLowStock(selectedItem) ? <span className='badge badge-light-danger'>⚠ Stock Bas</span> : <span className='badge badge-light-success'>✓ Normal</span> },
+                { label: 'Statut de couverture', val: <span className={`badge badge-light-${statusOf(selectedItem.statut).color}`}>{statusOf(selectedItem.statut).label}</span> },
               ].map(({ label, val }) => (
                 <div className='col-md-6' key={label}>
                   <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>

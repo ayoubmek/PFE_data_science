@@ -1,501 +1,381 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Optional, List
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-import random
-import os
+import logging
 import sys
+import threading
+import time
+from datetime import datetime
 from pathlib import Path
+from typing import List, Optional
+
+import numpy as np
+import pandas as pd
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 _cur_dir = Path(__file__).resolve().parent
 if str(_cur_dir) not in sys.path:
     sys.path.insert(0, str(_cur_dir))
 
+import config
 from models import (
-    LinearRegressionModel,
-    RandomForestModel,
+    MODEL_FACTORIES,
+    DWHUnavailableError,
     ProphetModel,
-    ARIMAModel,
+    benchmark_custom_series,
+    build_forecast_bundle,
+    load_production_dataset,
+    load_production_series,
+    load_stock_snapshot,
 )
+from models import data_loader, stock
+from models.data_loader import PRODUCTION_DECIMALS
+
+if config.ML_MODEL not in MODEL_FACTORIES:
+    raise RuntimeError(f"ML_MODEL='{config.ML_MODEL}' inconnu. Valeurs possibles : {', '.join(MODEL_FACTORIES)}")
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+logger = logging.getLogger("ml-service")
+
+
+def require_api_key(x_api_key: Optional[str] = Header(default=None)):
+    if config.ML_API_KEY and x_api_key != config.ML_API_KEY:
+        raise HTTPException(401, "Clé d'API ML invalide ou absente (en-tête X-API-Key).")
+
 
 app = FastAPI(
     title="Nexora - ML Service",
-    description="Service IA & Data Science: Prévisions et Insights",
-    version="2.0.0"
+    description="Prévisions, benchmark des modèles et analyses de stock calculés sur le Data Warehouse dbDWH.",
+    version="3.0.0",
 )
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-import logging
+if config.ML_CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=config.ML_CORS_ORIGINS,
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
-logger = logging.getLogger("ml-service")
 
-DB_HOST = os.getenv("DB_HOST", os.getenv("DB_SERVER", "LAPTOP-M7HILU4Q"))
-DB_NAME = os.getenv("DB_NAME", "dbDWH")
-_engine = None
+@app.exception_handler(DWHUnavailableError)
+def dwh_unavailable_handler(request: Request, exc: DWHUnavailableError):
+    return JSONResponse(status_code=503, content={"error": "DWH indisponible", "detail": str(exc)})
 
-def get_engine():
-    global _engine
-    if _engine is not None:
-        return _engine
-    try:
-        from sqlalchemy import create_engine, text
-        conn_str = (
-            f"mssql+pyodbc://@{DB_HOST}/{DB_NAME}"
-            "?driver=ODBC+Driver+17+for+SQL+Server"
-            "&trusted_connection=yes"
-            "&TrustServerCertificate=yes"
-            "&encrypt=no"
-        )
-        eng = create_engine(conn_str, fast_executemany=True)
-        with eng.connect() as c:
-            c.execute(text("SELECT 1"))
-        _engine = eng
-        logger.info("DB connection OK: Connected to dbDWH directly!")
-        return _engine
-    except Exception as e:
-        logger.warning(f"DB unavailable, using simulated data fallback: {e}")
-        return None
-def get_stock_df() -> pd.DataFrame:
-    engine = get_engine()
-    if engine:
+
+# ---------------------------------------------------------------------------
+# Cache des calculs coûteux (ré-entraînement de 4 modèles x n origines)
+# ---------------------------------------------------------------------------
+_cache: dict = {}
+_cache_lock = threading.Lock()
+
+
+def _cached(key, compute):
+    with _cache_lock:
+        hit = _cache.get(key)
+        if hit and time.time() - hit[0] < config.ML_CACHE_TTL_SECONDS:
+            return hit[1]
+        value = compute()
+        _cache[key] = (time.time(), value)
+        return value
+
+
+MAX_DAYS_AHEAD = 400
+
+
+def _compute_forecast_bundle(horizon: int, start: Optional[str] = None) -> dict:
+    series, meta = load_production_dataset()
+    start_ts = pd.Timestamp(start) if start else None
+    if start_ts is not None and (start_ts - series.index[-1]).days > MAX_DAYS_AHEAD:
+        raise HTTPException(400, f"La date de début doit se situer au plus {MAX_DAYS_AHEAD} jours après "
+                                 f"la dernière donnée du DWH ({series.index[-1]:%Y-%m-%d}).")
+    bundle = build_forecast_bundle(series, horizon, config.ML_BACKTEST_ORIGINS, start=start_ts,
+                                   models=[config.ML_MODEL])
+    bundle.update(meta)
+    return bundle
+
+
+def forecast_bundle(horizon: int, start: Optional[str] = None) -> dict:
+    return _cached(("forecast", horizon, start), lambda: _compute_forecast_bundle(horizon, start))
+
+
+@app.on_event("startup")
+def warm_cache():
+    def _warm():
         try:
-            sql = "SELECT [No_] AS reference, [Description] AS designation, groupeitem AS categorie, [Quantité] AS quantite, [Cout] AS cout, [Site] AS site FROM dbo.ASTOCKDATE WHERE datestock = '2026-03-28'"
-            df = pd.read_sql(sql, engine)
-            df["quantite"] = pd.to_numeric(df["quantite"], errors="coerce").fillna(0)
-            df["cout"]     = pd.to_numeric(df["cout"],     errors="coerce").fillna(0)
-            return df
+            logger.info("Pré-calcul des prévisions (horizon 30 j) sur dbDWH...")
+            b = forecast_bundle(30)
+            logger.info(f"Prévisions prêtes en {b['computed_in_seconds']} s — modèle retenu : {b['best_model_name']}")
         except Exception as e:
-            print(f"Stock query failed: {e}")
-    return _mock_stock()
-def _mock_stock() -> pd.DataFrame:
-    rng = np.random.default_rng(42)
-    n   = 150
-    categories = ["MATIERE PREMIERE", "PRODUIT FINI", "COMPOSANT", "EMBALLAGE", "CONSOMMABLE"]
-    return pd.DataFrame({
-        "reference":   [f"ART-{i:04d}" for i in range(1, n + 1)],
-        "designation": [f"Article {i}" for i in range(1, n + 1)],
-        "categorie":   rng.choice(categories, n).tolist(),
-        "quantite":    rng.uniform(0, 800, n).round(1).tolist(),
-        "cout":        rng.uniform(5, 2000, n).round(2).tolist(),
-        "site":        rng.choice(["DEPOT A", "DEPOT B", "ATELIER"], n).tolist(),
-    })
+            logger.warning(f"Pré-calcul impossible : {e}")
+
+    threading.Thread(target=_warm, daemon=True).start()
+
+
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
+@app.get("/health")
+def health():
+    return {
+        "status": "UP",
+        "service": "Nexora ML Service",
+        "version": app.version,
+        "database": {"connected": data_loader.is_available(), "server": config.DB_HOST, "database": config.DB_NAME},
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+    }
+
+
+@app.get("/predict/production", dependencies=[Depends(require_api_key)])
+def predict_production(horizon: int = 30, start: Optional[str] = None):
+    """`start` (AAAA-MM-JJ, optionnel) : premier jour de la période prévue ; par défaut, le lendemain des données."""
+    if not 1 <= horizon <= 90:
+        raise HTTPException(400, "L'horizon doit être compris entre 1 et 90 jours.")
+    if start:
+        try:
+            start = pd.Timestamp(start).strftime("%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(400, "Date de début invalide (format attendu : AAAA-MM-JJ).")
+    return forecast_bundle(horizon, start)
+
+
+@app.get("/benchmark", dependencies=[Depends(require_api_key)])
+def benchmark(horizon: int = 30):
+    b = predict_production(horizon)
+    return {k: b[k] for k in ("data_source", "history_start", "history_end", "history_days", "horizon_days",
+                              "best_model", "best_model_name", "metrics", "backtest", "generated_at")}
+
+
 class ScenarioRequest(BaseModel):
     variation_percent: float = 0.0
     horizon: int = 30
 
+
+@app.post("/simulate/scenario", dependencies=[Depends(require_api_key)])
+def simulate_scenario(request: ScenarioRequest):
+    b = predict_production(request.horizon)
+    factor = 1 + request.variation_percent / 100
+    baseline = [p["best_quantity"] for p in b["predictions"]]
+    scenario = [round(v * factor, 1) for v in baseline]
+    return {
+        "type": "production",
+        "baseline_model": b["best_model_name"],
+        "variation_percent": request.variation_percent,
+        "horizon": request.horizon,
+        "dates": [p["date"] for p in b["predictions"]],
+        "baseline": baseline,
+        "scenario": scenario,
+        "total_baseline": round(sum(baseline), 1),
+        "total_scenario": round(sum(scenario), 1),
+    }
+
+
 class AnomalyRequest(BaseModel):
     dates: Optional[List[str]] = None
     values: Optional[List[float]] = None
-    confidence_level: float = 0.95
 
-@app.get("/health")
-def health():
-    eng = get_engine()
-    db_ok = eng is not None
+
+def _anomaly_report(series: pd.Series) -> dict:
+    df = ProphetModel().fit(series).detect_anomalies()
+    total = len(df)
+    n_anom = int(df["is_anomaly"].sum())
     return {
-        "status": "UP",
-        "service": "Nexora ML Service",
-        "version": "2.0.0",
-        "database": {
-            "connected": db_ok,
-            "server": DB_HOST,
-            "database": DB_NAME
-        },
-        "active_models": ["ProphetModel", "RandomForestModel", "ARIMAModel", "LinearRegressionModel"],
-        "capabilities": [
-            "multi_step_forecasting",
-            "rolling_origin_cross_validation",
-            "prophet_95_anomaly_detection",
-            "abc_segmentation"
-        ],
-        "timestamp": datetime.now().isoformat()
+        "period": {"start": df["date"].iloc[0], "end": df["date"].iloc[-1]},
+        "total_observations": total,
+        "anomalies_count": n_anom,
+        "anomaly_rate_pct": round(n_anom / total * 100, 2) if total else 0.0,
+        "deficits_critiques": int((df["anomaly_type"] == "DEFICIT_CRITIQUE").sum()),
+        "surplus_pics": int((df["anomaly_type"] == "SURPLUS_PIC").sum()),
+        "zero_days_total": int(df["is_zero_day"].sum()),
+        "zero_days_detected_as_anomaly": int((df["is_zero_day"] & df["is_anomaly"]).sum()),
+        "detection_rule": "y < borne basse 95 % (déficit) OU y > borne haute 95 % (sur-cadence)",
+        "model": "Prophet (intervalle d'incertitude natif à 95 %)",
+        "anomalies": df[df["is_anomaly"]].to_dict("records"),
     }
 
-@app.get("/detect/anomalies")
-@app.post("/detect/anomalies")
-def detect_production_anomalies(req: Optional[AnomalyRequest] = None):
-    """
-    Détection d'anomalies de cadence d'atelier par bandes de confiance à 95% de Prophet.
-    Identifie les arrêts inopinés (y < lower_95) dont les 68 jours d'usine à zéro, et les sur-cadences (y > upper_95).
-    """
-    try:
-        from models.data_loader import load_production_series
-        if req and req.values and len(req.values) >= 5:
-            df_input = pd.DataFrame({
-                "date": req.dates if req.dates else [(datetime(2026, 1, 1) + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(len(req.values))],
-                "value": req.values
-            })
-        else:
-            df_input = load_production_series()
 
-        m = ProphetModel().fit(df_input)
-        df_res = m.detect_anomalies(df_input)
+@app.get("/detect/anomalies", dependencies=[Depends(require_api_key)])
+def detect_anomalies_dwh():
+    report = _cached(("anomalies",), lambda: _anomaly_report(load_production_series()))
+    return {"data_source": "dbDWH.dbo.FACT_CLE", **report}
 
-        total_obs = len(df_res)
-        n_anomalies = int(df_res["is_anomaly"].sum())
-        n_deficits = int((df_res["anomaly_type"] == "DEFICIT_CRITIQUE").sum())
-        n_surges = int((df_res["anomaly_type"] == "SURPLUS_PIC").sum())
-        n_zero_days = int(df_res["is_zero_day"].sum())
-        zero_days_flagged = int((df_res["is_zero_day"] & df_res["is_anomaly"]).sum())
 
-        return {
-            "total_observations": total_obs,
-            "anomalies_count": n_anomalies,
-            "anomaly_rate_pct": round((n_anomalies / total_obs) * 100, 2),
-            "deficits_critiques": n_deficits,
-            "surplus_pics": n_surges,
-            "zero_days_total": n_zero_days,
-            "zero_days_detected_as_anomaly": zero_days_flagged,
-            "detection_rule": "y < lower_95 (arrêt/déficit) OU y > upper_95 (sur-cadence)",
-            "model": "Prophet (intervalle de confiance natif à 95 %)",
-            "sample_anomalies": df_res[df_res["is_anomaly"]].head(20).to_dict("records")
-        }
-    except Exception as e:
-        logger.error(f"Erreur lors de la détection d'anomalies : {e}")
-        raise HTTPException(500, f"Erreur détection anomalies : {str(e)}")
+@app.post("/detect/anomalies", dependencies=[Depends(require_api_key)])
+def detect_anomalies_custom(req: AnomalyRequest):
+    if not req.values or not req.dates or len(req.values) != len(req.dates) or len(req.values) < 30:
+        raise HTTPException(400, "Fournir `dates` et `values` de même longueur (au moins 30 observations).")
+    s = pd.Series(req.values, index=pd.to_datetime(req.dates)).groupby(level=0).sum().asfreq("D", fill_value=0.0)
+    return {"data_source": "Série fournie dans la requête", **_anomaly_report(s)}
 
-@app.get("/predict/production")
-def predict_production(horizon: int = 30):
-    try:
-        start_date = datetime(2027, 1, 1)
-        dates = [start_date + timedelta(days=i) for i in range(horizon)]
-        base_qty = 8500
-        predictions = []
-        for i, date in enumerate(dates):
-            wd = date.weekday()
-            is_weekend = wd >= 5
-            arima_factor = 0.0 if is_weekend else (1.0 + np.sin(i / 2.5) * 0.12 + random.uniform(-0.05, 0.05))
-            arima_val = max(0, round(base_qty * arima_factor))
-            prophet_factor = 0.0 if is_weekend else (1.0 + np.sin(i / 2.8) * 0.15 + random.uniform(-0.02, 0.02))
-            prophet_val = max(0, round(base_qty * prophet_factor))
-            rf_factor = 0.0 if is_weekend else (1.0 + np.sin(i / 2.7) * 0.13 + random.uniform(-0.03, 0.03))
-            rf_val = max(0, round(base_qty * rf_factor))
-            lr_factor = 0.0 if is_weekend else (1.05 + (i * 0.003) + random.uniform(-0.09, 0.09))
-            lr_val = max(0, round(base_qty * lr_factor))
-            predictions.append({
-                "date": date.strftime("%Y-%m-%d"),
-                "arima_quantity": arima_val,
-                "prophet_quantity": prophet_val,
-                "rf_quantity": rf_val,
-                "lr_quantity": lr_val,
-                "working_day": not is_weekend
-            })
-        metrics = {
-            "random_forest": {
-                "name": "Random Forest Regressor (Champion)",
-                "mae": 2467,
-                "rmse": 3196,
-                "mape": "6.0%",
-                "r2": 0.9798,
-                "cv_r2": 0.9782,
-                "cv_folds": 6,
-                "status": "Modèle Champion Retenu",
-                "recommendation": "Meilleure précision ponctuelle absolue sur tous les horizons (MAPE 6.0%), modèle champion d'atelier."
-            },
-            "prophet": {
-                "name": "Prophet (Comparatif)",
-                "mae": 2875,
-                "rmse": 3674,
-                "mape": "6.7%",
-                "r2": 0.9738,
-                "cv_r2": 0.9665,
-                "cv_folds": 6,
-                "status": "Modèle Comparatif",
-                "recommendation": "Décomposition additive explicite et projection rapide."
-            },
-            "arima": {
-                "name": "ARIMA",
-                "mae": 5099,
-                "rmse": 5868,
-                "mape": "11.4%",
-                "r2": 0.9133,
-                "cv_r2": 0.9099,
-                "cv_folds": 6,
-                "status": "Modèle Comparatif",
-                "recommendation": "Modèle statistique autorégressif classique à court terme."
-            },
-            "linear_regression": {
-                "name": "Régression Linéaire",
-                "mae": 4679,
-                "rmse": 6097,
-                "mape": "9.8%",
-                "r2": 0.9271,
-                "cv_r2": 0.9277,
-                "cv_folds": 6,
-                "status": "Baseline de Référence",
-                "recommendation": "Modèle baseline linéaire simple pour estimer la pente tendancielle globale."
-            }
-        }
-        return {
-            "horizon_days": horizon,
-            "cross_validation": {
-                "method": "Rolling-Origin Cross-Validation (Leak-Free)",
-                "n_splits": 6,
-                "metrics_evaluated": ["MAE", "RMSE", "MAPE", "R²"]
-            },
-            "predictions": predictions,
-            "metrics": metrics,
-            "best_model": "random_forest"
-        }
-    except Exception as e:
-        raise HTTPException(500, str(e))
-@app.post("/simulate/scenario")
-def simulate_scenario(request: ScenarioRequest):
-    try:
-        factor = 1 + (request.variation_percent / 100)
-        start_date = datetime(2027, 1, 1)
-        dates  = [start_date + timedelta(days=i) for i in range(request.horizon)]
-        baseline = [round(120 * (0 if d.weekday() >= 5 else 1)) for d in dates]
-        scenario = [round(v * factor) for v in baseline]
-        return {
-            "type": "production",
-            "variation_percent": request.variation_percent,
-            "horizon": request.horizon,
-            "dates": [d.strftime("%Y-%m-%d") for d in dates],
-            "baseline": baseline,
-            "scenario": scenario,
-            "total_baseline": sum(baseline),
-            "total_scenario": sum(scenario),
-            "impact": f"Production {'augmentée' if factor > 1 else 'réduite'} de {abs(request.variation_percent)}%",
-        }
-    except Exception as e:
-        raise HTTPException(500, str(e))
-@app.get("/analyze/abc")
+
+# ---------------------------------------------------------------------------
+# Analyses de stock (dbo.ASTOCKDATE + dbo.FACT_ILE)
+# ---------------------------------------------------------------------------
+def _abc(df_articles: pd.DataFrame) -> pd.DataFrame:
+    df = df_articles[df_articles["valeur"] > 0].sort_values("valeur", ascending=False).reset_index(drop=True)
+    total = df["valeur"].sum()
+    df["cum_pct"] = df["valeur"].cumsum() / total * 100
+    df["classe"] = np.where(df["cum_pct"] <= 80, "A", np.where(df["cum_pct"] <= 95, "B", "C"))
+    return df
+
+
+def _snapshot_by_article() -> pd.DataFrame:
+    snap = load_stock_snapshot()
+    return (snap.groupby("reference")
+                .agg(designation=("designation", "first"), categorie=("categorie", "first"),
+                     quantite=("quantite", "sum"), valeur=("valeur", "sum"), date_stock=("date_stock", "first"))
+                .reset_index())
+
+
+@app.get("/analyze/abc", dependencies=[Depends(require_api_key)])
 def analyze_abc():
-    try:
-        df = get_stock_df()
-        df["valeur"] = (df["quantite"] * df["cout"]).round(2)
-        df_work = df[df["valeur"] > 0].sort_values("valeur", ascending=False).reset_index(drop=True)
-        if df_work.empty:
-            raise HTTPException(404, "Aucune donnée de stock avec valeur positive.")
-        total_val = float(df_work["valeur"].sum())
-        df_work["cum_pct"] = (df_work["valeur"].cumsum() / total_val * 100).round(2)
-        df_work["classe"] = df_work["cum_pct"].apply(lambda p: "A" if p <= 80.0 else ("B" if p <= 95.0 else "C"))
-        classes_summary = []
-        for cl in ["A", "B", "C"]:
-            sub = df_work[df_work["classe"] == cl]
-            nb = len(sub)
-            val = float(sub["valeur"].sum())
-            classes_summary.append({
-                "classe": cl,
-                "nb_articles": nb,
-                "pct_articles": round((nb / len(df_work)) * 100, 1),
-                "valeur_totale": round(val, 2),
-                "pct_valeur": round((val / total_val) * 100, 1),
-            })
-        cols = [c for c in ["reference", "designation", "categorie", "quantite", "cout", "valeur", "classe"] if c in df_work.columns]
-        return {
-            "total_articles": len(df_work),
-            "valeur_totale": round(total_val, 2),
-            "classes": classes_summary,
-            "top10": df_work.head(10)[cols].to_dict("records"),
-            "data_source": "Base de données live" if get_engine() else "Données simulées"
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(500, str(e))
-@app.get("/analyze/stats")
-def analyze_stats():
-    try:
-        df = get_stock_df()
-        df["valeur"] = (df["quantite"] * df["cout"]).round(2)
-        by_cat = (df.groupby("categorie")
-                    .agg(nb=("reference", "count"),
-                         qte_totale=("quantite", "sum"),
-                         valeur_totale=("valeur", "sum"),
-                         qte_moy=("quantite", "mean"),
-                         valeur_moy=("valeur", "mean"))
-                    .reset_index()
-                    .sort_values("valeur_totale", ascending=False)
-                    .round(2))
-        q_desc = df["quantite"].describe().round(2).to_dict()
-        v_desc = df["valeur"].describe().round(2).to_dict()
-        ruptures  = int((df["quantite"] <= 0).sum())
-        low_stock = int((df["quantite"].between(0.01, 10, inclusive="right")).sum())
-        hist_vals, hist_bins = np.histogram(df["valeur"].clip(upper=df["valeur"].quantile(0.95)), bins=12)
-        return {
-            "total_articles":   len(df),
-            "ruptures":         ruptures,
-            "low_stock":        low_stock,
-            "healthy_stock":    len(df) - ruptures - low_stock,
-            "quantite_stats":   q_desc,
-            "valeur_stats":     v_desc,
-            "by_category":      by_cat.to_dict("records"),
-            "valeur_histogram": {
-                "counts": hist_vals.tolist(),
-                "bins":   [round(b, 2) for b in hist_bins.tolist()],
-            },
-            "data_source": "Base de données live" if get_engine() else "Données simulées",
-        }
-    except Exception as e:
-        raise HTTPException(500, str(e))
-@app.get("/insights")
-def get_insights():
-    try:
-        df = get_stock_df()
-        df["valeur"] = (df["quantite"] * df["cout"]).round(2)
-        insights = []
-        total = len(df)
-        ruptures = int((df["quantite"] <= 0).sum())
-        if ruptures:
-            insights.append({
-                "type": "danger", "icon": "🚨",
-                "title": f"{ruptures} article(s) en rupture totale de stock",
-                "detail": f"Soit {round(ruptures/total*100,1)}% du catalogue — réapprovisionnement urgent requis.",
-                "priority": 1,
-            })
-        df_s      = df[df["valeur"] > 0].sort_values("valeur", ascending=False).copy()
-        if not df_s.empty:
-            df_s["cum_pct"] = df_s["valeur"].cumsum() / df_s["valeur"].sum() * 100
-            a_count = int((df_s["cum_pct"] <= 80).sum())
-            insights.append({
-                "type": "warning", "icon": "📊",
-                "title": f"Loi de Pareto : {a_count} article(s) représentent 80% de la valeur totale",
-                "detail": f"Concentrez vos efforts de gestion sur ces {a_count} références (classe A).",
-                "priority": 2,
-            })
-        low = int((df["quantite"].between(0.01, 10, inclusive="right")).sum())
-        if low:
-            insights.append({
-                "type": "warning", "icon": "⚠️",
-                "title": f"{low} article(s) avec moins de 10 unités restantes",
-                "detail": "Passez des commandes préventives pour éviter une rupture imminente.",
-                "priority": 3,
-            })
-        if not df_s.empty:
-            top = df_s.iloc[0]
-            insights.append({
-                "type": "info", "icon": "💎",
-                "title": f"Article le plus valorisé : {top['reference']}",
-                "detail": f"{top.get('designation','—')} — Valeur totale : {round(top['valeur'],2):,.0f} DH",
-                "priority": 4,
-            })
-        cat_val = df.groupby("categorie")["valeur"].sum().sort_values(ascending=False)
-        if len(cat_val) > 0:
-            top_cat     = cat_val.index[0]
-            top_cat_pct = round(cat_val.iloc[0] / cat_val.sum() * 100, 1)
-            insights.append({
-                "type": "info", "icon": "📦",
-                "title": f"Catégorie dominante : {top_cat} ({top_cat_pct}% de la valeur)",
-                "detail": "Diversification recommandée si ce taux dépasse 60%.",
-                "priority": 5,
-            })
-        healthy = total - ruptures - low
-        insights.append({
-            "type": "success", "icon": "✅",
-            "title": f"{healthy} article(s) en niveau de stock satisfaisant",
-            "detail": f"Taux de couverture sain : {round(healthy/total*100,1)}% du catalogue.",
-            "priority": 6,
+    articles = _snapshot_by_article()
+    df = _abc(articles)
+    if df.empty:
+        raise HTTPException(404, "Aucun article valorisé dans le dernier instantané de stock.")
+    total = float(df["valeur"].sum())
+    classes = []
+    for cl in ["A", "B", "C"]:
+        sub = df[df["classe"] == cl]
+        classes.append({
+            "classe": cl,
+            "nb_articles": int(len(sub)),
+            "pct_articles": round(len(sub) / len(df) * 100, 1),
+            "valeur_totale_tnd": round(float(sub["valeur"].sum()), 2),
+            "pct_valeur": round(float(sub["valeur"].sum()) / total * 100, 1),
         })
-        kpis = {
-            "total_articles":      total,
-            "valeur_totale":       round(float(df["valeur"].sum()), 2),
-            "articles_rupture":    ruptures,
-            "articles_low":        low,
-            "articles_ok":         healthy,
-            "taux_sante":          round(healthy / total * 100, 1),
-            "valeur_moyenne":      round(float(df["valeur"].mean()), 2),
-            "top_categorie":       cat_val.index[0] if len(cat_val) else "—",
-        }
-        return {
-            "generated_at": datetime.now().isoformat(),
-            "data_source":  "Base de données live" if get_engine() else "Données simulées",
-            "total_articles": total,
-            "kpis":           kpis,
-            "insights":       sorted(insights, key=lambda x: x["priority"]),
-        }
-    except Exception as e:
-        raise HTTPException(500, str(e))
+    return {
+        "data_source": "dbDWH.dbo.ASTOCKDATE (dernier instantané)",
+        "date_stock": str(articles["date_stock"].iloc[0]),
+        "total_articles": int(len(df)),
+        "valeur_totale_tnd": round(total, 2),
+        "classes": classes,
+        "top10": df.head(10)[["reference", "designation", "categorie", "quantite", "valeur", "classe"]].to_dict("records"),
+    }
 
+
+@app.get("/analyze/stock-status", dependencies=[Depends(require_api_key)])
+def analyze_stock_status():
+    df = stock.load_article_status()
+    return {
+        "data_source": "dbDWH.dbo.ASTOCKDATE + dbDWH.dbo.FACT_ILE",
+        "date_stock": str(df["date_stock"].iloc[0]),
+        "date_consommation": str(df["date_conso"].iloc[0]),
+        "regles": {
+            "fenetre_consommation_jours": config.STOCK_CONSO_WINDOW_DAYS,
+            "fenetre_rupture_jours": config.STOCK_RUPTURE_RECENT_DAYS,
+            "seuil_critique_jours": config.STOCK_CRITIQUE_DAYS,
+            "seuil_surstock_jours": config.STOCK_SURSTOCK_DAYS,
+            "couverture_cible_jours": config.STOCK_COVERAGE_TARGET_DAYS,
+        },
+        "nb_articles": int(len(df)),
+        "statuts": stock.status_counts(df),
+        "reapprovisionnement": stock.replenishment_summary(df),
+        "articles": stock.to_records(df.drop(columns=["date_stock", "date_conso"])),
+    }
+
+
+@app.get("/analyze/stats", dependencies=[Depends(require_api_key)])
+def analyze_stats():
+    df = stock.load_article_status()
+    by_cat = (df.assign(categorie=df["categorie"].fillna("Non classé"))
+                .groupby("categorie")
+                .agg(nb=("reference", "count"), qte_totale=("stock", "sum"), valeur_totale=("valeur", "sum"))
+                .reset_index().sort_values("valeur_totale", ascending=False).round(2))
+    return {
+        "data_source": "dbDWH.dbo.ASTOCKDATE + dbDWH.dbo.FACT_ILE",
+        "total_articles": int(len(df)),
+        "statuts": stock.status_counts(df),
+        "quantite_stats": df["stock"].describe().round(2).to_dict(),
+        "valeur_stats": df["valeur"].describe().round(2).to_dict(),
+        "by_category": by_cat.to_dict("records"),
+    }
+
+
+@app.get("/insights", dependencies=[Depends(require_api_key)])
+def get_insights():
+    df = stock.load_article_status()
+    counts = stock.status_counts(df)
+    plan = stock.replenishment_summary(df)
+    abc = _abc(df.rename(columns={"stock": "quantite"}))
+    total = len(df)
+    insights = []
+    if counts["RUPTURE"]:
+        insights.append({"type": "danger", "priority": 1,
+                         "title": f"{counts['RUPTURE']} article(s) consommé(s) en rupture de stock",
+                         "detail": f"Soit {counts['RUPTURE'] / total * 100:.1f} % des articles suivis."})
+    if counts["CRITIQUE"]:
+        insights.append({"type": "warning", "priority": 2,
+                         "title": f"{counts['CRITIQUE']} article(s) avec moins de {config.STOCK_CRITIQUE_DAYS} jours de couverture",
+                         "detail": f"Plan {plan['horizon_jours']} j : {plan['nb_references']} références, "
+                                   f"{plan['quantite_totale']:,.0f} unités, {plan['budget_tnd']:,.0f} TND."})
+    if not abc.empty:
+        a_count = int((abc["classe"] == "A").sum())
+        insights.append({"type": "info", "priority": 3,
+                         "title": f"Pareto : {a_count} article(s) concentrent 80 % de la valeur du stock",
+                         "detail": f"Valeur totale du stock : {abc['valeur'].sum():,.0f} TND."})
+    if counts["SURSTOCK"]:
+        insights.append({"type": "info", "priority": 4,
+                         "title": f"{counts['SURSTOCK']} article(s) en surstock (≥ {config.STOCK_SURSTOCK_DAYS} jours de couverture)",
+                         "detail": "Capital immobilisé à réduire."})
+    if counts["SANS_CONSOMMATION"]:
+        insights.append({"type": "secondary", "priority": 5,
+                         "title": f"{counts['SANS_CONSOMMATION']} article(s) sans consommation sur {config.STOCK_CONSO_WINDOW_DAYS} jours",
+                         "detail": "Stock dormant à analyser."})
+    return {
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "data_source": "dbDWH.dbo.ASTOCKDATE + dbDWH.dbo.FACT_ILE",
+        "total_articles": total,
+        "statuts": counts,
+        "reapprovisionnement": plan,
+        "insights": insights,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Benchmark sur un fichier importé par l'utilisateur
+# ---------------------------------------------------------------------------
 class CustomDataPoint(BaseModel):
     date: str
     value: float
 
+
 class CustomPredictionRequest(BaseModel):
     data: List[CustomDataPoint]
     horizon: int = 30
+    # Premier jour de la période prévue (AAAA-MM-JJ) ; ignoré s'il n'est pas après la fin du fichier
+    start: Optional[str] = None
 
-@app.post("/predict/custom")
+
+@app.post("/predict/custom", dependencies=[Depends(require_api_key)])
 def predict_custom(req: CustomPredictionRequest):
+    if not 1 <= req.horizon <= 90:
+        raise HTTPException(400, "L'horizon doit être compris entre 1 et 90 jours.")
     try:
-        raw = req.data
-        if not raw or len(raw) < 5:
-            raise HTTPException(400, "Le fichier doit contenir au moins 5 observations temporelles.")
-
-        df = pd.DataFrame([{"date": pd.to_datetime(d.date), "value": float(d.value)} for d in raw])
-        df = df.groupby("date")["value"].sum().reset_index().sort_values("date").reset_index(drop=True)
-        n = len(df)
-
-        lr_m = LinearRegressionModel().fit(df)
-        arima_m = ARIMAModel().fit(df)
-        prophet_m = ProphetModel().fit(df)
-        rf_m = RandomForestModel(n_estimators=100, max_depth=10).fit(df)
-
-        n_splits = min(6, max(2, n - 2)) if n >= 7 else 2
-
-        eval_lr = lr_m.evaluate(n_splits=n_splits)
-        eval_arima = arima_m.evaluate(n_splits=n_splits)
-        eval_prophet = prophet_m.evaluate(n_splits=n_splits)
-        eval_rf = rf_m.evaluate(n_splits=n_splits)
-
-        pred_lr = lr_m.predict(req.horizon)
-        pred_arima = arima_m.predict(req.horizon)
-        pred_prophet = prophet_m.predict(req.horizon)
-        pred_rf = rf_m.predict(req.horizon)
-
-        results = []
-        for i in range(req.horizon):
-            results.append({
-                "date": pred_lr[i]["date"],
-                "prophet_quantity": round(float(pred_prophet[i]["predicted_quantity"]), 1),
-                "rf_quantity": round(float(pred_rf[i]["predicted_quantity"]), 1),
-                "arima_quantity": round(float(pred_arima[i]["predicted_quantity"]), 1),
-                "lr_quantity": round(float(pred_lr[i]["predicted_quantity"]), 1),
-            })
-
-        scores = [
-            ("Prophet", float(eval_prophet["mape"])),
-            ("Random Forest", float(eval_rf["mape"])),
-            ("ARIMA", float(eval_arima["mape"])),
-            ("Régression Linéaire", float(eval_lr["mape"])),
-        ]
-        best = min(scores, key=lambda s: s[1])[0]
-
-        return {
-            "historical_count": n,
-            "horizon": req.horizon,
-            "cross_validation": {
-                "method": "TimeSeriesSplit (Rolling-Origin Cross-Validation)",
-                "n_splits": n_splits,
-                "metrics_evaluated": ["MAE", "RMSE", "MAPE", "R²"]
-            },
-            "predictions": results,
-            "metrics": {
-                "prophet": { "name": "Prophet (Meta)", "mae": eval_prophet["mae"], "rmse": eval_prophet["rmse"], "mape": f"{eval_prophet['mape']}%", "r2": eval_prophet["r2"], "cv_r2": eval_prophet["cv_r2"], "status": "Modèle Recommandé" if best == "Prophet" else "Champion Retenu" },
-                "random_forest": { "name": "Random Forest Regressor", "mae": eval_rf["mae"], "rmse": eval_rf["rmse"], "mape": f"{eval_rf['mape']}%", "r2": eval_rf["r2"], "cv_r2": eval_rf["cv_r2"], "status": "Modèle Recommandé" if best == "Random Forest" else "Très Performant" },
-                "arima": { "name": "ARIMA", "mae": eval_arima["mae"], "rmse": eval_arima["rmse"], "mape": f"{eval_arima['mape']}%", "r2": eval_arima["r2"], "cv_r2": eval_arima["cv_r2"], "status": "Modèle Recommandé" if best == "ARIMA" else "Intermédiaire" },
-                "linear_regression": { "name": "Régression Linéaire", "mae": eval_lr["mae"], "rmse": eval_lr["rmse"], "mape": f"{eval_lr['mape']}%", "r2": eval_lr["r2"], "cv_r2": eval_lr["cv_r2"], "status": "Modèle Recommandé" if best == "Régression Linéaire" else "Baseline Simple" }
-            },
-            "best_model": best
-        }
-    except HTTPException:
-        raise
+        s = (pd.Series([p.value for p in req.data], index=pd.to_datetime([p.date for p in req.data], format="%Y-%m-%d"))
+               .groupby(level=0).sum().sort_index().asfreq("D", fill_value=0.0))
     except Exception as e:
-        raise HTTPException(500, f"Erreur de prédiction : {str(e)}")
+        raise HTTPException(400, f"Dates ou valeurs invalides : {e}")
+    if len(s) < 90:
+        raise HTTPException(400, f"Le fichier couvre {len(s)} jours ; au moins 90 jours consécutifs sont nécessaires.")
+    s.index.name, s.name = "date", "value"
+    s = s.round(PRODUCTION_DECIMALS)  # même précision que la série chargée depuis le DWH
+
+    start_ts = None
+    if req.start:
+        try:
+            start_ts = pd.Timestamp(req.start)
+        except ValueError:
+            raise HTTPException(400, "Date de début invalide (format attendu : AAAA-MM-JJ).")
+        if not (s.index[-1] < start_ts <= s.index[-1] + pd.Timedelta(days=MAX_DAYS_AHEAD)):
+            start_ts = None  # période demandée incompatible avec ce fichier : prévision juste après la fin du fichier
+    try:
+        return benchmark_custom_series(s, req.horizon, config.ML_BACKTEST_ORIGINS, start_ts,
+                                       models=[config.ML_MODEL])
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+    uvicorn.run("main:app", host=config.ML_SERVICE_HOST, port=config.ML_SERVICE_PORT)

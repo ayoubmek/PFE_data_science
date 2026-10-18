@@ -25,6 +25,7 @@ class DataCleaner:
             "categories_standardized": 0,
             "sites_standardized": 0,
             "logical_mismatches_fixed": 0,
+            "quantity_outliers_dropped": 0,
             "final_clean_rows": 0,
         }
 
@@ -131,7 +132,12 @@ class DataCleaner:
             return
 
         date_series = self.df["DateStock"].astype(str).str.strip()
-        parsed_dates = pd.to_datetime(date_series, format="mixed", dayfirst=True, errors="coerce")
+        # Les dates ISO (AAAA-MM-JJ) sont analysées avec leur format exact ; seuls les formats
+        # jour/mois (JJ/MM/AAAA, JJ-MM-AAAA) utilisent dayfirst. Un dayfirst global inverserait
+        # jour et mois des dates ISO (2025-03-12 -> 2025-12-03).
+        iso = pd.to_datetime(date_series, format="%Y-%m-%d", errors="coerce")
+        day_first = pd.to_datetime(date_series.where(iso.isna()), format="mixed", dayfirst=True, errors="coerce")
+        parsed_dates = iso.fillna(day_first)
         invalid_mask = parsed_dates.isna()
         out_of_bounds = (
             (parsed_dates.dt.year < QUALITY_THRESHOLDS["min_valid_year"])
@@ -170,15 +176,17 @@ class DataCleaner:
 
         converted[invalid_cost_mask] = np.nan
         self.df["Cout"] = converted
+        # Imputation par la médiane de la famille d'articles, puis par la médiane globale observée.
         median_cost = self.df.groupby("GroupeItem")["Cout"].transform("median")
-        self.df["Cout"] = self.df["Cout"].fillna(median_cost).fillna(45.0).round(2)
+        self.df["Cout"] = self.df["Cout"].fillna(median_cost).fillna(self.df["Cout"].median()).round(2)
 
     def resolve_negative_stocks(self):
         if "Quantité" not in self.df.columns:
             return
+        # Un stock physique négatif est une erreur de saisie : il est ramené à 0 (et non inversé en positif).
         neg_mask = self.df["Quantité"] < 0
         self.audit_report["negative_stocks_resolved"] = int(neg_mask.sum())
-        self.df.loc[neg_mask, "Quantité"] = self.df.loc[neg_mask, "Quantité"].abs()
+        self.df.loc[neg_mask, "Quantité"] = 0.0
 
     def reconcile_logical_inconsistencies(self):
         discrepancy_count = 0
@@ -187,8 +195,10 @@ class DataCleaner:
             outlier_mask = self.df["Quantité"] > QUALITY_THRESHOLDS["max_quantity_outlier"]
             self.df.loc[outlier_mask, "Quantité"] = self.df.loc[outlier_mask, "Quantit"]
 
+            # Valeurs encore aberrantes sans valeur alternative fiable : ligne écartée (pas de valeur inventée).
             remaining_outliers = self.df["Quantité"] > QUALITY_THRESHOLDS["max_quantity_outlier"]
-            self.df.loc[remaining_outliers, "Quantité"] = 1500.0
+            self.audit_report["quantity_outliers_dropped"] = int(remaining_outliers.sum())
+            self.df = self.df[~remaining_outliers].copy()
 
             discrepancy_count = int(diff_mask.sum())
 
