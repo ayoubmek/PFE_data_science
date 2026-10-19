@@ -1,49 +1,23 @@
-import { FC, useState, useEffect, useCallback } from 'react'
-import axios from 'axios'
+import { FC, useState } from 'react'
+import { useQuery } from 'react-query'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import Chart from 'react-apexcharts'
-import { API_BASE_URL, apiErrorMessage } from '../../config'
+import { ApexOptions } from 'apexcharts'
+import { apiErrorMessage } from '../../config'
 import { PageSkeleton } from '../../components/PageSkeleton'
-
-interface StockGroup {
-  name: string
-  count: number
-  quantity: number
-  value: number
-  percentage: number
-}
-
-interface StockSite {
-  site: string
-  count: number
-  quantity: number
-  value: number
-  machines: number
-}
-
-interface Declaration {
-  id: number
-  reference: string
-  itemNo: string | null
-  article: string | null
-  quantiteRealisee: number
-  scrapQuantity: number
-  runTime: number
-  dateDebut: string | null
-  workCenter: string | null
-  machineNom: string | null
-  machineCode: string | null
-  site: string | null
-}
-
-interface DailyStat {
-  date: string
-  totalOutput: number
-  totalScrap: number
-}
-
-type Period = 'mois' | 'annee' | 'tout'
+import {
+  DailyStat,
+  DashboardSummary,
+  Declaration,
+  Period,
+  StockGroup,
+  StockSite,
+  fetchDashboardSummary,
+  fetchDeclarations,
+  fetchProductionStats,
+} from '../../services/api'
+import { fmt, fmtDate } from '../../utils/format'
 
 const PERIODS: { key: Period; label: string }[] = [
   { key: 'mois', label: 'Mois' },
@@ -51,39 +25,23 @@ const PERIODS: { key: Period; label: string }[] = [
   { key: 'tout', label: 'Tout' },
 ]
 
-const isMonthly = (period: Period) => period === 'annee' || period === 'tout'
-
-interface DashboardData {
-  production: {
-    period: Period
-    periodStart: string
-    periodEnd: string
-    periodDays: number
-    totalOrdres: number
-    totalVolumeProduit: number
-    totalRebut: number
-    tauxConformite: number | null
-    machinesTotal: number
-    machinesActives: number
-    machinesBloquees: number
-  }
-  stock: {
-    dateStock: string
-    totalArticles: number
-    quantiteTotale: number
-    valeurTotaleStock: number
-    statuts: Record<string, number>
-  }
-  stockGroups: StockGroup[]
-  stockSites: StockSite[]
+interface DashboardData extends DashboardSummary {
   daily: DailyStat[]
   recent: Declaration[]
 }
 
-const fmt = (n: number, digits = 0) => n.toLocaleString('fr-FR', { maximumFractionDigits: digits })
-const fmtDate = (iso?: string | null) => (iso ? new Date(iso).toLocaleDateString('fr-FR') : '—')
+const isMonthly = (period: Period) => period === 'annee' || period === 'tout'
 const fmtMonth = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })
 const fmtAxis = (v: number) => (v >= 1e6 ? `${fmt(v / 1e6, 1)} M` : `${Math.round(v / 1000)}k`)
+
+const fetchDashboard = async (period: Period): Promise<DashboardData> => {
+  const [summary, daily, orders] = await Promise.all([
+    fetchDashboardSummary(period),
+    fetchProductionStats(period),
+    fetchDeclarations(),
+  ])
+  return { ...summary, daily, recent: orders.slice(0, 6) }
+}
 
 const periodName = (period: Period, start: string, end: string) => {
   switch (period) {
@@ -136,54 +94,16 @@ const StatisticsWidget: FC<{
   )
 }
 
-const dashboardCache: Partial<Record<Period, DashboardData>> = {}
-let lastPeriod: Period = 'mois'
-
 const DashboardPage: FC = () => {
-  const [period, setPeriod] = useState<Period>(lastPeriod)
-  const [data, setData] = useState<DashboardData | null>(dashboardCache[lastPeriod] ?? null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string>('')
+  const [period, setPeriod] = useState<Period>('mois')
+  const query = useQuery(['dashboard', period], () => fetchDashboard(period), { keepPreviousData: true })
+  const data = query.data
+  const loading = query.isFetching
+  const error = query.error ? apiErrorMessage(query.error, 'Impossible de charger les données du Data Warehouse.') : ''
 
   const [selectedOf, setSelectedOf] = useState<Declaration | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<StockGroup | null>(null)
   const [selectedSite, setSelectedSite] = useState<StockSite | null>(null)
-
-  const fetchDashboardData = useCallback(async (p: Period) => {
-    const cached = dashboardCache[p]
-    if (cached) setData(cached)
-    setLoading(true)
-    try {
-      const [summaryRes, dailyRes, ordersRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/dashboard/summary`, { params: { period: p }, timeout: 120000 }),
-        axios.get<DailyStat[]>(`${API_BASE_URL}/production/fact-cle/stats`, { params: { period: p }, timeout: 120000 }),
-        axios.get<Declaration[]>(`${API_BASE_URL}/production/orders`, { timeout: 60000 }),
-      ])
-      const s = summaryRes.data
-      const mapped: DashboardData = {
-        production: s.production,
-        stock: s.stock,
-        stockGroups: s.stockGroups || [],
-        stockSites: s.stockSites || [],
-        daily: dailyRes.data || [],
-        recent: (ordersRes.data || []).slice(0, 6),
-      }
-      dashboardCache[p] = mapped
-      if (lastPeriod === p) {
-        setData(mapped)
-        setError('')
-      }
-    } catch (err) {
-      if (lastPeriod === p) setError(apiErrorMessage(err, 'Impossible de charger les données du Data Warehouse.'))
-    } finally {
-      if (lastPeriod === p) setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    lastPeriod = period
-    fetchDashboardData(period)
-  }, [period, fetchDashboardData])
 
   if (!data) {
     return error ? (
@@ -203,10 +123,10 @@ const DashboardPage: FC = () => {
   const monthly = isMonthly(production.period)
   const name = periodName(production.period, production.periodStart, production.periodEnd)
 
-  const chartOptions: any = {
+  const chartOptions: { series: ApexAxisChartSeries; options: ApexOptions } = {
     series: [
       { name: 'Production déclarée (Output)', type: 'area', data: data.daily.map((d) => Math.round(d.totalOutput)) },
-      { name: 'Pièces rebutées', type: 'line', data: data.daily.map((d) => Math.round(d.totalScrap)) },
+      { name: 'Unités rebutées', type: 'line', data: data.daily.map((d) => Math.round(d.totalScrap)) },
     ],
     options: {
       chart: { fontFamily: 'Inter, sans-serif', type: 'line', height: 310, toolbar: { show: false }, zoom: { enabled: false } },
@@ -233,7 +153,7 @@ const DashboardPage: FC = () => {
           labels: { style: { colors: '#7E8299', fontSize: '11px' }, formatter: fmtAxis },
         },
         {
-          seriesName: 'Pièces rebutées',
+          seriesName: 'Unités rebutées',
           opposite: true,
           min: 0,
           labels: { style: { colors: '#F1416C', fontSize: '11px' }, formatter: (v: number) => `${Math.round(v)}` },
@@ -246,7 +166,7 @@ const DashboardPage: FC = () => {
       },
       grid: { borderColor: '#F1F1F4', strokeDashArray: 4, yaxis: { lines: { show: true } } },
       legend: { show: true, position: 'top', horizontalAlign: 'right', fontSize: '12px', fontWeight: 600 },
-      tooltip: { theme: 'light', style: { fontSize: '12px' }, y: { formatter: (v: number) => `${fmt(v)} pièces` } },
+      tooltip: { theme: 'light', style: { fontSize: '12px' }, y: { formatter: (v: number) => `${fmt(v)} unités` } },
     },
   }
 

@@ -1,16 +1,49 @@
-import { useEffect, useState, useMemo, useCallback } from 'react'
-import axios from 'axios'
+import { useEffect, useState, useMemo } from 'react'
+import { useQuery } from 'react-query'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
-import { API_BASE_URL, apiErrorMessage } from '../../config'
+import { apiErrorMessage } from '../../config'
+import { Declaration, fetchDeclarations } from '../../services/api'
 
-let globalCachedOrders: any[] = []
+interface OrderRow {
+  id: number
+  code: string
+  itemNo: string
+  articleNom: string
+  quantiteProduite: number
+  scrapQuantity: number
+  runTime: number
+  dateDebut: string
+  machineNom: string
+  machineCode: string
+  machineLabel: string
+  responsable: string
+}
+
+type SortField = keyof OrderRow
+
+const toRow = (o: Declaration): OrderRow => ({
+  id: o.id,
+  code: o.reference,
+  itemNo: o.itemNo || '',
+  articleNom: o.article || '',
+  quantiteProduite: Number(o.quantiteRealisee) || 0,
+  scrapQuantity: Number(o.scrapQuantity) || 0,
+  runTime: Number(o.runTime) || 0,
+  dateDebut: o.dateDebut || '',
+  machineNom: o.workCenter || '',
+  machineCode: o.machineCode || '',
+  machineLabel: o.machineNom || '',
+  responsable: o.site || '',
+})
+
+const uniqueValues = (values: string[]) => Array.from(new Set(values.filter(Boolean)))
 
 export default function ProductionPage() {
-  const [orders, setOrders] = useState<any[]>(globalCachedOrders)
-  const [loading, setLoading] = useState(globalCachedOrders.length === 0)
+  const query = useQuery('declarations', fetchDeclarations)
+  const orders = useMemo(() => (query.data ?? []).map(toRow), [query.data])
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [siteFilter, setSiteFilter] = useState('ALL')
@@ -18,60 +51,29 @@ export default function ProductionPage() {
   const [volumeFilter, setVolumeFilter] = useState('ALL')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
-  const [sortField, setSortField] = useState('dateDebut')
+  const [sortField, setSortField] = useState<SortField>('dateDebut')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
-  const [selectedOrder, setSelectedOrder] = useState<any>(null)
+  const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(50)
   const [showFilters, setShowFilters] = useState(false)
-  const [loadError, setLoadError] = useState('')
 
-
-  const fetchOrders = useCallback(async () => {
-    if (globalCachedOrders.length === 0) setLoading(true)
-    try {
-      const { data } = await axios.get(`${API_BASE_URL}/production/orders`)
-      const mapped = (Array.isArray(data) ? data : []).map((o: any) => ({
-        id: o.id,
-        code: o.reference,
-        itemNo: o.itemNo || '',
-        articleNom: o.article || '',
-        quantiteProduite: Number(o.quantiteRealisee) || 0,
-        scrapQuantity: Number(o.scrapQuantity) || 0,
-        runTime: Number(o.runTime) || 0,
-        dateDebut: o.dateDebut || '',
-        machineNom: o.workCenter || '',
-        machineCode: o.machineCode || '',
-        machineLabel: o.machineNom || '',
-        responsable: o.site || '',
-      }))
-      globalCachedOrders = mapped
-      setOrders(mapped)
-      setLoadError('')
-    } catch (err) {
-      setLoadError(apiErrorMessage(err, 'Impossible de charger les déclarations de production.'))
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { fetchOrders() }, [fetchOrders])
   useEffect(() => { setCurrentPage(1) }, [searchTerm, statusFilter, siteFilter, scrapFilter, volumeFilter, dateFrom, dateTo, sortField, sortDir, rowsPerPage])
 
-  const workshops = useMemo(() => ['ALL', ...Array.from(new Set(orders.map(o => o.machineNom).filter(Boolean)))], [orders])
-  const sites = useMemo(() => ['ALL', ...Array.from(new Set(orders.map(o => o.responsable).filter(Boolean)))], [orders])
+  const workshops = useMemo(() => ['ALL', ...uniqueValues(orders.map(o => o.machineNom))], [orders])
+  const sites = useMemo(() => ['ALL', ...uniqueValues(orders.map(o => o.responsable))], [orders])
   const years = useMemo(
     () => Array.from(new Set(orders.map(o => String(o.dateDebut).slice(0, 4)).filter(y => /^\d{4}$/.test(y)))).sort().reverse(),
     [orders]
   )
 
-  const handleSort = (field: string) => {
+  const handleSort = (field: SortField) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortField(field); setSortDir('asc') }
   }
 
-  const SortIcon = ({ field }: { field: string }) => (
+  const SortIcon = ({ field }: { field: SortField }) => (
     <span className='ms-1 text-gray-400' style={{ fontSize: 9 }}>
       {sortField === field ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
     </span>
@@ -94,8 +96,8 @@ export default function ProductionPage() {
       return matchSearch && matchWorkshop && matchSite && matchScrap && matchVolume && matchFrom && matchTo
     })
     result.sort((a, b) => {
-      const va = a[sortField] ?? '', vb = b[sortField] ?? ''
-      if (typeof va === 'number') return sortDir === 'asc' ? va - vb : vb - va
+      const va = a[sortField], vb = b[sortField]
+      if (typeof va === 'number' && typeof vb === 'number') return sortDir === 'asc' ? va - vb : vb - va
       return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va))
     })
     return result
@@ -178,9 +180,9 @@ export default function ProductionPage() {
     XLSX.writeFile(wb, `production_FACT_CLE_${new Date().toISOString().slice(0, 10)}.xlsx`)
   }
 
-  if (loading && orders.length === 0) return <PageSkeleton type='table' />
-  if (loadError && orders.length === 0) {
-    return <div className='alert alert-danger p-5'>{loadError}</div>
+  if (query.isLoading) return <PageSkeleton type='table' />
+  if (query.error && orders.length === 0) {
+    return <div className='alert alert-danger p-5'>{apiErrorMessage(query.error, 'Impossible de charger les déclarations de production.')}</div>
   }
 
   return (
@@ -190,7 +192,7 @@ export default function ProductionPage() {
         <div className='d-flex gap-4 flex-wrap'>
           {[
             { label: 'Document No_ distincts', val: stats.total.toLocaleString(), color: 'primary', icon: 'element-11', sub: `${orders.length.toLocaleString()} dernières déclarations` },
-            { label: 'Total Output Quantity', val: `${stats.totalOutput.toLocaleString()} unités`, color: 'success', icon: 'check-circle', sub: 'Pièces conformes' },
+            { label: 'Total Output Quantity', val: `${stats.totalOutput.toLocaleString()} unités`, color: 'success', icon: 'check-circle', sub: 'Unités conformes' },
             { label: 'Total Scrap Quantity', val: `${stats.totalScrap.toLocaleString()} unités`, color: 'danger', icon: 'cross-circle', sub: `Taux : ${stats.scrapRate}%` },
             { label: 'Total Run Time', val: `${stats.totalRunTime.toLocaleString()} h`, color: 'info', icon: 'time', sub: 'Heures machine' },
           ].map(s => (
@@ -347,9 +349,9 @@ export default function ProductionPage() {
                   onChange={e => setVolumeFilter(e.target.value)}
                 >
                   <option value='ALL'>Toutes les tailles de série</option>
-                  <option value='HIGH'>🚀 Grandes Séries (&gt; 10 000 pièces)</option>
-                  <option value='MEDIUM'>⚙️ Séries Moyennes (1 000 à 10 000 pièces)</option>
-                  <option value='LOW'>📦 Petits Lots (&lt; 1 000 pièces)</option>
+                  <option value='HIGH'>🚀 Grandes Séries (&gt; 10 000 unités)</option>
+                  <option value='MEDIUM'>⚙️ Séries Moyennes (1 000 à 10 000 unités)</option>
+                  <option value='LOW'>📦 Petits Lots (&lt; 1 000 unités)</option>
                 </select>
               </div>
 
@@ -533,8 +535,8 @@ export default function ProductionPage() {
                 { label: 'Document No_', val: selectedOrder.code },
                 { label: 'Item No_', val: <span className='badge badge-light-primary fw-bold fs-7'>{selectedOrder.itemNo}</span> },
                 { label: 'Description', val: selectedOrder.articleNom },
-                { label: 'Output Quantity', val: <span className='fw-bolder text-success fs-6'>{selectedOrder.quantiteProduite?.toLocaleString()} unités</span> },
-                { label: 'Scrap Quantity', val: <span className={`fw-bold ${selectedOrder.scrapQuantity > 0 ? 'text-danger' : 'text-muted'}`}>{selectedOrder.scrapQuantity?.toLocaleString()} unités</span> },
+                { label: 'Output Quantity', val: <span className='fw-bolder text-success fs-6'>{selectedOrder.quantiteProduite.toLocaleString()} unités</span> },
+                { label: 'Scrap Quantity', val: <span className={`fw-bold ${selectedOrder.scrapQuantity > 0 ? 'text-danger' : 'text-muted'}`}>{selectedOrder.scrapQuantity.toLocaleString()} unités</span> },
                 { label: 'Run Time', val: <span className='fw-semibold text-gray-800'>{selectedOrder.runTime > 0 ? `${selectedOrder.runTime} heures` : '0 heure'}</span> },
                 { label: 'Work Center No_', val: <span className='badge badge-light-info fw-bold'>{selectedOrder.machineNom || '—'}</span> },
                 { label: 'Machine (No_)', val: selectedOrder.machineCode ? `${selectedOrder.machineCode} ${selectedOrder.machineLabel ? `(${selectedOrder.machineLabel})` : ''}` : '—' },

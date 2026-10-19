@@ -19,6 +19,8 @@ if config.ML_MODEL != "auto" and config.ML_MODEL not in MODEL_FACTORIES:
     raise RuntimeError(f"ML_MODEL='{config.ML_MODEL}' inconnu. Valeurs possibles : auto, {', '.join(MODEL_FACTORIES)}")
 APP_MODELS = list(MODEL_FACTORIES) if config.ML_MODEL == "auto" else [config.ML_MODEL]
 MAX_DAYS_AHEAD = 400
+WARMUP_ATTEMPTS = 5
+WARMUP_RETRY_SECONDS = 30
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("ml-service")
@@ -94,13 +96,19 @@ def dwh_forecast(horizon: int, start: Optional[str]) -> dict:
 @app.on_event("startup")
 def warm_cache():
     def _warm():
-        try:
-            start = config.ML_WARMUP_START or None
-            logger.info(f"Pré-calcul des prévisions (début {start or 'lendemain des données'})...")
-            result = dwh_forecast(30, start)
-            logger.info(f"Prévisions prêtes en {result['computed_in_seconds']} s — meilleur modèle : {result['best_model_name']}")
-        except Exception as e:
-            logger.warning(f"Pré-calcul impossible : {e}")
+        start = config.ML_WARMUP_START or None
+        for attempt in range(1, WARMUP_ATTEMPTS + 1):
+            try:
+                logger.info(f"Pré-calcul des prévisions (début {start or 'lendemain des données'}, essai {attempt})...")
+                result = dwh_forecast(30, start)
+                logger.info(f"Prévisions prêtes en {result['computed_in_seconds']} s — meilleur modèle : {result['best_model_name']}")
+                return
+            except HTTPException as e:
+                logger.warning(f"Pré-calcul annulé : {e.detail}")
+                return
+            except Exception as e:
+                logger.warning(f"Pré-calcul impossible (essai {attempt}/{WARMUP_ATTEMPTS}) : {e}")
+                time.sleep(WARMUP_RETRY_SECONDS)
 
     threading.Thread(target=_warm, daemon=True).start()
 

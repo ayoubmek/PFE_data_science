@@ -1,68 +1,50 @@
-import { useEffect, useState, useMemo, useCallback } from 'react'
-import axios from 'axios'
+import { useEffect, useState, useMemo } from 'react'
+import { useQuery } from 'react-query'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
-import { API_BASE_URL, apiErrorMessage } from '../../config'
+import { apiErrorMessage } from '../../config'
+import { fetchMachines, Machine } from '../../services/api'
 
-let globalCachedMachines: any[] = []
+type SortField = keyof Machine
+
+const uniqueValues = (values: Array<string | null>) => Array.from(new Set(values.filter((v): v is string => Boolean(v))))
+
+const getYieldColor = (rate: number | null) => {
+  if (rate === null) return 'text-muted'
+  if (rate >= 80) return 'text-success'
+  if (rate >= 50) return 'text-warning'
+  return 'text-danger'
+}
 
 export default function MachinesPage() {
-  const [machines, setMachines] = useState<any[]>(globalCachedMachines)
-  const [loading, setLoading] = useState(globalCachedMachines.length === 0)
+  const query = useQuery('machines', fetchMachines)
+  const machines = useMemo(() => query.data ?? [], [query.data])
   const [searchTerm, setSearchTerm] = useState('')
   const [workshopFilter, setWorkshopFilter] = useState('ALL')
   const [siteFilter, setSiteFilter] = useState('ALL')
-  const [sortField, setSortField] = useState('totalOutput')
+  const [sortField, setSortField] = useState<SortField>('totalOutput')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
-  const [selectedMachine, setSelectedMachine] = useState<any>(null)
+  const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(50)
   const [showFilters, setShowFilters] = useState(false)
-  const [loadError, setLoadError] = useState('')
-
-
-  const fetchMachines = useCallback(async () => {
-    if (globalCachedMachines.length === 0) setLoading(true)
-    try {
-      const { data } = await axios.get(`${API_BASE_URL}/production/machines`)
-      const list = Array.isArray(data) ? data : []
-      globalCachedMachines = list
-      setMachines(list)
-      setLoadError('')
-    } catch (err) {
-      setLoadError(apiErrorMessage(err, 'Impossible de charger le parc machines.'))
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchMachines()
-  }, [fetchMachines])
 
   useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, workshopFilter, siteFilter, sortField, sortDir, rowsPerPage])
 
-  const workshops = useMemo(() => ['ALL', ...Array.from(new Set(machines.map(m => m.workCenter).filter(Boolean)))], [machines])
-  const sites = useMemo(() => ['ALL', ...Array.from(new Set(machines.map(m => m.emplacement).filter(Boolean)))], [machines])
+  const workshops = useMemo(() => ['ALL', ...uniqueValues(machines.map(m => m.workCenter))], [machines])
+  const sites = useMemo(() => ['ALL', ...uniqueValues(machines.map(m => m.emplacement))], [machines])
 
-  const getYieldColor = (rate: number | null) => {
-    if (rate === null || rate === undefined) return 'text-muted'
-    if (rate >= 80) return 'text-success'
-    if (rate >= 50) return 'text-warning'
-    return 'text-danger'
-  }
-
-  const handleSort = (field: string) => {
+  const handleSort = (field: SortField) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortField(field); setSortDir('asc') }
   }
 
-  const SortIcon = ({ field }: { field: string }) => (
+  const SortIcon = ({ field }: { field: SortField }) => (
     <span className='ms-1 text-gray-400' style={{ fontSize: 9 }}>
       {sortField === field ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
     </span>
@@ -126,11 +108,11 @@ export default function MachinesPage() {
     XLSX.writeFile(wb, `Parc_Machines_${new Date().toISOString().slice(0, 10)}.xlsx`)
   }
 
-  if (loading && machines.length === 0) {
+  if (query.isLoading) {
     return <PageSkeleton type='table' />
   }
-  if (loadError && machines.length === 0) {
-    return <div className='alert alert-danger p-5'>{loadError}</div>
+  if (query.error && machines.length === 0) {
+    return <div className='alert alert-danger p-5'>{apiErrorMessage(query.error, 'Impossible de charger le parc machines.')}</div>
   }
 
   return (

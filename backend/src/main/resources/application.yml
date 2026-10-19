@@ -5,8 +5,8 @@ spring:
   application:
     name: pfe-platform-backend
 
-  main:
-    allow-circular-references: true
+  config:
+    import: "optional:file:.env[.properties],optional:file:../.env[.properties]"
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:sqlserver://${DB_HOST:localhost};databaseName=${DB_NAME:dbDWH};integratedSecurity=${DB_INTEGRATED_SECURITY:true};encrypt=false;trustServerCertificate=true}
@@ -15,12 +15,15 @@ spring:
     password: ${DB_PASSWORD:}
 
   jpa:
+    open-in-view: false
     database-platform: org.hibernate.dialect.SQLServerDialect
     hibernate:
       ddl-auto: none
     show-sql: false
     properties:
       hibernate:
+        boot:
+          allow_jdbc_metadata_access: false
         jdbc:
           time_zone: UTC
 

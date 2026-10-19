@@ -1,5 +1,6 @@
 
 import { useState } from 'react'
+import { isAxiosError } from 'axios'
 import * as Yup from 'yup'
 import clsx from 'clsx'
 import { useFormik } from 'formik'
@@ -33,12 +34,12 @@ export function Login() {
       setStatus(undefined)
       try {
         const { data } = await login(values.username, values.password)
-        saveAuth({ api_token: data.token, access_token: data.token })
+        saveAuth({ api_token: data.token })
         setCurrentUser(toUserModel(data))
-      } catch (error: any) {
+      } catch (error) {
         saveAuth(undefined)
         setStatus(
-          error?.response?.status === 401
+          isAxiosError(error) && error.response?.status === 401
             ? 'Identifiants incorrects ou compte désactivé.'
             : 'Serveur indisponible : impossible de vérifier vos identifiants.'
         )

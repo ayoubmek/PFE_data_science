@@ -1,9 +1,5 @@
 export interface AuthModel {
   api_token: string
-  access_token?: string
-  token_type?: string
-  expires_in?: number
-  refreshToken?: string
 }
 
 export interface UserModel {

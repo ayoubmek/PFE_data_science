@@ -1,3 +1,4 @@
+import type {AxiosError, AxiosStatic} from 'axios'
 import {AuthModel} from './_models'
 
 const AUTH_LOCAL_STORAGE_KEY = 'kt-auth-react-v'
@@ -47,25 +48,23 @@ const removeAuth = () => {
   }
 }
 
-export function setupAxios(axios: any) {
-  axios.defaults.headers.Accept = 'application/json'
+export function setupAxios(axios: AxiosStatic) {
+  axios.defaults.headers.common.Accept = 'application/json'
   axios.interceptors.request.use(
-    (config: any) => {
-      const auth = getAuth()
-      const token = auth?.api_token || auth?.access_token || (auth as any)?.token
+    (config) => {
+      const token = getAuth()?.api_token
       if (token) {
-        config.headers = config.headers || {}
         config.headers.Authorization = `Bearer ${token}`
       }
       return config
     },
-    (err: any) => Promise.reject(err)
+    (err: unknown) => Promise.reject(err)
   )
   axios.interceptors.response.use(
-    (response: any) => response,
-    (err: any) => {
-      const isLoginCall = String(err?.config?.url || '').endsWith('/auth/login')
-      if (err?.response?.status === 401 && !isLoginCall && getAuth()) {
+    (response) => response,
+    (err: AxiosError) => {
+      const isLoginCall = String(err.config?.url || '').endsWith('/auth/login')
+      if (err.response?.status === 401 && !isLoginCall && getAuth()) {
         removeAuth()
         window.location.assign('/auth/login')
       }

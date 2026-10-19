@@ -1,15 +1,16 @@
-import { useEffect, useState, useMemo, useCallback } from 'react'
-import axios from 'axios'
+import { useEffect, useState, useMemo } from 'react'
+import { useQuery } from 'react-query'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
 import { PageSkeleton } from '../../components/PageSkeleton'
 import * as XLSX from 'xlsx'
-import { API_BASE_URL, apiErrorMessage } from '../../config'
+import { apiErrorMessage } from '../../config'
+import { fetchStockItems, fetchStockKpi, StockItem, StockStatus } from '../../services/api'
+import { fmt } from '../../utils/format'
 
-let globalCachedStockItems: any[] = []
-let globalCachedStockKpi: any = null
+type SortField = keyof StockItem
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+const STATUS_CONFIG: Record<StockStatus, { label: string; color: string }> = {
   RUPTURE: { label: 'Rupture', color: 'danger' },
   CRITIQUE: { label: 'Critique', color: 'warning' },
   NORMAL: { label: 'Normal', color: 'success' },
@@ -17,62 +18,37 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   INACTIF: { label: 'Inactif', color: 'secondary' },
   SANS_CONSOMMATION: { label: 'Sans consommation', color: 'dark' },
 }
-const statusOf = (code?: string) => STATUS_CONFIG[code || ''] || { label: code || '—', color: 'secondary' }
-const fmt = (n: any, digits = 0) =>
-  n === null || n === undefined || isNaN(Number(n)) ? '—' : Number(n).toLocaleString('fr-FR', { maximumFractionDigits: digits })
+const statusOf = (code: StockStatus | null) => (code ? STATUS_CONFIG[code] : { label: '—', color: 'secondary' })
+const isLowStock = (item: StockItem) => item.statut === 'RUPTURE' || item.statut === 'CRITIQUE'
 
 export default function StockPage() {
-  const [items, setItems] = useState<any[]>(globalCachedStockItems)
-  const [loading, setLoading] = useState(globalCachedStockItems.length === 0)
+  const itemsQuery = useQuery('stockItems', fetchStockItems)
+  const kpiQuery = useQuery('stockKpi', fetchStockKpi)
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('ALL')
   const [siteFilter, setSiteFilter] = useState('ALL')
   const [alertFilter, setAlertFilter] = useState('ALL')
-  const [sortField, setSortField] = useState('designation')
+  const [sortField, setSortField] = useState<SortField>('designation')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
-  const [selectedItem, setSelectedItem] = useState<any>(null)
+  const [selectedItem, setSelectedItem] = useState<StockItem | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(50)
   const [showFilters, setShowFilters] = useState(false)
-  const [kpi, setKpi] = useState<any>(globalCachedStockKpi)
-  const [loadError, setLoadError] = useState('')
+  const items = useMemo(() => itemsQuery.data ?? [], [itemsQuery.data])
+  const kpi = kpiQuery.data
 
-
-  const fetchItems = useCallback(async () => {
-    if (globalCachedStockItems.length === 0) setLoading(true)
-    try {
-      const [itemsRes, kpiRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/stock/items`, { timeout: 60000 }),
-        axios.get(`${API_BASE_URL}/stock/kpi`, { timeout: 60000 }),
-      ])
-      const list = Array.isArray(itemsRes.data) ? itemsRes.data : []
-      globalCachedStockItems = list
-      globalCachedStockKpi = kpiRes.data
-      setItems(list)
-      setKpi(kpiRes.data)
-      setLoadError('')
-    } catch (err) {
-      setLoadError(apiErrorMessage(err, 'Impossible de charger le stock depuis le Data Warehouse.'))
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { fetchItems() }, [fetchItems])
   useEffect(() => { setCurrentPage(1) }, [searchTerm, categoryFilter, siteFilter, alertFilter, sortField, sortDir, rowsPerPage])
 
-  const categories = useMemo(() => ['ALL', ...Array.from(new Set(items.map(i => i.categorie).filter(Boolean)))], [items])
-  const sites = useMemo(() => ['ALL', ...Array.from(new Set(items.map(i => i.emplacement).filter(Boolean)))], [items])
+  const categories = useMemo(() => ['ALL', ...uniqueValues(items.map(i => i.categorie))], [items])
+  const sites = useMemo(() => ['ALL', ...uniqueValues(items.map(i => i.emplacement))], [items])
 
-  const isLowStock = (item: any) => item.statut === 'RUPTURE' || item.statut === 'CRITIQUE'
-
-  const handleSort = (field: string) => {
+  const handleSort = (field: SortField) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortField(field); setSortDir('asc') }
   }
 
-  const SortIcon = ({ field }: { field: string }) => (
+  const SortIcon = ({ field }: { field: SortField }) => (
     <span className='ms-1 text-gray-400' style={{ fontSize: 9 }}>
       {sortField === field ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
     </span>
@@ -131,10 +107,12 @@ export default function StockPage() {
     XLSX.writeFile(wb, `stock_${new Date().toISOString().slice(0, 10)}.xlsx`)
   }
 
-  if (loading && items.length === 0) return <PageSkeleton type='table' />
-  if (loadError && items.length === 0) return <div className='alert alert-danger p-5'>{loadError}</div>
+  if (itemsQuery.isLoading) return <PageSkeleton type='table' />
+  if (itemsQuery.error && items.length === 0) {
+    return <div className='alert alert-danger p-5'>{apiErrorMessage(itemsQuery.error, 'Impossible de charger le stock depuis le Data Warehouse.')}</div>
+  }
 
-  const statuts = kpi?.statuts || {}
+  const statuts = kpi?.statuts ?? {}
   const plan = kpi?.reapprovisionnement
 
   return (
@@ -287,7 +265,7 @@ export default function StockPage() {
                     <td className='text-muted'>{i.genProdPostingGroup || '—'}</td>
                     <td>
                       <span className={`fw-bold text-${low ? 'danger' : 'success'}`}>
-                        {Number(i.quantite).toLocaleString()}
+                        {fmt(i.quantite)}
                       </span>
                     </td>
                     <td className='fw-bold text-gray-700'>{fmt(i.valeurTotale, 2)} TND</td>
@@ -359,7 +337,7 @@ export default function StockPage() {
                 { label: 'datestock', val: selectedItem.dateStock ? String(selectedItem.dateStock).slice(0, 10) : '—' },
                 { label: 'groupeitem', val: <span className='badge badge-light-info'>{selectedItem.categorie || '—'}</span> },
                 { label: 'Site', val: selectedItem.emplacement || '—' },
-                { label: 'Quantité', val: <span className={`fw-bolder text-${isLowStock(selectedItem) ? 'danger' : 'success'}`}>{Number(selectedItem.quantite).toLocaleString()}</span> },
+                { label: 'Quantité', val: <span className={`fw-bolder text-${isLowStock(selectedItem) ? 'danger' : 'success'}`}>{fmt(selectedItem.quantite)}</span> },
                 { label: 'Valeur de la ligne (Cout)', val: `${fmt(selectedItem.valeurTotale, 2)} TND` },
                 { label: 'Coût unitaire déduit', val: selectedItem.valeurUnitaire !== null ? `${fmt(selectedItem.valeurUnitaire, 4)} TND` : '—' },
                 { label: 'Consommation / jour (article)', val: fmt(selectedItem.consommationJournaliere, 1) },
@@ -385,4 +363,8 @@ export default function StockPage() {
       </Modal>
     </div>
   )
+}
+
+function uniqueValues(values: Array<string | null>): string[] {
+  return Array.from(new Set(values.filter((v): v is string => Boolean(v))))
 }

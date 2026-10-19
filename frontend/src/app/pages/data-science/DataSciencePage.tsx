@@ -1,32 +1,19 @@
 import { useMemo } from 'react'
-import axios from 'axios'
 import Chart from 'react-apexcharts'
+import { ApexOptions } from 'apexcharts'
 import { useQuery } from 'react-query'
-import { API_BASE_URL, apiErrorMessage } from '../../config'
-
-const FORECAST_START = '2027-01-01'
-const HORIZON = 30
-
-const fetchForecast = async () => {
-  const { data } = await axios.get(`${API_BASE_URL}/ml/predict/production`, {
-    params: { horizon: HORIZON, start: FORECAST_START },
-    timeout: 300000,
-  })
-  return data
-}
-
-const fmt = (n: number | null | undefined, digits = 0) =>
-  n === null || n === undefined ? '—' : Number(n).toLocaleString('fr-FR', { maximumFractionDigits: digits })
-const fmtDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString('fr-FR') : '—')
+import { apiErrorMessage } from '../../config'
+import { fetchDwhForecast, forecastQueryKey } from '../../services/api'
+import { fmt, fmtDate, fmtIsoDay, fmtThousands } from '../../utils/format'
 
 export default function DataSciencePage() {
-  const { data: result, isLoading, error } = useQuery(['productionForecast', FORECAST_START], fetchForecast, {
+  const { data: result, isLoading, error } = useQuery(forecastQueryKey, fetchDwhForecast, {
     staleTime: 1000 * 60 * 10,
     retry: false,
   })
 
-  const predictions: any[] = useMemo(() => result?.predictions || [], [result])
-  const bestMetrics = result?.metrics?.[result?.best_model]
+  const predictions = useMemo(() => result?.predictions ?? [], [result])
+  const bestMetrics = result ? result.metrics[result.best_model] : undefined
 
   const totals = useMemo(() => {
     const values = predictions.map((p) => Number(p.best_quantity) || 0)
@@ -34,28 +21,25 @@ export default function DataSciencePage() {
     return { total, avg: values.length ? total / values.length : 0, peak: values.length ? Math.max(...values) : 0 }
   }, [predictions])
 
-  const chart: any = useMemo(() => {
-    if (!predictions.length) return null
-    return {
-      series: [
-        { name: `Prévision ${result.best_model_name}`, data: predictions.map((p) => Math.round(p.best_quantity)) },
-      ],
-      options: {
-        chart: { fontFamily: 'Inter, sans-serif', type: 'line', height: 380, toolbar: { show: false }, zoom: { enabled: false } },
-        colors: ['#00A3FF'],
-        stroke: { curve: 'smooth', width: 3 },
-        dataLabels: { enabled: false },
-        markers: { size: 4 },
-        xaxis: {
-          categories: predictions.map((p) => p.date.slice(5).split('-').reverse().join('/')),
-          labels: { rotate: 0, style: { colors: '#7E8299', fontSize: '11px' } },
-        },
-        yaxis: { min: 0, labels: { formatter: (v: number) => `${Math.round(v / 1000)}k`, style: { colors: '#7E8299' } } },
-        legend: { show: true, position: 'bottom' },
-        tooltip: { shared: true, intersect: false, y: { formatter: (v: number) => `${fmt(v)} pièces` } },
-        grid: { borderColor: '#F1F1F4', strokeDashArray: 4 },
+  const chart = useMemo(() => {
+    if (!result || !predictions.length) return null
+    const options: ApexOptions = {
+      chart: { fontFamily: 'Inter, sans-serif', type: 'line', height: 380, toolbar: { show: false }, zoom: { enabled: false } },
+      colors: ['#00A3FF'],
+      stroke: { curve: 'smooth', width: 3 },
+      dataLabels: { enabled: false },
+      markers: { size: 4 },
+      xaxis: {
+        categories: predictions.map((p) => fmtIsoDay(p.date).slice(0, 5)),
+        labels: { rotate: 0, style: { colors: '#7E8299', fontSize: '11px' } },
       },
+      yaxis: { min: 0, labels: { formatter: fmtThousands, style: { colors: '#7E8299' } } },
+      legend: { show: true, position: 'bottom' },
+      tooltip: { shared: true, intersect: false, y: { formatter: (v: number) => `${fmt(v)} unités` } },
+      grid: { borderColor: '#F1F1F4', strokeDashArray: 4 },
     }
+    const series = [{ name: `Prévision ${result.best_model_name}`, data: predictions.map((p) => Math.round(p.best_quantity)) }]
+    return { options, series }
   }, [result, predictions])
 
   const header = (
@@ -64,13 +48,11 @@ export default function DataSciencePage() {
         <div>
           <h2 className='fw-bold text-gray-900 fs-3 mb-1'>Prévisions de Production</h2>
           {result && !isLoading && (
-            <>
-              <div className='text-muted fs-7'>
-                Du <span className='text-gray-900 fw-semibold'>{fmtDate(predictions[0]?.date)}</span> au{' '}
-                <span className='text-gray-900 fw-semibold'>{fmtDate(predictions[predictions.length - 1]?.date)}</span> — meilleur modèle :{' '}
-                <span className='text-primary fw-semibold'>{result.best_model_name}</span>
-              </div>
-            </>
+            <div className='text-muted fs-7'>
+              Du <span className='text-gray-900 fw-semibold'>{fmtDate(predictions[0]?.date)}</span> au{' '}
+              <span className='text-gray-900 fw-semibold'>{fmtDate(predictions[predictions.length - 1]?.date)}</span> — meilleur modèle :{' '}
+              <span className='text-primary fw-semibold'>{result.best_model_name}</span>
+            </div>
           )}
         </div>
       </div>
@@ -99,9 +81,9 @@ export default function DataSciencePage() {
 
       <div className='row g-4'>
         {[
-          { title: 'Volume total prévu', value: `${fmt(totals.total)} pcs`, color: 'text-gray-900' },
-          { title: 'Moyenne journalière', value: `${fmt(totals.avg)} pcs/j`, color: 'text-primary' },
-          { title: 'Pic journalier', value: `${fmt(totals.peak)} pcs`, color: 'text-gray-900' },
+          { title: 'Volume total prévu', value: `${fmt(totals.total)} unités`, color: 'text-gray-900' },
+          { title: 'Moyenne journalière', value: `${fmt(totals.avg)} unités/j`, color: 'text-primary' },
+          { title: 'Pic journalier', value: `${fmt(totals.peak)} unités`, color: 'text-gray-900' },
           { title: "Erreur du modèle (WAPE, même période l'an dernier)", value: `${fmt(bestMetrics?.wape_selection ?? bestMetrics?.wape, 1)} %`, color: 'text-success' },
         ].map((k) => (
           <div className='col-xl-3 col-md-6' key={k.title}>
