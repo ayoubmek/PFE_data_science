@@ -1,7 +1,3 @@
-"""
-Régression linéaire de référence (baseline) : tendance linéaire + indicatrices jour de semaine et mois
-+ calendrier industriel (jour férié tunisien, fermeture d'usine récurrente).
-"""
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -17,12 +13,10 @@ def _design(t: np.ndarray, dates: pd.DatetimeIndex, calendar: IndustrialCalendar
 
 
 class LinearRegressionModel(Forecaster):
-    key = "linear_regression"
     name = "Régression linéaire (tendance + calendrier)"
 
     def __init__(self):
         self.model = LinearRegression()
-        self.series = None
 
     def fit(self, series: pd.Series) -> "LinearRegressionModel":
         self.series = series
@@ -31,8 +25,7 @@ class LinearRegressionModel(Forecaster):
         self.model.fit(_design(t, series.index, self.calendar), series.to_numpy(dtype=float))
         return self
 
-    def predict(self, horizon: int) -> pd.DataFrame:
+    def predict(self, horizon: int) -> pd.Series:
         dates = self.future_index(self.series, horizon)
         t = np.arange(len(self.series), len(self.series) + horizon, dtype=float)
-        yhat = np.maximum(0.0, self.model.predict(_design(t, dates, self.calendar)))
-        return pd.DataFrame({"yhat": yhat}, index=dates)
+        return pd.Series(np.maximum(0.0, self.model.predict(_design(t, dates, self.calendar))), index=dates)

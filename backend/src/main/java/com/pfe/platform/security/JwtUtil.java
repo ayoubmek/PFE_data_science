@@ -19,7 +19,6 @@ import java.util.function.Function;
 @Component
 @Slf4j
 public class JwtUtil {
-
     private static final int MIN_SECRET_BYTES = 32;
 
     @Value("${app.jwt.secret:}")

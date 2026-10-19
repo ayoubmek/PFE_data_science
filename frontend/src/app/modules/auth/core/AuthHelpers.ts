@@ -61,7 +61,6 @@ export function setupAxios(axios: any) {
     },
     (err: any) => Promise.reject(err)
   )
-  // Session expirée côté serveur (401) : on purge le jeton et on renvoie vers la connexion.
   axios.interceptors.response.use(
     (response: any) => response,
     (err: any) => {

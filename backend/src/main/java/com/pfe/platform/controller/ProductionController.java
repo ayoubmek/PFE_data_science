@@ -13,18 +13,17 @@ import java.util.Map;
 @RequestMapping("/api/production")
 @RequiredArgsConstructor
 public class ProductionController {
-
     private final ProductionService productionService;
 
-    /** Dernières déclarations de production (dbo.FACT_CLE), les plus récentes d'abord. */
     @GetMapping("/orders")
     public ResponseEntity<List<ProductionDTO.Response>> getLatestDeclarations() {
         return ResponseEntity.ok(productionService.getLatestDeclarations());
     }
 
     @GetMapping("/kpi")
-    public ResponseEntity<ProductionDTO.KpiResponse> getKpi() {
-        return ResponseEntity.ok(productionService.getKpi());
+    public ResponseEntity<ProductionDTO.KpiResponse> getKpi(@RequestParam(defaultValue = ProductionService.PERIOD_MONTH) String period) {
+        if (!ProductionService.PERIODS.contains(period)) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(productionService.getKpi(period));
     }
 
     @GetMapping("/machines")
@@ -33,7 +32,8 @@ public class ProductionController {
     }
 
     @GetMapping("/fact-cle/stats")
-    public ResponseEntity<List<Map<String, Object>>> getFactCleStats() {
-        return ResponseEntity.ok(productionService.getDailyStats());
+    public ResponseEntity<List<Map<String, Object>>> getFactCleStats(@RequestParam(defaultValue = ProductionService.PERIOD_MONTH) String period) {
+        if (!ProductionService.PERIODS.contains(period)) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(productionService.getStats(period));
     }
 }

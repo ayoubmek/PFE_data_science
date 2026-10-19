@@ -22,7 +22,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @PreAuthorize("hasRole('ADMIN')")
 @Slf4j
 public class UserController {
-
     private static final int MIN_PASSWORD_LENGTH = 8;
 
     private final UserRepository userRepository;

@@ -12,15 +12,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Les requêtes DWH sont mises en cache pour la réactivité du portail, puis invalidées toutes les
- * {@code app.cache.ttl-minutes} minutes afin que les écrans reflètent les nouveaux chargements du DWH.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class CacheWarmer {
-
     private final ProductionService productionService;
     private final StockService stockService;
     private final CacheManager cacheManager;
@@ -44,8 +39,10 @@ public class CacheWarmer {
             long t0 = System.currentTimeMillis();
             productionService.getLatestDeclarations();
             productionService.getAllMachines();
-            productionService.getKpi();
-            productionService.getDailyStats();
+            for (String period : ProductionService.PERIODS) {
+                productionService.getKpi(period);
+                productionService.getStats(period);
+            }
             productionService.getMachineCountBySite();
             stockService.getAllItems();
             stockService.getKpi();

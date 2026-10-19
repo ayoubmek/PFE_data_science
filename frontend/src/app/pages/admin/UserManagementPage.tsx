@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import axios from 'axios'
 import { KTIcon } from '../../../_metronic/helpers'
 import { API_BASE_URL, apiErrorMessage } from '../../config'
@@ -69,13 +69,11 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState<boolean>(true)
   const [searchTerm, setSearchTerm] = useState<string>('')
 
-  // Modals state
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false)
   const [showEditModal, setShowEditModal] = useState<boolean>(false)
   const [editingUser, setEditingUser] = useState<UserItem | null>(null)
   const [alertMsg, setAlertMsg] = useState<{ type: 'success' | 'danger' | 'info'; text: string } | null>(null)
 
-  // Form states
   const [formData, setFormData] = useState({
     username: '',
     fullName: '',
@@ -85,13 +83,12 @@ export default function UserManagementPage() {
     enabled: true,
   })
 
-  // Load users from the backend (table des utilisateurs de dbDWH)
-  useEffect(() => {
-    loadUsers()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const showAlert = useCallback((type: 'success' | 'danger' | 'info', text: string) => {
+    setAlertMsg({ type, text })
+    setTimeout(() => setAlertMsg(null), 4000)
   }, [])
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true)
     try {
       const { data } = await axios.get<UserItem[]>(`${API_BASE_URL}/users`)
@@ -102,14 +99,12 @@ export default function UserManagementPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [showAlert])
 
-  const showAlert = (type: 'success' | 'danger' | 'info', text: string) => {
-    setAlertMsg({ type, text })
-    setTimeout(() => setAlertMsg(null), 4000)
-  }
+  useEffect(() => {
+    loadUsers()
+  }, [loadUsers])
 
-  // Filtered list
   const filteredUsers = useMemo(() => {
     const q = searchTerm.toLowerCase().trim()
     if (!q) return users
@@ -122,7 +117,6 @@ export default function UserManagementPage() {
     })
   }, [users, searchTerm])
 
-  // Statistics
   const stats = useMemo(() => {
     const total = users.length
     const admins = users.filter((u) => (u.role || '').toUpperCase() === 'ADMIN').length
@@ -132,7 +126,6 @@ export default function UserManagementPage() {
     return { total, admins, operateurs, active, activeRate }
   }, [users])
 
-  // Toggle user active status
   const handleToggleStatus = async (user: UserItem) => {
     try {
       const { data } = await axios.patch<UserItem>(`${API_BASE_URL}/users/${user.id}/toggle-status`, {})
@@ -146,7 +139,6 @@ export default function UserManagementPage() {
     }
   }
 
-  // Delete user
   const handleDeleteUser = async (user: UserItem) => {
     if (user.role === 'ADMIN' && stats.admins <= 1) {
       showAlert('danger', "Impossible de supprimer l'unique compte Administrateur du système !")
@@ -166,7 +158,6 @@ export default function UserManagementPage() {
     }
   }
 
-  // Open Edit Modal
   const openEditModal = (user: UserItem) => {
     setEditingUser(user)
     setFormData({
@@ -180,7 +171,6 @@ export default function UserManagementPage() {
     setShowEditModal(true)
   }
 
-  // Open Create Modal
   const openCreateModal = () => {
     setFormData({
       username: '',
@@ -193,7 +183,6 @@ export default function UserManagementPage() {
     setShowCreateModal(true)
   }
 
-  // Submit Create User
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.username.trim() || !formData.email.trim() || !formData.fullName.trim() || !formData.password) {
@@ -210,7 +199,6 @@ export default function UserManagementPage() {
     }
   }
 
-  // Submit Edit User
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingUser) return
@@ -231,7 +219,6 @@ export default function UserManagementPage() {
 
   return (
     <div className='d-flex flex-column gap-6'>
-      {/* Alert toast notification */}
       {alertMsg && (
         <div className={`alert alert-${alertMsg.type} d-flex align-items-center p-4 rounded-3 shadow-sm border-0 mb-2`}>
           <KTIcon iconName='information' className={`fs-2 me-3 text-${alertMsg.type}`} />
@@ -239,7 +226,6 @@ export default function UserManagementPage() {
         </div>
       )}
 
-      {/* Top Header */}
       <div className='d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3'>
         <h2 className='fw-bolder text-gray-900 fs-3 mb-0'>
           Gestion des Utilisateurs
@@ -255,9 +241,7 @@ export default function UserManagementPage() {
         </button>
       </div>
 
-      {/* Users Table */}
       <div className='card shadow-sm border-0 bg-white rounded-3 p-6'>
-          {/* Search Bar */}
           <div className='d-flex align-items-center justify-content-between mb-6 pb-4 border-bottom'>
             <div className='d-flex align-items-center position-relative' style={{ minWidth: '280px', maxWidth: '400px' }}>
               <KTIcon iconName='magnifier' className='fs-3 position-absolute ms-3 text-gray-400' />
@@ -281,7 +265,6 @@ export default function UserManagementPage() {
             </div>
           </div>
 
-          {/* Users Table */}
           {loading ? (
             <div className='text-center py-12 text-muted'>Chargement...</div>
           ) : filteredUsers.length === 0 ? (
@@ -307,7 +290,6 @@ export default function UserManagementPage() {
 
                     return (
                       <tr key={u.id}>
-                        {/* Avatar and Name */}
                         <td>
                           <div className='d-flex align-items-center gap-3'>
                             <div
@@ -323,13 +305,11 @@ export default function UserManagementPage() {
                           </div>
                         </td>
 
-                        {/* Username & Email */}
                         <td>
                           <div className='fw-bold text-gray-800 fs-7'>@{u.username}</div>
                           <div className='text-muted fs-8'>{u.email}</div>
                         </td>
 
-                        {/* RBAC Role */}
                         <td>
                           <div
                             className='badge fw-bold px-3 py-2 fs-8 d-inline-flex align-items-center'
@@ -340,10 +320,8 @@ export default function UserManagementPage() {
                           </div>
                         </td>
 
-                        {/* Actions */}
                         <td className='text-end'>
                           <div className='d-flex justify-content-end align-items-center gap-2'>
-                            {/* Toggle Button */}
                             <button
                               type='button'
                               className={`btn btn-icon btn-sm ${u.enabled ? 'btn-light-warning' : 'btn-light-success'}`}
@@ -353,7 +331,6 @@ export default function UserManagementPage() {
                               <KTIcon iconName={u.enabled ? 'cross-circle' : 'check-circle'} className='fs-5' />
                             </button>
 
-                            {/* Edit Button */}
                             <button
                               type='button'
                               className='btn btn-icon btn-sm btn-light-primary'
@@ -363,7 +340,6 @@ export default function UserManagementPage() {
                               <KTIcon iconName='pencil' className='fs-5' />
                             </button>
 
-                            {/* Delete Button */}
                             <button
                               type='button'
                               className='btn btn-icon btn-sm btn-light-danger'
@@ -383,7 +359,6 @@ export default function UserManagementPage() {
           )}
         </div>
 
-      {/* Modal 1: Create User */}
       {showCreateModal && (
         <div className='modal fade show d-block' style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className='modal-dialog modal-dialog-centered modal-lg'>
@@ -454,7 +429,6 @@ export default function UserManagementPage() {
                     </div>
                   </div>
 
-                  {/* RBAC Role Selection Cards */}
                   <div>
                     <label className='form-label fw-bold fs-7 text-gray-800 required mb-2'>
                       Attribution du Rôle RBAC
@@ -494,7 +468,6 @@ export default function UserManagementPage() {
                     </div>
                   </div>
 
-                  {/* Status toggle */}
                   <div className='d-flex align-items-center gap-3 p-4 bg-light rounded-3'>
                     <input
                       type='checkbox'
@@ -527,7 +500,6 @@ export default function UserManagementPage() {
         </div>
       )}
 
-      {/* Modal 2: Edit User */}
       {showEditModal && editingUser && (
         <div className='modal fade show d-block' style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className='modal-dialog modal-dialog-centered modal-lg'>
@@ -593,7 +565,6 @@ export default function UserManagementPage() {
                     </div>
                   </div>
 
-                  {/* RBAC Role Selection Cards */}
                   <div>
                     <label className='form-label fw-bold fs-7 text-gray-800 required mb-2'>
                       Modifier le Rôle RBAC
@@ -633,7 +604,6 @@ export default function UserManagementPage() {
                     </div>
                   </div>
 
-                  {/* Status toggle */}
                   <div className='d-flex align-items-center gap-3 p-4 bg-light rounded-3'>
                     <input
                       type='checkbox'

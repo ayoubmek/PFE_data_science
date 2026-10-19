@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import axios from 'axios'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
@@ -9,7 +9,6 @@ import { API_BASE_URL, apiErrorMessage } from '../../config'
 let globalCachedStockItems: any[] = []
 let globalCachedStockKpi: any = null
 
-// Statuts calculés par le backend (couverture = stock / consommation journalière, cf. StockCoverageService)
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   RUPTURE: { label: 'Rupture', color: 'danger' },
   CRITIQUE: { label: 'Critique', color: 'warning' },
@@ -39,14 +38,13 @@ export default function StockPage() {
   const [kpi, setKpi] = useState<any>(globalCachedStockKpi)
   const [loadError, setLoadError] = useState('')
 
-  const apiUrl = API_BASE_URL
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     if (globalCachedStockItems.length === 0) setLoading(true)
     try {
       const [itemsRes, kpiRes] = await Promise.all([
-        axios.get(`${apiUrl}/stock/items`, { timeout: 60000 }),
-        axios.get(`${apiUrl}/stock/kpi`, { timeout: 60000 }),
+        axios.get(`${API_BASE_URL}/stock/items`, { timeout: 60000 }),
+        axios.get(`${API_BASE_URL}/stock/kpi`, { timeout: 60000 }),
       ])
       const list = Array.isArray(itemsRes.data) ? itemsRes.data : []
       globalCachedStockItems = list
@@ -59,9 +57,9 @@ export default function StockPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  useEffect(() => { fetchItems() }, [])
+  useEffect(() => { fetchItems() }, [fetchItems])
   useEffect(() => { setCurrentPage(1) }, [searchTerm, categoryFilter, siteFilter, alertFilter, sortField, sortDir, rowsPerPage])
 
   const categories = useMemo(() => ['ALL', ...Array.from(new Set(items.map(i => i.categorie).filter(Boolean)))], [items])
@@ -138,22 +136,18 @@ export default function StockPage() {
 
   const statuts = kpi?.statuts || {}
   const plan = kpi?.reapprovisionnement
-  const regles = kpi?.regles
 
   return (
     <div className='card card-flush'>
 
-      {}
       <div className='card-header border-0 pt-6 pb-0'>
         <div className='d-flex gap-4 flex-wrap'>
           {[
             { label: `Articles en stock au ${kpi?.dateStock ?? '—'}`, val: fmt(stats.total), color: 'primary', icon: 'element-11' },
             { label: 'Ruptures (articles consommés)', val: fmt(statuts.RUPTURE), color: 'danger', icon: 'cross-circle' },
-            { label: `Critiques (< ${regles?.seuilCritiqueJours ?? '—'} j de couverture)`, val: fmt(statuts.CRITIQUE), color: 'warning', icon: 'information-2' },
-            { label: `Surstock (≥ ${regles?.seuilSurstockJours ?? '—'} j)`, val: fmt(statuts.SURSTOCK), color: 'info', icon: 'archive' },
             { label: 'Valeur totale du stock', val: `${fmt((kpi?.valeurTotaleStock ?? 0) / 1e6, 2)} M TND`, color: 'success', icon: 'dollar' },
             {
-              label: `Plan ${plan?.horizonJours ?? '—'} j : ${fmt(plan?.nbReferences)} réf. · ${fmt(plan?.quantiteTotale)} u`,
+              label: `Plan ${plan?.horizonJours ?? '—'} j : ${fmt(plan?.nbReferences)} réf. · ${fmt(plan?.quantiteTotale)} unités`,
               val: `${fmt((plan?.budgetTnd ?? 0) / 1e6, 2)} M TND`,
               color: 'dark',
               icon: 'basket',
@@ -172,7 +166,6 @@ export default function StockPage() {
         </div>
       </div>
 
-      {}
       <div className='card-header border-0 pt-4 pb-2'>
         <div className='card-title'>
           <div className='d-flex align-items-center position-relative my-1'>
@@ -227,7 +220,6 @@ export default function StockPage() {
         </div>
       </div>
 
-      {}
       {showFilters && (
         <div className='card-header border-0 pt-0 pb-3'>
           <div className='d-flex flex-wrap gap-4 align-items-end bg-light rounded p-4 w-100'>
@@ -259,7 +251,6 @@ export default function StockPage() {
         </div>
       )}
 
-      {}
       <div className='card-body pt-0'>
         <div className='table-responsive'>
           <table className='table align-middle table-row-dashed table-hover fs-8 gy-2'>
@@ -288,7 +279,6 @@ export default function StockPage() {
                 </tr>
               ) : currentItems.map((i, idx) => {
                 const low = isLowStock(i)
-                const st = statusOf(i.statut)
                 return (
                   <tr key={`${i.reference}-${i.dateStock}-${i.emplacement}-${idx}`}>
                     <td className='ps-4 text-muted'>{i.dateStock ? String(i.dateStock).slice(0, 10) : '—'}</td>
@@ -299,7 +289,6 @@ export default function StockPage() {
                       <span className={`fw-bold text-${low ? 'danger' : 'success'}`}>
                         {Number(i.quantite).toLocaleString()}
                       </span>
-                      <span className={`badge badge-light-${st.color} ms-2 fs-9`}>{st.label}</span>
                     </td>
                     <td className='fw-bold text-gray-700'>{fmt(i.valeurTotale, 2)} TND</td>
                     <td className='text-gray-600'>{i.couvertureJours !== null && i.couvertureJours !== undefined ? `${fmt(i.couvertureJours, 1)} j` : '—'}</td>
@@ -323,7 +312,6 @@ export default function StockPage() {
           </table>
         </div>
 
-        {}
         <div className='d-flex justify-content-between align-items-center flex-wrap gap-3 pt-4 border-top'>
           <div className='text-muted fs-7'>
             Affichage de <strong className='text-gray-800'>{filteredItems.length === 0 ? 0 : start + 1}</strong> à{' '}
@@ -356,7 +344,6 @@ export default function StockPage() {
         </div>
       </div>
 
-      {}
       <Modal show={showModal} onHide={() => setShowModal(false)} size='lg' centered>
         <Modal.Header closeButton>
           <Modal.Title className='fw-bold fs-5'>

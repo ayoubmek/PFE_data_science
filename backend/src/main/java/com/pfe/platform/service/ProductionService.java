@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static com.pfe.platform.service.StockService.*;
@@ -17,14 +18,12 @@ import static com.pfe.platform.service.StockService.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ProductionService {
+    public static final String PERIOD_MONTH = "mois";
+    public static final String PERIOD_YEAR = "annee";
+    public static final String PERIOD_ALL = "tout";
+    public static final List<String> PERIODS = List.of(PERIOD_MONTH, PERIOD_YEAR, PERIOD_ALL);
 
     private final FactCleRepository factCleRepo;
-
-    @Value("${app.production.kpi-period-days}")
-    private int kpiPeriodDays;
-
-    @Value("${app.production.chart-days}")
-    private int chartDays;
 
     @Value("${app.production.orders-limit}")
     private int ordersLimit;
@@ -53,26 +52,24 @@ public class ProductionService {
     }
 
     @Cacheable(value = "productionKpi", sync = true)
-    public ProductionDTO.KpiResponse getKpi() {
+    public ProductionDTO.KpiResponse getKpi(String period) {
         ProductionDTO.KpiResponse kpi = new ProductionDTO.KpiResponse();
-        kpi.setPeriodDays(kpiPeriodDays);
+        kpi.setPeriod(period);
         LocalDate last = lastPostingDate();
         if (last == null) return kpi;
-        LocalDate start = last.minusDays(kpiPeriodDays - 1L);
+        LocalDate start = periodStart(period, last);
         kpi.setPeriodStart(start);
         kpi.setPeriodEnd(last);
+        kpi.setPeriodDays((int) ChronoUnit.DAYS.between(start, last) + 1);
         Object[] r = first(factCleRepo.findKpiStats(start));
         if (r != null) {
             kpi.setTotalOrdres(toLong(r[0]));
-            kpi.setTotalOperations(toLong(r[1]));
-            double output = toDouble(r[2]);
-            double scrap = toDouble(r[3]);
+            double output = toDouble(r[1]);
+            double scrap = toDouble(r[2]);
             kpi.setTotalVolumeProduit(output);
             kpi.setTotalRebut(scrap);
-            kpi.setTotalHeuresMarche(toDouble(r[4]));
             kpi.setTauxConformite(output + scrap > 0 ? Math.round(output / (output + scrap) * 10000.0) / 100.0 : null);
-            kpi.setCentresDeCharge(toLong(r[5]));
-            kpi.setMachinesActives(toLong(r[6]));
+            kpi.setMachinesActives(toLong(r[3]));
         }
         Object[] m = first(factCleRepo.findMachineCounts());
         if (m != null) {
@@ -83,17 +80,17 @@ public class ProductionService {
     }
 
     @Cacheable(value = "productionDaily", sync = true)
-    public List<Map<String, Object>> getDailyStats() {
+    public List<Map<String, Object>> getStats(String period) {
         List<Map<String, Object>> result = new ArrayList<>();
         LocalDate last = lastPostingDate();
         if (last == null) return result;
-        for (Object[] r : factCleRepo.findDailyStats(last.minusDays(chartDays - 1L))) {
+        LocalDate start = periodStart(period, last);
+        List<Object[]> rows = isMonthly(period) ? factCleRepo.findMonthlyStats(start) : factCleRepo.findDailyStats(start);
+        for (Object[] r : rows) {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("date", toDate(r[0]));
-            row.put("nbOperations", toLong(r[1]));
-            row.put("totalOutput", toDouble(r[2]));
-            row.put("totalScrap", toDouble(r[3]));
-            row.put("totalRunTime", toDouble(r[4]));
+            row.put("totalOutput", toDouble(r[1]));
+            row.put("totalScrap", toDouble(r[2]));
             result.add(row);
         }
         return result;
@@ -116,12 +113,10 @@ public class ProductionService {
             row.put("operationCount", toLong(r[5]));
             row.put("totalOutput", output);
             row.put("totalScrap", scrap);
-            row.put("totalRunTime", toDouble(r[8]));
             row.put("tauxConformite", output + scrap > 0 ? Math.round(output / (output + scrap) * 1000.0) / 10.0 : null);
-            row.put("efficaciteNominale", r[9] != null ? toDouble(r[9]) : null);
-            row.put("capacite", r[10] != null ? toDouble(r[10]) : null);
-            row.put("bloquee", toLong(r[11]) == 1);
-            row.put("derniereDeclaration", toDate(r[12]));
+            row.put("efficaciteNominale", r[8] != null ? toDouble(r[8]) : null);
+            row.put("bloquee", toLong(r[9]) == 1);
+            row.put("derniereDeclaration", toDate(r[10]));
             result.add(row);
         }
         return result;
@@ -134,6 +129,21 @@ public class ProductionService {
             bySite.put(str(r[0]), toLong(r[1]));
         }
         return bySite;
+    }
+
+    public static boolean isMonthly(String period) {
+        return PERIOD_YEAR.equals(period) || PERIOD_ALL.equals(period);
+    }
+
+    private LocalDate periodStart(String period, LocalDate last) {
+        return switch (period) {
+            case PERIOD_YEAR -> last.withDayOfYear(1);
+            case PERIOD_ALL -> {
+                java.sql.Date first = factCleRepo.findFirstPostingDate();
+                yield first != null ? first.toLocalDate() : last;
+            }
+            default -> last.withDayOfMonth(1);
+        };
     }
 
     private LocalDate lastPostingDate() {

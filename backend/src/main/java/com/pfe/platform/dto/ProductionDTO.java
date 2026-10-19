@@ -5,8 +5,6 @@ import lombok.Data;
 import java.time.LocalDate;
 
 public class ProductionDTO {
-
-    /** Déclaration de production (ligne de dbo.FACT_CLE). */
     @Data
     public static class Response {
         private Long id;
@@ -23,20 +21,16 @@ public class ProductionDTO {
         private String site;
     }
 
-    /** KPI de production sur la période [periodStart, periodEnd] (fin = dernière date de dbo.FACT_CLE). */
     @Data
     public static class KpiResponse {
+        private String period;
         private LocalDate periodStart;
         private LocalDate periodEnd;
         private int periodDays;
         private long totalOrdres;
-        private long totalOperations;
         private double totalVolumeProduit;
         private double totalRebut;
-        private double totalHeuresMarche;
-        /** Pièces conformes / (conformes + rebuts), en %. Null si aucune déclaration sur la période. */
         private Double tauxConformite;
-        private long centresDeCharge;
         private long machinesActives;
         private long machinesTotal;
         private long machinesBloquees;

@@ -11,8 +11,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockItemId implements Serializable {
-    private String reference; 
-    private LocalDate dateStock; 
-    private String emplacement; 
-    private Integer encours; 
+    private String reference;
+    private LocalDate dateStock;
+    private String emplacement;
+    private Integer encours;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react'
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import axios from 'axios'
 import Chart from 'react-apexcharts'
 import * as XLSX from 'xlsx'
@@ -10,32 +10,29 @@ interface DataPoint {
 }
 
 const HORIZON = 30
-// Même période que la page Prévisions : les 30 jours qui suivent la dernière donnée (DWH ou fichier importé)
+const FORECAST_START = '2027-01-01'
 
 const fmt = (n: number | null | undefined, digits = 0) =>
   n === null || n === undefined ? '—' : Number(n).toLocaleString('fr-FR', { maximumFractionDigits: digits })
+
+const fmtParam = (v: unknown) => (v === null ? 'aucune' : Array.isArray(v) ? `(${v.join(',')})` : String(v))
 
 export default function ModelBenchmarkPage() {
   const [mode, setMode] = useState<'dwh' | 'file'>('dwh')
   const [importedData, setImportedData] = useState<DataPoint[]>([])
   const [fileName, setFileName] = useState<string>('')
-  const [availableColumns, setAvailableColumns] = useState<string[]>([])
-  const [rawRows, setRawRows] = useState<any[]>([])
-  const [selectedDateCol, setSelectedDateCol] = useState<string>('')
-  const [selectedValueCol, setSelectedValueCol] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState<boolean>(false)
   const [result, setResult] = useState<any>(null)
   const [errorMessage, setErrorMessage] = useState<string>('')
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // Benchmark sur la série de production du Data Warehouse (dbo.FACT_CLE)
-  const runDwhBenchmark = async () => {
+  const runDwhBenchmark = useCallback(async () => {
     setIsProcessing(true)
     setErrorMessage('')
     try {
       const { data } = await axios.get(`${API_BASE_URL}/ml/predict/production`, {
-        params: { horizon: HORIZON },
+        params: { horizon: HORIZON, start: FORECAST_START },
         timeout: 300000,
       })
       setResult(data)
@@ -45,15 +42,13 @@ export default function ModelBenchmarkPage() {
     } finally {
       setIsProcessing(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (mode === 'dwh') runDwhBenchmark()
     else setResult(null)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode])
+  }, [mode, runDwhBenchmark])
 
-  // Parse des lignes du CSV / Excel avec agrégation journalière automatique
   const parseDataFromRows = (rows: any[], dateCol: string, valCol: string): DataPoint[] => {
     const dateMap = new Map<string, number>()
 
@@ -63,7 +58,6 @@ export default function ModelBenchmarkPage() {
       const vNum = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(/\s/g, '').replace(',', '.'))
 
       if (typeof dStr === 'number') {
-        // Date Excel (numéro de série) : conversion exacte jour/mois/année, sans décalage de fuseau horaire
         const d = XLSX.SSF.parse_date_code(dStr)
         dStr = d ? `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}` : ''
       } else if (typeof dStr === 'string' && dStr.trim()) {
@@ -71,7 +65,6 @@ export default function ModelBenchmarkPage() {
         if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
           dStr = s.slice(0, 10)
         } else {
-          // Formats jour/mois/année (dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy)
           const parts = s.split(/[/.-]/)
           dStr = parts.length === 3 ? `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}` : ''
         }
@@ -83,7 +76,6 @@ export default function ModelBenchmarkPage() {
     })
 
     const points: DataPoint[] = []
-    // Valeurs transmises sans arrondi : un fichier identique au DWH doit donner exactement le même résultat
     dateMap.forEach((val, dt) => points.push({ date: dt, value: val }))
     return points.sort((a, b) => a.date.localeCompare(b.date))
   }
@@ -99,7 +91,6 @@ export default function ModelBenchmarkPage() {
 
     reader.onload = (evt) => {
       try {
-        // cellDates: false -> les dates Excel restent des numéros de série, convertis exactement dans parseDataFromRows
         const wb = XLSX.read(evt.target?.result, { type: 'binary', cellDates: false })
         const ws = wb.Sheets[wb.SheetNames[0]]
         const rows: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })
@@ -110,8 +101,6 @@ export default function ModelBenchmarkPage() {
         }
 
         const cols = Object.keys(rows[0])
-        setAvailableColumns(cols)
-        setRawRows(rows)
 
         const detectedDate = cols.find((c) => /date|jour|posting|time|periode|day/i.test(c)) || cols[0]
         const detectedVal =
@@ -121,8 +110,6 @@ export default function ModelBenchmarkPage() {
           cols[1] ||
           cols[0]
 
-        setSelectedDateCol(detectedDate)
-        setSelectedValueCol(detectedVal)
         setImportedData(parseDataFromRows(rows, detectedDate, detectedVal))
       } catch (err: any) {
         setErrorMessage('Erreur lors de la lecture du fichier : ' + (err.message || 'Format non reconnu.'))
@@ -132,19 +119,13 @@ export default function ModelBenchmarkPage() {
     reader.readAsBinaryString(file)
   }
 
-  const handleColumnChange = (dateCol: string, valCol: string) => {
-    setSelectedDateCol(dateCol)
-    setSelectedValueCol(valCol)
-    if (rawRows.length > 0) setImportedData(parseDataFromRows(rawRows, dateCol, valCol))
-  }
-
   const runFileBenchmark = async () => {
     setIsProcessing(true)
     setErrorMessage('')
     try {
       const { data } = await axios.post(
         `${API_BASE_URL}/ml/predict/custom`,
-        { data: importedData, horizon: HORIZON },
+        { data: importedData, horizon: HORIZON, start: FORECAST_START },
         { timeout: 300000 }
       )
       setResult(data)
@@ -156,35 +137,28 @@ export default function ModelBenchmarkPage() {
     }
   }
 
-  // Seul le meilleur modèle (choisi par le service ML sur toutes les fenêtres de test) est affiché
   const bestKey: string | undefined = result?.best_model
   const best: any = bestKey ? { key: bestKey, ...result.metrics?.[bestKey] } : null
 
-  // Comparaison avec la production réelle de l'an dernier (dbo.FACT_CLE), même jour du mois
-  const lastYearRows: any[] = Array.isArray(result?.same_period_last_year?.rows) ? result.same_period_last_year.rows : []
   const dailyRows = useMemo(
     () =>
-      (result?.predictions || []).map((p: any, i: number) => {
-        const real = lastYearRows[i] ? Number(lastYearRows[i].actual) : null
+      (result?.predictions || []).map((p: any) => {
+        const real = p.real_last_year === null || p.real_last_year === undefined ? null : Number(p.real_last_year)
         const pred = Number(p.best_quantity) || 0
         return {
           date: p.date,
-          realDate: lastYearRows[i]?.date ?? null,
+          realDate: p.real_last_year_date ?? null,
           real,
           pred,
           delta: real === null ? null : pred - real,
-          pct: real ? ((pred - real) / real) * 100 : null,
         }
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [result]
   )
   const totalReal = dailyRows.reduce((s: number, r: any) => s + (r.real ?? 0), 0)
   const totalPred = dailyRows.reduce((s: number, r: any) => s + r.pred, 0)
   const hasReal = dailyRows.some((r: any) => r.real !== null)
-  const totalPct = totalReal > 0 ? ((totalPred - totalReal) / totalReal) * 100 : null
 
-  // Même graphique que la page Prévisions : prévision du mois par le meilleur modèle
   const chartConfig: any = useMemo(() => {
     const preds: any[] = result?.predictions || []
     if (!preds.length || !bestKey) return null
@@ -267,22 +241,6 @@ export default function ModelBenchmarkPage() {
             </div>
             <div className='text-muted fs-8 mt-2'>Au moins 90 jours consécutifs sont nécessaires pour un backtest fiable.</div>
 
-            {availableColumns.length > 0 && (
-              <div className='row g-3 mt-2 pt-3 border-top'>
-                <div className='col-md-6'>
-                  <label className='form-label text-muted fs-8 mb-1'>Colonne Date :</label>
-                  <select className='form-select form-select-sm' value={selectedDateCol} onChange={(e) => handleColumnChange(e.target.value, selectedValueCol)}>
-                    {availableColumns.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div className='col-md-6'>
-                  <label className='form-label text-muted fs-8 mb-1'>Colonne Quantité :</label>
-                  <select className='form-select form-select-sm' value={selectedValueCol} onChange={(e) => handleColumnChange(selectedDateCol, e.target.value)}>
-                    {availableColumns.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-            )}
           </>
         )}
 
@@ -297,7 +255,7 @@ export default function ModelBenchmarkPage() {
       {isProcessing && !result && (
         <div className='card border-0 shadow-sm p-10 text-center text-muted'>
           <div className='spinner-border text-primary mx-auto mb-4' role='status'></div>
-          Calcul des prévisions et des tests du modèle…
+          Calcul des prévisions…
         </div>
       )}
 
@@ -307,7 +265,7 @@ export default function ModelBenchmarkPage() {
             <div className='d-flex flex-wrap justify-content-between align-items-start gap-3 mb-5'>
               <div>
                 <h3 className='fs-4 fw-bold text-gray-900 mb-1'>
-                  Modèle : <span className='text-primary'>{result.best_model_name}</span>
+                  Meilleur modèle : <span className='text-primary'>{result.best_model_name}</span>
                 </h3>
               </div>
               <button type='button' className='btn btn-sm btn-light-success' onClick={exportPredictions}>
@@ -318,7 +276,7 @@ export default function ModelBenchmarkPage() {
 
             <div className='row g-4'>
               {[
-                { label: `WAPE (${result.backtest.n_origins} mois de tests)`, value: `${fmt(best.wape, 2)} %`, color: 'text-success' },
+                { label: "WAPE (même période l'an dernier)", value: `${fmt(best.wape_selection ?? best.wape, 2)} %`, color: 'text-success' },
                 { label: 'MAE', value: `${fmt(best.mae)} pcs/j` },
                 { label: 'RMSE', value: `${fmt(best.rmse)} pcs/j` },
                 { label: 'MASE', value: fmt(best.mase, 3) },
@@ -331,6 +289,28 @@ export default function ModelBenchmarkPage() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className='mt-5 fs-7'>
+              <span className='fw-bold text-gray-800 me-2'>Hyperparamètres retenus :</span>
+              {best.params && Object.keys(best.params).length > 0 ? (
+                <>
+                  {Object.entries(best.params).map(([name, value]) => (
+                    <span key={name} className='badge badge-light-primary fs-8 me-2'>
+                      {name} = {fmtParam(value)}
+                    </span>
+                  ))}
+                  <span className='text-muted'>
+                    {best.tuning_criterion === 'aic'
+                      ? '(choisis par AIC)'
+                      : best.tuning_criterion === 'wape_cv'
+                        ? '(choisis par validation croisée)'
+                        : '(valeurs par défaut)'}
+                  </span>
+                </>
+              ) : (
+                <span className='text-muted'>aucun (modèle sans hyperparamètre)</span>
+              )}
             </div>
           </div>
 
@@ -358,10 +338,9 @@ export default function ModelBenchmarkPage() {
                     <tr className='text-start text-gray-600 fw-bold fs-8 text-uppercase'>
                       <th>Date prévision</th>
                       {hasReal && <th>Date réel</th>}
-                      {hasReal && <th className='text-end'>Réel {lastYearRows[0]?.date?.slice(0, 4)}</th>}
+                      {hasReal && <th className='text-end'>Réel {dailyRows[0]?.realDate?.slice(0, 4)}</th>}
                       <th className='text-end text-primary'>Prévision {result.predictions?.[0]?.date?.slice(0, 4)}</th>
                       {hasReal && <th className='text-end'>Écart</th>}
-                      {hasReal && <th className='text-end'>Écart (%)</th>}
                     </tr>
                   </thead>
                   <tbody className='fs-8 fw-semibold text-gray-700'>
@@ -376,11 +355,6 @@ export default function ModelBenchmarkPage() {
                             {row.delta === null ? '—' : `${row.delta >= 0 ? '+' : ''}${fmt(row.delta)} pcs`}
                           </td>
                         )}
-                        {hasReal && (
-                          <td className={`text-end ${row.pct === null ? 'text-muted' : row.pct >= 0 ? 'text-success' : 'text-danger'}`}>
-                            {row.pct === null ? '—' : `${row.pct >= 0 ? '+' : ''}${fmt(row.pct, 1)} %`}
-                          </td>
-                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -393,9 +367,6 @@ export default function ModelBenchmarkPage() {
                         <td className='text-end text-primary'>{fmt(totalPred)} pcs</td>
                         <td className={`text-end ${totalPred - totalReal >= 0 ? 'text-success' : 'text-danger'}`}>
                           {totalPred - totalReal >= 0 ? '+' : ''}{fmt(totalPred - totalReal)} pcs
-                        </td>
-                        <td className={`text-end ${(totalPct ?? 0) >= 0 ? 'text-success' : 'text-danger'}`}>
-                          {totalPct === null ? '—' : `${totalPct >= 0 ? '+' : ''}${fmt(totalPct, 1)} %`}
                         </td>
                       </tr>
                     </tfoot>

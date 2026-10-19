@@ -20,20 +20,16 @@ const PrivateRoutes = () => {
   return (
     <Routes>
       <Route element={<MasterLayout />}>
-        {}
         <Route path='auth/*' element={<Navigate to='/dashboard' />} />
         <Route path='/' element={<Navigate to='/dashboard' />} />
 
-        {}
         <Route path='dashboard' element={<DashboardWrapper />} />
 
-        {}
         <Route path='production' element={<SuspensedView><ProductionPage /></SuspensedView>} />
         <Route path='production/machines' element={<SuspensedView><MachinesPage /></SuspensedView>} />
         <Route path='stock' element={<SuspensedView><StockInventoryPage /></SuspensedView>} />
         <Route path='stock/movements' element={<Navigate to='/stock' />} />
 
-        {/* Prévisions ML & Administration : rôle ADMIN uniquement (le backend renvoie 403 sinon) */}
         {isAdmin && (
           <>
             <Route path='data-science' element={<SuspensedView><DataSciencePage /></SuspensedView>} />
@@ -44,7 +40,6 @@ const PrivateRoutes = () => {
           </>
         )}
 
-        {}
         <Route path='*' element={<Navigate to='/error/404' />} />
       </Route>
     </Routes>

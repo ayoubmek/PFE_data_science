@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
@@ -17,16 +18,16 @@ import java.util.*;
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
 public class DashboardController {
-
     private final ProductionService productionService;
     private final StockService stockService;
     private final StockItemRepository stockRepository;
 
     @GetMapping("/summary")
-    public ResponseEntity<Map<String, Object>> getSummary() {
+    public ResponseEntity<Map<String, Object>> getSummary(@RequestParam(defaultValue = ProductionService.PERIOD_MONTH) String period) {
+        if (!ProductionService.PERIODS.contains(period)) return ResponseEntity.badRequest().build();
         Map<String, Object> summary = new LinkedHashMap<>();
 
-        ProductionDTO.KpiResponse productionKpi = productionService.getKpi();
+        ProductionDTO.KpiResponse productionKpi = productionService.getKpi(period);
         StockDTO.KpiResponse stockKpi = stockService.getKpi();
         summary.put("production", productionKpi);
         summary.put("stock", stockKpi);
@@ -60,13 +61,6 @@ public class DashboardController {
             stockSites.add(s);
         }
         summary.put("stockSites", stockSites);
-
-        Map<String, Long> statuts = stockKpi.getStatuts();
-        summary.put("alerts", Map.of(
-            "stockRuptures", statuts.getOrDefault("RUPTURE", 0L),
-            "stockCritiques", statuts.getOrDefault("CRITIQUE", 0L),
-            "machinesBloquees", productionKpi.getMachinesBloquees()
-        ));
 
         return ResponseEntity.ok(summary);
     }

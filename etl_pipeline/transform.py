@@ -24,15 +24,6 @@ def _to_number(series: pd.Series) -> pd.Series:
 
 
 def transform_fact_cle(df_prod: pd.DataFrame) -> pd.DataFrame:
-    """
-    Transforme les extractions brutes ERP (PRODUCTION_RAW.csv) en table de faits au schéma de [dbo].[FACT_CLE].
-
-    Métrique 'Quantité produite TRS' :
-    - déclaration de pièces (Output > 0) : pièces conformes nettes = Output - Scrap ;
-    - déclaration horaire (Run Time > 0 et Output = 0) : heures de marche x cadence observée de la machine,
-      cadence = médiane de Output / Run Time sur les déclarations de cette machine qui renseignent les deux
-      (repli : médiane de toutes les machines). Aucune cadence n'est fixée a priori.
-    """
     logger.info("Transforming fact: FACT_CLE (Feature Engineering 'Quantité produite TRS')...")
     if df_prod is None or df_prod.empty:
         logger.warning("No production records found, returning empty FACT_CLE schema.")
@@ -81,10 +72,6 @@ def transform_astockdate(df_clean: pd.DataFrame) -> pd.DataFrame:
 
 
 def transform_all(df_clean: pd.DataFrame, df_prod: pd.DataFrame) -> Dict[str, pd.DataFrame]:
-    """
-    Le référentiel machines (dbo.MCMachineCenter) provient directement de Navision : il n'est pas
-    reconstruit ici, car les extractions brutes ne contiennent pas ses attributs (capacité, efficacité...).
-    """
     logger.info("=== Transforming Data into dbDWH Schema Tables ===")
     tables = {
         "ASTOCKDATE": transform_astockdate(df_clean),

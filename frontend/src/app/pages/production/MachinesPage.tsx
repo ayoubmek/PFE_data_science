@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import axios from 'axios'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
@@ -23,12 +23,11 @@ export default function MachinesPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [loadError, setLoadError] = useState('')
 
-  const apiUrl = API_BASE_URL
 
-  const fetchMachines = async () => {
+  const fetchMachines = useCallback(async () => {
     if (globalCachedMachines.length === 0) setLoading(true)
     try {
-      const { data } = await axios.get(`${apiUrl}/production/machines`)
+      const { data } = await axios.get(`${API_BASE_URL}/production/machines`)
       const list = Array.isArray(data) ? data : []
       globalCachedMachines = list
       setMachines(list)
@@ -38,12 +37,11 @@ export default function MachinesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchMachines()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [fetchMachines])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -102,7 +100,6 @@ export default function MachinesPage() {
     const total = machines.length
     const totalVolume = machines.reduce((acc, m) => acc + (Number(m.totalOutput) || 0), 0)
     const totalScrap = machines.reduce((acc, m) => acc + (Number(m.totalScrap) || 0), 0)
-    // Taux de conformité global pondéré par les volumes (et non moyenne simple des machines)
     const conformite = totalVolume + totalScrap > 0 ? Math.round((totalVolume / (totalVolume + totalScrap)) * 1000) / 10 : null
     const nbAteliers = new Set(machines.map(m => m.workCenter).filter(Boolean)).size
     const bloquees = machines.filter(m => m.bloquee).length
@@ -138,7 +135,6 @@ export default function MachinesPage() {
 
   return (
     <div className='d-flex flex-column gap-5'>
-      {/* CSS Utilities */}
       <style>{`
         .glass-card {
           background: #ffffff !important;
@@ -168,7 +164,6 @@ export default function MachinesPage() {
         @keyframes pR { 0% { box-shadow: 0 0 0 0 rgba(241,65,108,0.7); } 100% { box-shadow: 0 0 0 6px rgba(241,65,108,0); } }
       `}</style>
 
-      {/* KPI Stats Cards */}
       <div className='row g-5'>
         <div className='col-xl-3 col-sm-6'>
           <div className='card card-flush bg-body shadow-sm h-100'>
@@ -216,7 +211,7 @@ export default function MachinesPage() {
           <div className='card card-flush bg-body shadow-sm h-100'>
             <div className='card-body d-flex align-items-center justify-content-between p-6'>
               <div>
-                <div className='fs-2hx fw-bold text-gray-900'>{stats.totalVolume.toLocaleString()} u</div>
+                <div className='fs-2hx fw-bold text-gray-900'>{stats.totalVolume.toLocaleString()} unités</div>
                 <div className='fs-7 fw-semibold text-gray-500 mt-1'>Volume cumulé déclaré (FACT_CLE)</div>
               </div>
               <div className='badge badge-light-warning p-4 rounded-circle'>
@@ -227,7 +222,6 @@ export default function MachinesPage() {
         </div>
       </div>
 
-      {/* Main Table Card */}
       <div className='card glass-card shadow-sm border-0'>
         <div className='card-header align-items-center py-5 gap-2 gap-md-5 border-0 bg-transparent'>
           <div className='card-title'>
@@ -265,7 +259,6 @@ export default function MachinesPage() {
           </div>
         </div>
 
-        {/* Filter Panel */}
         {showFilters && (
           <div className='card-body pt-0 pb-5'>
             <div className='p-4 rounded bg-light border d-flex flex-wrap gap-4 align-items-center'>
@@ -402,7 +395,6 @@ export default function MachinesPage() {
             </table>
           </div>
 
-          {/* Pagination Controls */}
           {filteredMachines.length > 0 && (
             <div className='d-flex flex-stack flex-wrap pt-5 gap-3'>
               <div className='fs-7 fw-bold text-gray-700'>
@@ -454,7 +446,6 @@ export default function MachinesPage() {
         </div>
       </div>
 
-      {/* Machine Details Modal */}
       {selectedMachine && (() => {
         return (
           <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">

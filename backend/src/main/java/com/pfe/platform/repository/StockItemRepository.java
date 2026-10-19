@@ -9,13 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * Requêtes de stock sur dbo.ASTOCKDATE (instantanés) et dbo.FACT_ILE (mouvements).
- * Le « dernier instantané » est toujours MAX(DateStock). [Cout] est la valeur totale de la ligne (TND).
- */
 @Repository
 public interface StockItemRepository extends JpaRepository<StockItem, StockItemId> {
-
     @Query(value = """
         SELECT *
         FROM dbo.ASTOCKDATE WITH (NOLOCK)
@@ -50,29 +45,13 @@ public interface StockItemRepository extends JpaRepository<StockItem, StockItemI
     List<Object[]> findStockDistributionBySite();
 
     @Query(value = """
-        SELECT MAX(DateStock) AS dateStock, COUNT(DISTINCT [No_]) AS articles, COUNT(*) AS lignes,
+        SELECT MAX(DateStock) AS dateStock, COUNT(DISTINCT [No_]) AS articles,
                CAST(SUM([Quantité]) AS FLOAT) AS quantite, CAST(SUM([Cout]) AS FLOAT) AS valeur
         FROM dbo.ASTOCKDATE WITH (NOLOCK)
         WHERE DateStock = (SELECT MAX(DateStock) FROM dbo.ASTOCKDATE)
         """, nativeQuery = true)
     List<Object[]> findSnapshotTotals();
 
-    /** Entrées (quantités positives) et sorties (négatives) de la dernière journée de dbo.FACT_ILE. */
-    @Query(value = """
-        WITH last_day AS (SELECT CAST(MAX([Posting Date]) AS DATE) AS d FROM dbo.FACT_ILE)
-        SELECT MAX(last_day.d) AS jour,
-               CAST(SUM(CASE WHEN i.Quantity > 0 THEN i.Quantity ELSE 0 END) AS FLOAT) AS entrees,
-               CAST(-SUM(CASE WHEN i.Quantity < 0 THEN i.Quantity ELSE 0 END) AS FLOAT) AS sorties
-        FROM dbo.FACT_ILE i WITH (NOLOCK) CROSS JOIN last_day
-        WHERE CAST(i.[Posting Date] AS DATE) = last_day.d
-        """, nativeQuery = true)
-    List<Object[]> findLastDayMovements();
-
-    /**
-     * Données de couverture par article (même requête que ml-service/models/stock.py) :
-     * stock et valeur du dernier instantané, coût unitaire moyen et consommation (ventes + consommations
-     * FACT_ILE) sur la fenêtre, consommation récente pour la détection des ruptures.
-     */
     @Query(value = """
         WITH snap AS (SELECT MAX(DateStock) AS d FROM dbo.ASTOCKDATE),
         ile_end AS (SELECT MAX([Posting Date]) AS d FROM dbo.FACT_ILE),

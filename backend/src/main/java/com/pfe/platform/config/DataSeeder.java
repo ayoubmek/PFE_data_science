@@ -16,7 +16,6 @@ import java.util.Base64;
 @RequiredArgsConstructor
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
-
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
 
@@ -28,7 +27,6 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Seule la table des utilisateurs applicatifs est initialisée, et uniquement si elle est vide.
         if (userRepo.count() > 0) {
             return;
         }

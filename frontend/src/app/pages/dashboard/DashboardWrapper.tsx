@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react'
+import { FC, useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
@@ -43,8 +43,19 @@ interface DailyStat {
   totalScrap: number
 }
 
+type Period = 'mois' | 'annee' | 'tout'
+
+const PERIODS: { key: Period; label: string }[] = [
+  { key: 'mois', label: 'Mois' },
+  { key: 'annee', label: 'Année' },
+  { key: 'tout', label: 'Tout' },
+]
+
+const isMonthly = (period: Period) => period === 'annee' || period === 'tout'
+
 interface DashboardData {
   production: {
+    period: Period
     periodStart: string
     periodEnd: string
     periodDays: number
@@ -71,6 +82,19 @@ interface DashboardData {
 
 const fmt = (n: number, digits = 0) => n.toLocaleString('fr-FR', { maximumFractionDigits: digits })
 const fmtDate = (iso?: string | null) => (iso ? new Date(iso).toLocaleDateString('fr-FR') : '—')
+const fmtMonth = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })
+const fmtAxis = (v: number) => (v >= 1e6 ? `${fmt(v / 1e6, 1)} M` : `${Math.round(v / 1000)}k`)
+
+const periodName = (period: Period, start: string, end: string) => {
+  switch (period) {
+    case 'annee':
+      return `année ${new Date(end).getFullYear()}`
+    case 'tout':
+      return `historique depuis ${new Date(start).getFullYear()}`
+    default:
+      return new Date(end).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+  }
+}
 
 const StatisticsWidget: FC<{
   className?: string
@@ -112,21 +136,27 @@ const StatisticsWidget: FC<{
   )
 }
 
-let globalCachedDashboardData: DashboardData | null = null
+const dashboardCache: Partial<Record<Period, DashboardData>> = {}
+let lastPeriod: Period = 'mois'
 
 const DashboardPage: FC = () => {
-  const [data, setData] = useState<DashboardData | null>(globalCachedDashboardData)
+  const [period, setPeriod] = useState<Period>(lastPeriod)
+  const [data, setData] = useState<DashboardData | null>(dashboardCache[lastPeriod] ?? null)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>('')
 
   const [selectedOf, setSelectedOf] = useState<Declaration | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<StockGroup | null>(null)
   const [selectedSite, setSelectedSite] = useState<StockSite | null>(null)
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async (p: Period) => {
+    const cached = dashboardCache[p]
+    if (cached) setData(cached)
+    setLoading(true)
     try {
       const [summaryRes, dailyRes, ordersRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/dashboard/summary`, { timeout: 60000 }),
-        axios.get<DailyStat[]>(`${API_BASE_URL}/production/fact-cle/stats`, { timeout: 60000 }),
+        axios.get(`${API_BASE_URL}/dashboard/summary`, { params: { period: p }, timeout: 120000 }),
+        axios.get<DailyStat[]>(`${API_BASE_URL}/production/fact-cle/stats`, { params: { period: p }, timeout: 120000 }),
         axios.get<Declaration[]>(`${API_BASE_URL}/production/orders`, { timeout: 60000 }),
       ])
       const s = summaryRes.data
@@ -138,18 +168,22 @@ const DashboardPage: FC = () => {
         daily: dailyRes.data || [],
         recent: (ordersRes.data || []).slice(0, 6),
       }
-      globalCachedDashboardData = mapped
-      setData(mapped)
-      setError('')
+      dashboardCache[p] = mapped
+      if (lastPeriod === p) {
+        setData(mapped)
+        setError('')
+      }
     } catch (err) {
-      setError(apiErrorMessage(err, 'Impossible de charger les données du Data Warehouse.'))
+      if (lastPeriod === p) setError(apiErrorMessage(err, 'Impossible de charger les données du Data Warehouse.'))
+    } finally {
+      if (lastPeriod === p) setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchDashboardData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    lastPeriod = period
+    fetchDashboardData(period)
+  }, [period, fetchDashboardData])
 
   if (!data) {
     return error ? (
@@ -166,6 +200,8 @@ const DashboardPage: FC = () => {
   }
 
   const { production, stock } = data
+  const monthly = isMonthly(production.period)
+  const name = periodName(production.period, production.periodStart, production.periodEnd)
 
   const chartOptions: any = {
     series: [
@@ -176,7 +212,7 @@ const DashboardPage: FC = () => {
       chart: { fontFamily: 'Inter, sans-serif', type: 'line', height: 310, toolbar: { show: false }, zoom: { enabled: false } },
       stroke: { curve: 'smooth', width: [3, 4] },
       markers: {
-        size: [4, 5],
+        size: data.daily.length > 40 ? [0, 0] : [4, 5],
         colors: ['#FFFFFF', '#FFFFFF'],
         strokeColors: ['#3E97FF', '#F1416C'],
         strokeWidth: 2,
@@ -184,7 +220,7 @@ const DashboardPage: FC = () => {
       },
       dataLabels: { enabled: false },
       xaxis: {
-        categories: data.daily.map((d) => fmtDate(d.date)),
+        categories: data.daily.map((d) => (monthly ? fmtMonth(d.date) : fmtDate(d.date))),
         axisBorder: { show: false },
         axisTicks: { show: false },
         tooltip: { enabled: false },
@@ -194,7 +230,7 @@ const DashboardPage: FC = () => {
         {
           seriesName: 'Production déclarée (Output)',
           min: 0,
-          labels: { style: { colors: '#7E8299', fontSize: '11px' }, formatter: (v: number) => `${Math.round(v / 1000)}k` },
+          labels: { style: { colors: '#7E8299', fontSize: '11px' }, formatter: fmtAxis },
         },
         {
           seriesName: 'Pièces rebutées',
@@ -226,10 +262,25 @@ const DashboardPage: FC = () => {
             Tableau de Bord Décisionnel Industriel
           </h1>
           <span className='text-muted fs-7'>
-            Source : dbDWH — production {periodLabel} · stock au {fmtDate(stock.dateStock)}
+            Production {periodLabel} · stock au {fmtDate(stock.dateStock)}
           </span>
         </div>
-        {error && <span className='badge badge-light-warning fs-8'>Actualisation impossible : {error}</span>}
+        <div className='d-flex align-items-center gap-3'>
+          {error && <span className='badge badge-light-warning fs-8'>Actualisation impossible : {error}</span>}
+          {loading && <span className='spinner-border spinner-border-sm text-primary' />}
+          <div className='btn-group' role='group'>
+            {PERIODS.map((p) => (
+              <button
+                key={p.key}
+                type='button'
+                className={`btn btn-sm ${period === p.key ? 'btn-primary' : 'btn-light'}`}
+                onClick={() => setPeriod(p.key)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className='row g-5 g-xl-10 mb-7'>
@@ -237,10 +288,9 @@ const DashboardPage: FC = () => {
           <StatisticsWidget
             color='primary'
             icon='delivery'
-            title={`Volume produit (${production.periodDays} derniers jours)`}
-            value={`${fmt(production.totalVolumeProduit)} u`}
+            title={`Volume produit (${name})`}
+            value={`${fmt(production.totalVolumeProduit)} unités`}
             subtitle={`${fmt(production.totalOrdres)} ordres de fabrication déclarés`}
-            badgeText='FACT_CLE'
             className='h-100'
           />
         </div>
@@ -252,8 +302,6 @@ const DashboardPage: FC = () => {
             title='Parc machines'
             value={`${fmt(production.machinesTotal)} machines`}
             subtitle={`${fmt(production.machinesActives)} actives sur la période · ${fmt(production.machinesBloquees)} bloquées`}
-            badgeText='MCMachineCenter'
-            badgeColor='success'
             className='h-100'
           />
         </div>
@@ -265,8 +313,6 @@ const DashboardPage: FC = () => {
             title='Valeur du stock'
             value={`${fmt(stock.valeurTotaleStock / 1e6, 2)} M TND`}
             subtitle={`${fmt(stock.quantiteTotale)} unités · ${fmt(stock.totalArticles)} articles`}
-            badgeText='ASTOCKDATE'
-            badgeColor='info'
             className='h-100'
           />
         </div>
@@ -276,7 +322,7 @@ const DashboardPage: FC = () => {
             color='danger'
             icon='cross-circle'
             title='Rebuts sur la période'
-            value={`${fmt(production.totalRebut)} u`}
+            value={`${fmt(production.totalRebut)} unités`}
             subtitle={
               production.tauxConformite !== null
                 ? `Taux de conformité : ${fmt(production.tauxConformite, 2)} %`
@@ -295,7 +341,7 @@ const DashboardPage: FC = () => {
             <div className='card-header pt-6 pb-2 border-0'>
               <h3 className='card-title align-items-start flex-column'>
                 <span className='card-label fw-bold text-gray-900 fs-4'>
-                  Flux de production et rebuts ({data.daily.length} derniers jours de déclaration)
+                  Flux de production et rebuts ({name}, par {monthly ? 'mois' : 'jour'})
                 </span>
               </h3>
             </div>
@@ -343,7 +389,7 @@ const DashboardPage: FC = () => {
                           <span className='badge badge-light-primary fw-bold fs-8'>{of.itemNo || '—'}</span>
                         </td>
                         <td>
-                          <span className='text-gray-900 fw-bolder'>{fmt(of.quantiteRealisee)} u</span>
+                          <span className='text-gray-900 fw-bolder'>{fmt(of.quantiteRealisee)} unités</span>
                           {of.scrapQuantity > 0 && (
                             <span className='badge badge-light-danger ms-1 fs-9'>{fmt(of.scrapQuantity)} reb.</span>
                           )}
@@ -388,7 +434,7 @@ const DashboardPage: FC = () => {
                 <table className='table align-middle table-row-dashed fs-7 gy-3'>
                   <thead>
                     <tr className='text-start text-muted fw-bold fs-8 text-uppercase gs-0'>
-                      <th>Famille (GroupeItem)</th>
+                      <th>Famille d'articles</th>
                       <th>Articles</th>
                       <th>Valeur</th>
                       <th>Part valeur</th>
@@ -437,9 +483,6 @@ const DashboardPage: FC = () => {
             <div className='card-header pt-6 pb-2 border-0'>
               <h3 className='card-title align-items-start flex-column'>
                 <span className='card-label fw-bold text-gray-900 fs-4'>Consolidation multi-sites</span>
-                <span className='text-muted fs-8 fw-semibold mt-1'>
-                  Stock physique (ASTOCKDATE) et machines (MCMachineCenter) par site
-                </span>
               </h3>
             </div>
             <div className='card-body pt-2'>
@@ -460,7 +503,7 @@ const DashboardPage: FC = () => {
                           </div>
                           <div className='d-flex justify-content-between'>
                             <span className='text-muted'>Volume physique :</span>
-                            <strong className='text-gray-900'>{fmt(site.quantity)} u</strong>
+                            <strong className='text-gray-900'>{fmt(site.quantity)} unités</strong>
                           </div>
                           <div className='d-flex justify-content-between'>
                             <span className='text-muted'>Valeur :</span>
@@ -500,13 +543,13 @@ const DashboardPage: FC = () => {
                 { label: 'N° Document / OF', val: selectedOf.reference },
                 { label: 'Article (Item No_)', val: selectedOf.itemNo || '—' },
                 { label: 'Description', val: selectedOf.article || '—' },
-                { label: 'Quantité produite', val: `${fmt(selectedOf.quantiteRealisee)} u` },
-                { label: 'Quantité rebutée', val: `${fmt(selectedOf.scrapQuantity)} u` },
+                { label: 'Quantité produite', val: `${fmt(selectedOf.quantiteRealisee)} unités` },
+                { label: 'Quantité rebutée', val: `${fmt(selectedOf.scrapQuantity)} unités` },
                 { label: 'Temps de marche', val: `${fmt(selectedOf.runTime, 2)} h` },
                 { label: 'Centre de charge', val: selectedOf.workCenter || '—' },
                 { label: 'Machine', val: [selectedOf.machineCode, selectedOf.machineNom].filter(Boolean).join(' — ') || '—' },
                 { label: 'Date de déclaration', val: fmtDate(selectedOf.dateDebut) },
-                { label: 'Base (Data Base)', val: selectedOf.site || '—' },
+                { label: 'Site', val: selectedOf.site || '—' },
               ].map(({ label, val }) => (
                 <div className='col-md-6' key={label}>
                   <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>
@@ -534,7 +577,7 @@ const DashboardPage: FC = () => {
             <div className='row g-4'>
               {[
                 { label: 'Articles distincts', val: `${fmt(selectedGroup.count)}` },
-                { label: 'Quantité en stock', val: `${fmt(selectedGroup.quantity)} u` },
+                { label: 'Quantité en stock', val: `${fmt(selectedGroup.quantity)} unités` },
                 { label: 'Valeur du stock', val: `${fmt(selectedGroup.value)} TND` },
                 { label: 'Part de la valeur totale', val: `${selectedGroup.percentage} %` },
               ].map(({ label, val }) => (
@@ -565,7 +608,7 @@ const DashboardPage: FC = () => {
             <div className='row g-4'>
               {[
                 { label: 'Articles en stock', val: fmt(selectedSite.count) },
-                { label: 'Volume physique', val: `${fmt(selectedSite.quantity)} u` },
+                { label: 'Volume physique', val: `${fmt(selectedSite.quantity)} unités` },
                 { label: 'Valeur du stock', val: `${fmt(selectedSite.value)} TND` },
                 { label: 'Machines rattachées', val: fmt(selectedSite.machines) },
               ].map(({ label, val }) => (

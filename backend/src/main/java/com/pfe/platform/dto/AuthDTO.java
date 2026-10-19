@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 public class AuthDTO {
-
     @Data
     public static class LoginRequest {
         @NotBlank

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
     private final AuthService authService;
 
     @PostMapping("/login")
@@ -22,7 +21,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    /** Profil de l'utilisateur porteur du jeton JWT (utilisé par le frontend pour valider la session). */
     @GetMapping("/me")
     public ResponseEntity<UserDTO> me(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(UserDTO.fromEntity(user));

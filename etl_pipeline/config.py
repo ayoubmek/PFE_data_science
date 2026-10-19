@@ -28,8 +28,6 @@ else:
         f"driver={DB_CONFIG['driver'].replace(' ', '+')}&TrustServerCertificate=yes"
     )
 
-# Les tables nettoyées sont chargées dans des tables de staging (STG_ASTOCKDATE, STG_FACT_CLE) :
-# le pipeline ne remplace jamais les tables de production du DWH alimentées par Navision.
 ETL_TARGET_PREFIX = os.getenv("ETL_TARGET_PREFIX", "STG_")
 if not ETL_TARGET_PREFIX:
     raise ValueError("ETL_TARGET_PREFIX ne peut pas être vide : les tables de production ne doivent pas être écrasées.")
@@ -40,4 +38,3 @@ QUALITY_THRESHOLDS = {
     "max_quantity_outlier": 50000.0,
     "max_cost_outlier": 10000.0,
 }
-

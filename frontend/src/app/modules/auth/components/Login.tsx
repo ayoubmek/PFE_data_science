@@ -72,7 +72,6 @@ export function Login() {
         </div>
       )}
 
-      {}
       <div className='fv-row mb-8'>
         <label className='form-label fs-6 fw-bolder text-dark'>Username</label>
         <input
@@ -95,9 +94,7 @@ export function Login() {
           </div>
         )}
       </div>
-      {}
 
-      {}
       <div className='fv-row mb-3'>
         <label className='form-label fw-bolder text-dark fs-6 mb-0'>Password</label>
         <input

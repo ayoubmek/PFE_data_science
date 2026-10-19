@@ -56,4 +56,3 @@ def extract_production_data(nrows: Optional[int] = None) -> pd.DataFrame:
     except Exception as e:
         logger.error(f"Error reading production data: {e}")
         raise
-

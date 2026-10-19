@@ -7,8 +7,6 @@ import java.time.LocalDate;
 import java.util.Map;
 
 public class StockDTO {
-
-    /** Ligne du dernier instantané de stock, enrichie du statut de couverture de son article. */
     @Data
     public static class ItemResponse {
         private String id;
@@ -24,13 +22,11 @@ public class StockDTO {
         private BigDecimal quantite;
         private BigDecimal valeurUnitaire;
         private BigDecimal valeurTotale;
-        /** RUPTURE, CRITIQUE, NORMAL, SURSTOCK, INACTIF ou SANS_CONSOMMATION (calculé au niveau article). */
         private String statut;
         private Double couvertureJours;
         private Double consommationJournaliere;
     }
 
-    /** Statut de couverture d'un article (agrégé tous sites). */
     @Data
     public static class ArticleStatus {
         private String reference;
@@ -59,16 +55,9 @@ public class StockDTO {
     public static class KpiResponse {
         private LocalDate dateStock;
         private long totalArticles;
-        private long totalLignes;
         private double quantiteTotale;
         private double valeurTotaleStock;
-        private long nbArticlesSuivis;
-        /** Nombre d'articles par statut de couverture. */
         private Map<String, Long> statuts;
         private ReplenishmentPlan reapprovisionnement;
-        private LocalDate dateMouvements;
-        private Double totalEntreesJour;
-        private Double totalSortiesJour;
-        private Map<String, Integer> regles;
     }
 }

@@ -1,14 +1,3 @@
-"""
-Calendrier industriel utilisé par les modèles :
-
-- jours fériés officiels tunisiens (package `holidays`, y compris les fêtes religieuses estimées) ;
-- fermetures récurrentes d'usine apprises sur l'historique d'apprentissage : une date calendaire (mois, jour)
-  est une fermeture récurrente si elle fait partie d'un arrêt d'au moins CLOSURE_MIN_RUN jours consécutifs
-  à production nulle pendant au moins CLOSURE_MIN_YEARS années différentes (ex. fin d'année, congé d'été).
-
-Les fermetures sont apprises uniquement sur la série fournie à `fit` : aucune information du futur
-n'est utilisée lors des backtests.
-"""
 from typing import Set, Tuple
 
 import holidays
@@ -64,6 +53,4 @@ class IndustrialCalendar:
         f = self.flags(dates)
         rows = [{"holiday": "jour_ferie_TN", "ds": d} for d in dates[f["is_public_holiday"].to_numpy() == 1]]
         rows += [{"holiday": "fermeture_usine", "ds": d} for d in dates[f["is_closure"].to_numpy() == 1]]
-        if not rows:
-            return pd.DataFrame(columns=["holiday", "ds"])
-        return pd.DataFrame(rows)
+        return pd.DataFrame(rows, columns=["holiday", "ds"])

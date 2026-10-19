@@ -10,14 +10,8 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Requêtes de production sur dbo.FACT_CLE et dbo.MCMachineCenter.
- * Les périodes sont toujours relatives à la dernière date présente dans dbo.FACT_CLE.
- */
 @Repository
 public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
-
-    /** Règle de rattachement d'une machine à un site (codes Navision : CZ* = Brno, TN2* = Sousse, sinon Kondar). */
     String MACHINE_SITE = """
         CASE
             WHEN mc.[Database] = 'Brno' OR mc.[No_] LIKE 'CZ%' OR mc.[Work Center No_] LIKE 'CZ%' THEN 'Brno'
@@ -45,18 +39,29 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
         """, nativeQuery = true)
     List<Object[]> findLatestProductionDeclarations(@Param("limit") int limit);
 
-    /** Dernière date de déclaration. Calculée à part : une jointure sur MAX() dans les requêtes d'agrégat
-     *  produit un plan d'exécution de plusieurs minutes sur SQL Server. */
     @Query(value = "SELECT CAST(MAX([Posting Date]) AS DATE) FROM dbo.FACT_CLE WITH (NOLOCK)", nativeQuery = true)
     java.sql.Date findLastPostingDate();
+
+    @Query(value = "SELECT CAST(MIN([Posting Date]) AS DATE) FROM dbo.FACT_CLE WITH (NOLOCK)", nativeQuery = true)
+    java.sql.Date findFirstPostingDate();
+
+    @Query(value = """
+        SELECT
+            DATEFROMPARTS(YEAR(f.[Posting Date]), MONTH(f.[Posting Date]), 1) AS month,
+            SUM(CAST(f.[Output Quantity] AS FLOAT))                           AS total_output,
+            SUM(CAST(f.[Scrap Quantity] AS FLOAT))                            AS total_scrap
+        FROM dbo.FACT_CLE f WITH (NOLOCK)
+        WHERE f.[Posting Date] >= :start
+        GROUP BY DATEFROMPARTS(YEAR(f.[Posting Date]), MONTH(f.[Posting Date]), 1)
+        ORDER BY DATEFROMPARTS(YEAR(f.[Posting Date]), MONTH(f.[Posting Date]), 1) ASC
+        """, nativeQuery = true)
+    List<Object[]> findMonthlyStats(@Param("start") LocalDate start);
 
     @Query(value = """
         SELECT
             CAST(f.[Posting Date] AS DATE)          AS date,
-            COUNT(*)                                AS nb_operations,
             SUM(CAST(f.[Output Quantity] AS FLOAT)) AS total_output,
-            SUM(CAST(f.[Scrap Quantity] AS FLOAT))  AS total_scrap,
-            SUM(CAST(f.[Run Time] AS FLOAT))        AS total_run_time
+            SUM(CAST(f.[Scrap Quantity] AS FLOAT))  AS total_scrap
         FROM dbo.FACT_CLE f WITH (NOLOCK)
         WHERE f.[Posting Date] >= :start
         GROUP BY CAST(f.[Posting Date] AS DATE)
@@ -75,9 +80,7 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
             ISNULL(agg.operationCount, 0)                           AS operationCount,
             CAST(ISNULL(agg.totalOutput, 0) AS FLOAT)               AS totalOutput,
             CAST(ISNULL(agg.totalScrap, 0) AS FLOAT)                AS totalScrap,
-            CAST(ISNULL(agg.totalRunTime, 0) AS FLOAT)              AS totalRunTime,
             CAST(mc.[Efficiency] AS FLOAT)                          AS nominalEfficiency,
-            CAST(mc.[Capacity] AS FLOAT)                            AS capacity,
             CAST(ISNULL(mc.[Blocked], 0) AS INT)                    AS blocked,
             agg.lastPosting                                         AS lastPosting
         FROM dbo.MCMachineCenter mc WITH (NOLOCK)
@@ -87,7 +90,6 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
                 COUNT(*) AS operationCount,
                 SUM(CAST(f.[Output Quantity] AS FLOAT)) AS totalOutput,
                 SUM(CAST(f.[Scrap Quantity] AS FLOAT)) AS totalScrap,
-                SUM(CAST(f.[Run Time] AS FLOAT)) AS totalRunTime,
                 MAX(f.[Posting Date]) AS lastPosting
             FROM dbo.FACT_CLE f WITH (NOLOCK)
             GROUP BY f.[No_]
@@ -100,11 +102,8 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
     @Query(value = """
         SELECT
             COUNT(DISTINCT f.[Document No_])            AS totalDocuments,
-            COUNT(*)                                    AS totalOperations,
             SUM(CAST(f.[Output Quantity] AS FLOAT))     AS totalOutput,
             SUM(CAST(f.[Scrap Quantity] AS FLOAT))      AS totalScrap,
-            SUM(CAST(f.[Run Time] AS FLOAT))            AS totalRunTime,
-            COUNT(DISTINCT f.[Work Center No_])         AS totalWorkCenters,
             COUNT(DISTINCT f.[No_])                     AS activeMachines
         FROM dbo.FACT_CLE f WITH (NOLOCK)
         WHERE f.[Posting Date] >= :start

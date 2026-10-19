@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import axios from 'axios'
 import { Modal } from 'react-bootstrap'
 import { KTIcon } from '../../../_metronic/helpers'
@@ -27,13 +27,11 @@ export default function ProductionPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [loadError, setLoadError] = useState('')
 
-  const apiUrl = API_BASE_URL
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (globalCachedOrders.length === 0) setLoading(true)
     try {
-      const { data } = await axios.get(`${apiUrl}/production/orders`)
-      // Déclarations réelles de dbo.FACT_CLE ; les champs absents restent vides (aucune valeur inventée).
+      const { data } = await axios.get(`${API_BASE_URL}/production/orders`)
       const mapped = (Array.isArray(data) ? data : []).map((o: any) => ({
         id: o.id,
         code: o.reference,
@@ -56,9 +54,9 @@ export default function ProductionPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  useEffect(() => { fetchOrders() }, [])
+  useEffect(() => { fetchOrders() }, [fetchOrders])
   useEffect(() => { setCurrentPage(1) }, [searchTerm, statusFilter, siteFilter, scrapFilter, volumeFilter, dateFrom, dateTo, sortField, sortDir, rowsPerPage])
 
   const workshops = useMemo(() => ['ALL', ...Array.from(new Set(orders.map(o => o.machineNom).filter(Boolean)))], [orders])
@@ -266,7 +264,6 @@ export default function ProductionPage() {
       {showFilters && (
         <div className='card-header border-0 pt-0 pb-4'>
           <div className='bg-light-subtle rounded p-5 w-100 border border-gray-300'>
-            {/* Header avec sélecteur rapide d'année */}
             <div className='d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom'>
               <div className='d-flex align-items-center gap-2'>
                 <KTIcon iconName='setting-4' className='fs-2 text-primary' />
@@ -288,9 +285,7 @@ export default function ProductionPage() {
               </div>
             </div>
 
-            {/* Grille de 4 filtres principaux */}
             <div className='row g-4'>
-              {/* 1. Atelier */}
               <div className='col-lg-3 col-md-6'>
                 <label className='form-label fs-7 fw-bold text-gray-700'>
                   <KTIcon iconName='abstract-26' className='fs-6 me-1 text-primary' />
@@ -308,7 +303,6 @@ export default function ProductionPage() {
                 </select>
               </div>
 
-              {/* 2. Site */}
               <div className='col-lg-3 col-md-6'>
                 <label className='form-label fs-7 fw-bold text-gray-700'>
                   <KTIcon iconName='geolocation' className='fs-6 me-1 text-warning' />
@@ -326,7 +320,6 @@ export default function ProductionPage() {
                 </select>
               </div>
 
-              {/* 3. Contrôle Qualité / Rebut */}
               <div className='col-lg-3 col-md-6'>
                 <label className='form-label fs-7 fw-bold text-gray-700'>
                   <KTIcon iconName='cross-circle' className='fs-6 me-1 text-danger' />
@@ -343,7 +336,6 @@ export default function ProductionPage() {
                 </select>
               </div>
 
-              {/* 4. Taille de la Série */}
               <div className='col-lg-3 col-md-6'>
                 <label className='form-label fs-7 fw-bold text-gray-700'>
                   <KTIcon iconName='chart-line-star' className='fs-6 me-1 text-success' />
@@ -361,7 +353,6 @@ export default function ProductionPage() {
                 </select>
               </div>
 
-              {/* 5. Date From / To */}
               <div className='col-lg-6 col-md-12'>
                 <label className='form-label fs-7 fw-bold text-gray-700'>
                   <KTIcon iconName='calendar' className='fs-6 me-1 text-info' />
@@ -386,7 +377,6 @@ export default function ProductionPage() {
                 </div>
               </div>
 
-              {/* 6. Barre de synthèse instantanée & Bouton Réinitialiser */}
               <div className='col-lg-6 col-md-12 d-flex align-items-end justify-content-lg-end justify-content-start flex-wrap gap-3'>
                 <div className='bg-body rounded px-4 py-2 border d-flex gap-3 align-items-center'>
                   <span className='fs-8 text-muted fw-semibold'>Résultats filtrés :</span>
@@ -497,7 +487,6 @@ export default function ProductionPage() {
           </table>
         </div>
 
-        {}
         <div className='d-flex justify-content-between align-items-center flex-wrap gap-3 pt-4 border-top'>
           <div className='text-muted fs-7'>
             Affichage de{' '}
@@ -531,7 +520,6 @@ export default function ProductionPage() {
         </div>
       </div>
 
-      {}
       <Modal show={showModal} onHide={() => setShowModal(false)} size='lg' centered>
         <Modal.Header closeButton>
           <Modal.Title className='fw-bold fs-5'>

@@ -37,7 +37,6 @@ export function toUserModel(u: { id?: number; username: string; fullName: string
   }
 }
 
-/** Valide le jeton auprès du backend et retourne l'utilisateur réel associé. */
 export async function getUserByToken(token: string): Promise<UserModel> {
   const { data } = await axios.get<MeResponse>(ME_URL, { headers: { Authorization: `Bearer ${token}` } })
   return toUserModel(data)

@@ -9,20 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-/**
- * Classification des articles par couverture de stock (règles identiques à ml-service/models/stock.py).
- *
- * <ul>
- *   <li>RUPTURE : stock &lt;= 0 et sorties sur les {@code rupture-recent-days} derniers jours ;</li>
- *   <li>INACTIF : stock &lt;= 0 sans sortie récente ;</li>
- *   <li>CRITIQUE / NORMAL / SURSTOCK : couverture (stock / consommation journalière) comparée aux seuils ;</li>
- *   <li>SANS_CONSOMMATION : stock présent mais aucune sortie sur la fenêtre.</li>
- * </ul>
- */
 @Service
 @RequiredArgsConstructor
 public class StockCoverageService {
-
     public static final List<String> STATUSES =
         List.of("RUPTURE", "CRITIQUE", "NORMAL", "SURSTOCK", "INACTIF", "SANS_CONSOMMATION");
 
@@ -101,16 +90,6 @@ public class StockCoverageService {
             }
         }
         return plan;
-    }
-
-    public Map<String, Integer> rules() {
-        Map<String, Integer> rules = new LinkedHashMap<>();
-        rules.put("fenetreConsommationJours", windowDays);
-        rules.put("fenetreRuptureJours", recentDays);
-        rules.put("seuilCritiqueJours", critiqueDays);
-        rules.put("seuilSurstockJours", surstockDays);
-        rules.put("couvertureCibleJours", coverageTargetDays);
-        return rules;
     }
 
     private static String str(Object o) {

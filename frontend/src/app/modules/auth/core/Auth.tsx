@@ -4,7 +4,7 @@ import {
   useEffect,
   createContext,
   useContext,
-  useRef,
+  useCallback,
   Dispatch,
   SetStateAction,
 } from 'react'
@@ -39,19 +39,19 @@ const useAuth = () => {
 const AuthProvider: FC<WithChildren> = ({ children }) => {
   const [auth, setAuth] = useState<AuthModel | undefined>(authHelper.getAuth())
   const [currentUser, setCurrentUser] = useState<UserModel | undefined>()
-  const saveAuth = (auth: AuthModel | undefined) => {
+  const saveAuth = useCallback((auth: AuthModel | undefined) => {
     setAuth(auth)
     if (auth) {
       authHelper.setAuth(auth)
     } else {
       authHelper.removeAuth()
     }
-  }
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     saveAuth(undefined)
     setCurrentUser(undefined)
-  }
+  }, [saveAuth])
 
   return (
     <AuthContext.Provider value={{ auth, saveAuth, currentUser, setCurrentUser, logout }}>
@@ -61,36 +61,21 @@ const AuthProvider: FC<WithChildren> = ({ children }) => {
 }
 
 const AuthInit: FC<WithChildren> = ({ children }) => {
-  const { auth, logout, setCurrentUser } = useAuth()
-  const didRequest = useRef(false)
+  const { logout, setCurrentUser } = useAuth()
   const [showSplashScreen, setShowSplashScreen] = useState(true)
 
   useEffect(() => {
-    const requestUser = async (apiToken: string) => {
-      try {
-        if (!didRequest.current) {
-          setCurrentUser(await getUserByToken(apiToken))
-        }
-      } catch (error) {
-        // Jeton expiré, invalide ou compte supprimé : retour à l'écran de connexion.
-        if (!didRequest.current) {
-          logout()
-        }
-      } finally {
-        setShowSplashScreen(false)
-      }
-
-      return () => (didRequest.current = true)
-    }
-
-    if (auth && auth.api_token) {
-      requestUser(auth.api_token)
-    } else {
+    const token = authHelper.getAuth()?.api_token
+    if (!token) {
       logout()
       setShowSplashScreen(false)
+      return
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    getUserByToken(token)
+      .then(setCurrentUser)
+      .catch(() => logout())
+      .finally(() => setShowSplashScreen(false))
+  }, [logout, setCurrentUser])
 
   return showSplashScreen ? <LayoutSplashScreen /> : <>{children}</>
 }

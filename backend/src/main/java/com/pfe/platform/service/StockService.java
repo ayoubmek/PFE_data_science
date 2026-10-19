@@ -16,7 +16,6 @@ import java.util.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class StockService {
-
     private final StockItemRepository itemRepo;
     private final StockCoverageService coverageService;
 
@@ -30,10 +29,6 @@ public class StockService {
         return items;
     }
 
-    public List<StockDTO.ArticleStatus> getArticleStatuses() {
-        return new ArrayList<>(coverageService.computeArticleStatuses().values());
-    }
-
     @Cacheable(value = "stockKpi", sync = true)
     public StockDTO.KpiResponse getKpi() {
         StockDTO.KpiResponse kpi = new StockDTO.KpiResponse();
@@ -42,23 +37,13 @@ public class StockService {
         if (totals != null) {
             kpi.setDateStock(toDate(totals[0]));
             kpi.setTotalArticles(toLong(totals[1]));
-            kpi.setTotalLignes(toLong(totals[2]));
-            kpi.setQuantiteTotale(toDouble(totals[3]));
-            kpi.setValeurTotaleStock(toDouble(totals[4]));
+            kpi.setQuantiteTotale(toDouble(totals[2]));
+            kpi.setValeurTotaleStock(toDouble(totals[3]));
         }
 
         Collection<StockDTO.ArticleStatus> articles = coverageService.computeArticleStatuses().values();
-        kpi.setNbArticlesSuivis(articles.size());
         kpi.setStatuts(coverageService.countByStatus(articles));
         kpi.setReapprovisionnement(coverageService.replenishmentPlan(articles));
-        kpi.setRegles(coverageService.rules());
-
-        Object[] moves = first(itemRepo.findLastDayMovements());
-        if (moves != null) {
-            kpi.setDateMouvements(toDate(moves[0]));
-            kpi.setTotalEntreesJour(moves[1] != null ? toDouble(moves[1]) : null);
-            kpi.setTotalSortiesJour(moves[2] != null ? toDouble(moves[2]) : null);
-        }
         return kpi;
     }
 

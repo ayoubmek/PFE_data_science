@@ -1,15 +1,15 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import axios from 'axios'
 import Chart from 'react-apexcharts'
 import { useQuery } from 'react-query'
 import { API_BASE_URL, apiErrorMessage } from '../../config'
 
-// Période prévue : les 30 jours qui suivent la dernière donnée consolidée du DWH
+const FORECAST_START = '2027-01-01'
 const HORIZON = 30
 
 const fetchForecast = async () => {
   const { data } = await axios.get(`${API_BASE_URL}/ml/predict/production`, {
-    params: { horizon: HORIZON },
+    params: { horizon: HORIZON, start: FORECAST_START },
     timeout: 300000,
   })
   return data
@@ -20,7 +20,7 @@ const fmt = (n: number | null | undefined, digits = 0) =>
 const fmtDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString('fr-FR') : '—')
 
 export default function DataSciencePage() {
-  const { data: result, isLoading, error } = useQuery(['productionForecast', 'next30'], fetchForecast, {
+  const { data: result, isLoading, error } = useQuery(['productionForecast', FORECAST_START], fetchForecast, {
     staleTime: 1000 * 60 * 10,
     retry: false,
   })
@@ -67,7 +67,7 @@ export default function DataSciencePage() {
             <>
               <div className='text-muted fs-7'>
                 Du <span className='text-gray-900 fw-semibold'>{fmtDate(predictions[0]?.date)}</span> au{' '}
-                <span className='text-gray-900 fw-semibold'>{fmtDate(predictions[predictions.length - 1]?.date)}</span> — modèle :{' '}
+                <span className='text-gray-900 fw-semibold'>{fmtDate(predictions[predictions.length - 1]?.date)}</span> — meilleur modèle :{' '}
                 <span className='text-primary fw-semibold'>{result.best_model_name}</span>
               </div>
             </>
@@ -102,7 +102,7 @@ export default function DataSciencePage() {
           { title: 'Volume total prévu', value: `${fmt(totals.total)} pcs`, color: 'text-gray-900' },
           { title: 'Moyenne journalière', value: `${fmt(totals.avg)} pcs/j`, color: 'text-primary' },
           { title: 'Pic journalier', value: `${fmt(totals.peak)} pcs`, color: 'text-gray-900' },
-          { title: `Erreur du modèle (WAPE, ${result.backtest.n_origins} mois de tests)`, value: `${fmt(bestMetrics?.wape, 1)} %`, color: 'text-success' },
+          { title: "Erreur du modèle (WAPE, même période l'an dernier)", value: `${fmt(bestMetrics?.wape_selection ?? bestMetrics?.wape, 1)} %`, color: 'text-success' },
         ].map((k) => (
           <div className='col-xl-3 col-md-6' key={k.title}>
             <div className='card border-0 shadow-sm bg-white p-5 rounded-3 h-100'>
