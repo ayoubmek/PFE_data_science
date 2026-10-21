@@ -90,7 +90,7 @@ const SidebarMenuMain = () => {
       <SidebarMenuItem
         to='/model-benchmark'
         icon='chart-pie'
-        title='Comparatif des Modèles'
+        title='Évaluation du Modèle'
         fontIcon='bi-bar-chart-line'
         iconColor='#10B981'
       />

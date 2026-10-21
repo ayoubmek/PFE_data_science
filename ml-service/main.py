@@ -2,6 +2,7 @@ import hashlib
 import logging
 import threading
 import time
+import uuid
 from typing import List, Optional
 
 import numpy as np
@@ -13,7 +14,7 @@ from pydantic import BaseModel
 
 import config
 from models.data_loader import PRODUCTION_DECIMALS, DWHUnavailableError, is_available, load_production_series
-from models.evaluation import MODEL_FACTORIES, build_custom_forecast, build_forecast
+from models.evaluation import MIN_TRAIN_DAYS, MODEL_FACTORIES, Tracker, build_custom_forecast, build_forecast
 
 if config.ML_MODEL != "auto" and config.ML_MODEL not in MODEL_FACTORIES:
     raise RuntimeError(f"ML_MODEL='{config.ML_MODEL}' inconnu. Valeurs possibles : auto, {', '.join(MODEL_FACTORIES)}")
@@ -79,14 +80,25 @@ def _check_horizon(horizon: int):
         raise HTTPException(400, "L'horizon doit être compris entre 1 et 90 jours.")
 
 
-def _compute_dwh_forecast(horizon: int, start: Optional[str]) -> dict:
+def _compute_dwh_forecast(horizon: int, start: Optional[str], tracker: Optional[Tracker] = None) -> dict:
+    tracker = tracker or Tracker()
+    tracker.running("Lecture de la production journalière dans dbDWH (FACT_CLE)…")
     series = load_production_series()
+    tracker.step("load", f"{len(series)} jours de production chargés depuis FACT_CLE, du {series.index[0]:%d/%m/%Y} "
+                         f"au {series.index[-1]:%d/%m/%Y}")
     start_ts = _parse_start(start)
     if start_ts is not None and (start_ts - series.index[-1]).days > MAX_DAYS_AHEAD:
         raise HTTPException(400, f"La date de début doit se situer au plus {MAX_DAYS_AHEAD} jours après "
                                  f"la dernière donnée du DWH ({series.index[-1]:%Y-%m-%d}).")
-    return build_forecast(series, horizon, config.ML_BACKTEST_ORIGINS, APP_MODELS, start_ts,
-                          tuning_folds=config.ML_TUNING_FOLDS)
+    train = series
+    if start_ts is not None and start_ts <= series.index[-1]:
+        train = series.loc[:start_ts - pd.Timedelta(days=1)]
+        if len(train) < MIN_TRAIN_DAYS + horizon:
+            raise HTTPException(400, f"Historique insuffisant avant le {start_ts:%d/%m/%Y} pour entraîner les modèles.")
+        tracker.step("load", f"Mois passé : apprentissage limité aux {len(train)} jours avant le {start_ts:%d/%m/%Y}, "
+                             f"la production réelle sert de comparaison")
+    return build_forecast(train, horizon, config.ML_BACKTEST_ORIGINS, APP_MODELS, start_ts,
+                          tuning_folds=config.ML_TUNING_FOLDS, reference=series, tracker=tracker)
 
 
 def dwh_forecast(horizon: int, start: Optional[str]) -> dict:
@@ -123,6 +135,97 @@ def predict_production(horizon: int = 30, start: Optional[str] = None):
     _check_horizon(horizon)
     start_ts = _parse_start(start)
     return dwh_forecast(horizon, start_ts.strftime("%Y-%m-%d") if start_ts is not None else None)
+
+
+JOB_TTL_SECONDS = 3600
+
+
+class TrainingJob(Tracker):
+    """Entraînement complet lancé par la page Benchmark, sans cache, dont les étapes sont suivies en direct."""
+
+    def __init__(self, horizon: int, start: Optional[str]):
+        super().__init__()
+        self.id = uuid.uuid4().hex[:12]
+        self.key = (horizon, start)
+        self.status = "running"
+        self.steps: list = []
+        self.current = ""
+        self.result: Optional[dict] = None
+        self.error: Optional[str] = None
+        self.t0 = time.time()
+        self.elapsed: Optional[float] = None
+
+    def running(self, text: str):
+        self.current = text
+
+    def step(self, phase: str, message: str, advance: int = 0, **data):
+        super().step(phase, message, advance)
+        self.steps.append({"t": round(time.time() - self.t0, 1), "phase": phase, "message": message, **data})
+
+    def run(self):
+        horizon, start = self.key
+        try:
+            result = _compute_dwh_forecast(horizon, start, self)
+            _cache[("forecast", horizon, start)] = (time.time(), result)
+            self.result = result
+            self.step("done", f"Entraînement terminé en {round(time.time() - self.t0, 1)} s · "
+                              f"meilleur modèle : {result['best_model_name']}")
+            self.status = "done"
+        except HTTPException as e:
+            self.error, self.status = str(e.detail), "error"
+        except DWHUnavailableError as e:
+            self.error, self.status = str(e), "error"
+        except Exception as e:
+            logger.exception("Entraînement Benchmark en échec")
+            self.error, self.status = f"Échec de l'entraînement : {e}", "error"
+        finally:
+            self.elapsed = round(time.time() - self.t0, 1)
+            self.current = ""
+
+    def snapshot(self, since: int) -> dict:
+        steps = self.steps[since:]
+        percent = 100 if self.status == "done" else min(99, round(100 * self.done / self.total))
+        return {
+            "job_id": self.id,
+            "status": self.status,
+            "percent": percent,
+            "elapsed": self.elapsed if self.elapsed is not None else round(time.time() - self.t0, 1),
+            "current": self.current,
+            "steps": steps,
+            "next": since + len(steps),
+            "result": self.result,
+            "error": self.error,
+        }
+
+
+_jobs: dict = {}
+_jobs_guard = threading.Lock()
+
+
+@app.post("/benchmark/start", dependencies=[Depends(require_api_key)])
+def benchmark_start(horizon: int = 30, start: Optional[str] = None):
+    _check_horizon(horizon)
+    start_ts = _parse_start(start)
+    key = (horizon, start_ts.strftime("%Y-%m-%d") if start_ts is not None else None)
+    with _jobs_guard:
+        for job_id, job in list(_jobs.items()):
+            if job.status != "running" and time.time() - job.t0 > JOB_TTL_SECONDS:
+                del _jobs[job_id]
+        running = next((j for j in _jobs.values() if j.key == key and j.status == "running"), None)
+        if running:
+            return {"job_id": running.id}
+        job = TrainingJob(*key)
+        _jobs[job.id] = job
+    threading.Thread(target=job.run, daemon=True).start()
+    return {"job_id": job.id}
+
+
+@app.get("/benchmark/{job_id}", dependencies=[Depends(require_api_key)])
+def benchmark_status(job_id: str, since: int = 0):
+    job = _jobs.get(job_id)
+    if job is None:
+        raise HTTPException(404, "Entraînement introuvable ou expiré.")
+    return job.snapshot(max(0, since))
 
 
 class CustomDataPoint(BaseModel):

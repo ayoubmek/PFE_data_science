@@ -62,6 +62,20 @@ public class MLController {
             .block(Duration.ofSeconds(timeoutSeconds)));
     }
 
+    @PostMapping("/benchmark/start")
+    public ResponseEntity<Object> startBenchmark(@RequestParam(defaultValue = "30") int horizon,
+                                                 @RequestParam(required = false) LocalDate start) {
+        String uri = "/benchmark/start?horizon=" + horizon + (start != null ? "&start=" + start : "");
+        return call(() -> client().post().uri(uri).retrieve().bodyToMono(Object.class)
+            .block(Duration.ofSeconds(30)));
+    }
+
+    @GetMapping("/benchmark/{jobId}")
+    public ResponseEntity<Object> benchmarkStatus(@PathVariable String jobId, @RequestParam(defaultValue = "0") int since) {
+        return call(() -> client().get().uri("/benchmark/{id}?since={since}", jobId, since).retrieve().bodyToMono(Object.class)
+            .block(Duration.ofSeconds(30)));
+    }
+
     @PostMapping("/predict/custom")
     public ResponseEntity<Object> predictCustom(@RequestBody Map<String, Object> payload) {
         return call(() -> client().post().uri("/predict/custom").bodyValue(payload).retrieve().bodyToMono(Object.class)

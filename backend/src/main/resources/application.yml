@@ -13,6 +13,9 @@ spring:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     username: ${DB_USER:}
     password: ${DB_PASSWORD:}
+    hikari:
+      minimum-idle: 3
+      maximum-pool-size: 10
 
   jpa:
     open-in-view: false

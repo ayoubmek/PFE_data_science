@@ -119,15 +119,14 @@ export interface ModelMetrics {
   name: string
   mae: number | null
   rmse: number | null
-  wape: number | null
-  mase: number | null
   r2: number | null
-  wape_selection: number | null
-  wape_default: number | null
+  mape: number | null
+  mae_selection: number | null
+  mae_default: number | null
   rank?: number
   params: ModelParams
   default_params: ModelParams
-  tuning_criterion: 'aic' | 'wape_cv' | null
+  tuning_criterion: 'aic' | 'mae_cv' | null
 }
 
 export interface ForecastPoint {
@@ -135,6 +134,7 @@ export interface ForecastPoint {
   best_quantity: number
   real_last_year_date: string
   real_last_year: number | null
+  real: number | null
 }
 
 export interface ForecastResult {
@@ -150,8 +150,8 @@ export interface DataPoint {
   value: number
 }
 
-export const FORECAST_START = '2027-01-01'
 export const FORECAST_HORIZON = 30
+export const DEFAULT_FORECAST_MONTH = '2026-05'
 const ML_TIMEOUT = 300000
 const DWH_TIMEOUT = 120000
 
@@ -173,17 +173,65 @@ export const fetchStockItems = async () =>
 export const fetchStockKpi = async () =>
   (await axios.get<StockKpi>(`${API_BASE_URL}/stock/kpi`, { timeout: DWH_TIMEOUT })).data
 
-export const fetchDwhForecast = async () =>
+export const daysInMonth = (month: string) => {
+  const [year, m] = month.split('-').map(Number)
+  return new Date(year, m, 0).getDate()
+}
+
+const forecastParams = (month: string) =>
+  month ? { horizon: daysInMonth(month), start: `${month}-01` } : { horizon: FORECAST_HORIZON }
+
+export const fetchDwhForecast = async (month: string) =>
   (await axios.get<ForecastResult>(`${API_BASE_URL}/ml/predict/production`, {
-    params: { horizon: FORECAST_HORIZON, start: FORECAST_START },
+    params: forecastParams(month),
     timeout: ML_TIMEOUT,
   })).data
+
+export type TrainingPhase = 'load' | 'tuning' | 'cv' | 'n1' | 'rank' | 'final' | 'done'
+
+export interface TrainingStep {
+  t: number
+  phase: TrainingPhase
+  message: string
+  model?: string
+  fold?: number
+  folds?: number
+  mae?: number | null
+  cv_mae?: number | null
+  cv_rmse?: number | null
+  cv_r2?: number | null
+  cv_mape?: number | null
+  mae_n1?: number | null
+  failed?: boolean
+  ranking?: { model: string; rank: number; mae: number | null }[]
+}
+
+export interface TrainingStatus {
+  job_id: string
+  status: 'running' | 'done' | 'error'
+  percent: number
+  elapsed: number
+  current: string
+  steps: TrainingStep[]
+  next: number
+  result: ForecastResult | null
+  error: string | null
+}
+
+export const startTraining = async (month: string) =>
+  (await axios.post<{ job_id: string }>(`${API_BASE_URL}/ml/benchmark/start`, null, {
+    params: forecastParams(month),
+    timeout: DWH_TIMEOUT,
+  })).data.job_id
+
+export const fetchTrainingStatus = async (jobId: string, since: number) =>
+  (await axios.get<TrainingStatus>(`${API_BASE_URL}/ml/benchmark/${jobId}`, { params: { since }, timeout: DWH_TIMEOUT })).data
 
 export const fetchCustomForecast = async (data: DataPoint[]) =>
   (await axios.post<ForecastResult>(
     `${API_BASE_URL}/ml/predict/custom`,
-    { data, horizon: FORECAST_HORIZON, start: FORECAST_START },
+    { data, horizon: FORECAST_HORIZON },
     { timeout: ML_TIMEOUT }
   )).data
 
-export const forecastQueryKey = ['productionForecast', FORECAST_START, FORECAST_HORIZON]
+export const forecastQueryKey = (month: string) => ['productionForecast', month || 'next']

@@ -1,19 +1,18 @@
-import React, { useState, useMemo, useRef } from 'react'
-import Chart from 'react-apexcharts'
-import { ApexOptions } from 'apexcharts'
-import { useQuery } from 'react-query'
+import React, { useEffect, useState, useMemo, useRef } from 'react'
+import { useQueryClient } from 'react-query'
 import * as XLSX from 'xlsx'
 import { apiErrorMessage } from '../../config'
 import {
   DataPoint,
+  DEFAULT_FORECAST_MONTH,
   FORECAST_HORIZON,
   ForecastResult,
-  ModelParams,
   fetchCustomForecast,
-  fetchDwhForecast,
   forecastQueryKey,
 } from '../../services/api'
-import { fmt, fmtIsoDay, fmtThousands } from '../../utils/format'
+import { fmt, fmtIsoDay } from '../../utils/format'
+import { ForecastMonthSelect } from '../../components/ForecastMonthSelect'
+import { LiveTrainingCard, useLiveTraining } from '../../components/LiveTraining'
 
 type Cell = string | number | boolean | Date | null | undefined
 type SheetRow = Record<string, Cell>
@@ -24,9 +23,9 @@ interface DailyRow {
   real: number | null
   pred: number
   delta: number | null
+  actual: number | null
+  deltaActual: number | null
 }
-
-const fmtParam = (v: ModelParams[string]) => (v === null ? 'aucune' : Array.isArray(v) ? `(${v.join(',')})` : String(v))
 
 const toIsoDate = (raw: Cell): string => {
   if (typeof raw === 'number') {
@@ -61,18 +60,18 @@ export default function ModelBenchmarkPage() {
   const [fileProcessing, setFileProcessing] = useState(false)
   const [fileError, setFileError] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [month, setMonth] = useState(DEFAULT_FORECAST_MONTH)
 
-  const dwh = useQuery(forecastQueryKey, fetchDwhForecast, {
-    enabled: mode === 'dwh',
-    staleTime: 1000 * 60 * 10,
-    retry: false,
-  })
+  const queryClient = useQueryClient()
+  const live = useLiveTraining(month, mode === 'dwh')
 
-  const result = mode === 'dwh' ? dwh.data ?? null : fileResult
-  const isProcessing = mode === 'dwh' ? dwh.isLoading : fileProcessing
-  const errorMessage = mode === 'dwh'
-    ? (dwh.error ? apiErrorMessage(dwh.error, 'Benchmark sur dbDWH impossible.') : '')
-    : fileError
+  useEffect(() => {
+    if (live.result) queryClient.setQueryData(forecastQueryKey(month), live.result)
+  }, [live.result, month, queryClient])
+
+  const result = mode === 'dwh' ? live.result : fileResult
+  const isProcessing = mode === 'dwh' ? live.status === 'starting' || live.status === 'running' : fileProcessing
+  const errorMessage = mode === 'dwh' ? '' : fileError
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -119,7 +118,7 @@ export default function ModelBenchmarkPage() {
       setFileResult(await fetchCustomForecast(importedData))
     } catch (err) {
       setFileResult(null)
-      setFileError(apiErrorMessage(err, "L'évaluation des modèles a échoué."))
+      setFileError(apiErrorMessage(err, "L'évaluation du modèle a échoué."))
     } finally {
       setFileProcessing(false)
     }
@@ -133,35 +132,26 @@ export default function ModelBenchmarkPage() {
       (result?.predictions ?? []).map((p) => {
         const real = p.real_last_year === null ? null : Number(p.real_last_year)
         const pred = Number(p.best_quantity) || 0
-        return { date: p.date, realDate: p.real_last_year_date ?? null, real, pred, delta: real === null ? null : pred - real }
+        const actual = p.real === null || p.real === undefined ? null : Number(p.real)
+        return {
+          date: p.date,
+          realDate: p.real_last_year_date ?? null,
+          real,
+          pred,
+          delta: real === null ? null : pred - real,
+          actual,
+          deltaActual: actual === null ? null : pred - actual,
+        }
       }),
     [result]
   )
   const totalReal = dailyRows.reduce((s, r) => s + (r.real ?? 0), 0)
   const totalPred = dailyRows.reduce((s, r) => s + r.pred, 0)
   const hasReal = dailyRows.some((r) => r.real !== null)
-
-  const chartConfig = useMemo(() => {
-    const preds = result?.predictions ?? []
-    if (!result || !preds.length) return null
-    const options: ApexOptions = {
-      chart: { fontFamily: 'Inter, sans-serif', type: 'line', height: 380, toolbar: { show: false }, zoom: { enabled: false } },
-      colors: ['#00A3FF'],
-      stroke: { curve: 'smooth', width: 3 },
-      dataLabels: { enabled: false },
-      markers: { size: 4 },
-      xaxis: {
-        categories: preds.map((p) => fmtIsoDay(p.date).slice(0, 5)),
-        labels: { rotate: 0, style: { colors: '#7E8299', fontSize: '11px' } },
-      },
-      yaxis: { min: 0, labels: { formatter: fmtThousands, style: { colors: '#7E8299' } } },
-      legend: { show: true, position: 'bottom' },
-      tooltip: { shared: true, intersect: false, y: { formatter: (v: number) => `${fmt(v)} unités` } },
-      grid: { borderColor: '#F1F1F4', strokeDashArray: 4 },
-    }
-    const series = [{ name: `Prévision ${result.best_model_name}`, data: preds.map((p) => Math.round(p.best_quantity)) }]
-    return { options, series }
-  }, [result])
+  const hasActual = dailyRows.some((r) => r.actual !== null)
+  const actualRows = dailyRows.filter((r) => r.actual !== null)
+  const totalActual = actualRows.reduce((s, r) => s + (r.actual ?? 0), 0)
+  const totalPredOnActual = actualRows.reduce((s, r) => s + r.pred, 0)
 
   const exportPredictions = () => {
     if (!result || !best || !bestKey) return
@@ -184,7 +174,9 @@ export default function ModelBenchmarkPage() {
     <div className='d-flex flex-column gap-6'>
       <div className='card border-0 shadow-sm bg-white p-5 rounded-3'>
         <div className='d-flex flex-wrap align-items-center justify-content-between gap-3'>
-          <h2 className='fw-bold text-gray-900 fs-4 mb-0'>Benchmark des Modèles</h2>
+          <h2 className='fw-bold text-gray-900 fs-4 mb-0'>Évaluation du Modèle</h2>
+          <div className='d-flex align-items-center gap-3'>
+          {mode === 'dwh' && <ForecastMonthSelect value={month} onChange={setMonth} />}
           <div className='btn-group'>
             <button type='button' className={`btn btn-sm ${mode === 'dwh' ? 'btn-primary' : 'btn-light'}`} onClick={() => setMode('dwh')}>
               Données dbDWH (FACT_CLE)
@@ -192,6 +184,7 @@ export default function ModelBenchmarkPage() {
             <button type='button' className={`btn btn-sm ${mode === 'file' ? 'btn-primary' : 'btn-light'}`} onClick={() => setMode('file')}>
               Fichier importé
             </button>
+          </div>
           </div>
         </div>
 
@@ -220,7 +213,7 @@ export default function ModelBenchmarkPage() {
                 disabled={importedData.length === 0 || isProcessing}
                 onClick={runFileBenchmark}
               >
-                {isProcessing ? 'Évaluation…' : 'Évaluer les modèles'}
+                {isProcessing ? 'Évaluation…' : 'Évaluer le modèle'}
               </button>
             </div>
             <div className='text-muted fs-8 mt-2'>Au moins 90 jours consécutifs sont nécessaires pour un backtest fiable.</div>
@@ -235,7 +228,9 @@ export default function ModelBenchmarkPage() {
         )}
       </div>
 
-      {isProcessing && !result && (
+      {mode === 'dwh' && <LiveTrainingCard live={live} />}
+
+      {mode === 'file' && isProcessing && !result && (
         <div className='card border-0 shadow-sm p-10 text-center text-muted'>
           <div className='spinner-border text-primary mx-auto mb-4' role='status'></div>
           Calcul des prévisions…
@@ -247,7 +242,7 @@ export default function ModelBenchmarkPage() {
           <div className='card border-0 shadow-sm bg-white p-6 rounded-3'>
             <div className='d-flex flex-wrap justify-content-between align-items-start gap-3 mb-5'>
               <h3 className='fs-4 fw-bold text-gray-900 mb-1'>
-                Meilleur modèle : <span className='text-primary'>{result.best_model_name}</span>
+                Modèle : <span className='text-primary'>{result.best_model_name}</span>
               </h3>
               <button type='button' className='btn btn-sm btn-light-success' onClick={exportPredictions}>
                 <i className='bi bi-download me-1'></i>
@@ -257,13 +252,13 @@ export default function ModelBenchmarkPage() {
 
             <div className='row g-4'>
               {[
-                { label: "WAPE (même période l'an dernier)", value: `${fmt(best.wape_selection ?? best.wape, 2)} %`, color: 'text-success' },
-                { label: 'MAE', value: `${fmt(best.mae)} unités/j` },
-                { label: 'RMSE', value: `${fmt(best.rmse)} unités/j` },
-                { label: 'MASE', value: fmt(best.mase, 3) },
-                { label: 'R²', value: fmt(best.r2, 3) },
+                { label: "MAE – même période l'an dernier", value: `${fmt(best.mae_selection ?? best.mae)} unités/j`, color: 'text-success' },
+                { label: 'MAE – validation croisée', value: `${fmt(best.mae)} unités/j` },
+                { label: 'RMSE – validation croisée', value: `${fmt(best.rmse)} unités/j` },
+                { label: 'R² – validation croisée', value: fmt(best.r2, 3) },
+                { label: 'MAPE – validation croisée', value: best.mape === null ? '—' : `${fmt(best.mape, 1)} %` },
               ].map((k) => (
-                <div className='col-xl-3 col-md-4 col-6' key={k.label}>
+                <div className='col-xl col-md-4 col-6' key={k.label}>
                   <div className='bg-light rounded-3 p-4 h-100'>
                     <div className='text-muted fs-8 fw-semibold mb-1'>{k.label}</div>
                     <div className={`fs-3 fw-bold ${k.color || 'text-gray-900'}`}>{k.value}</div>
@@ -271,37 +266,7 @@ export default function ModelBenchmarkPage() {
                 </div>
               ))}
             </div>
-
-            <div className='mt-5 fs-7'>
-              <span className='fw-bold text-gray-800 me-2'>Hyperparamètres retenus :</span>
-              {Object.keys(best.params ?? {}).length > 0 ? (
-                <>
-                  {Object.entries(best.params).map(([name, value]) => (
-                    <span key={name} className='badge badge-light-primary fs-8 me-2'>
-                      {name} = {fmtParam(value)}
-                    </span>
-                  ))}
-                  <span className='text-muted'>
-                    {best.tuning_criterion === 'aic'
-                      ? '(choisis par AIC)'
-                      : best.tuning_criterion === 'wape_cv'
-                        ? '(choisis par validation croisée)'
-                        : '(valeurs par défaut)'}
-                  </span>
-                </>
-              ) : (
-                <span className='text-muted'>aucun (modèle sans hyperparamètre)</span>
-              )}
-            </div>
           </div>
-
-          {chartConfig && (
-            <div className='card border-0 shadow-sm bg-white p-6 rounded-3'>
-              <h3 className='fs-4 fw-bold text-gray-900 mb-1'>Prévision du mois</h3>
-              <span className='text-muted fs-7 mb-4'>Modèle {result.best_model_name}</span>
-              <Chart options={chartConfig.options} series={chartConfig.series} type='line' height={380} />
-            </div>
-          )}
 
           <div className='card border-0 shadow-sm bg-white p-5 rounded-3'>
             <h4 className='fs-6 fw-bold text-gray-900 mb-1'>
@@ -316,7 +281,9 @@ export default function ModelBenchmarkPage() {
                     {hasReal && <th>Date réel</th>}
                     {hasReal && <th className='text-end'>Réel {dailyRows[0]?.realDate?.slice(0, 4)}</th>}
                     <th className='text-end text-primary'>Prévision {firstDate?.slice(0, 4)}</th>
-                    {hasReal && <th className='text-end'>Écart</th>}
+                    {hasReal && <th className='text-end'>Écart vs N-1</th>}
+                    {hasActual && <th className='text-end'>Réel {firstDate?.slice(0, 4)}</th>}
+                    {hasActual && <th className='text-end'>Écart vs réel</th>}
                   </tr>
                 </thead>
                 <tbody className='fs-8 fw-semibold text-gray-700'>
@@ -331,19 +298,33 @@ export default function ModelBenchmarkPage() {
                           {row.delta === null ? '—' : `${row.delta >= 0 ? '+' : ''}${fmt(row.delta)} unités`}
                         </td>
                       )}
+                      {hasActual && <td className='text-end text-gray-900 fw-bold'>{row.actual === null ? '—' : `${fmt(row.actual)} unités`}</td>}
+                      {hasActual && (
+                        <td className={`text-end ${row.deltaActual === null ? 'text-muted' : row.deltaActual >= 0 ? 'text-success' : 'text-danger'}`}>
+                          {row.deltaActual === null ? '—' : `${row.deltaActual >= 0 ? '+' : ''}${fmt(row.deltaActual)} unités`}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
-                {hasReal && (
+                {(hasReal || hasActual) && (
                   <tfoot className='bg-light fw-bold text-gray-900 fs-8'>
                     <tr>
                       <td>Total</td>
-                      <td></td>
-                      <td className='text-end'>{fmt(totalReal)} unités</td>
+                      {hasReal && <td></td>}
+                      {hasReal && <td className='text-end'>{fmt(totalReal)} unités</td>}
                       <td className='text-end text-primary'>{fmt(totalPred)} unités</td>
-                      <td className={`text-end ${totalPred - totalReal >= 0 ? 'text-success' : 'text-danger'}`}>
-                        {totalPred - totalReal >= 0 ? '+' : ''}{fmt(totalPred - totalReal)} unités
-                      </td>
+                      {hasReal && (
+                        <td className={`text-end ${totalPred - totalReal >= 0 ? 'text-success' : 'text-danger'}`}>
+                          {totalPred - totalReal >= 0 ? '+' : ''}{fmt(totalPred - totalReal)} unités
+                        </td>
+                      )}
+                      {hasActual && <td className='text-end'>{fmt(totalActual)} unités</td>}
+                      {hasActual && (
+                        <td className={`text-end ${totalPredOnActual - totalActual >= 0 ? 'text-success' : 'text-danger'}`}>
+                          {totalPredOnActual - totalActual >= 0 ? '+' : ''}{fmt(totalPredOnActual - totalActual)} unités
+                        </td>
+                      )}
                     </tr>
                   </tfoot>
                 )}

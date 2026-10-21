@@ -1,13 +1,15 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Chart from 'react-apexcharts'
 import { ApexOptions } from 'apexcharts'
 import { useQuery } from 'react-query'
 import { apiErrorMessage } from '../../config'
-import { fetchDwhForecast, forecastQueryKey } from '../../services/api'
+import { ForecastMonthSelect } from '../../components/ForecastMonthSelect'
+import { DEFAULT_FORECAST_MONTH, fetchDwhForecast, forecastQueryKey } from '../../services/api'
 import { fmt, fmtDate, fmtIsoDay, fmtThousands } from '../../utils/format'
 
 export default function DataSciencePage() {
-  const { data: result, isLoading, error } = useQuery(forecastQueryKey, fetchDwhForecast, {
+  const [month, setMonth] = useState(DEFAULT_FORECAST_MONTH)
+  const { data: result, isLoading, error } = useQuery(forecastQueryKey(month), () => fetchDwhForecast(month), {
     staleTime: 1000 * 60 * 10,
     retry: false,
   })
@@ -18,15 +20,25 @@ export default function DataSciencePage() {
   const totals = useMemo(() => {
     const values = predictions.map((p) => Number(p.best_quantity) || 0)
     const total = values.reduce((a, b) => a + b, 0)
-    return { total, avg: values.length ? total / values.length : 0, peak: values.length ? Math.max(...values) : 0 }
+    const actualDays = predictions.filter((p) => p.real !== null)
+    const actual = actualDays.reduce((a, p) => a + (p.real ?? 0), 0)
+    const predictedOnActualDays = actualDays.reduce((a, p) => a + p.best_quantity, 0)
+    return {
+      total,
+      avg: values.length ? total / values.length : 0,
+      peak: values.length ? Math.max(...values) : 0,
+      actualDays: actualDays.length,
+      actual,
+      gap: actual > 0 ? ((predictedOnActualDays - actual) / actual) * 100 : null,
+    }
   }, [predictions])
 
   const chart = useMemo(() => {
     if (!result || !predictions.length) return null
     const options: ApexOptions = {
       chart: { fontFamily: 'Inter, sans-serif', type: 'line', height: 380, toolbar: { show: false }, zoom: { enabled: false } },
-      colors: ['#00A3FF'],
-      stroke: { curve: 'smooth', width: 3 },
+      colors: ['#00A3FF', '#1B2A41'],
+      stroke: { curve: 'smooth', width: [3, 2] },
       dataLabels: { enabled: false },
       markers: { size: 4 },
       xaxis: {
@@ -38,7 +50,10 @@ export default function DataSciencePage() {
       tooltip: { shared: true, intersect: false, y: { formatter: (v: number) => `${fmt(v)} unités` } },
       grid: { borderColor: '#F1F1F4', strokeDashArray: 4 },
     }
-    const series = [{ name: `Prévision ${result.best_model_name}`, data: predictions.map((p) => Math.round(p.best_quantity)) }]
+    const series: ApexAxisChartSeries = [{ name: `Prévision ${result.best_model_name}`, data: predictions.map((p) => Math.round(p.best_quantity)) }]
+    if (predictions.some((p) => p.real !== null)) {
+      series.push({ name: 'Production réelle', data: predictions.map((p) => (p.real === null ? null : Math.round(p.real))) })
+    }
     return { options, series }
   }, [result, predictions])
 
@@ -55,6 +70,7 @@ export default function DataSciencePage() {
             </div>
           )}
         </div>
+        <ForecastMonthSelect value={month} onChange={setMonth} />
       </div>
     </div>
   )
@@ -84,7 +100,7 @@ export default function DataSciencePage() {
           { title: 'Volume total prévu', value: `${fmt(totals.total)} unités`, color: 'text-gray-900' },
           { title: 'Moyenne journalière', value: `${fmt(totals.avg)} unités/j`, color: 'text-primary' },
           { title: 'Pic journalier', value: `${fmt(totals.peak)} unités`, color: 'text-gray-900' },
-          { title: "Erreur du modèle (WAPE, même période l'an dernier)", value: `${fmt(bestMetrics?.wape_selection ?? bestMetrics?.wape, 1)} %`, color: 'text-success' },
+          { title: "Erreur moyenne du modèle (même période l'an dernier)", value: `${fmt(bestMetrics?.mae_selection ?? bestMetrics?.mae)} unités/j`, color: 'text-success' },
         ].map((k) => (
           <div className='col-xl-3 col-md-6' key={k.title}>
             <div className='card border-0 shadow-sm bg-white p-5 rounded-3 h-100'>
@@ -94,6 +110,19 @@ export default function DataSciencePage() {
           </div>
         ))}
       </div>
+
+      {totals.actualDays > 0 && totals.gap !== null && (
+        <div className='alert alert-light-primary d-flex flex-wrap gap-4 align-items-center p-4 mb-0'>
+          <span className='fw-semibold text-gray-800'>Mois déjà réalisé : comparaison avec la production réelle</span>
+          <span>Réel : <strong>{fmt(totals.actual)} unités</strong> ({totals.actualDays} jours)</span>
+          <span>
+            Écart de la prévision :{' '}
+            <strong className={totals.gap >= 0 ? 'text-success' : 'text-danger'}>
+              {totals.gap >= 0 ? '+' : ''}{fmt(totals.gap, 1)} %
+            </strong>
+          </span>
+        </div>
+      )}
 
       <div className='card border-0 shadow-sm bg-white p-6 rounded-3'>
         <h3 className='fs-4 fw-bold text-gray-900 mb-1'>Prévision du mois</h3>
