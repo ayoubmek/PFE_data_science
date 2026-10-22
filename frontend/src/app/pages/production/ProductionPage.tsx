@@ -177,7 +177,7 @@ export default function ProductionPage() {
     const ws = XLSX.utils.json_to_sheet(rows)
     ws['!cols'] = [18, 16, 32, 16, 14, 12, 16, 25, 14, 14].map(w => ({ wch: w }))
     XLSX.utils.book_append_sheet(wb, ws, 'Production')
-    XLSX.writeFile(wb, `production_FACT_CLE_${new Date().toISOString().slice(0, 10)}.xlsx`)
+    XLSX.writeFile(wb, `production_${new Date().toISOString().slice(0, 10)}.xlsx`)
   }
 
   if (query.isLoading) return <PageSkeleton type='table' />

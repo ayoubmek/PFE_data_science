@@ -194,7 +194,7 @@ export default function MachinesPage() {
             <div className='card-body d-flex align-items-center justify-content-between p-6'>
               <div>
                 <div className='fs-2hx fw-bold text-gray-900'>{stats.totalVolume.toLocaleString()} unités</div>
-                <div className='fs-7 fw-semibold text-gray-500 mt-1'>Volume cumulé déclaré (FACT_CLE)</div>
+                <div className='fs-7 fw-semibold text-gray-500 mt-1'>Volume cumulé déclaré</div>
               </div>
               <div className='badge badge-light-warning p-4 rounded-circle'>
                 <KTIcon iconName='cube-3' className='fs-2x text-warning' />
@@ -486,7 +486,7 @@ export default function MachinesPage() {
                         </span>
                       </div>
                       <div className='d-flex justify-content-between border-bottom pb-3'>
-                        <span className='text-gray-500 fw-bold fs-7'>Déclarations (FACT_CLE) :</span>
+                        <span className='text-gray-500 fw-bold fs-7'>Déclarations :</span>
                         <span className='fw-bold fs-6'>{(selectedMachine.operationCount || 0).toLocaleString()}</span>
                       </div>
                       <div className='d-flex justify-content-between border-bottom pb-3'>

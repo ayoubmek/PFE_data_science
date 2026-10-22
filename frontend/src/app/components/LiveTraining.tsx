@@ -144,7 +144,7 @@ export function LiveTrainingCard({ live }: { live: LiveTrainingState & { restart
             {running ? 'Entraînement du modèle en cours' : live.status === 'done' ? 'Entraînement terminé' : 'Entraînement interrompu'}
           </h3>
           <div className='text-muted fs-8'>
-            Données FACT_CLE relues et modèle Random Forest réentraîné à chaque ouverture de la page · {fmt(live.elapsed, 1)} s
+            Données de production relues et modèle Random Forest réentraîné à chaque ouverture de la page · {fmt(live.elapsed, 1)} s
           </div>
         </div>
         <div className='d-flex align-items-center gap-3'>

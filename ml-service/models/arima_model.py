@@ -6,28 +6,29 @@ from .base import Forecaster
 
 
 class ARIMAModel(Forecaster):
-    name = "SARIMA"
-    DEFAULT_PARAMS = {"order": (1, 0, 1), "seasonal_order": (1, 1, 1, 7)}
-    GRID = {"order": [(1, 0, 0), (1, 0, 1), (2, 0, 1)], "seasonal_order": [(0, 1, 1, 7), (1, 1, 1, 7)]}
+    """ARIMA(p,d,q) sans composante saisonnière ; p = 7 permet de reprendre le même jour de la semaine précédente."""
+
+    name = "ARIMA"
+    DEFAULT_PARAMS = {"order": (7, 0, 1)}
+    GRID = {"order": [(7, 0, 0), (7, 0, 1), (7, 1, 1)]}
     SELECT_BY_AIC = True
 
-    def __init__(self, order=(1, 0, 1), seasonal_order=(1, 1, 1, 7)):
+    def __init__(self, order=(7, 0, 1)):
         self.order = tuple(order)
-        self.seasonal_order = tuple(seasonal_order)
 
     def fit(self, series: pd.Series) -> "ARIMAModel":
-        from statsmodels.tsa.statespace.sarimax import SARIMAX
+        from statsmodels.tsa.arima.model import ARIMA
 
         self.series = series
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            self.result = SARIMAX(
+            self.result = ARIMA(
                 series.to_numpy(dtype=float),
                 order=self.order,
-                seasonal_order=self.seasonal_order,
+                trend="c" if self.order[1] == 0 else "n",
                 enforce_stationarity=False,
                 enforce_invertibility=False,
-            ).fit(disp=False)
+            ).fit()
         self.aic = float(self.result.aic)
         return self
 

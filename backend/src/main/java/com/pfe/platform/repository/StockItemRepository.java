@@ -52,9 +52,9 @@ public interface StockItemRepository extends JpaRepository<StockItem, StockItemI
         """, nativeQuery = true)
     List<Object[]> findSnapshotTotals();
 
+    // Consommation estimée à partir des instantanés de stock : baisse du stock (tous sites) d'un instantané au suivant.
     @Query(value = """
         WITH snap AS (SELECT MAX(DateStock) AS d FROM dbo.ASTOCKDATE),
-        ile_end AS (SELECT MAX([Posting Date]) AS d FROM dbo.FACT_ILE),
         tracked AS (
             SELECT s.[No_] AS art,
                    MAX(s.[Description]) AS designation,
@@ -70,12 +70,37 @@ public interface StockItemRepository extends JpaRepository<StockItem, StockItemI
             FROM dbo.ASTOCKDATE s WITH (NOLOCK) JOIN snap ON s.DateStock = snap.d
             GROUP BY s.[No_]
         ),
+        dates AS (
+            SELECT d, LAG(d) OVER (ORDER BY d) AS prev_d
+            FROM (SELECT DISTINCT s.DateStock AS d FROM dbo.ASTOCKDATE s WITH (NOLOCK) CROSS JOIN snap
+                  WHERE s.DateStock > DATEADD(day, -:window, snap.d)) x
+        ),
+        art_day AS (
+            SELECT s.[No_] AS art, s.DateStock AS d, SUM(CAST(s.[Quantité] AS FLOAT)) AS q
+            FROM dbo.ASTOCKDATE s WITH (NOLOCK) CROSS JOIN snap
+            WHERE s.DateStock > DATEADD(day, -:window, snap.d)
+            GROUP BY s.[No_], s.DateStock
+        ),
+        moves AS (
+            SELECT a.art, a.d, a.q, dt.prev_d,
+                   LAG(a.q) OVER (PARTITION BY a.art ORDER BY a.d) AS prev_q,
+                   LAG(a.d) OVER (PARTITION BY a.art ORDER BY a.d) AS prev_art_d,
+                   LEAD(a.d) OVER (PARTITION BY a.art ORDER BY a.d) AS next_art_d
+            FROM art_day a JOIN dates dt ON dt.d = a.d
+        ),
+        sorties AS (
+            SELECT m.art, m.d,
+                   CASE WHEN m.prev_q IS NULL THEN 0
+                        WHEN m.prev_art_d = m.prev_d THEN CASE WHEN m.prev_q > m.q THEN m.prev_q - m.q ELSE 0 END
+                        WHEN m.prev_q > 0 THEN m.prev_q ELSE 0 END
+                 + CASE WHEN m.next_art_d IS NULL AND m.d < snap.d AND m.q > 0 THEN m.q ELSE 0 END AS sortie
+            FROM moves m CROSS JOIN snap
+        ),
         conso AS (
-            SELECT i.[Item No_] AS art, -SUM(CAST(i.Quantity AS FLOAT)) AS conso,
-                   -SUM(CASE WHEN i.[Posting Date] > DATEADD(day, -:recent, ile_end.d) THEN CAST(i.Quantity AS FLOAT) ELSE 0 END) AS conso_recente
-            FROM dbo.FACT_ILE i WITH (NOLOCK) CROSS JOIN ile_end
-            WHERE i.[Entry Type] IN ('1', '5') AND i.[Posting Date] > DATEADD(day, -:window, ile_end.d)
-            GROUP BY i.[Item No_]
+            SELECT so.art, SUM(so.sortie) AS conso,
+                   SUM(CASE WHEN so.d > DATEADD(day, -:recent, snap.d) THEN so.sortie ELSE 0 END) AS conso_recente
+            FROM sorties so CROSS JOIN snap
+            GROUP BY so.art
         )
         SELECT t.art, t.designation, t.categorie, t.cout_unitaire,
                ISNULL(c.qte, 0) AS stock, ISNULL(c.valeur, 0) AS valeur,

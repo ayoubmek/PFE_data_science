@@ -179,7 +179,7 @@ export default function ModelBenchmarkPage() {
           {mode === 'dwh' && <ForecastMonthSelect value={month} onChange={setMonth} />}
           <div className='btn-group'>
             <button type='button' className={`btn btn-sm ${mode === 'dwh' ? 'btn-primary' : 'btn-light'}`} onClick={() => setMode('dwh')}>
-              Données dbDWH (FACT_CLE)
+              Données de production
             </button>
             <button type='button' className={`btn btn-sm ${mode === 'file' ? 'btn-primary' : 'btn-light'}`} onClick={() => setMode('file')}>
               Fichier importé
@@ -216,7 +216,7 @@ export default function ModelBenchmarkPage() {
                 {isProcessing ? 'Évaluation…' : 'Évaluer le modèle'}
               </button>
             </div>
-            <div className='text-muted fs-8 mt-2'>Au moins 90 jours consécutifs sont nécessaires pour un backtest fiable.</div>
+            <div className='text-muted fs-8 mt-2'>Au moins 90 jours consécutifs sont nécessaires pour une évaluation fiable.</div>
           </>
         )}
 

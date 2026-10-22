@@ -28,7 +28,6 @@ const PrivateRoutes = () => {
         <Route path='production' element={<SuspensedView><ProductionPage /></SuspensedView>} />
         <Route path='production/machines' element={<SuspensedView><MachinesPage /></SuspensedView>} />
         <Route path='stock' element={<SuspensedView><StockInventoryPage /></SuspensedView>} />
-        <Route path='stock/movements' element={<Navigate to='/stock' />} />
 
         {isAdmin && (
           <>
