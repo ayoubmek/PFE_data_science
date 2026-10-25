@@ -20,7 +20,7 @@ DB_TRUSTED = os.getenv("DB_TRUSTED", "yes").lower() in ("yes", "true", "1")
 DB_USER = os.getenv("DB_USER", "")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 
-ML_HISTORY_START = os.getenv("ML_HISTORY_START", "2024-01-01")
+ML_HISTORY_START = os.getenv("ML_HISTORY_START", "2020-01-01")
 ML_TRS_COMPLETENESS_RATIO = float(os.getenv("ML_TRS_COMPLETENESS_RATIO", "0.5"))
 # Modèle utilisé par l'application ; "auto" compare les quatre modèles et retient le meilleur.
 ML_MODEL = os.getenv("ML_MODEL", "random_forest")

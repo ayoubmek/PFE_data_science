@@ -121,8 +121,7 @@ export interface ModelMetrics {
   rmse: number | null
   r2: number | null
   mape: number | null
-  mae_selection: number | null
-  mae_default: number | null
+  volume_gap: number | null
   rank?: number
   params: ModelParams
   default_params: ModelParams
@@ -187,7 +186,7 @@ export const fetchDwhForecast = async (month: string) =>
     timeout: ML_TIMEOUT,
   })).data
 
-export type TrainingPhase = 'load' | 'tuning' | 'cv' | 'n1' | 'rank' | 'final' | 'done'
+export type TrainingPhase = 'load' | 'tuning' | 'cv' | 'rank' | 'final' | 'done'
 
 export interface TrainingStep {
   t: number
@@ -201,7 +200,7 @@ export interface TrainingStep {
   cv_rmse?: number | null
   cv_r2?: number | null
   cv_mape?: number | null
-  mae_n1?: number | null
+  cv_volume?: number | null
   failed?: boolean
   ranking?: { model: string; rank: number; mae: number | null }[]
 }

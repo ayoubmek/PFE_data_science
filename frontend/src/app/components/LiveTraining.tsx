@@ -12,7 +12,6 @@ const PHASES: Record<TrainingPhase, { label: string; badge: string }> = {
   load: { label: 'Données', badge: 'badge-light-info' },
   tuning: { label: 'Réglage', badge: 'badge-light-warning' },
   cv: { label: 'Validation croisée', badge: 'badge-light-primary' },
-  n1: { label: 'Année précédente', badge: 'badge-light-warning' },
   rank: { label: 'Résultat', badge: 'badge-light-dark' },
   final: { label: 'Entraînement final', badge: 'badge-light-success' },
   done: { label: 'Terminé', badge: 'badge-success' },
@@ -100,7 +99,7 @@ interface ModelProgress {
   cvRmse: number | null
   cvR2: number | null
   cvMape: number | null
-  n1Mae: number | null
+  cvVolume: number | null
   failed: boolean
 }
 
@@ -117,7 +116,7 @@ const summarize = (steps: TrainingStep[]): ModelProgress[] =>
       cvRmse: cvSummary?.cv_rmse ?? null,
       cvR2: cvSummary?.cv_r2 ?? null,
       cvMape: cvSummary?.cv_mape ?? null,
-      n1Mae: own.find((s) => s.mae_n1 !== undefined)?.mae_n1 ?? null,
+      cvVolume: cvSummary?.cv_volume ?? null,
       failed: own.some((s) => s.failed),
     }
   })
@@ -184,7 +183,7 @@ export function LiveTrainingCard({ live }: { live: LiveTrainingState & { restart
               <th className='text-end'>RMSE (CV)</th>
               <th className='text-end'>R² (CV)</th>
               <th className='text-end'>MAPE (CV)</th>
-              <th className='text-end'>MAE année précédente</th>
+              <th className='text-end'>Écart volume (CV)</th>
             </tr>
           </thead>
           <tbody>
@@ -212,7 +211,7 @@ export function LiveTrainingCard({ live }: { live: LiveTrainingState & { restart
                 <td className='text-end'>{m.cvRmse === null ? '—' : `${fmt(m.cvRmse)} unités/j`}</td>
                 <td className='text-end'>{m.cvR2 === null ? '—' : fmt(m.cvR2, 3)}</td>
                 <td className='text-end'>{m.cvMape === null ? '—' : `${fmt(m.cvMape, 1)} %`}</td>
-                <td className='text-end'>{m.n1Mae === null ? '—' : `${fmt(m.n1Mae)} unités/j`}</td>
+                <td className='text-end'>{m.cvVolume === null ? '—' : `${fmt(m.cvVolume, 1)} %`}</td>
               </tr>
             ))}
           </tbody>

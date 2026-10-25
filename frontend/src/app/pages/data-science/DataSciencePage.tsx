@@ -100,7 +100,7 @@ export default function DataSciencePage() {
           { title: 'Volume total prévu', value: `${fmt(totals.total)} unités`, color: 'text-gray-900' },
           { title: 'Moyenne journalière', value: `${fmt(totals.avg)} unités/j`, color: 'text-primary' },
           { title: 'Pic journalier', value: `${fmt(totals.peak)} unités`, color: 'text-gray-900' },
-          { title: "Erreur moyenne du modèle (même période l'an dernier)", value: `${fmt(bestMetrics?.mae_selection ?? bestMetrics?.mae)} unités/j`, color: 'text-success' },
+          { title: 'Erreur moyenne du modèle (validation croisée)', value: `${fmt(bestMetrics?.mae)} unités/j`, color: 'text-success' },
         ].map((k) => (
           <div className='col-xl-3 col-md-6' key={k.title}>
             <div className='card border-0 shadow-sm bg-white p-5 rounded-3 h-100'>

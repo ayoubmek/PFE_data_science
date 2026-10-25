@@ -252,11 +252,11 @@ export default function ModelBenchmarkPage() {
 
             <div className='row g-4'>
               {[
-                { label: "MAE – même période l'an dernier", value: `${fmt(best.mae_selection ?? best.mae)} unités/j`, color: 'text-success' },
-                { label: 'MAE – validation croisée', value: `${fmt(best.mae)} unités/j` },
+                { label: 'MAE – validation croisée', value: `${fmt(best.mae)} unités/j`, color: 'text-success' },
                 { label: 'RMSE – validation croisée', value: `${fmt(best.rmse)} unités/j` },
                 { label: 'R² – validation croisée', value: fmt(best.r2, 3) },
                 { label: 'MAPE – validation croisée', value: best.mape === null ? '—' : `${fmt(best.mape, 1)} %` },
+                { label: 'Écart de volume mensuel', value: best.volume_gap === null ? '—' : `${fmt(best.volume_gap, 1)} %` },
               ].map((k) => (
                 <div className='col-xl col-md-4 col-6' key={k.label}>
                   <div className='bg-light rounded-3 p-4 h-100'>

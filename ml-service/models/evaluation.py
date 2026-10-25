@@ -48,9 +48,17 @@ def _n(x: Optional[float]) -> str:
     return "—" if x is None else f"{x:,.0f}".replace(",", " ")
 
 
+PRODUCTION_DAY_RATIO = 0.10
+
+
+def outlier_cap(values) -> float:
+    """Seuil des journées aberrantes (règle de Tukey : Q3 + 3·IQR)."""
+    q1, q3 = np.quantile(np.asarray(values, dtype=float), [0.25, 0.75])
+    return float(q3 + 3.0 * (q3 - q1))
+
+
 def clean_training_series(series: pd.Series) -> pd.Series:
-    q1, q3 = np.quantile(series.to_numpy(dtype=float), [0.25, 0.75])
-    return series.clip(upper=float(q3 + 3.0 * (q3 - q1)))
+    return series.clip(upper=outlier_cap(series.to_numpy(dtype=float)))
 
 
 def fit_predict(key: str, train: pd.Series, horizon: int, params: Optional[dict] = None) -> pd.Series:
@@ -114,13 +122,20 @@ def rolling_backtest(series: pd.Series, horizon: int, n_origins: int, models: Li
     scope = f"{len(models)} modèles" if len(models) > 1 else MODEL_NAMES[models[0]]
     tracker.step("cv", f"Validation croisée glissante : {len(cuts)} fenêtres de {horizon} jours · {scope}")
 
-    actual = []
+    # Évaluation : la journée aberrante est plafonnée avec la même règle que l'apprentissage (seuil appris sur
+    # l'apprentissage de la fenêtre), la MAPE porte sur les jours de production et l'écart de volume sur chaque fenêtre.
+    actual, production_days = [], []
     preds = {k: [] for k in models}
+    volume_gaps: Dict[str, List[float]] = {k: [] for k in models}
     failed: Dict[str, str] = {}
     for fold, cut in enumerate(cuts, start=1):
-        train, test = series.iloc[:cut], series.iloc[cut:cut + horizon].to_numpy()
+        train = series.iloc[:cut]
+        train_values = train.to_numpy(dtype=float)
+        test = np.minimum(series.iloc[cut:cut + horizon].to_numpy(dtype=float), outlier_cap(train_values))
+        floor = PRODUCTION_DAY_RATIO * float(np.median(train_values[train_values > 0]))
         period = f"{series.index[cut]:%d/%m/%Y} → {series.index[min(cut + horizon, n) - 1]:%d/%m/%Y}"
         actual.extend(test)
+        production_days.extend(test >= floor)
         for key in models:
             if key in failed:
                 continue
@@ -134,6 +149,8 @@ def rolling_backtest(series: pd.Series, horizon: int, n_origins: int, models: Li
                              model=key, failed=True)
                 continue
             preds[key].extend(yhat)
+            if test.sum() > 0:
+                volume_gaps[key].append(float((yhat.sum() - test.sum()) / test.sum() * 100))
             fold_mae = compute_eval_metrics(test, yhat)["mae"]
             tracker.step("cv", f"Fenêtre {fold}/{len(cuts)} ({period}) · {MODEL_NAMES[key]} : MAE {_n(fold_mae)}",
                          advance=1, model=key, fold=fold, folds=len(cuts), mae=fold_mae)
@@ -143,45 +160,22 @@ def rolling_backtest(series: pd.Series, horizon: int, n_origins: int, models: Li
     metrics = {}
     for key in models:
         if key in failed:
-            metrics[key] = {"mae": None, "rmse": None, "r2": None, "mape": None,
+            metrics[key] = {"mae": None, "rmse": None, "r2": None, "mape": None, "volume_gap": None,
                             "name": MODEL_NAMES[key], "error": failed[key]}
             continue
-        m = compute_eval_metrics(actual, preds[key])
+        m = compute_eval_metrics(actual, preds[key], mape_mask=production_days)
+        gaps = volume_gaps[key]
+        m["volume_gap"] = round(float(np.mean(np.abs(gaps))), 1) if gaps else None
         m["name"] = MODEL_NAMES[key]
         metrics[key] = m
         r2 = "—" if m["r2"] is None else f"{m['r2']:.3f}".replace(".", ",")
         mape = "—" if m["mape"] is None else f"{m['mape']:.1f}".replace(".", ",") + " %"
+        vol = "—" if m["volume_gap"] is None else f"{m['volume_gap']:.1f}".replace(".", ",") + " %"
         tracker.step("cv", f"{m['name']} · validation croisée ({len(cuts)} fenêtres) : MAE {_n(m['mae'])} · "
-                           f"RMSE {_n(m['rmse'])} · R² {r2} · MAPE {mape}",
-                     model=key, cv_mae=m["mae"], cv_rmse=m["rmse"], cv_r2=m["r2"], cv_mape=m["mape"])
+                           f"RMSE {_n(m['rmse'])} · R² {r2} · MAPE {mape} · écart de volume {vol}",
+                     model=key, cv_mae=m["mae"], cv_rmse=m["rmse"], cv_r2=m["r2"], cv_mape=m["mape"],
+                     cv_volume=m["volume_gap"])
     return metrics
-
-
-def same_period_last_year_mae(series: pd.Series, forecast_start: pd.Timestamp, horizon: int,
-                               models: List[str], params: Dict[str, dict],
-                               tracker: Optional[Tracker] = None) -> Optional[dict]:
-    tracker = tracker or Tracker()
-    test_start = forecast_start - pd.DateOffset(years=1)
-    test = series.loc[test_start:test_start + pd.Timedelta(days=horizon - 1)]
-    train = series.loc[:test_start - pd.Timedelta(days=1)]
-    if len(test) < horizon or len(train) < MIN_TRAIN_DAYS:
-        tracker.step("n1", "Même période de l'an dernier indisponible : classement sur la validation croisée",
-                     advance=len(models))
-        return None
-    tracker.step("n1", f"Test sur la même période l'an dernier : du {test.index[0]:%d/%m/%Y} au {test.index[-1]:%d/%m/%Y} "
-                       f"(apprentissage jusqu'au {train.index[-1]:%d/%m/%Y})")
-    result = {}
-    for key in models:
-        tracker.running(f"Même période l'an dernier · entraînement {MODEL_NAMES[key]}…")
-        try:
-            result[key] = compute_eval_metrics(test.to_numpy(), fit_predict(key, train, horizon, params[key]).to_numpy())["mae"]
-            tracker.step("n1", f"{MODEL_NAMES[key]} : MAE {_n(result[key])} unités/jour", advance=1,
-                         model=key, mae_n1=result[key])
-        except Exception as e:
-            logger.warning(f"Modèle {MODEL_NAMES[key]} ignoré pour la période N-1 : {str(e)[:200]}")
-            result[key] = None
-            tracker.step("n1", f"{MODEL_NAMES[key]} ignoré : {str(e)[:200]}", advance=1, model=key, failed=True)
-    return result
 
 
 def build_forecast(series: pd.Series, horizon: int, n_origins: int, models: List[str],
@@ -194,14 +188,10 @@ def build_forecast(series: pd.Series, horizon: int, n_origins: int, models: List
     bt_horizon = backtest_horizon or horizon
     first_future = series.index[-1] + pd.Timedelta(days=1)
     gap = max(0, (start - first_future).days) if start is not None else 0
-    forecast_start = first_future + pd.Timedelta(days=gap)
     n_folds = len(_cuts(len(series), bt_horizon, n_origins))
-    tracker.plan(n_folds * len(models) + len(models) + 1 + (len(models) if tuning_folds > 0 else 0))
+    tracker.plan(n_folds * len(models) + 1 + (len(models) if tuning_folds > 0 else 0))
 
-    holdout_start = forecast_start - pd.DateOffset(years=1)
-    tuning_series = series.loc[:holdout_start - pd.Timedelta(days=1)]
-    if len(tuning_series) < MIN_TRAIN_DAYS + bt_horizon:
-        tuning_series = series.iloc[:-bt_horizon]
+    tuning_series = series.iloc[:-bt_horizon]
     tuning = {}
     for key in models:
         if tuning_folds > 0:
@@ -213,33 +203,25 @@ def build_forecast(series: pd.Series, horizon: int, n_origins: int, models: List
     defaults = {key: dict(MODEL_FACTORIES[key].DEFAULT_PARAMS) for key in models}
 
     metrics = rolling_backtest(series, bt_horizon, n_origins, models, tuned, tracker)
-    last_year = same_period_last_year_mae(series, forecast_start, horizon, models, tuned, tracker)
-    changed = [key for key in models if tuned[key] != defaults[key]]
-    last_year_default = (same_period_last_year_mae(series, forecast_start, horizon, changed, defaults)
-                         if last_year and changed else {}) or {}
 
     for key, m in metrics.items():
-        m["mae_selection"] = last_year[key] if last_year else m["mae"]
-        m["mae_default"] = last_year_default.get(key, m["mae_selection"]) if last_year else None
         m["params"] = tuned[key]
         m["default_params"] = defaults[key]
         m["tuning_criterion"] = tuning[key]["criterion"]
         m["tuning_candidates"] = tuning[key]["candidates"]
-    ranked = sorted((k for k in metrics if metrics[k]["mae_selection"] is not None),
-                    key=lambda k: (metrics[k]["mae_selection"], metrics[k]["mae"] or 0.0))
+    ranked = sorted((k for k in metrics if metrics[k]["mae"] is not None), key=lambda k: metrics[k]["mae"])
     for rank, key in enumerate(ranked, start=1):
         metrics[key]["rank"] = rank
     if not ranked:
         raise RuntimeError("Aucun modèle de prévision n'a pu être évalué.")
     best = ranked[0]
-    criterion = "même période l'an dernier" if last_year else "validation croisée"
     if len(ranked) > 1:
-        summary = f"Classement (MAE {criterion}) : " + " · ".join(
-            f"{metrics[k]['rank']}. {MODEL_NAMES[k]} ({_n(metrics[k]['mae_selection'])})" for k in ranked)
+        summary = f"Classement (MAE en validation croisée) : " + " · ".join(
+            f"{metrics[k]['rank']}. {MODEL_NAMES[k]} ({_n(metrics[k]['mae'])})" for k in ranked)
     else:
-        summary = f"Modèle utilisé : {MODEL_NAMES[best]} (MAE {criterion} : {_n(metrics[best]['mae_selection'])} unités/jour)"
+        summary = f"Modèle utilisé : {MODEL_NAMES[best]} (MAE en validation croisée : {_n(metrics[best]['mae'])} unités/jour)"
     tracker.step("rank", summary,
-                 ranking=[{"model": k, "rank": metrics[k]["rank"], "mae": metrics[k]["mae_selection"]} for k in ranked])
+                 ranking=[{"model": k, "rank": metrics[k]["rank"], "mae": metrics[k]["mae"]} for k in ranked])
 
     tracker.running(f"Entraînement final de {MODEL_NAMES[best]} sur {len(series)} jours…")
     yhat = fit_predict(best, series, gap + horizon, tuned[best]).iloc[gap:]
