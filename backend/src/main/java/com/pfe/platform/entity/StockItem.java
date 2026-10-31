@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Entity
 @Table(name = "ASTOCKDATE", schema = "dbo")
@@ -50,9 +49,4 @@ public class StockItem {
 
     @Column(name = "groupeclient")
     private String groupeClient;
-
-    public BigDecimal getValeurUnitaire() {
-        if (valeurTotale == null || quantite == null || quantite.signum() <= 0) return null;
-        return valeurTotale.divide(quantite, 6, RoundingMode.HALF_UP);
-    }
 }

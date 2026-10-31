@@ -224,3 +224,83 @@ class DataCleaner:
             self.df.loc[mask, "Nom abrégé"] = self.df.loc[mask, "No_"]
 
         self.audit_report["missing_imputed"] = int(missing_count)
+
+
+class ProductionCleaner:
+    NUMERIC_COLS = ["Quantity", "Setup Time", "Run Time", "Stop Time", "Invoiced Quantity",
+                    "Output Quantity", "Scrap Quantity"]
+
+    def __init__(self, df_raw: pd.DataFrame):
+        self.df = df_raw.copy()
+        self.audit_report: Dict[str, Any] = {
+            "initial_rows": len(df_raw),
+            "invalid_rows_dropped": 0,
+            "missing_machines": 0,
+            "invalid_dates_dropped": 0,
+            "corrections_kept": 0,
+            "inconsistencies_fixed": 0,
+            "final_clean_rows": 0,
+        }
+
+    def run_all_cleaners(self) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+        logger.info("Production Rule 1: Duplicates, missing IDs and machines...")
+        self.clean_ids()
+
+        logger.info("Production Rule 2: Posting Date Parsing and ISO Standardization...")
+        self.harmonize_dates()
+
+        logger.info("Production Rule 3: Numeric Values (ERP corrections kept)...")
+        self.clean_numeric_fields()
+
+        logger.info("Production Rule 4: Inconsistent values (scrap, run time)...")
+        self.fix_inconsistencies()
+
+        self.audit_report["final_clean_rows"] = len(self.df)
+        self.audit_report["retention_rate_pct"] = round(
+            (len(self.df) / self.audit_report["initial_rows"]) * 100, 2
+        )
+        return self.df, self.audit_report
+
+    def clean_ids(self):
+        before_count = len(self.df)
+        self.df["Entry No_"] = self.df["Entry No_"].fillna("").astype(str).str.strip()
+        self.df = self.df[self.df["Entry No_"] != ""].drop_duplicates(subset=["Entry No_"], keep="first").copy()
+        self.audit_report["invalid_rows_dropped"] = int(before_count - len(self.df))
+
+        self.df["No_"] = self.df["No_"].fillna("").astype(str).str.strip().str.upper()
+        missing = self.df["No_"] == ""
+        self.audit_report["missing_machines"] = int(missing.sum())
+        self.df.loc[missing, "No_"] = "NON_RENSEIGNE"
+
+    def harmonize_dates(self):
+        date_series = self.df["Posting Date"].astype(str).str.strip()
+        iso = pd.to_datetime(date_series, format="%Y-%m-%d", errors="coerce")
+        day_first = pd.to_datetime(date_series.where(iso.isna()), format="mixed", dayfirst=True, errors="coerce")
+        parsed_dates = iso.fillna(day_first)
+        out_of_bounds = (
+            (parsed_dates.dt.year < QUALITY_THRESHOLDS["min_valid_year"])
+            | (parsed_dates.dt.year > QUALITY_THRESHOLDS["max_valid_year"])
+        )
+        drop_mask = parsed_dates.isna() | out_of_bounds
+
+        self.audit_report["invalid_dates_dropped"] = int(drop_mask.sum())
+        self.df = self.df[~drop_mask].copy()
+        self.df["Posting Date"] = parsed_dates[~drop_mask].dt.strftime("%Y-%m-%d")
+
+    def clean_numeric_fields(self):
+        for col in [c for c in self.NUMERIC_COLS if c in self.df.columns]:
+            s_clean = (self.df[col].fillna("").astype(str)
+                       .str.replace(r"[^\d.,\-]", "", regex=True).str.replace(",", ".", regex=False))
+            self.df[col] = pd.to_numeric(s_clean, errors="coerce").fillna(0.0)
+        negatives = self.df[["Output Quantity", "Scrap Quantity", "Run Time"]] < 0
+        self.audit_report["corrections_kept"] = int(negatives.any(axis=1).sum())
+
+    def fix_inconsistencies(self):
+        excess_scrap = (self.df["Output Quantity"] > 0) & (self.df["Scrap Quantity"] > self.df["Output Quantity"])
+        self.df.loc[excess_scrap, "Scrap Quantity"] = self.df.loc[excess_scrap, "Output Quantity"]
+
+        max_hours = QUALITY_THRESHOLDS["max_run_time_hours"]
+        too_long = self.df["Run Time"] > max_hours
+        self.df.loc[too_long, "Run Time"] = max_hours
+
+        self.audit_report["inconsistencies_fixed"] = int(excess_scrap.sum() + too_long.sum())

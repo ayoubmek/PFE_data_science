@@ -9,8 +9,6 @@ import { fmt } from '../../utils/format'
 
 type SortField = keyof StockItem
 
-const isLowStock = (item: StockItem) => item.statut === 'RUPTURE' || item.statut === 'CRITIQUE'
-
 export default function StockPage() {
   const itemsQuery = useQuery('stockItems', fetchStockItems)
   const kpiQuery = useQuery('stockKpi', fetchStockKpi)
@@ -39,7 +37,7 @@ export default function StockPage() {
   const filteredItems = useMemo(() => {
     let result = items.filter(i => {
       const s = searchTerm.toLowerCase()
-      const matchSearch = !s || i.designation?.toLowerCase().includes(s) || i.reference?.toLowerCase().includes(s) || i.emplacement?.toLowerCase().includes(s) || i.nomAbrege?.toLowerCase().includes(s) || i.groupeClient?.toLowerCase().includes(s)
+      const matchSearch = !s || i.designation?.toLowerCase().includes(s) || i.reference?.toLowerCase().includes(s) || i.emplacement?.toLowerCase().includes(s) || i.nomAbrege?.toLowerCase().includes(s) || i.groupeClient?.toLowerCase().includes(s) || i.categorie?.toLowerCase().includes(s) || i.genProdPostingGroup?.toLowerCase().includes(s)
       return matchSearch
     })
     result.sort((a, b) => {
@@ -85,9 +83,6 @@ export default function StockPage() {
     return <div className='alert alert-danger p-5'>{apiErrorMessage(itemsQuery.error, 'Impossible de charger le stock depuis le Data Warehouse.')}</div>
   }
 
-  const statuts = kpi?.statuts ?? {}
-  const plan = kpi?.reapprovisionnement
-
   return (
     <div className='card card-flush'>
 
@@ -95,14 +90,7 @@ export default function StockPage() {
         <div className='d-flex gap-4 flex-wrap'>
           {[
             { label: `Articles en stock au ${kpi?.dateStock ?? '—'}`, val: fmt(stats.total), color: 'primary', icon: 'element-11' },
-            { label: 'Ruptures (articles consommés)', val: fmt(statuts.RUPTURE), color: 'danger', icon: 'cross-circle' },
             { label: 'Valeur totale du stock', val: `${fmt((kpi?.valeurTotaleStock ?? 0) / 1e6, 2)} M TND`, color: 'success', icon: 'dollar' },
-            {
-              label: `Plan ${plan?.horizonJours ?? '—'} j : ${fmt(plan?.nbReferences)} réf. · ${fmt(plan?.quantiteTotale)} unités`,
-              val: `${fmt((plan?.budgetTnd ?? 0) / 1e6, 2)} M TND`,
-              color: 'dark',
-              icon: 'basket',
-            },
           ].map(s => (
             <div key={s.label} className='d-flex align-items-center gap-2 bg-light-subtle rounded px-4 py-2'>
               <span className={`badge badge-circle badge-light-${s.color} p-4`}>
@@ -124,7 +112,7 @@ export default function StockPage() {
             <input
               type='text'
               className='form-control form-control-solid w-250px ps-14'
-              placeholder='No_, Description, Site, Nom abrégé, GroupeClient...'
+              placeholder='No_, Description, Site, GroupeItem, GroupeClient...'
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
@@ -171,27 +159,20 @@ export default function StockPage() {
                     <span className='text-muted fs-6'>Aucun article trouvé</span>
                   </td>
                 </tr>
-              ) : currentItems.map((i, idx) => {
-                const low = isLowStock(i)
-                return (
-                  <tr key={`${i.reference}-${i.dateStock}-${i.emplacement}-${idx}`}>
-                    <td className='ps-4 text-muted'>{i.dateStock ? String(i.dateStock).slice(0, 10) : '—'}</td>
-                    <td className='fw-bold text-gray-800'>{i.reference}</td>
-                    <td className='text-gray-700 mw-150px text-truncate'>{i.designation}</td>
-                    <td className='text-muted'>{i.genProdPostingGroup || '—'}</td>
-                    <td>
-                      <span className={`fw-bold text-${low ? 'danger' : 'success'}`}>
-                        {fmt(i.quantite)}
-                      </span>
-                    </td>
-                    <td className='fw-bold text-gray-700'>{fmt(i.valeurTotale, 2)} TND</td>
-                    <td className='text-muted'>{i.emplacement}</td>
-                    <td className='text-muted'>{i.nomAbrege}</td>
-                    <td><span className='badge badge-light-info'>{i.categorie}</span></td>
-                    <td className='text-muted'>{i.groupeClient || '—'}</td>
-                  </tr>
-                )
-              })}
+              ) : currentItems.map((i, idx) => (
+                <tr key={`${i.reference}-${i.dateStock}-${i.emplacement}-${idx}`}>
+                  <td className='ps-4 text-muted'>{i.dateStock ? String(i.dateStock).slice(0, 10) : '—'}</td>
+                  <td className='fw-bold text-gray-800'>{i.reference}</td>
+                  <td className='text-gray-700 mw-150px text-truncate'>{i.designation}</td>
+                  <td className='text-muted'>{i.genProdPostingGroup || '—'}</td>
+                  <td className='fw-bold text-gray-800'>{fmt(i.quantite)}</td>
+                  <td className='fw-bold text-gray-700'>{fmt(i.valeurTotale, 2)} TND</td>
+                  <td className='text-muted'>{i.emplacement}</td>
+                  <td className='text-muted'>{i.nomAbrege}</td>
+                  <td><span className='badge badge-light-info'>{i.categorie}</span></td>
+                  <td className='text-muted'>{i.groupeClient || '—'}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

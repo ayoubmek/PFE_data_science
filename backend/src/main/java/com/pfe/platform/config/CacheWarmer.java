@@ -41,9 +41,8 @@ public class CacheWarmer {
             productionService.getAllMachines();
             for (String period : ProductionService.PERIODS) {
                 productionService.getKpi(period);
-                productionService.getStats(period);
+                productionService.getStats(period, null);
             }
-            productionService.getMachineCountBySite();
             stockService.getAllItems();
             stockService.getKpi();
             log.info("[CACHE] Données DWH chargées en {} ms.", System.currentTimeMillis() - t0);

@@ -46,22 +46,6 @@ public class DashboardController {
         }
         summary.put("stockGroups", stockGroups);
 
-        Map<String, Long> machinesBySite = productionService.getMachineCountBySite();
-        List<Map<String, Object>> stockSites = new ArrayList<>();
-        for (Object[] r : stockRepository.findStockDistributionBySite()) {
-            String site = r[0].toString().trim();
-            Map<String, Object> s = new LinkedHashMap<>();
-            s.put("site", site);
-            s.put("count", ((Number) r[1]).longValue());
-            s.put("quantity", r[2] != null ? ((Number) r[2]).doubleValue() : 0.0);
-            s.put("value", r[3] != null ? ((Number) r[3]).doubleValue() : 0.0);
-            s.put("machines", machinesBySite.entrySet().stream()
-                .filter(e -> e.getKey().equalsIgnoreCase(site))
-                .map(Map.Entry::getValue).findFirst().orElse(0L));
-            stockSites.add(s);
-        }
-        summary.put("stockSites", stockSites);
-
         return ResponseEntity.ok(summary);
     }
 }

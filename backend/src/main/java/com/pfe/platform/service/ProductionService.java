@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.time.YearMonth;
 import java.util.*;
 
 import static com.pfe.platform.service.StockService.*;
@@ -60,37 +60,36 @@ public class ProductionService {
         LocalDate start = periodStart(period, last);
         kpi.setPeriodStart(start);
         kpi.setPeriodEnd(last);
-        kpi.setPeriodDays((int) ChronoUnit.DAYS.between(start, last) + 1);
+        java.sql.Date first = factCleRepo.findFirstPostingDate();
+        kpi.setDataStart(first != null ? first.toLocalDate() : null);
         Object[] r = first(factCleRepo.findKpiStats(start));
         if (r != null) {
-            kpi.setTotalOrdres(toLong(r[0]));
-            double output = toDouble(r[1]);
-            double scrap = toDouble(r[2]);
-            kpi.setTotalVolumeProduit(output);
-            kpi.setTotalRebut(scrap);
-            kpi.setTauxConformite(output + scrap > 0 ? Math.round(output / (output + scrap) * 10000.0) / 100.0 : null);
-            kpi.setMachinesActives(toLong(r[3]));
+            kpi.setTotalVolumeProduit(toDouble(r[0]));
+            kpi.setTotalRebut(toDouble(r[1]));
         }
         Object[] m = first(factCleRepo.findMachineCounts());
         if (m != null) {
             kpi.setMachinesTotal(toLong(m[0]));
-            kpi.setMachinesBloquees(toLong(m[1]));
         }
         return kpi;
     }
 
     @Cacheable(value = "productionDaily", sync = true)
-    public List<Map<String, Object>> getStats(String period) {
+    public List<Map<String, Object>> getStats(String period, YearMonth month) {
         List<Map<String, Object>> result = new ArrayList<>();
         LocalDate last = lastPostingDate();
         if (last == null) return result;
-        LocalDate start = periodStart(period, last);
-        List<Object[]> rows = isMonthly(period) ? factCleRepo.findMonthlyStats(start) : factCleRepo.findDailyStats(start);
+        boolean monthly = isMonthly(period);
+        boolean chosenMonth = month != null && !monthly;
+        LocalDate start = chosenMonth ? month.atDay(1) : periodStart(period, last);
+        LocalDate end = chosenMonth ? month.plusMonths(1).atDay(1) : last.plusDays(1);
+        List<Object[]> rows = monthly ? factCleRepo.findMonthlyStats(start) : factCleRepo.findDailyStats(start, end);
         for (Object[] r : rows) {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("date", toDate(r[0]));
             row.put("totalOutput", toDouble(r[1]));
             row.put("totalScrap", toDouble(r[2]));
+            row.put("totalTrs", toDouble(r[3]));
             result.add(row);
         }
         return result;
@@ -122,22 +121,13 @@ public class ProductionService {
         return result;
     }
 
-    @Cacheable(value = "machinesBySite", sync = true)
-    public Map<String, Long> getMachineCountBySite() {
-        Map<String, Long> bySite = new LinkedHashMap<>();
-        for (Object[] r : factCleRepo.findMachineCountBySite()) {
-            bySite.put(str(r[0]), toLong(r[1]));
-        }
-        return bySite;
-    }
-
     public static boolean isMonthly(String period) {
         return PERIOD_YEAR.equals(period) || PERIOD_ALL.equals(period);
     }
 
     private LocalDate periodStart(String period, LocalDate last) {
         return switch (period) {
-            case PERIOD_YEAR -> last.withDayOfYear(1);
+            case PERIOD_YEAR -> last.withDayOfMonth(1).minusMonths(11);
             case PERIOD_ALL -> {
                 java.sql.Date first = factCleRepo.findFirstPostingDate();
                 yield first != null ? first.toLocalDate() : last;

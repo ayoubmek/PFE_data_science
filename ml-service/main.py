@@ -13,7 +13,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 import config
-from models.data_loader import PRODUCTION_DECIMALS, DWHUnavailableError, is_available, load_production_series
+from models.data_loader import (PRODUCTION_DECIMALS, DWHUnavailableError, is_available, last_loaded_series,
+                                load_production_series)
 from models.evaluation import MIN_TRAIN_DAYS, MODEL_FACTORIES, Tracker, build_custom_forecast, build_forecast
 
 if config.ML_MODEL != "auto" and config.ML_MODEL not in MODEL_FACTORIES:
@@ -80,12 +81,14 @@ def _check_horizon(horizon: int):
         raise HTTPException(400, "L'horizon doit être compris entre 1 et 90 jours.")
 
 
-def _compute_dwh_forecast(horizon: int, start: Optional[str], tracker: Optional[Tracker] = None) -> dict:
+def _compute_dwh_forecast(horizon: int, start: Optional[str], tracker: Optional[Tracker] = None,
+                          series: Optional[pd.Series] = None) -> dict:
     tracker = tracker or Tracker()
-    tracker.running("Lecture de la production journalière dans dbDWH (FACT_CLE)…")
-    series = load_production_series()
-    tracker.step("load", f"{len(series)} jours de production chargés depuis FACT_CLE, du {series.index[0]:%d/%m/%Y} "
-                         f"au {series.index[-1]:%d/%m/%Y}")
+    if series is None:
+        tracker.running("Lecture de la production journalière dans dbDWH (FACT_CLE)…")
+        series = load_production_series()
+        tracker.step("load", f"{len(series)} jours de production chargés depuis FACT_CLE, du {series.index[0]:%d/%m/%Y} "
+                             f"au {series.index[-1]:%d/%m/%Y}")
     start_ts = _parse_start(start)
     if start_ts is not None and (start_ts - series.index[-1]).days > MAX_DAYS_AHEAD:
         raise HTTPException(400, f"La date de début doit se situer au plus {MAX_DAYS_AHEAD} jours après "
@@ -141,12 +144,11 @@ JOB_TTL_SECONDS = 3600
 
 
 class TrainingJob(Tracker):
-    """Entraînement complet lancé par la page Benchmark, sans cache, dont les étapes sont suivies en direct."""
-
-    def __init__(self, horizon: int, start: Optional[str]):
+    def __init__(self, key: tuple, compute):
         super().__init__()
         self.id = uuid.uuid4().hex[:12]
-        self.key = (horizon, start)
+        self.key = key
+        self.compute = compute
         self.status = "running"
         self.steps: list = []
         self.current = ""
@@ -163,17 +165,15 @@ class TrainingJob(Tracker):
         self.steps.append({"t": round(time.time() - self.t0, 1), "phase": phase, "message": message, **data})
 
     def run(self):
-        horizon, start = self.key
         try:
-            result = _compute_dwh_forecast(horizon, start, self)
-            _cache[("forecast", horizon, start)] = (time.time(), result)
+            result = self.compute(self)
             self.result = result
             self.step("done", f"Entraînement terminé en {round(time.time() - self.t0, 1)} s · "
                               f"meilleur modèle : {result['best_model_name']}")
             self.status = "done"
         except HTTPException as e:
             self.error, self.status = str(e.detail), "error"
-        except DWHUnavailableError as e:
+        except (DWHUnavailableError, ValueError) as e:
             self.error, self.status = str(e), "error"
         except Exception as e:
             logger.exception("Entraînement Benchmark en échec")
@@ -202,11 +202,7 @@ _jobs: dict = {}
 _jobs_guard = threading.Lock()
 
 
-@app.post("/benchmark/start", dependencies=[Depends(require_api_key)])
-def benchmark_start(horizon: int = 30, start: Optional[str] = None):
-    _check_horizon(horizon)
-    start_ts = _parse_start(start)
-    key = (horizon, start_ts.strftime("%Y-%m-%d") if start_ts is not None else None)
+def _start_job(key: tuple, compute) -> dict:
     with _jobs_guard:
         for job_id, job in list(_jobs.items()):
             if job.status != "running" and time.time() - job.t0 > JOB_TTL_SECONDS:
@@ -214,7 +210,7 @@ def benchmark_start(horizon: int = 30, start: Optional[str] = None):
         running = next((j for j in _jobs.values() if j.key == key and j.status == "running"), None)
         if running:
             return {"job_id": running.id}
-        job = TrainingJob(*key)
+        job = TrainingJob(key, compute)
         _jobs[job.id] = job
     threading.Thread(target=job.run, daemon=True).start()
     return {"job_id": job.id}
@@ -239,8 +235,7 @@ class CustomPredictionRequest(BaseModel):
     start: Optional[str] = None
 
 
-@app.post("/predict/custom", dependencies=[Depends(require_api_key)])
-def predict_custom(req: CustomPredictionRequest):
+def _parse_custom(req: CustomPredictionRequest):
     _check_horizon(req.horizon)
     try:
         s = (pd.Series([p.value for p in req.data], index=pd.to_datetime([p.date for p in req.data], format="%Y-%m-%d"))
@@ -252,25 +247,41 @@ def predict_custom(req: CustomPredictionRequest):
     s = s.round(PRODUCTION_DECIMALS)
 
     start_ts = _parse_start(req.start)
+    requested_key = start_ts.strftime("%Y-%m-%d") if start_ts is not None else None
     if start_ts is not None and not (s.index[-1] < start_ts <= s.index[-1] + pd.Timedelta(days=MAX_DAYS_AHEAD)):
         start_ts = None
-    start_key = start_ts.strftime("%Y-%m-%d") if start_ts is not None else None
+    return s, requested_key, start_ts
 
-    def compute():
-        try:
-            dwh_series = load_production_series()
-            if dwh_series.index.equals(s.index) and np.array_equal(dwh_series.to_numpy(), s.to_numpy()):
-                return dwh_forecast(req.horizon, start_key)
-        except DWHUnavailableError:
-            pass
-        return build_custom_forecast(s, req.horizon, config.ML_BACKTEST_ORIGINS, APP_MODELS, start_ts,
-                                     tuning_folds=config.ML_TUNING_FOLDS)
 
-    content_key = hashlib.sha1(pd.util.hash_pandas_object(s, index=True).to_numpy().tobytes()).hexdigest()
+def _matching_dwh_series(s: pd.Series) -> Optional[pd.Series]:
     try:
-        return _cached(("custom", content_key, req.horizon, start_key), compute)
-    except ValueError as e:
-        raise HTTPException(400, str(e))
+        dwh_series = last_loaded_series()
+    except DWHUnavailableError:
+        return None
+    return dwh_series if dwh_series.index.equals(s.index) and np.array_equal(dwh_series.to_numpy(), s.to_numpy()) else None
+
+
+def _content_key(s: pd.Series) -> str:
+    return hashlib.sha1(pd.util.hash_pandas_object(s, index=True).to_numpy().tobytes()).hexdigest()
+
+
+@app.post("/benchmark/custom/start", dependencies=[Depends(require_api_key)])
+def benchmark_custom_start(req: CustomPredictionRequest):
+    s, requested_key, start_ts = _parse_custom(req)
+
+    def compute(job: TrainingJob) -> dict:
+        job.step("load", f"{len(s)} jours importés depuis le fichier, du {s.index[0]:%d/%m/%Y} au {s.index[-1]:%d/%m/%Y}")
+        dwh_series = _matching_dwh_series(s)
+        if dwh_series is not None:
+            job.step("load", "Fichier identique aux données de production de l'entrepôt : même calcul et même résultat")
+            result = _compute_dwh_forecast(req.horizon, requested_key, job, series=dwh_series)
+            _cache[("forecast", req.horizon, requested_key)] = (time.time(), result)
+        else:
+            result = build_custom_forecast(s, req.horizon, config.ML_BACKTEST_ORIGINS, APP_MODELS, start_ts,
+                                           tuning_folds=config.ML_TUNING_FOLDS, tracker=job)
+        return result
+
+    return _start_job(("custom", _content_key(s), req.horizon, requested_key), compute)
 
 
 if __name__ == "__main__":

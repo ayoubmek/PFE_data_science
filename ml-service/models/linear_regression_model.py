@@ -6,8 +6,6 @@ from .base import Forecaster
 
 
 class LinearRegressionModel(Forecaster):
-    """Régression linéaire simple : la production est expliquée par le temps seul (y = a + b·t)."""
-
     name = "Régression linéaire simple"
 
     def __init__(self):

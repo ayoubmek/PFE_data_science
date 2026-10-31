@@ -22,20 +22,17 @@ export interface DailyStat {
   date: string
   totalOutput: number
   totalScrap: number
+  totalTrs: number
 }
 
 export interface ProductionKpi {
   period: Period
   periodStart: string
   periodEnd: string
-  periodDays: number
-  totalOrdres: number
+  dataStart: string | null
   totalVolumeProduit: number
   totalRebut: number
-  tauxConformite: number | null
   machinesTotal: number
-  machinesActives: number
-  machinesBloquees: number
 }
 
 export interface Machine {
@@ -54,40 +51,22 @@ export interface Machine {
   derniereDeclaration: string | null
 }
 
-export type StockStatus = 'RUPTURE' | 'CRITIQUE' | 'NORMAL' | 'SURSTOCK' | 'INACTIF' | 'SANS_CONSOMMATION'
-
 export interface StockItem {
-  id: string
   reference: string
   designation: string | null
   categorie: string | null
   emplacement: string | null
   dateStock: string | null
-  encours: number | null
   genProdPostingGroup: string | null
   nomAbrege: string | null
   groupeClient: string | null
   quantite: number
-  valeurUnitaire: number | null
   valeurTotale: number
-  statut: StockStatus | null
-  couvertureJours: number | null
-  consommationJournaliere: number | null
 }
 
 export interface StockKpi {
   dateStock: string
-  totalArticles: number
-  quantiteTotale: number
   valeurTotaleStock: number
-  statuts: Partial<Record<StockStatus, number>>
-  reapprovisionnement: {
-    horizonJours: number
-    nbReferences: number
-    quantiteTotale: number
-    budgetTnd: number
-    nbReferencesSansCout: number
-  } | null
 }
 
 export interface StockGroup {
@@ -98,19 +77,10 @@ export interface StockGroup {
   percentage: number
 }
 
-export interface StockSite {
-  site: string
-  count: number
-  quantity: number
-  value: number
-  machines: number
-}
-
 export interface DashboardSummary {
   production: ProductionKpi
   stock: StockKpi
   stockGroups: StockGroup[]
-  stockSites: StockSite[]
 }
 
 export type ModelParams = Record<string, string | number | null | Array<number>>
@@ -119,9 +89,9 @@ export interface ModelMetrics {
   name: string
   mae: number | null
   rmse: number | null
-  r2: number | null
-  mape: number | null
-  volume_gap: number | null
+  wape: number | null
+  mase: number | null
+  bias: number | null
   rank?: number
   params: ModelParams
   default_params: ModelParams
@@ -157,8 +127,8 @@ const DWH_TIMEOUT = 120000
 export const fetchDashboardSummary = async (period: Period) =>
   (await axios.get<DashboardSummary>(`${API_BASE_URL}/dashboard/summary`, { params: { period }, timeout: DWH_TIMEOUT })).data
 
-export const fetchProductionStats = async (period: Period) =>
-  (await axios.get<DailyStat[]>(`${API_BASE_URL}/production/fact-cle/stats`, { params: { period }, timeout: DWH_TIMEOUT })).data
+export const fetchProductionStats = async (period: Period, month?: string) =>
+  (await axios.get<DailyStat[]>(`${API_BASE_URL}/production/fact-cle/stats`, { params: { period, month }, timeout: DWH_TIMEOUT })).data
 
 export const fetchDeclarations = async () =>
   (await axios.get<Declaration[]>(`${API_BASE_URL}/production/orders`, { timeout: DWH_TIMEOUT })).data
@@ -198,9 +168,9 @@ export interface TrainingStep {
   mae?: number | null
   cv_mae?: number | null
   cv_rmse?: number | null
-  cv_r2?: number | null
-  cv_mape?: number | null
-  cv_volume?: number | null
+  cv_wape?: number | null
+  cv_mase?: number | null
+  cv_bias?: number | null
   failed?: boolean
   ranking?: { model: string; rank: number; mae: number | null }[]
 }
@@ -217,20 +187,14 @@ export interface TrainingStatus {
   error: string | null
 }
 
-export const startTraining = async (month: string) =>
-  (await axios.post<{ job_id: string }>(`${API_BASE_URL}/ml/benchmark/start`, null, {
-    params: forecastParams(month),
-    timeout: DWH_TIMEOUT,
-  })).data.job_id
-
 export const fetchTrainingStatus = async (jobId: string, since: number) =>
   (await axios.get<TrainingStatus>(`${API_BASE_URL}/ml/benchmark/${jobId}`, { params: { since }, timeout: DWH_TIMEOUT })).data
 
-export const fetchCustomForecast = async (data: DataPoint[]) =>
-  (await axios.post<ForecastResult>(
-    `${API_BASE_URL}/ml/predict/custom`,
-    { data, horizon: FORECAST_HORIZON },
-    { timeout: ML_TIMEOUT }
-  )).data
+export const startCustomTraining = async (data: DataPoint[], month: string) =>
+  (await axios.post<{ job_id: string }>(
+    `${API_BASE_URL}/ml/benchmark/custom/start`,
+    { data, ...forecastParams(month) },
+    { timeout: DWH_TIMEOUT }
+  )).data.job_id
 
 export const forecastQueryKey = (month: string) => ['productionForecast', month || 'next']

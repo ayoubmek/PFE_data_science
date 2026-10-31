@@ -59,13 +59,6 @@ app:
     api-key: ${ML_API_KEY:}
     timeout-seconds: ${ML_TIMEOUT_SECONDS:300}
 
-  stock:
-    conso-window-days: ${STOCK_CONSO_WINDOW_DAYS:365}
-    rupture-recent-days: ${STOCK_RUPTURE_RECENT_DAYS:30}
-    critique-days: ${STOCK_CRITIQUE_DAYS:15}
-    surstock-days: ${STOCK_SURSTOCK_DAYS:120}
-    coverage-target-days: ${STOCK_COVERAGE_TARGET_DAYS:45}
-
   production:
     orders-limit: ${PRODUCTION_ORDERS_LIMIT:2000}
 

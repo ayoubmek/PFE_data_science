@@ -26,13 +26,9 @@ public class ProductionDTO {
         private String period;
         private LocalDate periodStart;
         private LocalDate periodEnd;
-        private int periodDays;
-        private long totalOrdres;
+        private LocalDate dataStart;
         private double totalVolumeProduit;
         private double totalRebut;
-        private Double tauxConformite;
-        private long machinesActives;
         private long machinesTotal;
-        private long machinesBloquees;
     }
 }

@@ -2,24 +2,36 @@ from typing import Optional
 
 import numpy as np
 
+SEASONAL_LAG = 7
+
 
 def _round(x: Optional[float], nd: int) -> Optional[float]:
     return None if x is None or not np.isfinite(x) else round(float(x), nd)
 
 
-def compute_eval_metrics(actual, pred, mape_mask=None) -> dict:
+def naive_scale(train) -> Optional[float]:
+    y = np.asarray(train, dtype=float)
+    if len(y) <= SEASONAL_LAG:
+        return None
+    scale = float(np.mean(np.abs(y[SEASONAL_LAG:] - y[:-SEASONAL_LAG])))
+    return scale if scale > 0 else None
+
+
+def compute_eval_metrics(actual, pred, scale=None) -> dict:
     actual = np.asarray(actual, dtype=float)
     pred = np.asarray(pred, dtype=float)
-    err = actual - pred
+    err = pred - actual
     abs_err = np.abs(err)
-    mae = float(np.mean(abs_err))
-    ss_tot = float(np.sum((actual - actual.mean()) ** 2))
-    # MAPE calculée sur les jours de production : un jour quasi à l'arrêt n'a pas d'erreur relative significative.
-    produced = np.asarray(mape_mask, dtype=bool) & (actual > 0) if mape_mask is not None else actual > 0
-    mape = float(np.mean(abs_err[produced] / actual[produced]) * 100) if produced.any() else None
+    total = float(actual.sum())
+    mase = None
+    if scale is not None:
+        scale = np.broadcast_to(np.asarray(scale, dtype=float), abs_err.shape)
+        valid = np.isfinite(scale) & (scale > 0)
+        mase = float(np.mean(abs_err[valid] / scale[valid])) if valid.any() else None
     return {
-        "mae": _round(mae, 1),
+        "mae": _round(float(np.mean(abs_err)), 1),
         "rmse": _round(float(np.sqrt(np.mean(err ** 2))), 1),
-        "r2": _round(1.0 - float(np.sum(err ** 2)) / ss_tot, 4) if ss_tot > 0 else None,
-        "mape": _round(mape, 1),
+        "wape": _round(float(abs_err.sum()) / total * 100, 1) if total > 0 else None,
+        "mase": _round(mase, 3),
+        "bias": _round(float(err.sum()) / total * 100, 1) if total > 0 else None,
     }

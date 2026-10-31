@@ -1,15 +1,6 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react'
-import { useQueryClient } from 'react-query'
+import React, { useState, useMemo, useRef } from 'react'
 import * as XLSX from 'xlsx'
-import { apiErrorMessage } from '../../config'
-import {
-  DataPoint,
-  DEFAULT_FORECAST_MONTH,
-  FORECAST_HORIZON,
-  ForecastResult,
-  fetchCustomForecast,
-  forecastQueryKey,
-} from '../../services/api'
+import { DataPoint, DEFAULT_FORECAST_MONTH, startCustomTraining } from '../../services/api'
 import { fmt, fmtIsoDay } from '../../utils/format'
 import { ForecastMonthSelect } from '../../components/ForecastMonthSelect'
 import { LiveTrainingCard, useLiveTraining } from '../../components/LiveTraining'
@@ -46,39 +37,30 @@ const parseDataFromRows = (rows: SheetRow[], dateCol: string, valCol: string): D
     const raw = r[valCol]
     const value = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(/\s/g, '').replace(',', '.'))
     if (date && !isNaN(value)) {
-      dateMap.set(date, (dateMap.get(date) || 0) + Math.max(0, value))
+      dateMap.set(date, (dateMap.get(date) || 0) + value)
     }
   })
   return Array.from(dateMap, ([date, value]) => ({ date, value })).sort((a, b) => a.date.localeCompare(b.date))
 }
 
 export default function ModelBenchmarkPage() {
-  const [mode, setMode] = useState<'dwh' | 'file'>('dwh')
   const [importedData, setImportedData] = useState<DataPoint[]>([])
   const [fileName, setFileName] = useState<string>('')
-  const [fileResult, setFileResult] = useState<ForecastResult | null>(null)
-  const [fileProcessing, setFileProcessing] = useState(false)
-  const [fileError, setFileError] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [month, setMonth] = useState(DEFAULT_FORECAST_MONTH)
+  const [runKey, setRunKey] = useState<string | null>(null)
 
-  const queryClient = useQueryClient()
-  const live = useLiveTraining(month, mode === 'dwh')
-
-  useEffect(() => {
-    if (live.result) queryClient.setQueryData(forecastQueryKey(month), live.result)
-  }, [live.result, month, queryClient])
-
-  const result = mode === 'dwh' ? live.result : fileResult
-  const isProcessing = mode === 'dwh' ? live.status === 'starting' || live.status === 'running' : fileProcessing
-  const errorMessage = mode === 'dwh' ? '' : fileError
+  const live = useLiveTraining(runKey, () => startCustomTraining(importedData, month))
+  const isProcessing = live.status === 'starting' || live.status === 'running'
+  const result = live.status === 'done' ? live.result : null
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setFileError('')
-    setFileResult(null)
+    setErrorMessage('')
+    setRunKey(null)
     setFileName(file.name)
     const reader = new FileReader()
 
@@ -89,7 +71,7 @@ export default function ModelBenchmarkPage() {
         const rows = XLSX.utils.sheet_to_json<SheetRow>(ws, { defval: '' })
 
         if (rows.length === 0) {
-          setFileError('Le fichier sélectionné est vide.')
+          setErrorMessage('Le fichier sélectionné est vide.')
           return
         }
 
@@ -104,24 +86,21 @@ export default function ModelBenchmarkPage() {
 
         setImportedData(parseDataFromRows(rows, detectedDate, detectedVal))
       } catch (err) {
-        setFileError('Erreur lors de la lecture du fichier : ' + (err instanceof Error ? err.message : 'Format non reconnu.'))
+        setErrorMessage('Erreur lors de la lecture du fichier : ' + (err instanceof Error ? err.message : 'Format non reconnu.'))
       }
     }
 
     reader.readAsBinaryString(file)
   }
 
-  const runFileBenchmark = async () => {
-    setFileProcessing(true)
-    setFileError('')
-    try {
-      setFileResult(await fetchCustomForecast(importedData))
-    } catch (err) {
-      setFileResult(null)
-      setFileError(apiErrorMessage(err, "L'évaluation du modèle a échoué."))
-    } finally {
-      setFileProcessing(false)
-    }
+  const changeMonth = (m: string) => {
+    setMonth(m)
+    setRunKey(null)
+  }
+
+  const runFileBenchmark = () => {
+    setErrorMessage('')
+    setRunKey(`${fileName}|${month}|${Date.now()}`)
   }
 
   const bestKey = result?.best_model
@@ -164,7 +143,7 @@ export default function ModelBenchmarkPage() {
       XLSX.utils.json_to_sheet([{ ...metrics, params: JSON.stringify(params), default_params: JSON.stringify(default_params) }]),
       'Metriques'
     )
-    XLSX.writeFile(wb, `previsions_${bestKey}_${FORECAST_HORIZON}_jours.xlsx`)
+    XLSX.writeFile(wb, `previsions_${bestKey}_${result.predictions.length}_jours.xlsx`)
   }
 
   const firstDate = result?.predictions[0]?.date
@@ -175,51 +154,35 @@ export default function ModelBenchmarkPage() {
       <div className='card border-0 shadow-sm bg-white p-5 rounded-3'>
         <div className='d-flex flex-wrap align-items-center justify-content-between gap-3'>
           <h2 className='fw-bold text-gray-900 fs-4 mb-0'>Évaluation du Modèle</h2>
-          <div className='d-flex align-items-center gap-3'>
-          {mode === 'dwh' && <ForecastMonthSelect value={month} onChange={setMonth} />}
-          <div className='btn-group'>
-            <button type='button' className={`btn btn-sm ${mode === 'dwh' ? 'btn-primary' : 'btn-light'}`} onClick={() => setMode('dwh')}>
-              Données de production
-            </button>
-            <button type='button' className={`btn btn-sm ${mode === 'file' ? 'btn-primary' : 'btn-light'}`} onClick={() => setMode('file')}>
-              Fichier importé
-            </button>
-          </div>
-          </div>
+          <ForecastMonthSelect value={month} onChange={changeMonth} />
         </div>
 
-        {mode === 'file' && (
-          <>
-            <div className='d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mt-4 pt-4 border-top'>
-              <div className='d-flex align-items-center gap-3'>
-                <input type='file' ref={fileInputRef} onChange={handleFileUpload} accept='.csv,.xlsx,.xls' className='d-none' />
-                <button
-                  type='button'
-                  className='btn btn-sm btn-outline btn-outline-dashed btn-outline-primary'
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <i className='bi bi-upload me-1'></i>
-                  Importer (.csv, .xlsx)
-                </button>
-                {fileName && (
-                  <span className='badge badge-light-success fs-8 px-3 py-2'>
-                    {fileName} ({importedData.length} jours)
-                  </span>
-                )}
-              </div>
-              <button
-                type='button'
-                className='btn btn-sm btn-primary fw-bold px-5'
-                disabled={importedData.length === 0 || isProcessing}
-                onClick={runFileBenchmark}
-              >
-                {isProcessing ? 'Évaluation…' : 'Évaluer le modèle'}
-              </button>
-            </div>
-            <div className='text-muted fs-8 mt-2'>Au moins 90 jours consécutifs sont nécessaires pour une évaluation fiable.</div>
-          </>
-        )}
-
+        <div className='d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mt-4 pt-4 border-top'>
+          <div className='d-flex align-items-center gap-3'>
+            <input type='file' ref={fileInputRef} onChange={handleFileUpload} accept='.csv,.xlsx,.xls' className='d-none' />
+            <button
+              type='button'
+              className='btn btn-sm btn-outline btn-outline-dashed btn-outline-primary'
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <i className='bi bi-upload me-1'></i>
+              Importer (.csv, .xlsx)
+            </button>
+            {fileName && (
+              <span className='badge badge-light-success fs-8 px-3 py-2'>
+                {fileName} ({importedData.length} jours)
+              </span>
+            )}
+          </div>
+          <button
+            type='button'
+            className='btn btn-sm btn-primary fw-bold px-5'
+            disabled={importedData.length === 0 || isProcessing}
+            onClick={runFileBenchmark}
+          >
+            {isProcessing ? 'Évaluation…' : 'Évaluer le modèle'}
+          </button>
+        </div>
         {errorMessage && (
           <div className='text-danger fs-7 mt-3'>
             <i className='bi bi-exclamation-circle me-1'></i>
@@ -228,13 +191,8 @@ export default function ModelBenchmarkPage() {
         )}
       </div>
 
-      {mode === 'dwh' && <LiveTrainingCard live={live} />}
-
-      {mode === 'file' && isProcessing && !result && (
-        <div className='card border-0 shadow-sm p-10 text-center text-muted'>
-          <div className='spinner-border text-primary mx-auto mb-4' role='status'></div>
-          Calcul des prévisions…
-        </div>
+      {live.status !== 'idle' && (
+        <LiveTrainingCard live={live} subtitle={`Fichier ${fileName}`} />
       )}
 
       {result && best && (
@@ -252,11 +210,11 @@ export default function ModelBenchmarkPage() {
 
             <div className='row g-4'>
               {[
-                { label: 'MAE – validation croisée', value: `${fmt(best.mae)} unités/j`, color: 'text-success' },
-                { label: 'RMSE – validation croisée', value: `${fmt(best.rmse)} unités/j` },
-                { label: 'R² – validation croisée', value: fmt(best.r2, 3) },
-                { label: 'MAPE – validation croisée', value: best.mape === null ? '—' : `${fmt(best.mape, 1)} %` },
-                { label: 'Écart de volume mensuel', value: best.volume_gap === null ? '—' : `${fmt(best.volume_gap, 1)} %` },
+                { label: 'MAE – validation croisée', value: `${fmt(best.mae)} unités/jour`, color: 'text-success' },
+                { label: 'RMSE – validation croisée', value: `${fmt(best.rmse)} unités/jour` },
+                { label: 'WAPE – validation croisée', value: best.wape === null ? '—' : `${fmt(best.wape, 1)} %` },
+                { label: 'MASE – validation croisée', value: best.mase === null ? '—' : fmt(best.mase, 3) },
+                { label: 'Biais – validation croisée', value: best.bias === null ? '—' : `${best.bias > 0 ? '+' : ''}${fmt(best.bias, 1)} %` },
               ].map((k) => (
                 <div className='col-xl col-md-4 col-6' key={k.label}>
                   <div className='bg-light rounded-3 p-4 h-100'>

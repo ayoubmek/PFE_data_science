@@ -11,8 +11,6 @@ import {
   DashboardSummary,
   Declaration,
   Period,
-  StockGroup,
-  StockSite,
   fetchDashboardSummary,
   fetchDeclarations,
   fetchProductionStats,
@@ -21,7 +19,7 @@ import { fmt, fmtDate } from '../../utils/format'
 
 const PERIODS: { key: Period; label: string }[] = [
   { key: 'mois', label: 'Mois' },
-  { key: 'annee', label: 'Année' },
+  { key: 'annee', label: '12 derniers mois' },
   { key: 'tout', label: 'Tout' },
 ]
 
@@ -29,6 +27,24 @@ interface DashboardData extends DashboardSummary {
   daily: DailyStat[]
   recent: Declaration[]
 }
+
+const TRS_COMPLETENESS_RATIO = 0.5
+const isPending = (d: DailyStat) =>
+  (d.totalOutput > 0 && d.totalTrs < TRS_COMPLETENESS_RATIO * d.totalOutput) || (d.totalTrs === 0 && d.totalScrap > 0)
+
+const splitConsolidated = (daily: DailyStat[]) => {
+  let end = daily.length
+  while (end > 0 && isPending(daily[end - 1])) end--
+  return { shown: daily.slice(0, end), pending: daily.slice(end) }
+}
+
+const shiftMonth = (month: string, delta: number) => {
+  const [y, m] = month.split('-').map(Number)
+  const d = new Date(y, m - 1 + delta, 1)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+const monthLabel = (month: string) =>
+  new Date(`${month}-01T00:00:00`).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
 
 const isMonthly = (period: Period) => period === 'annee' || period === 'tout'
 const fmtMonth = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })
@@ -46,7 +62,7 @@ const fetchDashboard = async (period: Period): Promise<DashboardData> => {
 const periodName = (period: Period, start: string, end: string) => {
   switch (period) {
     case 'annee':
-      return `année ${new Date(end).getFullYear()}`
+      return '12 derniers mois'
     case 'tout':
       return `historique depuis ${new Date(start).getFullYear()}`
     default:
@@ -60,24 +76,15 @@ const StatisticsWidget: FC<{
   icon: string
   title: string
   value: string | number
-  subtitle: string
-  badgeText?: string
-  badgeColor?: string
-}> = ({ className, color, icon, title, value, subtitle, badgeText, badgeColor = 'primary' }) => {
+}> = ({ className, color, icon, title, value }) => {
   return (
     <div className={`card card-flush shadow-sm border-0 ${className}`}>
       <div className='card-header pt-5 pb-2'>
         <div className='card-title d-flex flex-column'>
           <div className='d-flex align-items-center gap-2 mb-1'>
             <span className='fs-2hx fw-bold text-gray-900 lh-1 ls-n2'>{value}</span>
-            {badgeText && (
-              <span className={`badge badge-light-${badgeColor} fw-bold fs-8`}>
-                {badgeText}
-              </span>
-            )}
           </div>
           <span className='text-gray-700 fw-bold fs-6'>{title}</span>
-          <span className='text-muted fs-8 fw-semibold mt-1'>{subtitle}</span>
         </div>
         <div className='card-toolbar'>
           <span className={`badge badge-circle badge-light-${color} p-4`}>
@@ -101,9 +108,13 @@ const DashboardPage: FC = () => {
   const loading = query.isFetching
   const error = query.error ? apiErrorMessage(query.error, 'Impossible de charger les données du Data Warehouse.') : ''
 
+  const [chartMonth, setChartMonth] = useState<string | null>(null)
+  const monthQuery = useQuery(['productionStats', chartMonth], () => fetchProductionStats('mois', chartMonth ?? undefined), {
+    enabled: chartMonth !== null,
+    keepPreviousData: true,
+  })
+
   const [selectedOf, setSelectedOf] = useState<Declaration | null>(null)
-  const [selectedGroup, setSelectedGroup] = useState<StockGroup | null>(null)
-  const [selectedSite, setSelectedSite] = useState<StockSite | null>(null)
 
   if (!data) {
     return error ? (
@@ -122,17 +133,31 @@ const DashboardPage: FC = () => {
   const { production, stock } = data
   const monthly = isMonthly(production.period)
   const name = periodName(production.period, production.periodStart, production.periodEnd)
+  const latestMonth = production.periodEnd.slice(0, 7)
+  const firstMonth = production.dataStart?.slice(0, 7) ?? latestMonth
+  const shownMonth = chartMonth ?? latestMonth
+  const goToMonth = (month: string) => setChartMonth(month >= latestMonth ? null : month)
+  const chartLoading = chartMonth !== null && !monthQuery.data
+  const chartDaily = chartMonth === null ? data.daily : monthQuery.data ?? []
+  const { shown: daily, pending } =
+    monthly || chartMonth !== null ? { shown: chartDaily, pending: [] } : splitConsolidated(chartDaily)
+  const pendingNote =
+    pending.length === 0
+      ? null
+      : pending.length === 1
+        ? `Dernier jour en cours de consolidation (${fmtDate(pending[0].date)}) non affiché`
+        : `Derniers jours en cours de consolidation (${fmtDate(pending[0].date)} – ${fmtDate(pending[pending.length - 1].date)}) non affichés`
 
   const chartOptions: { series: ApexAxisChartSeries; options: ApexOptions } = {
     series: [
-      { name: 'Production déclarée (Output)', type: 'area', data: data.daily.map((d) => Math.round(d.totalOutput)) },
-      { name: 'Unités rebutées', type: 'line', data: data.daily.map((d) => Math.round(d.totalScrap)) },
+      { name: 'Production (quantité TRS)', type: 'area', data: daily.map((d) => Math.round(d.totalTrs)) },
+      { name: 'Unités rebutées', type: 'line', data: daily.map((d) => Math.round(d.totalScrap)) },
     ],
     options: {
       chart: { fontFamily: 'Inter, sans-serif', type: 'line', height: 310, toolbar: { show: false }, zoom: { enabled: false } },
       stroke: { curve: 'smooth', width: [3, 4] },
       markers: {
-        size: data.daily.length > 40 ? [0, 0] : [4, 5],
+        size: daily.length > 40 ? [0, 0] : [4, 5],
         colors: ['#FFFFFF', '#FFFFFF'],
         strokeColors: ['#3E97FF', '#F1416C'],
         strokeWidth: 2,
@@ -140,7 +165,7 @@ const DashboardPage: FC = () => {
       },
       dataLabels: { enabled: false },
       xaxis: {
-        categories: data.daily.map((d) => (monthly ? fmtMonth(d.date) : fmtDate(d.date))),
+        categories: daily.map((d) => (monthly ? fmtMonth(d.date) : fmtDate(d.date))),
         axisBorder: { show: false },
         axisTicks: { show: false },
         tooltip: { enabled: false },
@@ -148,14 +173,16 @@ const DashboardPage: FC = () => {
       },
       yaxis: [
         {
-          seriesName: 'Production déclarée (Output)',
+          seriesName: 'Production (quantité TRS)',
           min: 0,
+          title: { text: 'Production (unités)', style: { color: '#3E97FF', fontSize: '11px', fontWeight: 600 } },
           labels: { style: { colors: '#7E8299', fontSize: '11px' }, formatter: fmtAxis },
         },
         {
           seriesName: 'Unités rebutées',
           opposite: true,
           min: 0,
+          title: { text: 'Rebuts (unités)', style: { color: '#F1416C', fontSize: '11px', fontWeight: 600 } },
           labels: { style: { colors: '#F1416C', fontSize: '11px' }, formatter: (v: number) => `${Math.round(v)}` },
         },
       ],
@@ -171,8 +198,6 @@ const DashboardPage: FC = () => {
   }
 
   const periodLabel = `du ${fmtDate(production.periodStart)} au ${fmtDate(production.periodEnd)}`
-  const ruptures = stock.statuts?.RUPTURE ?? 0
-  const critiques = stock.statuts?.CRITIQUE ?? 0
 
   return (
     <>
@@ -194,7 +219,10 @@ const DashboardPage: FC = () => {
                 key={p.key}
                 type='button'
                 className={`btn btn-sm ${period === p.key ? 'btn-primary' : 'btn-light'}`}
-                onClick={() => setPeriod(p.key)}
+                onClick={() => {
+                  setPeriod(p.key)
+                  setChartMonth(null)
+                }}
               >
                 {p.label}
               </button>
@@ -210,7 +238,6 @@ const DashboardPage: FC = () => {
             icon='delivery'
             title={`Volume produit (${name})`}
             value={`${fmt(production.totalVolumeProduit)} unités`}
-            subtitle={`${fmt(production.totalOrdres)} ordres de fabrication déclarés`}
             className='h-100'
           />
         </div>
@@ -221,7 +248,6 @@ const DashboardPage: FC = () => {
             icon='gear'
             title='Parc machines'
             value={`${fmt(production.machinesTotal)} machines`}
-            subtitle={`${fmt(production.machinesActives)} actives sur la période · ${fmt(production.machinesBloquees)} bloquées`}
             className='h-100'
           />
         </div>
@@ -232,7 +258,6 @@ const DashboardPage: FC = () => {
             icon='parcel'
             title='Valeur du stock'
             value={`${fmt(stock.valeurTotaleStock / 1e6, 2)} M TND`}
-            subtitle={`${fmt(stock.quantiteTotale)} unités · ${fmt(stock.totalArticles)} articles`}
             className='h-100'
           />
         </div>
@@ -243,13 +268,6 @@ const DashboardPage: FC = () => {
             icon='cross-circle'
             title='Rebuts sur la période'
             value={`${fmt(production.totalRebut)} unités`}
-            subtitle={
-              production.tauxConformite !== null
-                ? `Taux de conformité : ${fmt(production.tauxConformite, 2)} %`
-                : 'Aucune déclaration sur la période'
-            }
-            badgeText={`${ruptures} ruptures · ${critiques} critiques`}
-            badgeColor='danger'
             className='h-100'
           />
         </div>
@@ -261,12 +279,45 @@ const DashboardPage: FC = () => {
             <div className='card-header pt-6 pb-2 border-0'>
               <h3 className='card-title align-items-start flex-column'>
                 <span className='card-label fw-bold text-gray-900 fs-4'>
-                  Flux de production et rebuts ({name}, par {monthly ? 'mois' : 'jour'})
+                  Flux de production et rebuts ({monthly ? name : monthLabel(shownMonth)}, par {monthly ? 'mois' : 'jour'})
                 </span>
+                {pendingNote && <span className='text-muted fs-8 fw-semibold mt-1'>{pendingNote}</span>}
               </h3>
+              {!monthly && (
+                <div className='card-toolbar d-flex align-items-center gap-2'>
+                  {monthQuery.isFetching && <span className='spinner-border spinner-border-sm text-primary' />}
+                  <button
+                    type='button'
+                    className='btn btn-sm btn-light fw-bold fs-5 px-4 py-1'
+                    disabled={shownMonth <= firstMonth}
+                    onClick={() => goToMonth(shiftMonth(shownMonth, -1))}
+                    title='Mois précédent'
+                  >
+                    ‹
+                  </button>
+                  <span className='fw-bold text-gray-700 fs-7 text-center text-capitalize' style={{ minWidth: 110 }}>
+                    {monthLabel(shownMonth)}
+                  </span>
+                  <button
+                    type='button'
+                    className='btn btn-sm btn-light fw-bold fs-5 px-4 py-1'
+                    disabled={shownMonth >= latestMonth}
+                    onClick={() => goToMonth(shiftMonth(shownMonth, 1))}
+                    title='Mois suivant'
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
             </div>
             <div className='card-body pt-0 pb-4'>
-              {data.daily.length === 0 ? (
+              {monthQuery.isError && chartMonth !== null ? (
+                <div className='text-danger text-center py-10'>
+                  {apiErrorMessage(monthQuery.error, 'Impossible de charger ce mois.')}
+                </div>
+              ) : chartLoading ? (
+                <div className='text-muted text-center py-10'>Chargement du mois…</div>
+              ) : daily.length === 0 ? (
                 <div className='text-muted text-center py-10'>Aucune déclaration sur la période.</div>
               ) : (
                 <Chart options={chartOptions.options} series={chartOptions.series} type='line' height={300} />
@@ -354,11 +405,11 @@ const DashboardPage: FC = () => {
                 <table className='table align-middle table-row-dashed fs-7 gy-3'>
                   <thead>
                     <tr className='text-start text-muted fw-bold fs-8 text-uppercase gs-0'>
-                      <th>Famille d'articles</th>
-                      <th>Articles</th>
-                      <th>Valeur</th>
-                      <th>Part valeur</th>
-                      <th className='text-end pe-2'>Détails</th>
+                      <th>GroupeItem</th>
+                      <th>Articles (No_)</th>
+                      <th className='text-end'>Quantité</th>
+                      <th className='text-end'>Cout</th>
+                      <th className='ps-6'>Part du Cout</th>
                     </tr>
                   </thead>
                   <tbody className='text-gray-600 fw-semibold'>
@@ -368,8 +419,9 @@ const DashboardPage: FC = () => {
                         <td>
                           <span className='badge badge-light-primary text-primary fw-bolder fs-7 px-2 py-1'>{group.count} réf.</span>
                         </td>
-                        <td className='fw-bolder text-gray-900'>{fmt(group.value)} TND</td>
-                        <td>
+                        <td className='text-end text-gray-800'>{fmt(group.quantity)}</td>
+                        <td className='text-end fw-bolder text-gray-900'>{fmt(group.value)} TND</td>
+                        <td className='ps-6'>
                           <div className='d-flex align-items-center gap-2'>
                             <span className='fw-bold text-gray-800 fs-8'>{group.percentage}%</span>
                             <div className='progress h-4px w-50px bg-light'>
@@ -377,72 +429,10 @@ const DashboardPage: FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className='text-end pe-2'>
-                          <button
-                            type='button'
-                            className='btn btn-icon btn-bg-light btn-active-color-success btn-sm'
-                            onClick={() => setSelectedGroup(group)}
-                            title='Voir le détail du groupe'
-                          >
-                            <KTIcon iconName='eye' className='fs-4' />
-                          </button>
-                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className='row g-5 mb-7'>
-        <div className='col-12'>
-          <div className='card card-flush shadow-sm border-0'>
-            <div className='card-header pt-6 pb-2 border-0'>
-              <h3 className='card-title align-items-start flex-column'>
-                <span className='card-label fw-bold text-gray-900 fs-4'>Consolidation multi-sites</span>
-              </h3>
-            </div>
-            <div className='card-body pt-2'>
-              <div className='row g-4'>
-                {data.stockSites.map((site) => {
-                  const key = site.site.toLowerCase()
-                  const color = key.includes('kondar') ? 'primary' : key.includes('brno') ? 'warning' : 'info'
-                  return (
-                    <div className='col-md-4' key={site.site}>
-                      <div className={`card bg-light-${color} border border-dashed border-${color} p-5 rounded-3 h-100`}>
-                        <div className='d-flex justify-content-between align-items-center mb-3'>
-                          <span className={`fw-bolder fs-5 text-${color}`}>{site.site}</span>
-                        </div>
-                        <div className='d-flex flex-column gap-2 text-gray-700 fs-7'>
-                          <div className='d-flex justify-content-between'>
-                            <span className='text-muted'>Articles en stock :</span>
-                            <strong>{fmt(site.count)}</strong>
-                          </div>
-                          <div className='d-flex justify-content-between'>
-                            <span className='text-muted'>Volume physique :</span>
-                            <strong className='text-gray-900'>{fmt(site.quantity)} unités</strong>
-                          </div>
-                          <div className='d-flex justify-content-between'>
-                            <span className='text-muted'>Valeur :</span>
-                            <strong className='text-gray-900'>{fmt(site.value)} TND</strong>
-                          </div>
-                          <div className='d-flex justify-content-between'>
-                            <span className='text-muted'>Machines rattachées :</span>
-                            <strong className={`text-${color}`}>{fmt(site.machines)}</strong>
-                          </div>
-                        </div>
-                        <div className='mt-4 pt-3 border-top border-secondary border-opacity-10 d-flex justify-content-end'>
-                          <button type='button' className={`btn btn-xs btn-${color} fw-bold`} onClick={() => setSelectedSite(site)}>
-                            Consulter la fiche site →
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
               </div>
             </div>
           </div>
@@ -481,68 +471,6 @@ const DashboardPage: FC = () => {
           </Modal.Body>
           <Modal.Footer className='border-0 bg-light py-3 px-8'>
             <button className='btn btn-light-primary btn-sm' onClick={() => setSelectedOf(null)}>Fermer</button>
-          </Modal.Footer>
-        </Modal>
-      )}
-
-      {selectedGroup && (
-        <Modal show onHide={() => setSelectedGroup(null)} centered size='lg'>
-          <Modal.Header closeButton className='border-0 pt-6 px-8 bg-light'>
-            <Modal.Title className='fw-bold text-gray-900 fs-4 d-flex align-items-center gap-2'>
-              <KTIcon iconName='category' className='fs-2 text-success' />
-              Famille d'articles : <span className='text-success fw-bolder'>{selectedGroup.name}</span>
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body className='px-8 py-6'>
-            <div className='row g-4'>
-              {[
-                { label: 'Articles distincts', val: `${fmt(selectedGroup.count)}` },
-                { label: 'Quantité en stock', val: `${fmt(selectedGroup.quantity)} unités` },
-                { label: 'Valeur du stock', val: `${fmt(selectedGroup.value)} TND` },
-                { label: 'Part de la valeur totale', val: `${selectedGroup.percentage} %` },
-              ].map(({ label, val }) => (
-                <div className='col-md-6' key={label}>
-                  <div className='bg-light p-4 rounded'>
-                    <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>
-                    <div className='fs-4 fw-bolder text-gray-900'>{val}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Modal.Body>
-          <Modal.Footer className='border-0 bg-light py-3 px-8'>
-            <button className='btn btn-light-success btn-sm' onClick={() => setSelectedGroup(null)}>Fermer</button>
-          </Modal.Footer>
-        </Modal>
-      )}
-
-      {selectedSite && (
-        <Modal show onHide={() => setSelectedSite(null)} centered size='lg'>
-          <Modal.Header closeButton className='border-0 pt-6 px-8 bg-light'>
-            <Modal.Title className='fw-bold text-gray-900 fs-4 d-flex align-items-center gap-2'>
-              <KTIcon iconName='geolocation' className='fs-2 text-warning' />
-              Site : <span className='text-warning fw-bolder'>{selectedSite.site}</span>
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body className='px-8 py-6'>
-            <div className='row g-4'>
-              {[
-                { label: 'Articles en stock', val: fmt(selectedSite.count) },
-                { label: 'Volume physique', val: `${fmt(selectedSite.quantity)} unités` },
-                { label: 'Valeur du stock', val: `${fmt(selectedSite.value)} TND` },
-                { label: 'Machines rattachées', val: fmt(selectedSite.machines) },
-              ].map(({ label, val }) => (
-                <div className='col-md-6' key={label}>
-                  <div className='bg-light p-4 rounded'>
-                    <div className='fs-8 text-muted fw-semibold mb-1'>{label}</div>
-                    <div className='fs-4 fw-bolder text-gray-900'>{val}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Modal.Body>
-          <Modal.Footer className='border-0 bg-light py-3 px-8'>
-            <button className='btn btn-light-warning btn-sm' onClick={() => setSelectedSite(null)}>Fermer</button>
           </Modal.Footer>
         </Modal>
       )}

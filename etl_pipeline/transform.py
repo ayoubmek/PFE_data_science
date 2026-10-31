@@ -44,8 +44,12 @@ def transform_fact_cle(df_prod: pd.DataFrame) -> pd.DataFrame:
 
     trs_qty = np.where(
         output_qty > 0,
-        (output_qty - scrap_qty).clip(lower=0.0),
-        np.where(run_time > 0, (run_time * machine_rate).round(1), 0.0),
+        (output_qty - scrap_qty.clip(lower=0.0)).clip(lower=0.0),
+        np.where(
+            output_qty < 0,
+            output_qty,
+            np.where(run_time != 0, (run_time * machine_rate).round(1), 0.0),
+        ),
     )
     fact["Quantité produite TRS"] = np.nan_to_num(trs_qty, nan=0.0)
 

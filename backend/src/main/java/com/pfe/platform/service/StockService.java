@@ -8,7 +8,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -17,14 +16,12 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class StockService {
     private final StockItemRepository itemRepo;
-    private final StockCoverageService coverageService;
 
     @Cacheable(value = "stockItems", sync = true)
     public List<StockDTO.ItemResponse> getAllItems() {
-        Map<String, StockDTO.ArticleStatus> statuses = coverageService.computeArticleStatuses();
         List<StockDTO.ItemResponse> items = new ArrayList<>();
         for (StockItem s : itemRepo.findAllLatestSnapshot()) {
-            items.add(toItemResponse(s, statuses.get(s.getReference())));
+            items.add(toItemResponse(s));
         }
         return items;
     }
@@ -36,38 +33,23 @@ public class StockService {
         Object[] totals = first(itemRepo.findSnapshotTotals());
         if (totals != null) {
             kpi.setDateStock(toDate(totals[0]));
-            kpi.setTotalArticles(toLong(totals[1]));
-            kpi.setQuantiteTotale(toDouble(totals[2]));
-            kpi.setValeurTotaleStock(toDouble(totals[3]));
+            kpi.setValeurTotaleStock(toDouble(totals[1]));
         }
-
-        Collection<StockDTO.ArticleStatus> articles = coverageService.computeArticleStatuses().values();
-        kpi.setStatuts(coverageService.countByStatus(articles));
-        kpi.setReapprovisionnement(coverageService.replenishmentPlan(articles));
         return kpi;
     }
 
-    private StockDTO.ItemResponse toItemResponse(StockItem s, StockDTO.ArticleStatus status) {
+    private StockDTO.ItemResponse toItemResponse(StockItem s) {
         StockDTO.ItemResponse r = new StockDTO.ItemResponse();
-        r.setId(s.getReference() + "|" + s.getEmplacement() + "|" + s.getEncours());
         r.setReference(s.getReference());
         r.setDesignation(s.getDesignation());
         r.setCategorie(s.getCategorie());
         r.setEmplacement(s.getEmplacement());
         r.setDateStock(s.getDateStock());
-        r.setEncours(s.getEncours());
         r.setGenProdPostingGroup(s.getGenProdPostingGroup());
         r.setNomAbrege(s.getNomAbrege());
         r.setGroupeClient(s.getGroupeClient());
         r.setQuantite(s.getQuantite());
         r.setValeurTotale(s.getValeurTotale());
-        BigDecimal unit = s.getValeurUnitaire();
-        r.setValeurUnitaire(unit);
-        if (status != null) {
-            r.setStatut(status.getStatut());
-            r.setCouvertureJours(status.getCouvertureJours());
-            r.setConsommationJournaliere(status.getConsommationJournaliere());
-        }
         return r;
     }
 

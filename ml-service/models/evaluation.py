@@ -10,7 +10,7 @@ import pandas as pd
 from .arima_model import ARIMAModel
 from .calendar_features import learn_recurring_closures
 from .linear_regression_model import LinearRegressionModel
-from .metrics import compute_eval_metrics
+from .metrics import compute_eval_metrics, naive_scale
 from .prophet_model import ProphetModel
 from .random_forest_model import RandomForestModel
 
@@ -29,8 +29,6 @@ _tuning_cache: Dict[tuple, dict] = {}
 
 
 class Tracker:
-    """Suivi d'un entraînement : sans effet par défaut, journalisé en direct par la page Benchmark."""
-
     def __init__(self):
         self.total, self.done = 1, 0
 
@@ -48,11 +46,7 @@ def _n(x: Optional[float]) -> str:
     return "—" if x is None else f"{x:,.0f}".replace(",", " ")
 
 
-PRODUCTION_DAY_RATIO = 0.10
-
-
 def outlier_cap(values) -> float:
-    """Seuil des journées aberrantes (règle de Tukey : Q3 + 3·IQR)."""
     q1, q3 = np.quantile(np.asarray(values, dtype=float), [0.25, 0.75])
     return float(q3 + 3.0 * (q3 - q1))
 
@@ -122,20 +116,16 @@ def rolling_backtest(series: pd.Series, horizon: int, n_origins: int, models: Li
     scope = f"{len(models)} modèles" if len(models) > 1 else MODEL_NAMES[models[0]]
     tracker.step("cv", f"Validation croisée glissante : {len(cuts)} fenêtres de {horizon} jours · {scope}")
 
-    # Évaluation : la journée aberrante est plafonnée avec la même règle que l'apprentissage (seuil appris sur
-    # l'apprentissage de la fenêtre), la MAPE porte sur les jours de production et l'écart de volume sur chaque fenêtre.
-    actual, production_days = [], []
+    actual, scales = [], []
     preds = {k: [] for k in models}
-    volume_gaps: Dict[str, List[float]] = {k: [] for k in models}
     failed: Dict[str, str] = {}
     for fold, cut in enumerate(cuts, start=1):
         train = series.iloc[:cut]
         train_values = train.to_numpy(dtype=float)
         test = np.minimum(series.iloc[cut:cut + horizon].to_numpy(dtype=float), outlier_cap(train_values))
-        floor = PRODUCTION_DAY_RATIO * float(np.median(train_values[train_values > 0]))
         period = f"{series.index[cut]:%d/%m/%Y} → {series.index[min(cut + horizon, n) - 1]:%d/%m/%Y}"
         actual.extend(test)
-        production_days.extend(test >= floor)
+        scales.extend([naive_scale(clean_training_series(train).to_numpy(dtype=float)) or np.nan] * len(test))
         for key in models:
             if key in failed:
                 continue
@@ -149,8 +139,6 @@ def rolling_backtest(series: pd.Series, horizon: int, n_origins: int, models: Li
                              model=key, failed=True)
                 continue
             preds[key].extend(yhat)
-            if test.sum() > 0:
-                volume_gaps[key].append(float((yhat.sum() - test.sum()) / test.sum() * 100))
             fold_mae = compute_eval_metrics(test, yhat)["mae"]
             tracker.step("cv", f"Fenêtre {fold}/{len(cuts)} ({period}) · {MODEL_NAMES[key]} : MAE {_n(fold_mae)}",
                          advance=1, model=key, fold=fold, folds=len(cuts), mae=fold_mae)
@@ -160,21 +148,18 @@ def rolling_backtest(series: pd.Series, horizon: int, n_origins: int, models: Li
     metrics = {}
     for key in models:
         if key in failed:
-            metrics[key] = {"mae": None, "rmse": None, "r2": None, "mape": None, "volume_gap": None,
+            metrics[key] = {"mae": None, "rmse": None, "wape": None, "mase": None, "bias": None,
                             "name": MODEL_NAMES[key], "error": failed[key]}
             continue
-        m = compute_eval_metrics(actual, preds[key], mape_mask=production_days)
-        gaps = volume_gaps[key]
-        m["volume_gap"] = round(float(np.mean(np.abs(gaps))), 1) if gaps else None
+        m = compute_eval_metrics(actual, preds[key], scale=scales)
         m["name"] = MODEL_NAMES[key]
         metrics[key] = m
-        r2 = "—" if m["r2"] is None else f"{m['r2']:.3f}".replace(".", ",")
-        mape = "—" if m["mape"] is None else f"{m['mape']:.1f}".replace(".", ",") + " %"
-        vol = "—" if m["volume_gap"] is None else f"{m['volume_gap']:.1f}".replace(".", ",") + " %"
+        fr = lambda x, nd, unit="": "—" if x is None else f"{x:.{nd}f}".replace(".", ",") + unit
+        bias = "—" if m["bias"] is None else f"{m['bias']:+.1f}".replace(".", ",") + " %"
         tracker.step("cv", f"{m['name']} · validation croisée ({len(cuts)} fenêtres) : MAE {_n(m['mae'])} · "
-                           f"RMSE {_n(m['rmse'])} · R² {r2} · MAPE {mape} · écart de volume {vol}",
-                     model=key, cv_mae=m["mae"], cv_rmse=m["rmse"], cv_r2=m["r2"], cv_mape=m["mape"],
-                     cv_volume=m["volume_gap"])
+                           f"RMSE {_n(m['rmse'])} · WAPE {fr(m['wape'], 1, ' %')} · MASE {fr(m['mase'], 3)} · biais {bias}",
+                     model=key, cv_mae=m["mae"], cv_rmse=m["rmse"], cv_wape=m["wape"], cv_mase=m["mase"],
+                     cv_bias=m["bias"])
     return metrics
 
 
@@ -249,11 +234,12 @@ def build_forecast(series: pd.Series, horizon: int, n_origins: int, models: List
 
 
 def build_custom_forecast(series: pd.Series, horizon: int, n_origins: int, models: List[str],
-                          start: Optional[pd.Timestamp] = None, tuning_folds: int = 0) -> dict:
+                          start: Optional[pd.Timestamp] = None, tuning_folds: int = 0,
+                          tracker: Optional[Tracker] = None) -> dict:
     n = len(series)
     if n >= MIN_TRAIN_DAYS + n_origins * horizon:
-        return build_forecast(series, horizon, n_origins, models, start, tuning_folds=tuning_folds)
+        return build_forecast(series, horizon, n_origins, models, start, tuning_folds=tuning_folds, tracker=tracker)
     bt_horizon = min(horizon, max(7, (n - MIN_TRAIN_DAYS) // 2))
     n_origins = max(1, min(n_origins, (n - MIN_TRAIN_DAYS) // bt_horizon))
     return build_forecast(series, horizon, n_origins, models, start, backtest_horizon=bt_horizon,
-                          tuning_folds=tuning_folds)
+                          tuning_folds=tuning_folds, tracker=tracker)

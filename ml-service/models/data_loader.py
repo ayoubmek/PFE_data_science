@@ -11,6 +11,7 @@ PRODUCTION_DECIMALS = 6
 
 _engine: Optional[Engine] = None
 _engine_lock = threading.Lock()
+_last_series: Optional[pd.Series] = None
 
 
 class DWHUnavailableError(RuntimeError):
@@ -41,6 +42,7 @@ def is_available() -> bool:
 
 
 def load_production_series() -> pd.Series:
+    global _last_series
     try:
         with get_engine().connect() as conn:
             df = pd.read_sql(
@@ -67,4 +69,9 @@ def load_production_series() -> pd.Series:
         raise DWHUnavailableError("Aucun jour de production consolidé dans dbo.FACT_CLE.")
 
     s = df["trs"].reindex(pd.date_range(df.index.min(), df.index.max(), freq="D"), fill_value=0.0).astype(float)
-    return s.round(PRODUCTION_DECIMALS)
+    _last_series = s.round(PRODUCTION_DECIMALS)
+    return _last_series
+
+
+def last_loaded_series() -> pd.Series:
+    return _last_series if _last_series is not None else load_production_series()

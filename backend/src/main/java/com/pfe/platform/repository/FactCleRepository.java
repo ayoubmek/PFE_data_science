@@ -49,7 +49,8 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
         SELECT
             DATEFROMPARTS(YEAR(f.[Posting Date]), MONTH(f.[Posting Date]), 1) AS month,
             SUM(CAST(f.[Output Quantity] AS FLOAT))                           AS total_output,
-            SUM(CAST(f.[Scrap Quantity] AS FLOAT))                            AS total_scrap
+            SUM(CAST(f.[Scrap Quantity] AS FLOAT))                            AS total_scrap,
+            SUM(CAST(f.[Quantité produite TRS] AS FLOAT))                     AS total_trs
         FROM dbo.FACT_CLE f WITH (NOLOCK)
         WHERE f.[Posting Date] >= :start
         GROUP BY DATEFROMPARTS(YEAR(f.[Posting Date]), MONTH(f.[Posting Date]), 1)
@@ -61,13 +62,14 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
         SELECT
             CAST(f.[Posting Date] AS DATE)          AS date,
             SUM(CAST(f.[Output Quantity] AS FLOAT)) AS total_output,
-            SUM(CAST(f.[Scrap Quantity] AS FLOAT))  AS total_scrap
+            SUM(CAST(f.[Scrap Quantity] AS FLOAT))  AS total_scrap,
+            SUM(CAST(f.[Quantité produite TRS] AS FLOAT)) AS total_trs
         FROM dbo.FACT_CLE f WITH (NOLOCK)
-        WHERE f.[Posting Date] >= :start
+        WHERE f.[Posting Date] >= :start AND f.[Posting Date] < :end
         GROUP BY CAST(f.[Posting Date] AS DATE)
         ORDER BY CAST(f.[Posting Date] AS DATE) ASC
         """, nativeQuery = true)
-    List<Object[]> findDailyStats(@Param("start") LocalDate start);
+    List<Object[]> findDailyStats(@Param("start") LocalDate start, @Param("end") LocalDate end);
 
     @Query(value = """
         SELECT
@@ -101,24 +103,16 @@ public interface FactCleRepository extends JpaRepository<FactCle, FactCleId> {
 
     @Query(value = """
         SELECT
-            COUNT(DISTINCT f.[Document No_])            AS totalDocuments,
             SUM(CAST(f.[Output Quantity] AS FLOAT))     AS totalOutput,
-            SUM(CAST(f.[Scrap Quantity] AS FLOAT))      AS totalScrap,
-            COUNT(DISTINCT f.[No_])                     AS activeMachines
+            SUM(CAST(f.[Scrap Quantity] AS FLOAT))      AS totalScrap
         FROM dbo.FACT_CLE f WITH (NOLOCK)
         WHERE f.[Posting Date] >= :start
         """, nativeQuery = true)
     List<Object[]> findKpiStats(@Param("start") LocalDate start);
 
     @Query(value = """
-        SELECT COUNT(*) AS total, SUM(CASE WHEN ISNULL(mc.[Blocked], 0) = 1 THEN 1 ELSE 0 END) AS blocked
+        SELECT COUNT(*) AS total
         FROM dbo.MCMachineCenter mc WITH (NOLOCK)
         """, nativeQuery = true)
     List<Object[]> findMachineCounts();
-
-    @Query(value = "SELECT site, COUNT(*) AS machines FROM (SELECT " + MACHINE_SITE + """
-         AS site FROM dbo.MCMachineCenter mc WITH (NOLOCK)) t
-        GROUP BY site
-        """, nativeQuery = true)
-    List<Object[]> findMachineCountBySite();
 }

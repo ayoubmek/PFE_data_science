@@ -9,7 +9,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from etl_pipeline.extract import extract_raw_stock_csv, extract_production_data
-from etl_pipeline.cleaners import DataCleaner
+from etl_pipeline.cleaners import DataCleaner, ProductionCleaner
 from etl_pipeline.transform import transform_all
 from etl_pipeline.load import DWHLoader
 
@@ -25,7 +25,7 @@ def print_banner():
     banner = """
     ========================================================================
        NEXORA DATA WAREHOUSE (dbDWH) - ETL PIPELINE & QUALITY ENGINE
-       Raw CSV Ingestion -> 10 Quality Cleaners -> Staging tables (STG_*)
+       Raw CSV Ingestion -> Quality Cleaners (stock: 10, production: 4) -> Staging tables (STG_*)
     ========================================================================
     """
     print(banner)
@@ -54,6 +54,22 @@ def print_audit_summary(report: dict, elapsed_sec: float):
     print("=" * 75 + "\n")
 
 
+def print_production_audit(report: dict):
+    print("=" * 75)
+    print("               PRODUCTION DATA QUALITY AUDIT REPORT")
+    print("=" * 75)
+    print(f"  • Déclarations brutes extraites           : {report.get('initial_rows', 0):>10,}")
+    print(f"  • Doublons / lignes sans numéro écartés   : {report.get('invalid_rows_dropped', 0):>10,}")
+    print(f"  • Machines manquantes (NON_RENSEIGNE)     : {report.get('missing_machines', 0):>10,}")
+    print(f"  • Dates impossibles / hors limites purges : {report.get('invalid_dates_dropped', 0):>10,}")
+    print(f"  • Écritures de correction conservées      : {report.get('corrections_kept', 0):>10,}")
+    print(f"  • Valeurs incohérentes corrigées          : {report.get('inconsistencies_fixed', 0):>10,}")
+    print("-" * 75)
+    print(f"  ==> Déclarations valides (Clean DWH)      : {report.get('final_clean_rows', 0):>10,}")
+    print(f"  ==> Taux de rétention qualité             : {report.get('retention_rate_pct', 0):>9.2f} %")
+    print("=" * 75 + "\n")
+
+
 def run_pipeline(dry_run: bool = True, limit: int = None):
     t_start = time.perf_counter()
     print_banner()
@@ -65,16 +81,18 @@ def run_pipeline(dry_run: bool = True, limit: int = None):
     t_extract = time.perf_counter() - t0
     logger.info(f"Phase 1 terminée en {t_extract:.2f} s ({len(df_stock_raw):,} lignes stock, {len(df_prod_raw):,} lignes prod)")
 
-    logger.info("PHASE 2: Exécution des 10 règles de nettoyage de données...")
+    logger.info("PHASE 2: Nettoyage des données (10 règles stock, 4 règles production)...")
     t0 = time.perf_counter()
     cleaner = DataCleaner(df_stock_raw)
     df_stock_clean, audit_report = cleaner.run_all_cleaners()
+    df_prod_clean, prod_audit = ProductionCleaner(df_prod_raw).run_all_cleaners()
     t_clean = time.perf_counter() - t0
-    logger.info(f"Phase 2 terminée en {t_clean:.2f} s ({len(df_stock_clean):,} lignes certifiées)")
+    logger.info(f"Phase 2 terminée en {t_clean:.2f} s ({len(df_stock_clean):,} lignes stock, "
+                f"{len(df_prod_clean):,} lignes production certifiées)")
 
     logger.info("PHASE 3: Modélisation et projection dans les tables du DWH...")
     t0 = time.perf_counter()
-    tables_dict = transform_all(df_stock_clean, df_prod_raw)
+    tables_dict = transform_all(df_stock_clean, df_prod_clean)
     t_transform = time.perf_counter() - t0
     logger.info(f"Phase 3 terminée en {t_transform:.2f} s ({len(tables_dict)} tables structurées)")
 
@@ -97,10 +115,11 @@ def run_pipeline(dry_run: bool = True, limit: int = None):
         "total_elapsed_sec": round(elapsed, 2),
     }
     print_audit_summary(audit_report, elapsed)
+    print_production_audit(prod_audit)
 
     print("Timing Breakdown by Stage:")
     print(f"  • Extraction     : {t_extract:6.2f} s")
-    print(f"  • Nettoyage (10) : {t_clean:6.2f} s")
+    print(f"  • Nettoyage      : {t_clean:6.2f} s")
     print(f"  • Transformation : {t_transform:6.2f} s")
     print(f"  • Chargement DWH : {t_load:6.2f} s")
     print(f"  • TOTAL GLOBAL   : {elapsed:6.2f} s")

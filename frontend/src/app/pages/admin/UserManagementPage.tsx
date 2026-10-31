@@ -49,7 +49,6 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState<boolean>(true)
   const [searchTerm, setSearchTerm] = useState<string>('')
 
-  // null = modal fermé, 'new' = création, sinon l'utilisateur modifié
   const [editing, setEditing] = useState<UserItem | 'new' | null>(null)
   const [formData, setFormData] = useState<UserForm>(EMPTY_FORM)
   const [saving, setSaving] = useState<boolean>(false)

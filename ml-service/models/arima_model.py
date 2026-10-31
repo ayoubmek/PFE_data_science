@@ -6,8 +6,6 @@ from .base import Forecaster
 
 
 class ARIMAModel(Forecaster):
-    """ARIMA(p,d,q) sans composante saisonnière ; p = 7 permet de reprendre le même jour de la semaine précédente."""
-
     name = "ARIMA"
     DEFAULT_PARAMS = {"order": (7, 0, 1)}
     GRID = {"order": [(7, 0, 0), (7, 0, 1), (7, 1, 1)]}

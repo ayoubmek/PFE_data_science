@@ -37,4 +37,5 @@ QUALITY_THRESHOLDS = {
     "max_valid_year": 2030,
     "max_quantity_outlier": 50000.0,
     "max_cost_outlier": 10000.0,
+    "max_run_time_hours": 24.0,
 }
